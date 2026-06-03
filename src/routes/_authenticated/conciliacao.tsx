@@ -16,6 +16,7 @@ import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { toast } from "sonner";
 import { Upload, CheckCircle, XCircle, Link2, ArrowLeftRight, Search, ArrowLeft, Pencil, Trash2, Building2, Banknote, Plus, RotateCcw, EyeOff } from "lucide-react";
 import { parseOfx, type ParsedOfxTx } from "@/lib/parseOfx";
+import { NovoLancamentoDialog, type NovoLancamentoPrefill } from "@/components/financeiro/NovoLancamentoDialog";
 
 type BankStatementEntry = {
   id: string;
@@ -64,6 +65,19 @@ function Conciliacao() {
     queryKey: ["conciliation-matches"],
     queryFn: async () => {
       const { data } = await supabase.from("conciliation_matches").select("*").order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  // Bank accounts for the "Conta de pagamento" select inside NovoLancamentoDialog
+  const { data: bankAccounts = [] } = useQuery({
+    queryKey: ["bank-accounts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("bank_accounts")
+        .select("id, bank_name, account_number, agency")
+        .eq("active", true)
+        .order("bank_name");
       return data ?? [];
     },
   });
@@ -357,28 +371,28 @@ function Conciliacao() {
   const [searchTarget, setSearchTarget] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [createTarget, setCreateTarget] = useState<any>(null);
-  const [createForm, setCreateForm] = useState({
-    entry_date: "",
-    business_unit: "",
-    movement_account: "",
-    movement_description: "",
-    counterparty_name: "",
-    amount: "0.00",
-  });
+  const [createPrefill, setCreatePrefill] = useState<NovoLancamentoPrefill | undefined>(undefined);
 
   const openSearch = (stmt: any) => {
     setSearchTarget(stmt);
     setSearchTerm("");
   };
   const openCreate = (stmt: any) => {
+    const isEntrada =
+      stmt.direction === "entrada" || (stmt.direction == null && Number(stmt.amount) >= 0);
+    const stmtDate: string = stmt.transaction_date ?? "";
+    const amt = Math.abs(Number(stmt.amount ?? 0)).toFixed(2);
     setCreateTarget(stmt);
-    setCreateForm({
-      entry_date: stmt.transaction_date ?? "",
-      business_unit: "",
-      movement_account: "",
-      movement_description: stmt.description ?? "",
-      counterparty_name: "",
-      amount: Number(stmt.amount ?? 0).toFixed(2),
+    setCreatePrefill({
+      entry_type: isEntrada ? "receita" : "despesa",
+      description: stmt.description ?? "",
+      amount: amt,
+      competence_date: stmtDate,
+      due_date: stmtDate,
+      payment_account_id: stmt.bank_account_id ?? "",
+      is_paid: true,
+      paid_at: stmtDate,
+      paid_amount: amt,
     });
   };
 
@@ -577,36 +591,27 @@ function Conciliacao() {
     },
   });
 
-  // Create new financial entry and immediately pair
-  const createAndPair = useMutation({
-    mutationFn: async () => {
-      if (!createTarget) throw new Error("Sem alvo");
-      const isEntrada = createTarget.direction === "entrada";
-      const amt = Number(createForm.amount);
+  // After NovoLancamentoDialog creates the entry, fetch it and pair with the bank statement
+  const handleCreatedAndPair = useCallback(async (firstEntryId?: string) => {
+    if (!firstEntryId || !createTarget) {
+      setCreateTarget(null);
+      return;
+    }
+    try {
       const { data: fe, error } = await supabase
         .from("financial_entries")
-        .insert({
-          entry_date: createForm.entry_date,
-          business_unit: createForm.business_unit || null,
-          movement_account: createForm.movement_account || null,
-          movement_description: createForm.movement_description || null,
-          counterparty_name: createForm.counterparty_name || null,
-          amount_in: isEntrada ? amt : 0,
-          amount_out: isEntrada ? 0 : amt,
-          entry_type: (isEntrada ? "receita" : "despesa") as any,
-          source_type: "manual" as const,
-          user_id: user?.id,
-        })
-        .select()
+        .select("*")
+        .eq("id", firstEntryId)
         .single();
       if (error) throw error;
       await conciliatePair.mutateAsync({ stmt: createTarget, fe });
-    },
-    onSuccess: () => {
+    } catch (e: any) {
+      toast.error(`Erro ao conciliar: ${e.message ?? e}`);
+    } finally {
       setCreateTarget(null);
-    },
-    onError: (e: any) => toast.error(`Erro: ${e.message ?? e}`),
-  });
+      setCreatePrefill(undefined);
+    }
+  }, [createTarget]);
 
   const conciliadoCount = statements.filter((s) => s.conciliation_status === "conciliado").length;
   const pendenteCount = statements.filter((s) => s.conciliation_status === "pendente").length;
@@ -1013,48 +1018,21 @@ function Conciliacao() {
         </DialogContent>
       </Dialog>
 
-      {/* Create new financial entry dialog */}
-      <Dialog open={!!createTarget} onOpenChange={(o) => !o && setCreateTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Novo lançamento financeiro</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <Label>Data</Label>
-              <Input type="date" value={createForm.entry_date} onChange={(e) => setCreateForm((f) => ({ ...f, entry_date: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Descrição</Label>
-              <Input value={createForm.movement_description} onChange={(e) => setCreateForm((f) => ({ ...f, movement_description: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Fornecedor / Cliente</Label>
-              <Input value={createForm.counterparty_name} onChange={(e) => setCreateForm((f) => ({ ...f, counterparty_name: e.target.value }))} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Negócio (BU)</Label>
-                <Input value={createForm.business_unit} onChange={(e) => setCreateForm((f) => ({ ...f, business_unit: e.target.value }))} />
-              </div>
-              <div className="space-y-2">
-                <Label>Conta movimento</Label>
-                <Input value={createForm.movement_account} onChange={(e) => setCreateForm((f) => ({ ...f, movement_account: e.target.value }))} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Valor</Label>
-              <CurrencyInputBRL value={createForm.amount} onChange={(v) => setCreateForm((f) => ({ ...f, amount: v }))} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateTarget(null)}>Cancelar</Button>
-            <Button onClick={() => createAndPair.mutate()} disabled={createAndPair.isPending}>
-              Criar e conciliar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Create new financial entry — formulário completo + conciliação automática */}
+      <NovoLancamentoDialog
+        open={!!createTarget}
+        onOpenChange={(o) => {
+          if (!o) {
+            setCreateTarget(null);
+            setCreatePrefill(undefined);
+          }
+        }}
+        bankAccounts={bankAccounts as any}
+        prefill={createPrefill}
+        title="Novo lançamento financeiro (conciliação)"
+        submitLabel="Salvar e conciliar"
+        onCreated={handleCreatedAndPair}
+      />
     </div>
   );
 }

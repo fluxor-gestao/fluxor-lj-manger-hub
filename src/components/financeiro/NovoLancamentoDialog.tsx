@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,11 +19,32 @@ import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 
 type BankAccount = { id: string; bank_name: string; account_number: string | null };
 
+export type NovoLancamentoPrefill = Partial<{
+  entry_type: EntryType;
+  description: string;
+  amount: string;
+  competence_date: string;
+  due_date: string;
+  payment_account_id: string;
+  is_paid: boolean;
+  paid_at: string;
+  paid_amount: string;
+  business_unit: string;
+  reference_code: string;
+}>;
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated?: () => void;
+  /** Called after the entry(ies) is created. Receives the id of the first inserted entry. */
+  onCreated?: (firstEntryId?: string) => void | Promise<void>;
   bankAccounts: BankAccount[];
+  /** Values to prefill when the dialog opens. */
+  prefill?: NovoLancamentoPrefill;
+  /** Override the dialog title. */
+  title?: string;
+  /** Override the submit button label. */
+  submitLabel?: string;
 }
 
 type EntryType = "receita" | "despesa" | "transferencia";
@@ -69,10 +90,20 @@ const emptyForm = () => ({
   notes: "",
 });
 
-export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccounts }: Props) {
+export function NovoLancamentoDialog({
+  open, onOpenChange, onCreated, bankAccounts, prefill, title, submitLabel,
+}: Props) {
   const { user } = useAuth();
   const catalogs = useFinanceiroCatalogs();
   const [form, setForm] = useState(emptyForm());
+
+  // Apply prefill whenever the dialog opens
+  useEffect(() => {
+    if (open) {
+      setForm({ ...emptyForm(), ...(prefill ?? {}) });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
   const [allocations, setAllocations] = useState<Allocation[]>([
     { category_id: "", cost_center_id: "", percent: "100", amount: "0", notes: "" },
   ]);
@@ -137,7 +168,7 @@ export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccoun
   };
 
   const createMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<string | undefined> => {
       if (!form.description.trim()) throw new Error("Descrição obrigatória");
       if (totalAmount <= 0) throw new Error("Valor deve ser maior que zero");
       if (!form.competence_date) throw new Error("Data de competência obrigatória");
@@ -146,6 +177,7 @@ export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccoun
       }
 
       const today = todayISO();
+      let firstId: string | undefined;
 
       for (let i = 1; i <= installments; i++) {
         const dueDate = form.due_date ? addMonthsISO(form.due_date, i - 1) : null;
@@ -157,7 +189,6 @@ export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccoun
 
         if (form.is_paid) {
           const informed = Number(form.paid_amount) || 0;
-          // dividir pago entre parcelas: simplificação — assume valor por parcela
           const pagoParcela = installments === 1 ? informed : parcelaAmount;
           if (pagoParcela >= parcelaAmount) {
             payment_status = "pago";
@@ -198,7 +229,6 @@ export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccoun
           source_type: "manual",
           user_id: user?.id,
 
-          // novos campos
           supplier_id: form.entry_type === "despesa" && form.party_id ? form.party_id : null,
           client_id: form.entry_type === "receita" && form.party_id ? form.party_id : null,
           category_id: form.enable_allocation ? null : form.category_id || null,
@@ -223,6 +253,7 @@ export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccoun
           .select("id")
           .single();
         if (error) throw error;
+        if (i === 1) firstId = inserted?.id;
 
         if (form.enable_allocation && inserted) {
           const allocRows = allocations.map((a) => {
@@ -243,12 +274,14 @@ export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccoun
           if (aErr) throw aErr;
         }
       }
+
+      return firstId;
     },
-    onSuccess: () => {
+    onSuccess: async (firstId) => {
       toast.success(installments > 1 ? `${installments} parcelas criadas!` : "Lançamento criado!");
       reset();
       onOpenChange(false);
-      onCreated?.();
+      await onCreated?.(firstId);
     },
     onError: (e: any) => toast.error(e.message || "Erro ao criar lançamento"),
   });
@@ -257,7 +290,7 @@ export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccoun
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Lançamento Financeiro</DialogTitle>
+          <DialogTitle>{title ?? "Novo Lançamento Financeiro"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -598,7 +631,7 @@ export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccoun
               onClick={() => createMutation.mutate()}
               disabled={createMutation.isPending}
             >
-              {createMutation.isPending ? "Salvando…" : "Salvar lançamento"}
+              {createMutation.isPending ? "Salvando…" : (submitLabel ?? "Salvar lançamento")}
             </Button>
           </div>
         </div>
