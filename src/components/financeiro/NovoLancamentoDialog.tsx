@@ -168,7 +168,7 @@ export function NovoLancamentoDialog({
   };
 
   const createMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<string | undefined> => {
       if (!form.description.trim()) throw new Error("Descrição obrigatória");
       if (totalAmount <= 0) throw new Error("Valor deve ser maior que zero");
       if (!form.competence_date) throw new Error("Data de competência obrigatória");
@@ -177,6 +177,7 @@ export function NovoLancamentoDialog({
       }
 
       const today = todayISO();
+      let firstId: string | undefined;
 
       for (let i = 1; i <= installments; i++) {
         const dueDate = form.due_date ? addMonthsISO(form.due_date, i - 1) : null;
@@ -188,7 +189,6 @@ export function NovoLancamentoDialog({
 
         if (form.is_paid) {
           const informed = Number(form.paid_amount) || 0;
-          // dividir pago entre parcelas: simplificação — assume valor por parcela
           const pagoParcela = installments === 1 ? informed : parcelaAmount;
           if (pagoParcela >= parcelaAmount) {
             payment_status = "pago";
@@ -229,7 +229,6 @@ export function NovoLancamentoDialog({
           source_type: "manual",
           user_id: user?.id,
 
-          // novos campos
           supplier_id: form.entry_type === "despesa" && form.party_id ? form.party_id : null,
           client_id: form.entry_type === "receita" && form.party_id ? form.party_id : null,
           category_id: form.enable_allocation ? null : form.category_id || null,
@@ -254,6 +253,7 @@ export function NovoLancamentoDialog({
           .select("id")
           .single();
         if (error) throw error;
+        if (i === 1) firstId = inserted?.id;
 
         if (form.enable_allocation && inserted) {
           const allocRows = allocations.map((a) => {
@@ -274,12 +274,14 @@ export function NovoLancamentoDialog({
           if (aErr) throw aErr;
         }
       }
+
+      return firstId;
     },
-    onSuccess: () => {
+    onSuccess: async (firstId) => {
       toast.success(installments > 1 ? `${installments} parcelas criadas!` : "Lançamento criado!");
       reset();
       onOpenChange(false);
-      onCreated?.();
+      await onCreated?.(firstId);
     },
     onError: (e: any) => toast.error(e.message || "Erro ao criar lançamento"),
   });
