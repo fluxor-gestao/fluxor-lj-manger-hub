@@ -366,6 +366,9 @@ function Admin() {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="comercial">Comercial</SelectItem>
+                        <SelectItem value="financeiro">Financeiro</SelectItem>
+                        <SelectItem value="operacao">Operação</SelectItem>
                         <SelectItem value="gerencial">Gerencial</SelectItem>
                       </SelectContent>
                     </Select>
