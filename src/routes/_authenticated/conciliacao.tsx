@@ -574,7 +574,7 @@ function Conciliacao() {
         if (error) throw error;
       }
       await supabase.from("bank_statement_entries").update({ conciliation_status: "conciliado" as const }).eq("id", stmt.id);
-      await supabase.from("financial_entries").update(feUpdate).eq("id", fe.id);
+      await supabase.from("financial_entries").update(feUpdate as any).eq("id", fe.id);
 
       // Registra a baixa (histórico imutável)
       const { error: payErr } = await supabase.from("financial_payments").insert({
