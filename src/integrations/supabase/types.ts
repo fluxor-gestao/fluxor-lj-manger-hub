@@ -876,10 +876,6 @@ export type Database = {
         Args: { _from?: string; _to?: string }
         Returns: Json
       }
-      bi_kpis_financeiro: {
-        Args: { _from?: string; _to?: string }
-        Returns: Json
-      }
       bi_kpis_operacao: {
         Args: { _from?: string; _to?: string }
         Returns: Json
