@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { useNavigate, useParams, Link, createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BarChart3, BriefcaseBusiness, DollarSign, ShoppingCart } from "lucide-react";
+import { ArrowLeft, BarChart3, BriefcaseBusiness, DollarSign, ShieldAlert, ShoppingCart } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { canAccessBiDashboard } from "@/lib/access";
 
 const dashboards = [
   {
@@ -32,9 +34,33 @@ const dashboards = [
 type DashboardId = (typeof dashboards)[number]["id"];
 
 function BI() {
-  const navigate = useNavigate();
+  const { hasRole, roleLoading } = useAuth();
+  const visibleDashboards = dashboards.filter((d) => canAccessBiDashboard(d.id, hasRole));
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardId | null>(null);
-  const activeDashboard = dashboards.find((dashboard) => dashboard.id === selectedDashboard);
+
+  // Se o usuário só tem acesso a 1 dashboard, abrir direto
+  useEffect(() => {
+    if (!roleLoading && visibleDashboards.length === 1 && !selectedDashboard) {
+      setSelectedDashboard(visibleDashboards[0].id);
+    }
+  }, [roleLoading, visibleDashboards, selectedDashboard]);
+
+  const activeDashboard =
+    selectedDashboard && canAccessBiDashboard(selectedDashboard, hasRole)
+      ? dashboards.find((dashboard) => dashboard.id === selectedDashboard)
+      : undefined;
+
+  if (!roleLoading && visibleDashboards.length === 0) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+        <ShieldAlert className="h-12 w-12 text-muted-foreground" />
+        <h1 className="text-xl font-semibold">Sem dashboards disponíveis</h1>
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Seu usuário não tem acesso a nenhum dashboard de BI. Fale com um administrador.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -48,35 +74,37 @@ function BI() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {dashboards.map((dashboard) => {
-          const Icon = dashboard.icon;
-          const isActive = selectedDashboard === dashboard.id;
+      {visibleDashboards.length > 1 && (
+        <div className="grid gap-4 md:grid-cols-3">
+          {visibleDashboards.map((dashboard) => {
+            const Icon = dashboard.icon;
+            const isActive = selectedDashboard === dashboard.id;
 
-          return (
-            <Card
-              key={dashboard.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => setSelectedDashboard(dashboard.id)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setSelectedDashboard(dashboard.id);
-                }
-              }}
-              className={`group min-h-[150px] cursor-pointer border-0 bg-gradient-to-br ${dashboard.gradient} p-6 text-primary-foreground shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${
-                isActive ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
-              }`}
-            >
-              <CardHeader className="flex h-full justify-between space-y-0 p-0">
-                <Icon className="h-11 w-11 text-primary-foreground/95" strokeWidth={1.75} />
-                <CardTitle className="text-xl leading-tight text-primary-foreground">{dashboard.title}</CardTitle>
-              </CardHeader>
-            </Card>
-          );
-        })}
-      </div>
+            return (
+              <Card
+                key={dashboard.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedDashboard(dashboard.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedDashboard(dashboard.id);
+                  }
+                }}
+                className={`group min-h-[150px] cursor-pointer border-0 bg-gradient-to-br ${dashboard.gradient} p-6 text-primary-foreground shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${
+                  isActive ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
+                }`}
+              >
+                <CardHeader className="flex h-full justify-between space-y-0 p-0">
+                  <Icon className="h-11 w-11 text-primary-foreground/95" strokeWidth={1.75} />
+                  <CardTitle className="text-xl leading-tight text-primary-foreground">{dashboard.title}</CardTitle>
+                </CardHeader>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {activeDashboard && (
         <Card className="overflow-hidden border-primary/20">
