@@ -19,11 +19,32 @@ import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 
 type BankAccount = { id: string; bank_name: string; account_number: string | null };
 
+export type NovoLancamentoPrefill = Partial<{
+  entry_type: EntryType;
+  description: string;
+  amount: string;
+  competence_date: string;
+  due_date: string;
+  payment_account_id: string;
+  is_paid: boolean;
+  paid_at: string;
+  paid_amount: string;
+  business_unit: string;
+  reference_code: string;
+}>;
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated?: () => void;
+  /** Called after the entry(ies) is created. Receives the id of the first inserted entry. */
+  onCreated?: (firstEntryId?: string) => void | Promise<void>;
   bankAccounts: BankAccount[];
+  /** Values to prefill when the dialog opens. */
+  prefill?: NovoLancamentoPrefill;
+  /** Override the dialog title. */
+  title?: string;
+  /** Override the submit button label. */
+  submitLabel?: string;
 }
 
 type EntryType = "receita" | "despesa" | "transferencia";
@@ -69,10 +90,20 @@ const emptyForm = () => ({
   notes: "",
 });
 
-export function NovoLancamentoDialog({ open, onOpenChange, onCreated, bankAccounts }: Props) {
+export function NovoLancamentoDialog({
+  open, onOpenChange, onCreated, bankAccounts, prefill, title, submitLabel,
+}: Props) {
   const { user } = useAuth();
   const catalogs = useFinanceiroCatalogs();
   const [form, setForm] = useState(emptyForm());
+
+  // Apply prefill whenever the dialog opens
+  useEffect(() => {
+    if (open) {
+      setForm({ ...emptyForm(), ...(prefill ?? {}) });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
   const [allocations, setAllocations] = useState<Allocation[]>([
     { category_id: "", cost_center_id: "", percent: "100", amount: "0", notes: "" },
   ]);
