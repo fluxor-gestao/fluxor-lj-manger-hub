@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { LoadingScreen } from "@/components/LoadingScreen";
 import logo from "@/assets/logo.svg";
+
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
