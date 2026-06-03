@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
 
   try {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") ?? "Lundgaard Jensen <onboarding@resend.dev>";
     if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY não configurada");
 
@@ -111,16 +112,26 @@ Deno.serve(async (req) => {
       payload.attachments = [{ filename: pdf_filename, content: pdf_base64 }];
     }
 
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    // Use Lovable connector gateway if LOVABLE_API_KEY is present (managed Resend connector),
+    // otherwise fall back to direct Resend API call with the raw key.
+    const useGateway = !!LOVABLE_API_KEY;
+    const endpoint = useGateway
+      ? "https://connector-gateway.lovable.dev/resend/emails"
+      : "https://api.resend.com/emails";
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (useGateway) {
+      headers["Authorization"] = `Bearer ${LOVABLE_API_KEY}`;
+      headers["X-Connection-Api-Key"] = RESEND_API_KEY;
+    } else {
+      headers["Authorization"] = `Bearer ${RESEND_API_KEY}`;
+    }
+
+    const r = await fetch(endpoint, { method: "POST", headers, body: JSON.stringify(payload) });
 
     if (!r.ok) {
       const t = await r.text();
       console.error("Resend error:", r.status, t);
-      throw new Error(`Falha ao enviar e-mail: ${r.status}`);
+      throw new Error(`Falha ao enviar e-mail: ${r.status} ${t}`);
     }
     const sendResult = await r.json();
 
