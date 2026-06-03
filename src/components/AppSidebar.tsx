@@ -8,7 +8,6 @@ import {
   Shield,
   HelpCircle,
   LogOut,
-  GitCompare,
 } from "lucide-react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
@@ -39,7 +38,6 @@ const mainItems: NavItem[] = [
   { title: "Início", url: "/hub", icon: Home },
   { title: "Comercial", url: "/comercial", icon: ShoppingCart, roles: ["comercial"] },
   { title: "Financeiro", url: "/financeiro", icon: DollarSign, roles: ["financeiro"] },
-  { title: "Conciliação", url: "/conciliacao", icon: GitCompare, roles: ["financeiro"] },
   { title: "Operação", url: "/operacao", icon: Settings2, roles: ["operacao"] },
 ];
 
