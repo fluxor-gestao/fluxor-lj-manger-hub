@@ -1,101 +1,87 @@
-# Plano — Formulário avançado de Novo Lançamento Financeiro
+# Pagamento parcial na conciliação
 
-Substituir o diálogo simples atual (`src/routes/_authenticated/financeiro.tsx`, ~linhas 114–298 e 377–466) por um formulário com classificação completa, condição de pagamento e rateio. Tudo dentro do mesmo arquivo de rota; lógica do form extraída para um componente novo para não inflar a página.
+## 1. Migration: tabela `financial_payments`
 
-## 1. Novo componente
+Criar tabela para histórico imutável de baixas:
 
-`src/components/financeiro/NovoLancamentoDialog.tsx`
+- `id uuid pk default gen_random_uuid()`
+- `financial_entry_id uuid not null references financial_entries(id) on delete restrict`
+- `bank_statement_entry_id uuid references bank_statement_entries(id) on delete set null`
+- `conciliation_match_id uuid references conciliation_matches(id) on delete set null` (rastreabilidade)
+- `amount numeric(14,2) not null check (amount > 0)`
+- `paid_at date not null default current_date`
+- `payment_method_id uuid references payment_methods(id)`
+- `bank_account_id uuid references bank_accounts(id)`
+- `notes text`
+- `created_by uuid` (auth.uid)
+- `created_at timestamptz default now()`
 
-Props:
-- `open`, `onOpenChange`
-- `onCreated()` — callback para invalidar queries (`["financial-entries"]`)
-- `bankAccounts` — reaproveita o que a tela já carrega
+Índices: `(financial_entry_id)`, `(bank_statement_entry_id)`, `(paid_at)`.
 
-Estado interno gerenciado com `react-hook-form` + `zod` (já presentes no projeto). Schema valida: descrição obrigatória, valor > 0, data de competência obrigatória, parcelas ≥ 1, soma do rateio = 100% (ou = valor) quando ativo.
+GRANTs: `SELECT, INSERT, UPDATE, DELETE` para `authenticated`; `ALL` para `service_role`. RLS habilitada com policy alinhada ao padrão atual (admin + financeiro via `has_role`, igual a `financial_entries`).
 
-## 2. Layout do diálogo
+Nada é apagado: sem trigger de delete, sem cascade destrutivo.
 
-Dialog largo (`max-w-3xl`), com 3 seções colapsáveis (sempre visíveis, separadas por título):
+## 2. Lógica nova em `conciliatePair` (`src/routes/_authenticated/conciliacao.tsx`)
 
-### Seção A — Informações do lançamento
-- **Tipo** (`entry_type`): radio/segmented `receita | despesa | transferencia`
-- **Fornecedor/Cliente**: Combobox condicional
-  - `receita` → busca em `clients` → grava `client_id`
-  - `despesa` → busca em `suppliers` → grava `supplier_id`
-  - `transferencia` → oculto
-- **Descrição** (`movement_description`)
-- **Valor** (`CurrencyInputBRL`) — único campo de valor; mapeado para `amount_in`/`amount_out` conforme tipo
-- **Data de competência** (`competence_date` date + `competence_month` derivado `YYYY-MM`)
-- **Categoria** (`category_id`) — select de `financial_categories` filtrado por `kind` compatível com o tipo
-- **Centro de custo** (`cost_center_id`) — select de `cost_centers`
-- **Código de referência** (`reference_code`)
-- **Unidade de negócio** (`business_unit`) — mantido
-- **Switch "Habilitar rateio"** — quando ativo, esconde Categoria/Centro de custo no topo e mostra a Seção C
+Substitui o `feUpdate` simples (apenas `conciliation_status`) por fluxo baseado em `open_amount`:
 
-### Seção B — Condição de pagamento
-- **Parcelamento**: `installment_total` (number, default 1) + indicador "Parcela atual" `installment_number` (default 1). Quando `> 1`, mostra hint "será criado 1 lançamento por parcela com vencimentos mensais a partir da data de vencimento informada"
-- **Vencimento** (`due_date`)
-- **Forma de pagamento** (`payment_method_id`) — select de `payment_methods`
-- **Conta de pagamento** (`payment_account_id`) — select de `bank_accounts`
-- **Pago?** Switch
-  - quando ON: mostra `paid_at` (date, default hoje) e `paid_amount` (default = valor total da parcela)
+```text
+stmtAmt   = |stmt.amount|
+openAmt   = fe.open_amount ?? (fe.amount_in|amount_out) - (fe.paid_amount ?? 0)
+paidPrev  = fe.paid_amount ?? 0
 
-### Seção C — Rateio (condicional)
-Tabela editável com linhas `{ category_id, cost_center_id, percent, amount, notes? }`.
-- Botão "+ Adicionar linha" e remoção por linha
-- Edição em percent recalcula `amount = valor * percent/100`; edição em amount recalcula percent
-- Rodapé mostra soma percent / soma valor com aviso visual se ≠ 100% / ≠ valor
-
-## 3. Lógica ao salvar
-
-Função única `handleSubmit` (mutation):
-
-```
-const totalAmount = Number(form.amount)                  // valor digitado
-const installments = Math.max(1, form.installment_total)
-const parcelaAmount = round2(totalAmount / installments)
+if stmtAmt == openAmt (tol 0.01):
+    payment_status = 'pago'
+    paid_amount    = paidPrev + stmtAmt   (= valor total da parcela)
+    open_amount    = 0
+elif stmtAmt < openAmt:
+    payment_status = 'parcial'
+    paid_amount    = paidPrev + stmtAmt
+    open_amount    = openAmt - stmtAmt
+else (stmtAmt > openAmt):
+    confirm("Valor do banco (X) é maior que o saldo em aberto (Y). Registrar como pago e gerar sobra?")
+    se confirmar:
+        payment_status = 'pago'
+        paid_amount    = paidPrev + openAmt   (limita ao saldo)
+        open_amount    = 0
+        // sobra fica registrada em financial_payments.notes = "excedente R$ ..."
+    senão: throw
 ```
 
-Para cada parcela `i = 1..installments`:
-1. **Calcular status/saldo da parcela**
-   - se `pago == true` e `paid_amount >= parcelaAmount` → `payment_status='pago'`, `open_amount = 0`, `paid_amount = parcelaAmount`
-   - se `pago == true` e `0 < paid_amount < parcelaAmount` → `'parcial'`, `open_amount = parcelaAmount - paid_amount`
-   - se `pago == false` e `due_date < hoje` → `'vencido'`
-   - senão → `'aberto'`
-   - `conciliation_status`: `'conciliado'` quando `payment_status='pago'`, senão mantém `'pendente'` (compatível com telas atuais e com `financeiro_summary`)
-2. **Insert em `financial_entries`** com todos os novos campos preenchidos (incluindo `installment_number=i`, `installment_total`, `due_date` = vencimento base + (i-1) meses, `amount_in/amount_out` mapeados pelo tipo, `source_type='manual'`, `user_id`). Retorna `id`.
-3. Se **rateio ativo**: insert em `entry_allocations` (uma linha por linha do rateio) com `entry_id` recém-criado e `amount = linha.percent/100 * parcelaAmount` (recalculado por parcela para garantir consistência).
+Após update do `financial_entries`, INSERT em `financial_payments` com `amount = min(stmtAmt, openAmt)` (ou `stmtAmt` quando igual), `bank_statement_entry_id = stmt.id`, `bank_account_id = stmt.bank_account_id`, `payment_method_id = fe.payment_method_id`, `paid_at = stmt.transaction_date`, `created_by = user.id`, `conciliation_match_id = matchId`.
 
-Tudo dentro de um `try`/`catch` simples; erros mostram `toast.error`. Sucesso: `toast.success`, fecha diálogo, reseta form, chama `onCreated()`.
+`bank_statement_entries.conciliation_status` continua indo para `'conciliado'` (extrato é uma linha = uma baixa). A divergência cambial / direção oposta atual é preservada antes desse bloco.
 
-## 4. Carregamento de selects
+## 3. `undoMatch` — preservar histórico
 
-Hook único `useFinanceiroCatalogs()` em `src/hooks/useFinanceiroCatalogs.ts` que retorna `{ suppliers, clients, categories, costCenters, paymentMethods }`, cada um via `useQuery` com `staleTime` longo (5 min). Filtra `active=true`. Usa `supabase.from(...).select('id, name, kind?').order('name')`.
+Hoje deleta o `conciliation_matches` e zera status. Novo comportamento:
+
+- Marca match como `rejeitado` (não deleta) **ou** deleta apenas o match, mas **mantém** linhas de `financial_payments` intactas.
+- Reverte a baixa recalculando a partir do histórico: busca `sum(amount)` em `financial_payments` para o `financial_entry_id` **excluindo** o pagamento associado a esse match; recalcula `paid_amount`, `open_amount`, `payment_status` (`pago` / `parcial` / `aberto` / `vencido`) e atualiza `financial_entries`.
+- Remove apenas o registro de `financial_payments` daquele match (não é "apagar histórico anterior" — é cancelar a baixa específica) **ou**, alternativamente, mantém com `notes = 'estornado'`. **Decisão proposta:** delete somente a linha vinculada ao match desfeito; demais baixas permanecem.
+- `bank_statement_entries` volta para `pendente`.
+
+## 4. UI
+
+- Botão "Conciliar" continua igual; o `window.confirm` extra aparece só no caso `stmtAmt > openAmt`.
+- Toast diferenciado: `"Baixa parcial registrada — saldo: R$ X"` quando `payment_status = 'parcial'`.
+- Sem nova tela de histórico nesta entrega (fora de escopo).
 
 ## 5. Compatibilidade
 
-- `competence_month` (texto YYYY-MM) **continua sendo preenchido** (derivado de `competence_date`) → `financeiro_summary` e tela atual seguem funcionando.
-- `entry_type` mantém os valores existentes (`receita | despesa | transferencia`).
-- `source_type='manual'` mantido.
-- Trigger `fx_recompute_total_brl` continua recalculando `total_brl`.
-- Nenhuma alteração em listagem/filtros/RPCs — apenas o diálogo muda.
+- `conciliation_status = 'conciliado'` continua sendo escrito para não quebrar filtros/relatórios existentes.
+- Campos `payment_status`, `paid_amount`, `open_amount` já existem em `financial_entries` (migration anterior).
+- Lançamentos antigos sem `open_amount` definido caem no fallback `amount_in|amount_out - paid_amount`.
 
-## 6. Pontos técnicos
+## Fora de escopo
 
-- Uso de `react-hook-form` com `useFieldArray` para o rateio.
-- `CurrencyInputBRL` já existe (`src/components/ui/currency-input-brl.tsx`).
-- Datas em `<Input type="date">` (mantém padrão do form atual).
-- Validação do rateio: bloqueia submit se soma ≠ valor (tolerância R$ 0,01).
-- Sem mudanças de schema — a migration anterior já adicionou todas as colunas e tabelas.
+- Tela de listagem/edição de `financial_payments`.
+- Estorno em massa.
+- Trigger SQL que mantém `paid_amount/open_amount` sincronizados (mantemos cálculo no client, igual ao `NovoLancamentoDialog`).
 
-## 7. Arquivos tocados
+## Arquivos
 
-- **novo** `src/components/financeiro/NovoLancamentoDialog.tsx`
-- **novo** `src/hooks/useFinanceiroCatalogs.ts`
-- **edit** `src/routes/_authenticated/financeiro.tsx`: remover state `form`/`createEntry`/JSX do dialog antigo; substituir por `<NovoLancamentoDialog open=... onCreated={() => qc.invalidateQueries(['financial-entries'])} bankAccounts={bankAccounts} />`.
-
-## 8. Fora de escopo (próximas iterações)
-
-- Telas de cadastro de Fornecedores / Categorias / Centros de custo / Formas de pagamento (selects ficarão vazios até o usuário cadastrar — incluir link "Gerenciar cadastros" no diálogo é opcional, deixar para próximo passo).
-- Edição de lançamento existente com este mesmo formulário (hoje a tela só cria).
-- Recalcular `open_amount`/`payment_status` automaticamente via trigger.
+- **Nova migration**: `financial_payments` + GRANTs + RLS + índices.
+- **Editar**: `src/routes/_authenticated/conciliacao.tsx` (`conciliatePair`, `undoMatch`).
+- Types do Supabase regenerados após a migration.
