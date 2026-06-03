@@ -16,6 +16,7 @@ import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { toast } from "sonner";
 import { Upload, CheckCircle, XCircle, Link2, ArrowLeftRight, Search, ArrowLeft, Pencil, Trash2, Building2, Banknote, Plus, RotateCcw, EyeOff } from "lucide-react";
 import { parseOfx, type ParsedOfxTx } from "@/lib/parseOfx";
+import { NovoLancamentoDialog, type NovoLancamentoPrefill } from "@/components/financeiro/NovoLancamentoDialog";
 
 type BankStatementEntry = {
   id: string;
