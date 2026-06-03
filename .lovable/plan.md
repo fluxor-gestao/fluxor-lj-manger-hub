@@ -1,79 +1,55 @@
 
-# Validação completa — Supabase `uxwdzcjhrhlugrjgpkcr`
+# Testes End-to-End — Supabase `uxwdzcjhrhlugrjgpkcr`
 
-Objetivo: rodar uma bateria de verificações somente-leitura + testes mínimos criados/removidos, sem mexer em schema, migrations, layout ou regras de negócio. Apenas corrigir erros de integração se aparecerem.
+Todos os registros marcados com sufixo `__QA_E2E__` para limpeza determinística no final.
 
-## Como vou executar (10 seções)
+## Sequência
 
-### 1. Infra / Supabase
-- Conferir `.env`, `client.ts`, `client.server.ts`, `auth-middleware.ts` — project_ref, URL, publishable e service role.
-- `fetch_secrets` para confirmar `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`.
-- `supabase--read_query` listando `pg_tables` com `rowsecurity=true` para confirmar RLS.
-- Listar bucket `devis-pdfs` via query em `storage.buckets`.
+### 1. Comercial (SQL via supabase--read_query/migration tool)
+- INSERT `clients` (`name='QA Cliente __QA_E2E__'`, `business_unit_id=NULL`, `type='PJ'`, email teste) → guardar `client_id`.
+- UPDATE no client (mudar telefone) → confirmar `updated_at` mudou.
+- INSERT `devis` (`title='QA Devis __QA_E2E__'`, `client_id`, `total_amount=10000`, `service_type='ambiental'`) → confirmar `devis_number` gerado (`AM…`), `down_payment_amount=5000` (trigger `calc_devis_down_payment`).
+- UPDATE setando flags de validação (`validation_*_confirmed=true`) → confirmar status avançou (trigger `devis_status_progression`).
+- UPDATE setando `accepted_at=now()` → dispara `devis_accepted_create_service` + `trg_devis_accepted_charge`.
 
-### 2. Auth
-- Verificar `AuthContext`, `_authenticated/route.tsx`, fluxo `/auth`.
-- Query: `auth.users` × `profiles` × `user_roles` (admin presente).
-- Validar `attachSupabaseAuth` registrado em `start.ts` (já confirmado).
+### 2. Automações
+- SELECT `services` WHERE `devis_id=` → confirmar 1 linha criada.
+- SELECT `financial_entries` WHERE `document_reference=<devis_id>` → confirmar 1 linha, `amount_in=5000`, `entry_type='receita'`, `conciliation_status='pendente'`.
+- Confirmar `initial_charge_generated=true` no devis.
 
-### 3. Módulos
-- Abrir cada rota via browser tool (Hub, Comercial, Financeiro, Operação, Gestão, BI) logado como `gestao@fluxorbi.com` (admin).
-- Capturar console + network para erros.
+### 3. Financeiro
+- INSERT `financial_entries` manual extra (`movement_description='QA Lançamento __QA_E2E__'`, `amount_in=1234.56`, `entry_date=hoje`, `competence_month=YYYY-MM`).
+- SELECT verificando soma e listagem.
+- Executar `financeiro_summary(_competence=>'<mes>')` → validar `previstoIn` ≥ 6234.56 (devis 5000 + manual 1234.56).
 
-### 4. Fluxo Comercial
-- Listar `clients`, `devis` via SQL.
-- Criar 1 client teste + 1 devis teste via SQL (`INSERT`) marcado com sufixo `__qa_test`.
-- Atualizar status, simular aceite (set `accepted_at`) — observar triggers `devis_accepted_create_service` e `trg_devis_accepted_charge`.
-- Abrir PDF do devis no preview (rota `/comercial/devis/$id`).
-- Remover registros teste no final.
+### 4. Storage `devis-pdfs`
+- Via service role (CLI curl com `SUPABASE_SERVICE_ROLE_KEY` se disponível; se não, usar `code--exec` chamando a REST API do Storage com a key listada no Project Secrets — vou conferir disponibilidade no runtime). Caso a key não esteja exposta ao shell, faço upload via uma serverFn temporária OU pulo e reporto.
+- Upload `qa-test.pdf` (PDF mínimo gerado em /tmp).
+- Gerar signed URL (60s) e baixar via curl → checar 200 + content-type.
+- Delete do arquivo.
 
-### 5. Automações
-- Após aceite teste, confirmar:
-  - novo `services` criado com `devis_id`
-  - novo `financial_entries` 50%
-  - `devis_number` gerado automaticamente
-  - `updated_at` mudou ao update
+### 5. BI
+- `SELECT bi_kpis_comercial(NULL,NULL)` → verificar `total_devis>=1`, `accepted>=1`, `accepted_amount>=10000`.
+- `SELECT bi_kpis_operacao(NULL,NULL)` → `total_services>=1`.
+- `SELECT financeiro_summary()` → confirmar entrada prevista.
+- Endpoint `/api/public/bi-kpis-financeiro` agregado (sem token → 401 esperado; com smoke pelo SQL direto).
 
-### 6. Financeiro
-- SELECTs em `financial_entries`, `bank_accounts`, `conciliation_matches`, `bank_statement_entries`.
-- INSERT mínimo em `financial_entries` (qa_test) e DELETE.
+### 6. Limpeza
+Ordem reversa para respeitar dependências (sem FKs declaradas, mas mesmo assim):
+1. DELETE `financial_entries` WHERE `document_reference=<devis_id>` OR `movement_description ILIKE '%__QA_E2E__%'`.
+2. DELETE `services` WHERE `devis_id=<devis_id>`.
+3. DELETE `devis` WHERE `id=<devis_id>`.
+4. DELETE `clients` WHERE `id=<client_id>`.
+5. DELETE objeto Storage (`qa-test.pdf`) — já feito na §4.
+6. SELECT final confirmando counts voltaram a 0.
 
-### 7. RPCs/BI
-- `supabase--read_query`:
-  ```sql
-  SELECT bi_kpis_comercial(NULL,NULL);
-  SELECT bi_kpis_financeiro(NULL,NULL); -- se existir
-  SELECT bi_kpis_operacao(NULL,NULL);
-  SELECT financeiro_summary();
-  SELECT * FROM financeiro_analitico() LIMIT 5;
-  ```
+## Entregável
+- Tabela OK/Erro por item.
+- IDs criados + IDs removidos.
+- Output dos KPIs antes/depois.
+- Saídas de erro (se houver).
 
-### 8. Server functions / APIs
-- `stack_modern--invoke-server-function` em `/api/public/bi-kpis-comercial`, `/bi-kpis-financeiro`, `/bi-kpis-operacao`, `/bi-comercial`, `/bi-financeiro`, `/bi-operacao` — verificar 200/401/403.
-- Invocar uma serverFn protegida via browser logado e observar header `Authorization`.
-
-### 9. Storage `devis-pdfs`
-- Via service role: upload de arquivo `qa_test.txt`, gerar signed URL, baixar, deletar.
-- Confirmar bucket privado.
-
-### 10. Logs
-- `code--read_console_logs` + `supabase--analytics_query` (auth + edge logs) buscando:
-  - `localStorage is not defined`
-  - `Missing Supabase environment`
-  - HTTP 500 nas rotas principais
-- Listar warnings relevantes.
-
-## Entregável final
-Relatório com:
-- Tabela OK/Erro por item das 10 seções
-- Evidências (query results, status HTTP, logs)
-- Registros de teste criados (IDs)
-- Confirmação de remoção
-- Lista de correções de integração feitas (se houver) — apenas integração, sem tocar schema/regra/layout
-
-## Confirmação necessária
-Para executar, preciso:
-1. Aprovar este plano (entro em build mode).
-2. Permissões já habilitadas em Lovable Cloud: **Read database** e **Add data** = Always allow (para `supabase--read_query` e os INSERTs de teste). Caso contrário, eu paro e te aviso antes de cada operação.
-
-Aprovar este plano para eu rodar.
+## Notas
+- Não toco em schema, migrations, layout, regras.
+- INSERT/UPDATE/DELETE de teste serão executados via `supabase--migration` (tool requer aprovação automática) ou `supabase--read_query` se vier permitido — caso contrário paro e peço a aprovação a você.
+- Storage upload depende do `SUPABASE_SERVICE_ROLE_KEY` estar acessível no runtime do sandbox. Se indisponível, reporto e pulo só esse passo.
