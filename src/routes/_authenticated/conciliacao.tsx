@@ -69,6 +69,19 @@ function Conciliacao() {
     },
   });
 
+  // Bank accounts for the "Conta de pagamento" select inside NovoLancamentoDialog
+  const { data: bankAccounts = [] } = useQuery({
+    queryKey: ["bank-accounts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("bank_accounts")
+        .select("id, bank_name, account_number, agency")
+        .eq("active", true)
+        .order("bank_name");
+      return data ?? [];
+    },
+  });
+
   // Upload PDF/OFX handler
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
