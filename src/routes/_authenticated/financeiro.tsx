@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NovoLancamentoDialog } from "@/components/financeiro/NovoLancamentoDialog";
+import { ContasTable } from "@/components/financeiro/ContasTable";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -101,9 +102,10 @@ function Financeiro() {
   const [originFilter, setOriginFilter] = useState<string>("all");
   const [realizedFilter, setRealizedFilter] = useState<string>("all");
 
-  const [tab, setTab] = useState<"consolidado" | "previsoes" | "realizados" | "fluxo" | "analitico">(
+  const [tab, setTab] = useState<"consolidado" | "receber" | "pagar" | "realizados" | "fluxo" | "analitico">(
     "consolidado",
   );
+
 
   const [page, setPage] = useState(0);
 
@@ -118,7 +120,7 @@ function Financeiro() {
   // ---------- Parâmetros server-side ----------
   // Combina o filtro "Previsto/Realizado" da tab + dropdown
   const realizedParam: string | null = useMemo(() => {
-    if (tab === "previsoes") return "previsto";
+    if (tab === "receber" || tab === "pagar") return null;
     if (tab === "realizados") return "realizado";
     if (realizedFilter === "previsto") return "previsto";
     if (realizedFilter === "realizado") return "realizado";
@@ -441,7 +443,8 @@ function Financeiro() {
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="w-full">
         <TabsList>
           <TabsTrigger value="consolidado">Consolidado</TabsTrigger>
-          <TabsTrigger value="previsoes">Previsões</TabsTrigger>
+          <TabsTrigger value="receber">Contas a Receber</TabsTrigger>
+          <TabsTrigger value="pagar">Contas a Pagar</TabsTrigger>
           <TabsTrigger value="realizados">Realizados</TabsTrigger>
           <TabsTrigger value="fluxo">Fluxo Bancário</TabsTrigger>
           <TabsTrigger value="analitico">Receitas × Despesas</TabsTrigger>
@@ -463,22 +466,13 @@ function Financeiro() {
             disabled={entriesQuery.isFetching}
           />
         </TabsContent>
-        <TabsContent value="previsoes" className="mt-4 space-y-2">
-          <EntriesTable
-            rows={rows}
-            bankLabel={bankLabel}
-            isLoading={entriesQuery.isLoading}
-            isError={entriesQuery.isError}
-            onRetry={() => entriesQuery.refetch()}
-          />
-          <Pagination
-            page={page}
-            pageSize={PAGE_SIZE}
-            total={total}
-            onPageChange={setPage}
-            disabled={entriesQuery.isFetching}
-          />
+        <TabsContent value="receber" className="mt-4 space-y-2">
+          <ContasTable kind="receber" />
         </TabsContent>
+        <TabsContent value="pagar" className="mt-4 space-y-2">
+          <ContasTable kind="pagar" />
+        </TabsContent>
+
         <TabsContent value="realizados" className="mt-4 space-y-2">
           <EntriesTable
             rows={rows}
