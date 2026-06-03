@@ -91,60 +91,33 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
       const filename = `Devis-${devisNumber}-${safeName}.pdf`;
       const { base64 } = await generateDevisPdfBase64(host, filename);
 
-      // Upload PDF to Supabase Storage and create a signed URL (30 days)
-      const pdfBytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-      const objectPath = `${devis.id}/${Date.now()}-${filename}`;
-      const { error: upErr } = await supabase.storage
-        .from("devis-pdfs")
-        .upload(objectPath, pdfBytes, { contentType: "application/pdf", upsert: true });
-      if (upErr) throw upErr;
-      const { data: signed, error: signErr } = await supabase.storage
-        .from("devis-pdfs")
-        .createSignedUrl(objectPath, 60 * 60 * 24 * 30);
-      if (signErr) throw signErr;
-      const pdfUrl = signed.signedUrl;
-
-      const { data: { session } } = await supabase.auth.getSession();
-      const idempotencyKey = `devis-${devis.id}-${Date.now()}`;
-
-      // Send to each recipient (one transactional email per recipient)
+      // Envia via edge function (Resend) — uma chamada por destinatário
+      let lastError: string | null = null;
       for (const recipient of recipients) {
-        const res = await fetch("/lovable/email/transactional/send", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token ?? ""}`,
+        const { data, error } = await supabase.functions.invoke("send-devis-proposal", {
+          body: {
+            devis_id: devis.id,
+            to: [recipient],
+            subject,
+            message_text: message,
+            pdf_base64: base64,
+            pdf_filename: filename,
+            accept_url: acceptUrl,
+            language,
           },
-          body: JSON.stringify({
-            templateName: "devis-proposal",
-            recipientEmail: recipient,
-            idempotencyKey: `${idempotencyKey}-${recipient}`,
-            templateData: {
-              messageText: message,
-              acceptUrl,
-              pdfUrl,
-              language,
-              devisNumber,
-              subject,
-            },
-          }),
         });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.error || `Falha ao enviar para ${recipient}`);
+        if (error || (data && (data as any).error)) {
+          lastError = error?.message || (data as any)?.error || `Falha ao enviar para ${recipient}`;
+          break;
         }
       }
-
-      // Update devis status
-      await supabase
-        .from("devis")
-        .update({ status: "enviada_ao_cliente", sent_at: new Date().toISOString() })
-        .eq("id", devis.id);
+      if (lastError) throw new Error(lastError);
 
       toast.success("Proposta enviada ao cliente!");
       queryClient.invalidateQueries({ queryKey: ["devis"] });
       queryClient.invalidateQueries({ queryKey: ["devis", devis.id] });
       onOpenChange(false);
+
     } catch (e: any) {
       toast.error(e.message || "Erro ao enviar proposta");
     } finally {
