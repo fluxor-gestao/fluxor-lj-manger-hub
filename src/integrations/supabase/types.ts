@@ -875,6 +875,84 @@ export type Database = {
           },
         ]
       }
+      financial_payments: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          bank_statement_entry_id: string | null
+          conciliation_match_id: string | null
+          created_at: string
+          created_by: string | null
+          financial_entry_id: string
+          id: string
+          notes: string | null
+          paid_at: string
+          payment_method_id: string | null
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          bank_statement_entry_id?: string | null
+          conciliation_match_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          financial_entry_id: string
+          id?: string
+          notes?: string | null
+          paid_at?: string
+          payment_method_id?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          bank_statement_entry_id?: string | null
+          conciliation_match_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          financial_entry_id?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string
+          payment_method_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_payments_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_payments_bank_statement_entry_id_fkey"
+            columns: ["bank_statement_entry_id"]
+            isOneToOne: false
+            referencedRelation: "bank_statement_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_payments_conciliation_match_id_fkey"
+            columns: ["conciliation_match_id"]
+            isOneToOne: false
+            referencedRelation: "conciliation_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_payments_financial_entry_id_fkey"
+            columns: ["financial_entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_payments_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_batches: {
         Row: {
           error_count: number | null

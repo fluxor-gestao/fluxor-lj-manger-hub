@@ -488,41 +488,60 @@ function Conciliacao() {
       const expectedBrl = Number(fe.total_brl ?? feAmount ?? 0);
       const brlDiff = Math.abs(stmtAmt - expectedBrl);
       const isFxEntry = feCurrency !== "BRL";
+      const fmtBRL = (n: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
 
-      const feUpdate: { conciliation_status: "conciliado"; exchange_rate?: number; total_brl?: number; fx_variation?: number; fx_status?: string } = {
-        conciliation_status: "conciliado" as const,
-      };
+      const feUpdate: Record<string, any> = { conciliation_status: "conciliado" as const };
 
       if (feHasOpposite || feAmount === 0) {
-        const fmt = (n: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
         const sideLabel = stmtDir === "entrada" ? "entrada" : "saída";
         const feSide = Number(fe.amount_in) > 0 ? "entrada" : "saída";
         const ok = window.confirm(
           `Divergência de direção detectada:\n\n` +
-            `• Banco: ${sideLabel} de ${fmt(stmtAmt)}\n` +
+            `• Banco: ${sideLabel} de ${fmtBRL(stmtAmt)}\n` +
             `• Lançamento interno: ${feSide}\n\n` +
             `Conciliar mesmo assim?`,
         );
         if (!ok) throw new Error("Conciliação cancelada por divergência.");
-      } else if (brlDiff >= 0.01) {
-        if (isFxEntry && feOriginal > 0) {
-          // Variação cambial: recalcula taxa, marca status especial
-          const newRate = stmtAmt / feOriginal;
-          feUpdate.exchange_rate = Number(newRate.toFixed(6));
-          feUpdate.total_brl = stmtAmt;
-          feUpdate.fx_variation = stmtAmt - expectedBrl;
-          feUpdate.fx_status = "com_variacao_cambial";
-          toast.info(`Variação cambial registrada (taxa ${newRate.toFixed(4)})`);
-        } else {
-          const fmt = (n: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
-          const ok = window.confirm(
-            `Divergência de valor detectada:\n\n` +
-              `• Banco: ${fmt(stmtAmt)}\n` +
-              `• Previsto (BRL): ${fmt(expectedBrl)}\n\n` +
-              `Conciliar mesmo assim?`,
-          );
-          if (!ok) throw new Error("Conciliação cancelada por divergência.");
-        }
+      } else if (brlDiff >= 0.01 && isFxEntry && feOriginal > 0) {
+        // Variação cambial: recalcula taxa, marca status especial
+        const newRate = stmtAmt / feOriginal;
+        feUpdate.exchange_rate = Number(newRate.toFixed(6));
+        feUpdate.total_brl = stmtAmt;
+        feUpdate.fx_variation = stmtAmt - expectedBrl;
+        feUpdate.fx_status = "com_variacao_cambial";
+        toast.info(`Variação cambial registrada (taxa ${newRate.toFixed(4)})`);
+      }
+
+      // --- Pagamento parcial / total / excedente ---
+      const paidPrev = Number(fe.paid_amount ?? 0);
+      const baseTotal = feAmount || expectedBrl || 0;
+      const openPrev = Number(fe.open_amount ?? Math.max(0, baseTotal - paidPrev));
+      let appliedAmount = stmtAmt;
+      let excedente = 0;
+      let nextStatus: "pago" | "parcial" = "pago";
+
+      if (Math.abs(stmtAmt - openPrev) < 0.01) {
+        appliedAmount = openPrev;
+        nextStatus = "pago";
+      } else if (stmtAmt < openPrev) {
+        appliedAmount = stmtAmt;
+        nextStatus = "parcial";
+      } else {
+        const ok = window.confirm(
+          `Valor do banco (${fmtBRL(stmtAmt)}) é maior que o saldo em aberto (${fmtBRL(openPrev)}).\n\n` +
+            `Registrar como pago e gerar excedente de ${fmtBRL(stmtAmt - openPrev)}?`,
+        );
+        if (!ok) throw new Error("Conciliação cancelada por divergência de valor.");
+        appliedAmount = openPrev;
+        excedente = stmtAmt - openPrev;
+        nextStatus = "pago";
+      }
+
+      feUpdate.paid_amount = Number((paidPrev + appliedAmount).toFixed(2));
+      feUpdate.open_amount = Number(Math.max(0, openPrev - appliedAmount).toFixed(2));
+      feUpdate.payment_status = nextStatus;
+      if (nextStatus === "pago" || !fe.paid_at) {
+        feUpdate.paid_at = stmt.transaction_date;
       }
 
       let matchId = existingMatchId;
@@ -555,28 +574,79 @@ function Conciliacao() {
         if (error) throw error;
       }
       await supabase.from("bank_statement_entries").update({ conciliation_status: "conciliado" as const }).eq("id", stmt.id);
-      await supabase.from("financial_entries").update(feUpdate).eq("id", fe.id);
+      await supabase.from("financial_entries").update(feUpdate as any).eq("id", fe.id);
+
+      // Registra a baixa (histórico imutável)
+      const { error: payErr } = await supabase.from("financial_payments").insert({
+        financial_entry_id: fe.id,
+        bank_statement_entry_id: stmt.id,
+        conciliation_match_id: matchId,
+        amount: appliedAmount,
+        paid_at: stmt.transaction_date,
+        payment_method_id: fe.payment_method_id ?? null,
+        bank_account_id: stmt.bank_account_id ?? fe.payment_account_id ?? fe.bank_account_id ?? null,
+        notes: excedente > 0 ? `Excedente recebido: ${fmtBRL(excedente)}` : null,
+        created_by: user?.id ?? null,
+      });
+      if (payErr) throw payErr;
+
+      return { status: nextStatus, openAfter: feUpdate.open_amount as number };
     },
-    onSuccess: () => {
-      toast.success("Conciliado!");
+    onSuccess: (res) => {
+      if (res?.status === "parcial") {
+        const fmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(res.openAfter);
+        toast.success(`Baixa parcial registrada — saldo: ${fmt}`);
+      } else {
+        toast.success("Conciliado!");
+      }
       queryClient.invalidateQueries();
     },
     onError: (e: any) => toast.error(`Erro: ${e.message ?? e}`),
   });
 
-  // Undo conciliation
+  // Undo conciliation — preserva demais baixas; remove apenas a deste match e recalcula saldo
   const undoMatch = useMutation({
     mutationFn: async (matchId: string) => {
       const m = matches.find((x) => x.id === matchId);
       if (!m) throw new Error("Match não encontrado");
+
+      const { data: fe } = await supabase
+        .from("financial_entries")
+        .select("*")
+        .eq("id", m.financial_entry_id)
+        .single();
+      const { data: otherPayments } = await supabase
+        .from("financial_payments")
+        .select("amount")
+        .eq("financial_entry_id", m.financial_entry_id)
+        .neq("conciliation_match_id", matchId);
+
+      const totalPaid = (otherPayments ?? []).reduce((s, p: any) => s + Number(p.amount), 0);
+      const feAmount = Number(fe?.amount_in ?? 0) > 0 ? Number(fe?.amount_in) : Number(fe?.amount_out ?? 0);
+      const baseTotal = Number(fe?.total_brl ?? feAmount ?? 0);
+      const openAfter = Math.max(0, baseTotal - totalPaid);
+      const today = new Date().toISOString().slice(0, 10);
+      let status: "pago" | "parcial" | "aberto" | "vencido";
+      if (openAfter <= 0.0049) status = "pago";
+      else if (totalPaid > 0) status = "parcial";
+      else if (fe?.due_date && fe.due_date < today) status = "vencido";
+      else status = "aberto";
+
+      await supabase.from("financial_payments").delete().eq("conciliation_match_id", matchId);
       await supabase.from("conciliation_matches").delete().eq("id", matchId);
       await supabase.from("bank_statement_entries").update({ conciliation_status: "pendente" as const }).eq("id", m.bank_statement_entry_id);
-      await supabase.from("financial_entries").update({ conciliation_status: "pendente" as const }).eq("id", m.financial_entry_id);
+      await supabase.from("financial_entries").update({
+        conciliation_status: totalPaid > 0 ? ("conciliado" as const) : ("pendente" as const),
+        paid_amount: Number(totalPaid.toFixed(2)),
+        open_amount: Number(openAfter.toFixed(2)),
+        payment_status: status,
+      }).eq("id", m.financial_entry_id);
     },
     onSuccess: () => {
       toast.success("Conciliação desfeita");
       queryClient.invalidateQueries();
     },
+    onError: (e: any) => toast.error(`Erro: ${e.message ?? e}`),
   });
 
   // Mark statement as ignored (uses 'divergente' status)
