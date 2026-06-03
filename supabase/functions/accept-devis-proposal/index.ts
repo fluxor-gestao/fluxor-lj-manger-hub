@@ -44,6 +44,10 @@ Deno.serve(async (req) => {
 
     if (!token) return json({ error: "token ausente" }, 400);
 
+    // Token deve ser UUID — qualquer outro formato é tratado como não encontrado
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(token)) return json({ error: "Proposta não encontrada" }, 404);
+
     const { data: devis, error } = await admin
       .from("devis")
       .select(PREVIEW_FIELDS)
