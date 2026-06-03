@@ -324,6 +324,36 @@ export type Database = {
           },
         ]
       }
+      cost_centers: {
+        Row: {
+          active: boolean
+          business_unit: string | null
+          code: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_unit?: string | null
+          code?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_unit?: string | null
+          code?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       devis: {
         Row: {
           accept_token: string
@@ -548,6 +578,102 @@ export type Database = {
         }
         Relationships: []
       }
+      entry_allocations: {
+        Row: {
+          amount: number
+          category_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          entry_id: string
+          id: string
+          notes: string | null
+          percent: number | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          entry_id: string
+          id?: string
+          notes?: string | null
+          percent?: number | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          entry_id?: string
+          id?: string
+          notes?: string | null
+          percent?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entry_allocations_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entry_allocations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entry_allocations_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          kind: string
+          name: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_entries: {
         Row: {
           amount_in: number | null
@@ -555,13 +681,18 @@ export type Database = {
           amount_signed: number | null
           bank_account_id: string | null
           business_unit: string | null
+          category_id: string | null
+          client_id: string | null
+          competence_date: string | null
           competence_month: string | null
           conciliation_group_id: string | null
           conciliation_status: Database["public"]["Enums"]["conciliation_status"]
+          cost_center_id: string | null
           counterparty_name: string | null
           created_at: string
           currency: string
           document_reference: string | null
+          due_date: string | null
           entry_date: string
           entry_type: Database["public"]["Enums"]["entry_type"] | null
           exchange_rate: number
@@ -569,12 +700,23 @@ export type Database = {
           fx_variation: number | null
           id: string
           import_batch_id: string | null
+          installment_number: number | null
+          installment_total: number | null
           movement_account: string | null
           movement_description: string | null
+          notes: string | null
+          open_amount: number | null
           original_amount: number | null
+          paid_amount: number | null
+          paid_at: string | null
+          payment_account_id: string | null
+          payment_method_id: string | null
+          payment_status: string | null
+          reference_code: string | null
           source_file_name: string | null
           source_sheet_name: string | null
           source_type: Database["public"]["Enums"]["source_type"]
+          supplier_id: string | null
           total_brl: number | null
           transfer_pair_id: string | null
           updated_at: string
@@ -586,13 +728,18 @@ export type Database = {
           amount_signed?: number | null
           bank_account_id?: string | null
           business_unit?: string | null
+          category_id?: string | null
+          client_id?: string | null
+          competence_date?: string | null
           competence_month?: string | null
           conciliation_group_id?: string | null
           conciliation_status?: Database["public"]["Enums"]["conciliation_status"]
+          cost_center_id?: string | null
           counterparty_name?: string | null
           created_at?: string
           currency?: string
           document_reference?: string | null
+          due_date?: string | null
           entry_date: string
           entry_type?: Database["public"]["Enums"]["entry_type"] | null
           exchange_rate?: number
@@ -600,12 +747,23 @@ export type Database = {
           fx_variation?: number | null
           id?: string
           import_batch_id?: string | null
+          installment_number?: number | null
+          installment_total?: number | null
           movement_account?: string | null
           movement_description?: string | null
+          notes?: string | null
+          open_amount?: number | null
           original_amount?: number | null
+          paid_amount?: number | null
+          paid_at?: string | null
+          payment_account_id?: string | null
+          payment_method_id?: string | null
+          payment_status?: string | null
+          reference_code?: string | null
           source_file_name?: string | null
           source_sheet_name?: string | null
           source_type?: Database["public"]["Enums"]["source_type"]
+          supplier_id?: string | null
           total_brl?: number | null
           transfer_pair_id?: string | null
           updated_at?: string
@@ -617,13 +775,18 @@ export type Database = {
           amount_signed?: number | null
           bank_account_id?: string | null
           business_unit?: string | null
+          category_id?: string | null
+          client_id?: string | null
+          competence_date?: string | null
           competence_month?: string | null
           conciliation_group_id?: string | null
           conciliation_status?: Database["public"]["Enums"]["conciliation_status"]
+          cost_center_id?: string | null
           counterparty_name?: string | null
           created_at?: string
           currency?: string
           document_reference?: string | null
+          due_date?: string | null
           entry_date?: string
           entry_type?: Database["public"]["Enums"]["entry_type"] | null
           exchange_rate?: number
@@ -631,12 +794,23 @@ export type Database = {
           fx_variation?: number | null
           id?: string
           import_batch_id?: string | null
+          installment_number?: number | null
+          installment_total?: number | null
           movement_account?: string | null
           movement_description?: string | null
+          notes?: string | null
+          open_amount?: number | null
           original_amount?: number | null
+          paid_amount?: number | null
+          paid_at?: string | null
+          payment_account_id?: string | null
+          payment_method_id?: string | null
+          payment_status?: string | null
+          reference_code?: string | null
           source_file_name?: string | null
           source_sheet_name?: string | null
           source_type?: Database["public"]["Enums"]["source_type"]
+          supplier_id?: string | null
           total_brl?: number | null
           transfer_pair_id?: string | null
           updated_at?: string
@@ -651,10 +825,52 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "financial_entries_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "financial_entries_import_batch_id_fkey"
             columns: ["import_batch_id"]
             isOneToOne: false
             referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_payment_account_id_fkey"
+            columns: ["payment_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -695,6 +911,33 @@ export type Database = {
           source_kind?: string
           status?: Database["public"]["Enums"]["import_status"]
           success_count?: number | null
+        }
+        Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          kind: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          kind?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          kind?: string | null
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -796,6 +1039,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      suppliers: {
+        Row: {
+          active: boolean
+          created_at: string
+          document: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       suppressed_emails: {
         Row: {
