@@ -290,7 +290,7 @@ export function NovoLancamentoDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Lançamento Financeiro</DialogTitle>
+          <DialogTitle>{title ?? "Novo Lançamento Financeiro"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
