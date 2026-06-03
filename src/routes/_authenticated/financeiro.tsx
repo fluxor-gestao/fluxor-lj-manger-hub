@@ -203,18 +203,27 @@ function Financeiro() {
       });
       if (error) throw error;
       return data as {
+        previstoIn: number; previstoOut: number;
+        recebido: number; pago: number;
+        abertoIn: number; abertoOut: number;
+        saldoBanco: number;
+        pendConcCount: number; divConcCount: number;
         saldoInicial: number; totalIn: number; totalOut: number;
         transfers: number; saldoFinal: number; disponivel: number;
-        previstoIn: number; entries_count: number;
+        entries_count: number;
       };
     },
     placeholderData: keepPreviousData,
   });
 
   const metrics = summaryQuery.data ?? {
+    previstoIn: 0, previstoOut: 0, recebido: 0, pago: 0,
+    abertoIn: 0, abertoOut: 0, saldoBanco: 0,
+    pendConcCount: 0, divConcCount: 0,
     saldoInicial: 0, totalIn: 0, totalOut: 0, transfers: 0,
-    saldoFinal: 0, disponivel: 0, previstoIn: 0, entries_count: 0,
+    saldoFinal: 0, disponivel: 0, entries_count: 0,
   };
+
 
   // ---------- Analítico (RPC server-side) ----------
   const analiticoQuery = useQuery({
@@ -355,15 +364,18 @@ function Financeiro() {
         </div>
       </div>
 
-      {/* Cards superiores — 6 indicadores */}
-      <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
-        <SummaryCard icon={<Wallet className="h-5 w-5 text-muted-foreground" />} label="Saldo Inicial" value={fmt(metrics.saldoInicial)} />
-        <SummaryCard icon={<ArrowDownCircle className="h-5 w-5 text-success" />} label="Total Receitas" value={fmt(metrics.totalIn)} />
-        <SummaryCard icon={<ArrowUpCircle className="h-5 w-5 text-destructive" />} label="Total Despesas" value={fmt(metrics.totalOut)} />
-        <SummaryCard icon={<ArrowLeftRight className="h-5 w-5 text-primary" />} label="Transferências" value={fmt(metrics.transfers)} />
-        <SummaryCard icon={<TrendingUp className="h-5 w-5 text-primary" />} label="Saldo Final" value={fmt(metrics.saldoFinal)} highlight />
-        <SummaryCard icon={<CheckCircle2 className="h-5 w-5 text-success" />} label="Disponível Atual" value={fmt(metrics.disponivel)} />
+      {/* Cards superiores — 8 indicadores */}
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <SummaryCard icon={<ArrowDownCircle className="h-5 w-5 text-success" />} label="Previsto a receber" value={fmt(metrics.previstoIn)} />
+        <SummaryCard icon={<ArrowUpCircle className="h-5 w-5 text-destructive" />} label="Previsto a pagar" value={fmt(metrics.previstoOut)} />
+        <SummaryCard icon={<CheckCircle2 className="h-5 w-5 text-success" />} label="Recebido (realizado)" value={fmt(metrics.recebido)} />
+        <SummaryCard icon={<CheckCircle2 className="h-5 w-5 text-destructive" />} label="Pago (realizado)" value={fmt(metrics.pago)} />
+        <SummaryCard icon={<CircleDashed className="h-5 w-5 text-warning" />} label="Saldo aberto a receber" value={fmt(metrics.abertoIn)} />
+        <SummaryCard icon={<CircleDashed className="h-5 w-5 text-warning" />} label="Saldo aberto a pagar" value={fmt(metrics.abertoOut)} />
+        <SummaryCard icon={<Wallet className="h-5 w-5 text-primary" />} label="Saldo bancário conciliado" value={fmt(metrics.saldoBanco)} highlight />
+        <SummaryCard icon={<ArrowLeftRight className="h-5 w-5 text-primary" />} label="Pendências de conciliação" value={`${metrics.pendConcCount}${metrics.divConcCount ? ` · ${metrics.divConcCount} div.` : ""}`} />
       </div>
+
 
       {/* Ticker de cotações */}
       <FxTicker />
