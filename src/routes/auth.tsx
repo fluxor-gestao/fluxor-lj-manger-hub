@@ -17,7 +17,6 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -27,19 +26,29 @@ function AuthPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error(error.message);
+        setLoading(false);
+        return;
+      }
+      if (data.session) {
+        // Redireciona imperativamente para garantir entrada no app
+        window.location.assign("/hub");
+        return;
+      }
+      toast.error("Não foi possível iniciar a sessão. Tente novamente.");
       setLoading(false);
-      return;
+    } catch (err: any) {
+      console.error("Login error", err);
+      toast.error(err?.message ?? "Erro ao entrar");
+      setLoading(false);
     }
-    // Não navegar imperativamente — o useEffect acima cuida do redirect
-    // quando o estado `user` for atualizado pelo onAuthStateChange.
-    setRedirecting(true);
   };
 
-  if (redirecting) return <LoadingScreen message="Abrindo sistema..." />;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
