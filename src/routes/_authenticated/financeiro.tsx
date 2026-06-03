@@ -260,37 +260,7 @@ function Financeiro() {
     return `${b.bank_name}${b.account_number ? ` · ${b.account_number}` : ""}`;
   };
 
-  // ---------- Novo lançamento ----------
-  const createEntry = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("financial_entries").insert({
-        entry_date: form.entry_date,
-        competence_month: form.competence_month || null,
-        business_unit: form.business_unit || null,
-        movement_account: form.movement_account || null,
-        movement_description: form.movement_description,
-        counterparty_name: form.counterparty_name || null,
-        amount_in: Number(form.amount_in) || 0,
-        amount_out: Number(form.amount_out) || 0,
-        entry_type: form.entry_type as any,
-        bank_account_id: form.bank_account_id || null,
-        source_type: "manual" as const,
-        user_id: user?.id,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Lançamento criado!");
-      queryClient.invalidateQueries({ queryKey: ["financial-entries"] });
-      setDialogOpen(false);
-      setForm({
-        entry_date: "", competence_month: "", business_unit: "", movement_account: "",
-        movement_description: "", counterparty_name: "", amount_in: "", amount_out: "",
-        entry_type: "receita", bank_account_id: "",
-      });
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
+  // Novo lançamento — agora via NovoLancamentoDialog
 
   const exportXLSX = () => {
     const headers = [
