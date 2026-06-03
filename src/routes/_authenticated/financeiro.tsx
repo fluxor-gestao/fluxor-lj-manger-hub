@@ -339,96 +339,15 @@ function Financeiro() {
             <Button variant="outline" onClick={exportXLSX}>
               <Download className="h-4 w-4 mr-2" /> Exportar XLSX
             </Button>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" /> Novo Lançamento
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Novo Lançamento</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-3">
-                  <Input
-                    type="date"
-                    value={form.entry_date}
-                    onChange={(e) => setForm({ ...form, entry_date: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Competência (ex: 2025-03)"
-                    value={form.competence_month}
-                    onChange={(e) => setForm({ ...form, competence_month: e.target.value })}
-                  />
-                  <Select
-                    value={form.entry_type}
-                    onValueChange={(v) => setForm({ ...form, entry_type: v })}
-                  >
-                    <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="receita">Receita</SelectItem>
-                      <SelectItem value="despesa">Despesa</SelectItem>
-                      <SelectItem value="transferencia">Transferência interna</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={form.bank_account_id || "__none__"}
-                    onValueChange={(v) => setForm({ ...form, bank_account_id: v === "__none__" ? "" : v })}
-                  >
-                    <SelectTrigger><SelectValue placeholder="Banco / Conta" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">Sem banco (previsto)</SelectItem>
-                      {bankAccounts.map((b) => (
-                        <SelectItem key={b.id} value={b.id}>
-                          {b.bank_name}{b.account_number ? ` · ${b.account_number}` : ""}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    placeholder="Negócio"
-                    value={form.business_unit}
-                    onChange={(e) => setForm({ ...form, business_unit: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Conta Movimentação"
-                    value={form.movement_account}
-                    onChange={(e) => setForm({ ...form, movement_account: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Descrição"
-                    value={form.movement_description}
-                    onChange={(e) => setForm({ ...form, movement_description: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Fornecedor/Cliente"
-                    value={form.counterparty_name}
-                    onChange={(e) => setForm({ ...form, counterparty_name: e.target.value })}
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      type="number"
-                      placeholder="Entrada (R$)"
-                      value={form.amount_in}
-                      onChange={(e) => setForm({ ...form, amount_in: e.target.value })}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Saída (R$)"
-                      value={form.amount_out}
-                      onChange={(e) => setForm({ ...form, amount_out: e.target.value })}
-                    />
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => createEntry.mutate()}
-                    disabled={!form.entry_date}
-                  >
-                    Salvar
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" /> Novo Lançamento
+            </Button>
+            <NovoLancamentoDialog
+              open={dialogOpen}
+              onOpenChange={setDialogOpen}
+              bankAccounts={bankAccounts}
+              onCreated={() => queryClient.invalidateQueries({ queryKey: ["financial-entries"] })}
+            />
           </div>
         </div>
       </div>
