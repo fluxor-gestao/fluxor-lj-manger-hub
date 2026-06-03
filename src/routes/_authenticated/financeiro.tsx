@@ -101,9 +101,10 @@ function Financeiro() {
   const [originFilter, setOriginFilter] = useState<string>("all");
   const [realizedFilter, setRealizedFilter] = useState<string>("all");
 
-  const [tab, setTab] = useState<"consolidado" | "previsoes" | "realizados" | "fluxo" | "analitico">(
+  const [tab, setTab] = useState<"consolidado" | "receber" | "pagar" | "realizados" | "fluxo" | "analitico">(
     "consolidado",
   );
+
 
   const [page, setPage] = useState(0);
 
