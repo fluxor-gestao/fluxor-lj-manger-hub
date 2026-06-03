@@ -113,11 +113,6 @@ function Financeiro() {
 
   // ---------- Dialog Novo Lançamento ----------
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({
-    entry_date: "", competence_month: "", business_unit: "", movement_account: "",
-    movement_description: "", counterparty_name: "", amount_in: "", amount_out: "",
-    entry_type: "receita", bank_account_id: "",
-  });
 
   // ---------- Parâmetros server-side ----------
   // Combina o filtro "Previsto/Realizado" da tab + dropdown
