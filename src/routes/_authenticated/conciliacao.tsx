@@ -1018,48 +1018,21 @@ function Conciliacao() {
         </DialogContent>
       </Dialog>
 
-      {/* Create new financial entry dialog */}
-      <Dialog open={!!createTarget} onOpenChange={(o) => !o && setCreateTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Novo lançamento financeiro</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <Label>Data</Label>
-              <Input type="date" value={createForm.entry_date} onChange={(e) => setCreateForm((f) => ({ ...f, entry_date: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Descrição</Label>
-              <Input value={createForm.movement_description} onChange={(e) => setCreateForm((f) => ({ ...f, movement_description: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Fornecedor / Cliente</Label>
-              <Input value={createForm.counterparty_name} onChange={(e) => setCreateForm((f) => ({ ...f, counterparty_name: e.target.value }))} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Negócio (BU)</Label>
-                <Input value={createForm.business_unit} onChange={(e) => setCreateForm((f) => ({ ...f, business_unit: e.target.value }))} />
-              </div>
-              <div className="space-y-2">
-                <Label>Conta movimento</Label>
-                <Input value={createForm.movement_account} onChange={(e) => setCreateForm((f) => ({ ...f, movement_account: e.target.value }))} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Valor</Label>
-              <CurrencyInputBRL value={createForm.amount} onChange={(v) => setCreateForm((f) => ({ ...f, amount: v }))} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateTarget(null)}>Cancelar</Button>
-            <Button onClick={() => createAndPair.mutate()} disabled={createAndPair.isPending}>
-              Criar e conciliar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Create new financial entry — formulário completo + conciliação automática */}
+      <NovoLancamentoDialog
+        open={!!createTarget}
+        onOpenChange={(o) => {
+          if (!o) {
+            setCreateTarget(null);
+            setCreatePrefill(undefined);
+          }
+        }}
+        bankAccounts={bankAccounts as any}
+        prefill={createPrefill}
+        title="Novo lançamento financeiro (conciliação)"
+        submitLabel="Salvar e conciliar"
+        onCreated={handleCreatedAndPair}
+      />
     </div>
   );
 }
