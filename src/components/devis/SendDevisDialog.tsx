@@ -44,7 +44,10 @@ interface Props {
 export default function SendDevisDialog({ open, onOpenChange, devis, client }: Props) {
   const queryClient = useQueryClient();
   const language = useMemo<Lang>(() => detectLanguage(devis?.proposal_structure), [devis?.proposal_structure]);
-  const acceptUrl = `${window.location.origin}/proposta/aceite/${devis?.accept_token}`;
+  const publicBase =
+    (import.meta.env.VITE_PUBLIC_SITE_URL as string | undefined) ||
+    "https://ljmanager.fluxorbi.com";
+  const acceptUrl = `${publicBase}/proposta/aceite/${devis?.accept_token}`;
   const devisNumber = devis?.devis_number || devis?.id?.slice(0, 8) || "";
 
   const [to, setTo] = useState("");
