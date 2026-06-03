@@ -578,36 +578,27 @@ function Conciliacao() {
     },
   });
 
-  // Create new financial entry and immediately pair
-  const createAndPair = useMutation({
-    mutationFn: async () => {
-      if (!createTarget) throw new Error("Sem alvo");
-      const isEntrada = createTarget.direction === "entrada";
-      const amt = Number(createForm.amount);
+  // After NovoLancamentoDialog creates the entry, fetch it and pair with the bank statement
+  const handleCreatedAndPair = useCallback(async (firstEntryId?: string) => {
+    if (!firstEntryId || !createTarget) {
+      setCreateTarget(null);
+      return;
+    }
+    try {
       const { data: fe, error } = await supabase
         .from("financial_entries")
-        .insert({
-          entry_date: createForm.entry_date,
-          business_unit: createForm.business_unit || null,
-          movement_account: createForm.movement_account || null,
-          movement_description: createForm.movement_description || null,
-          counterparty_name: createForm.counterparty_name || null,
-          amount_in: isEntrada ? amt : 0,
-          amount_out: isEntrada ? 0 : amt,
-          entry_type: (isEntrada ? "receita" : "despesa") as any,
-          source_type: "manual" as const,
-          user_id: user?.id,
-        })
-        .select()
+        .select("*")
+        .eq("id", firstEntryId)
         .single();
       if (error) throw error;
       await conciliatePair.mutateAsync({ stmt: createTarget, fe });
-    },
-    onSuccess: () => {
+    } catch (e: any) {
+      toast.error(`Erro ao conciliar: ${e.message ?? e}`);
+    } finally {
       setCreateTarget(null);
-    },
-    onError: (e: any) => toast.error(`Erro: ${e.message ?? e}`),
-  });
+      setCreatePrefill(undefined);
+    }
+  }, [createTarget]);
 
   const conciliadoCount = statements.filter((s) => s.conciliation_status === "conciliado").length;
   const pendenteCount = statements.filter((s) => s.conciliation_status === "pendente").length;
