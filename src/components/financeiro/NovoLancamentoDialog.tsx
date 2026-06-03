@@ -631,7 +631,7 @@ export function NovoLancamentoDialog({
               onClick={() => createMutation.mutate()}
               disabled={createMutation.isPending}
             >
-              {createMutation.isPending ? "Salvando…" : "Salvar lançamento"}
+              {createMutation.isPending ? "Salvando…" : (submitLabel ?? "Salvar lançamento")}
             </Button>
           </div>
         </div>
