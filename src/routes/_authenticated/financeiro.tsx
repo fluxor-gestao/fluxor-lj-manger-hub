@@ -443,7 +443,8 @@ function Financeiro() {
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="w-full">
         <TabsList>
           <TabsTrigger value="consolidado">Consolidado</TabsTrigger>
-          <TabsTrigger value="previsoes">Previsões</TabsTrigger>
+          <TabsTrigger value="receber">Contas a Receber</TabsTrigger>
+          <TabsTrigger value="pagar">Contas a Pagar</TabsTrigger>
           <TabsTrigger value="realizados">Realizados</TabsTrigger>
           <TabsTrigger value="fluxo">Fluxo Bancário</TabsTrigger>
           <TabsTrigger value="analitico">Receitas × Despesas</TabsTrigger>
@@ -465,22 +466,13 @@ function Financeiro() {
             disabled={entriesQuery.isFetching}
           />
         </TabsContent>
-        <TabsContent value="previsoes" className="mt-4 space-y-2">
-          <EntriesTable
-            rows={rows}
-            bankLabel={bankLabel}
-            isLoading={entriesQuery.isLoading}
-            isError={entriesQuery.isError}
-            onRetry={() => entriesQuery.refetch()}
-          />
-          <Pagination
-            page={page}
-            pageSize={PAGE_SIZE}
-            total={total}
-            onPageChange={setPage}
-            disabled={entriesQuery.isFetching}
-          />
+        <TabsContent value="receber" className="mt-4 space-y-2">
+          <ContasTable kind="receber" />
         </TabsContent>
+        <TabsContent value="pagar" className="mt-4 space-y-2">
+          <ContasTable kind="pagar" />
+        </TabsContent>
+
         <TabsContent value="realizados" className="mt-4 space-y-2">
           <EntriesTable
             rows={rows}
