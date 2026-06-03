@@ -203,18 +203,27 @@ function Financeiro() {
       });
       if (error) throw error;
       return data as {
+        previstoIn: number; previstoOut: number;
+        recebido: number; pago: number;
+        abertoIn: number; abertoOut: number;
+        saldoBanco: number;
+        pendConcCount: number; divConcCount: number;
         saldoInicial: number; totalIn: number; totalOut: number;
         transfers: number; saldoFinal: number; disponivel: number;
-        previstoIn: number; entries_count: number;
+        entries_count: number;
       };
     },
     placeholderData: keepPreviousData,
   });
 
   const metrics = summaryQuery.data ?? {
+    previstoIn: 0, previstoOut: 0, recebido: 0, pago: 0,
+    abertoIn: 0, abertoOut: 0, saldoBanco: 0,
+    pendConcCount: 0, divConcCount: 0,
     saldoInicial: 0, totalIn: 0, totalOut: 0, transfers: 0,
-    saldoFinal: 0, disponivel: 0, previstoIn: 0, entries_count: 0,
+    saldoFinal: 0, disponivel: 0, entries_count: 0,
   };
+
 
   // ---------- Analítico (RPC server-side) ----------
   const analiticoQuery = useQuery({
