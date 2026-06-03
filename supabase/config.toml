@@ -1,4 +1,4 @@
-project_id = "phmqxmwaoonbibgvbumq"
+project_id = "uxwdzcjhrhlugrjgpkcr"
 
 [functions.generate-devis-proposal]
 verify_jwt = true
