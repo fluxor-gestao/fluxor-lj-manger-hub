@@ -358,28 +358,28 @@ function Conciliacao() {
   const [searchTarget, setSearchTarget] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [createTarget, setCreateTarget] = useState<any>(null);
-  const [createForm, setCreateForm] = useState({
-    entry_date: "",
-    business_unit: "",
-    movement_account: "",
-    movement_description: "",
-    counterparty_name: "",
-    amount: "0.00",
-  });
+  const [createPrefill, setCreatePrefill] = useState<NovoLancamentoPrefill | undefined>(undefined);
 
   const openSearch = (stmt: any) => {
     setSearchTarget(stmt);
     setSearchTerm("");
   };
   const openCreate = (stmt: any) => {
+    const isEntrada =
+      stmt.direction === "entrada" || (stmt.direction == null && Number(stmt.amount) >= 0);
+    const stmtDate: string = stmt.transaction_date ?? "";
+    const amt = Math.abs(Number(stmt.amount ?? 0)).toFixed(2);
     setCreateTarget(stmt);
-    setCreateForm({
-      entry_date: stmt.transaction_date ?? "",
-      business_unit: "",
-      movement_account: "",
-      movement_description: stmt.description ?? "",
-      counterparty_name: "",
-      amount: Number(stmt.amount ?? 0).toFixed(2),
+    setCreatePrefill({
+      entry_type: isEntrada ? "receita" : "despesa",
+      description: stmt.description ?? "",
+      amount: amt,
+      competence_date: stmtDate,
+      due_date: stmtDate,
+      payment_account_id: stmt.bank_account_id ?? "",
+      is_paid: true,
+      paid_at: stmtDate,
+      paid_amount: amt,
     });
   };
 
