@@ -119,7 +119,7 @@ function Financeiro() {
   // ---------- Parâmetros server-side ----------
   // Combina o filtro "Previsto/Realizado" da tab + dropdown
   const realizedParam: string | null = useMemo(() => {
-    if (tab === "previsoes") return "previsto";
+    if (tab === "receber" || tab === "pagar") return null;
     if (tab === "realizados") return "realizado";
     if (realizedFilter === "previsto") return "previsto";
     if (realizedFilter === "realizado") return "realizado";
