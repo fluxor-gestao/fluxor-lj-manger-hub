@@ -8,7 +8,6 @@ import {
   Shield,
   HelpCircle,
   LogOut,
-  GitCompare,
 } from "lucide-react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
