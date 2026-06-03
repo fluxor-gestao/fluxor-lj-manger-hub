@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NovoLancamentoDialog } from "@/components/financeiro/NovoLancamentoDialog";
+import { ContasTable } from "@/components/financeiro/ContasTable";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
