@@ -500,7 +500,7 @@ function Admin() {
                               variant="ghost"
                               onClick={() => {
                                 setEditTarget({ user_id: p.user_id, currentRole: role });
-                                setNewRole(role === "admin" || role === "gerencial" ? role : "gerencial");
+                                setNewRole(["admin","comercial","financeiro","operacao","gerencial"].includes(role) ? role : "gerencial");
                                 setEditOpen(true);
                               }}
                             >
