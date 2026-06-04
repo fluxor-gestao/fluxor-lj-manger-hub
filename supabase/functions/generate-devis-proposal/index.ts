@@ -1,197 +1,165 @@
-// Gera estrutura de proposta (Devis) a partir de um relatório de reunião usando Lovable AI
+// Gera proposta jurídica (Devis) — IA gera APENAS o Escopo dos Serviços (Seção III).
+// As demais 10 cláusulas (I, II, IV–XI) vêm de um template fixo em PT.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Lang = "pt" | "fr" | "en" | "es";
-
-// Cabeçalhos e labels nativos por idioma — SEM bilíngue, SEM barras "/"
-const STRUCTURE: Record<Lang, {
-  langName: string;
-  title: string;
-  sec1: string; provider: string; client: string;
-  sec2: string;
-  scope: string;
-  lblDesc: string; lblDeliv: string; lblParties: string; lblMetrics: string; lblDuration: string;
-  sec3: string;
-  lblTotal: string; lblDown: string; lblBalance: string;
-  sec4: string;
-  sec5: string;
-  sec6: string;
-  sec7: string;
-  forbidden: string[];
-}> = {
-  pt: {
-    langName: "português do Brasil",
-    title: "Título da proposta",
-    sec1: "I. Identificação das Partes",
-    provider: "CONTRATADO",
-    client: "CONTRATANTE",
-    sec2: "II. Contexto e Objeto do Contrato",
-    scope: "Escopo de Serviços",
-    lblDesc: "Descrição", lblDeliv: "Entregáveis", lblParties: "Partes envolvidas",
-    lblMetrics: "Indicadores de sucesso", lblDuration: "Prazo",
-    sec3: "III. Honorários",
-    lblTotal: "Total", lblDown: "Entrada de 50%", lblBalance: "Saldo de 50%",
-    sec4: "IV. Prazo e Cronograma",
-    sec5: "V. Obrigações das Partes",
-    sec6: "VI. Confidencialidade e Propriedade Intelectual",
-    sec7: "VII. Disposições Finais",
-    forbidden: ["PRESTATAIRE", "CLIENT :", "Identification des Parties", "Contexte et Objet", "Étendue des Services", "Description :", "Livrables", "Parties prenantes", "Indicateurs de succès", "Délai", "Honoraires", "Calendrier", "Obligations des Parties", "Confidentialité", "Dispositions Finales", "attentes"],
-  },
-  fr: {
-    langName: "français",
-    title: "Titre de la proposition",
-    sec1: "I. Identification des Parties",
-    provider: "PRESTATAIRE",
-    client: "CLIENT",
-    sec2: "II. Contexte et Objet du Contrat",
-    scope: "Étendue des Services",
-    lblDesc: "Description", lblDeliv: "Livrables", lblParties: "Parties prenantes",
-    lblMetrics: "Indicateurs de succès", lblDuration: "Délai",
-    sec3: "III. Honoraires",
-    lblTotal: "Total", lblDown: "Acompte de 50%", lblBalance: "Solde de 50%",
-    sec4: "IV. Délai et Calendrier",
-    sec5: "V. Obligations des Parties",
-    sec6: "VI. Confidentialité et Propriété Intellectuelle",
-    sec7: "VII. Dispositions Finales",
-    forbidden: ["CONTRATADO", "CONTRATANTE", "Identificação das Partes", "Escopo de Serviços", "Honorários", "Cronograma", "Obrigações", "Confidencialidade", "Disposições Finais"],
-  },
-  en: {
-    langName: "English",
-    title: "Proposal Title",
-    sec1: "I. Identification of the Parties",
-    provider: "PROVIDER",
-    client: "CLIENT",
-    sec2: "II. Background and Purpose of the Agreement",
-    scope: "Scope of Services",
-    lblDesc: "Description", lblDeliv: "Deliverables", lblParties: "Stakeholders",
-    lblMetrics: "Success indicators", lblDuration: "Timeframe",
-    sec3: "III. Fees",
-    lblTotal: "Total", lblDown: "50% Down Payment", lblBalance: "50% Final Balance",
-    sec4: "IV. Timeline and Schedule",
-    sec5: "V. Obligations of the Parties",
-    sec6: "VI. Confidentiality and Intellectual Property",
-    sec7: "VII. Final Provisions",
-    forbidden: ["PRESTATAIRE", "CONTRATADO", "CONTRATANTE", "Honoraires", "Honorários", "Délai", "Livrables", "Description :", "Étendue", "attentes", "Escopo"],
-  },
-  es: {
-    langName: "español",
-    title: "Título de la propuesta",
-    sec1: "I. Identificación de las Partes",
-    provider: "PRESTADOR",
-    client: "CLIENTE",
-    sec2: "II. Contexto y Objeto del Contrato",
-    scope: "Alcance de los Servicios",
-    lblDesc: "Descripción", lblDeliv: "Entregables", lblParties: "Partes involucradas",
-    lblMetrics: "Indicadores de éxito", lblDuration: "Plazo",
-    sec3: "III. Honorarios",
-    lblTotal: "Total", lblDown: "Anticipo del 50%", lblBalance: "Saldo del 50%",
-    sec4: "IV. Plazo y Cronograma",
-    sec5: "V. Obligaciones de las Partes",
-    sec6: "VI. Confidencialidad y Propiedad Intelectual",
-    sec7: "VII. Disposiciones Finales",
-    forbidden: ["PRESTATAIRE", "CONTRATADO", "Honoraires", "Honorários", "Livrables", "Délai", "Étendue", "Escopo", "attentes"],
-  },
+const CONTRACTOR = {
+  name: "LUNDGAARD JENSEN ADVOCACIA E CONSULTORIA INTERNACIONAL",
+  document: "21.682.183/0001-42",
+  address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+  representative:
+    "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
 };
+
+const fmtBRL = (n: number) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
+
+interface ScopeItem {
+  letter: string;
+  title: string;
+  description: string;
+  deliverables?: string[];
+  stakeholders?: string[];
+  success_metrics?: string[];
+  duration?: string;
+  amount: number;
+}
+
+function renderScopeItems(items: ScopeItem[]): string {
+  return items
+    .map((it) => {
+      const head = `**${(it.letter || "").toUpperCase()}) ${it.title} — ${fmtBRL(it.amount)}**`;
+      const lines = [head];
+      if (it.description) lines.push(`*Descrição:* ${it.description}`);
+      if (it.deliverables?.length) lines.push(`*Entregáveis:* ${it.deliverables.join("; ")}.`);
+      if (it.stakeholders?.length) lines.push(`*Partes envolvidas:* ${it.stakeholders.join("; ")}.`);
+      if (it.success_metrics?.length)
+        lines.push(`*Indicadores de sucesso:* ${it.success_metrics.join("; ")}.`);
+      if (it.duration) lines.push(`*Prazo:* ${it.duration}.`);
+      return lines.join("\n");
+    })
+    .join("\n\n");
+}
+
+function buildProposalMarkdown(args: {
+  title: string;
+  client_name?: string;
+  client_document?: string;
+  client_address?: string;
+  scope_description: string;
+  scope_items: ScopeItem[];
+  total_amount: number;
+  down_payment_amount: number;
+  deadline_date?: string | null;
+}): string {
+  const {
+    title,
+    client_name,
+    client_document,
+    client_address,
+    scope_description,
+    scope_items,
+    total_amount,
+    down_payment_amount,
+    deadline_date,
+  } = args;
+  const balance = Math.max(total_amount - down_payment_amount, 0);
+  const clientLines = [
+    `- **CONTRATANTE:** ${client_name || "{nome do cliente}"}`,
+    client_document ? `  - Documento: ${client_document}` : "",
+    client_address ? `  - Endereço: ${client_address}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return `# ${title}
+
+## I. Identificação das Partes
+- **CONTRATADO:** ${CONTRACTOR.name}, sociedade de advogados inscrita no CNPJ sob o nº ${CONTRACTOR.document}, com sede na ${CONTRACTOR.address}, neste ato representada pelo sócio ${CONTRACTOR.representative}.
+${clientLines}
+
+## II. Objeto do Contrato
+O presente contrato tem por objeto a prestação, pelo CONTRATADO ao CONTRATANTE, dos serviços jurídicos e de consultoria detalhados na Seção III abaixo. ${scope_description}
+
+## III. Escopo dos Serviços
+${renderScopeItems(scope_items)}
+
+## IV. Honorários
+- **Valor Total:** ${fmtBRL(total_amount)}.
+- **Entrada (50%) na assinatura:** ${fmtBRL(down_payment_amount)}.
+- **Saldo (50%) na conclusão dos serviços:** ${fmtBRL(balance)}.
+- Em caso de execução superior a 12 (doze) meses, os valores remanescentes serão reajustados pela variação acumulada do IPCA/IBGE no período.
+
+## V. Forma de Pagamento
+Os pagamentos serão realizados via PIX ou transferência bancária para conta de titularidade do CONTRATADO, em até 5 (cinco) dias úteis contados da emissão da respectiva cobrança. A entrada de 50% é condição para o início da execução; o saldo de 50% é devido na entrega final ou conforme cronograma específico previamente acordado entre as partes.
+
+## VI. Obrigações do Contratado
+O CONTRATADO obriga-se a: (a) executar os serviços com zelo, diligência profissional e observância da legislação aplicável e das normas da OAB; (b) manter sigilo absoluto sobre informações, documentos e dados a que tiver acesso; (c) manter o CONTRATANTE informado sobre o andamento dos trabalhos por meio de relatórios periódicos; (d) empregar profissionais qualificados para a condução do objeto; (e) entregar os produtos jurídicos contratados dentro dos prazos estabelecidos na Seção III.
+
+## VII. Obrigações do Contratante
+O CONTRATANTE obriga-se a: (a) fornecer, em tempo hábil, todos os documentos, dados e informações necessários à execução dos serviços; (b) prestar esclarecimentos e tomar decisões tempestivas sempre que solicitado; (c) efetuar os pagamentos nas datas e condições pactuadas; (d) custear despesas de terceiros eventualmente necessárias (notário, tradutor juramentado, taxas, custas judiciais, peritos), salvo quando expressamente incluídas no escopo.
+
+## VIII. Limitação de Escopo
+Os serviços contratados restringem-se ao objeto descrito na Seção III. Quaisquer atos, peças, diligências, audiências, recursos, pareceres adicionais ou demandas judiciais não expressamente previstos neste instrumento configuram serviços extraordinários, sujeitos a aditivo contratual com honorários específicos. O CONTRATADO não assume obrigação de resultado, mas de meio, comprometendo-se com a melhor técnica e diligência profissional aplicáveis.
+
+## IX. Rescisão
+O presente contrato poderá ser rescindido: (a) por comum acordo entre as partes, mediante distrato escrito; (b) por inadimplemento de qualquer obrigação contratual, após notificação com prazo de 10 (dez) dias para purgação da mora; (c) unilateralmente por qualquer das partes, mediante aviso prévio de 30 (trinta) dias. Em qualquer hipótese de rescisão, são devidos ao CONTRATADO os honorários proporcionais aos serviços efetivamente prestados até a data da rescisão, bem como o reembolso de despesas comprovadamente incorridas.
+
+## X. Foro
+Fica eleito o foro da Comarca de Fortaleza/CE para dirimir quaisquer dúvidas ou controvérsias oriundas deste contrato, com renúncia expressa a qualquer outro, por mais privilegiado que seja.${deadline_date ? `\n\n*Prazo estimado de execução: até ${deadline_date}.*` : ""}
+
+## XI. Assinaturas
+As partes assinam o presente instrumento em via eletrônica, juntamente com 2 (duas) testemunhas, declarando ter lido e concordado com todas as cláusulas e condições aqui pactuadas.
+`;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { meeting_report, client_name, total_amount, language, tier } = await req.json();
+    const {
+      meeting_report,
+      client_name,
+      client_document,
+      client_address,
+      total_amount,
+      deadline_date,
+      tier,
+    } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
     if (!meeting_report) throw new Error("meeting_report é obrigatório");
 
-    // REGRA: a geração da proposta é SEMPRE em português (PT é a fonte de verdade
-    // jurídica). A tradução para o idioma do cliente, quando estrangeiro, é feita
-    // posteriormente via translate-devis e armazenada nos campos _secondary do devis.
-    void language;
-    const lang: Lang = "pt";
-    const S = STRUCTURE[lang];
-
-    // Tier de qualidade: 'final' usa gpt-5 (refinamento de proposta enviada ao cliente),
-    // 'draft' (padrão) usa gpt-5-mini para a primeira geração.
     const model = tier === "final" ? "gpt-5" : "gpt-5-mini";
-
     const hasTotal = typeof total_amount === "number" && total_amount > 0;
 
-    const systemPrompt = `Você é um advogado sênior redator de propostas comerciais jurídicas (devis), multilíngue. Escreva uma proposta FORMAL, COMPLETA e DETALHADA, 100% em ${S.langName}, sem misturar idiomas. Não traduza nomes próprios, valores monetários, datas, números ou siglas.
+    const systemPrompt = `Você é advogado(a) sênior de Lundgaard Jensen, redator(a) de propostas comerciais jurídicas (devis) em português do Brasil.
 
-REGRA CRÍTICA DE IDIOMA:
-- TODO o conteúdo (títulos de seção, labels de campo, corpo do texto) DEVE estar exclusivamente em ${S.langName}.
-- PROIBIDO usar versões bilíngues, barras "/" separando idiomas, ou qualquer palavra/expressão dos seguintes idiomas estrangeiros: ${S.forbidden.join(", ")}.
-- Use EXATAMENTE os títulos e labels fornecidos abaixo — não invente variantes, não adicione tradução entre parênteses.
+Sua tarefa NÃO é redigir o contrato inteiro. As cláusulas padrão (I, II, IV–XI) são geradas por template fixo pelo sistema. Você é responsável APENAS por:
+1. "title" — título da proposta (1 linha, em PT, descritivo do escopo).
+2. "scope_description" — resumo executivo do objeto (2 a 4 frases densas, em PT), citando fatos concretos do relatório.
+3. "scope_items" — lista A/B/C... (3 a 6 itens) com title, description (3–6 frases), deliverables, stakeholders, success_metrics, duration (prazo da etapa) e amount (BRL, > 0).
+4. "total_amount" — soma EXATA dos amounts dos scope_items.
 
-REGRAS DE CONTEÚDO:
-- Personalize a proposta usando fatos concretos do relatório da reunião: contexto, partes envolvidas, pontos de dor, expectativas, prazos, métricas, riscos. NUNCA escreva texto genérico.
-- NUNCA use placeholders entre colchetes do tipo "[Inserir cliente]", "[XXX]". Se um dado não estiver disponível, simplesmente omita a linha.
-- Tom formal jurídico, parágrafos bem construídos (não bullets soltos no texto corrido).
+REGRAS:
+- Tom jurídico formal, parágrafos densos, sem placeholders entre colchetes, sem bilíngue, sem barras "/".
+- Personalize tudo com base no relatório da reunião. NUNCA texto genérico.
+- ${
+      hasTotal
+        ? `O valor total foi definido pelo cliente: R$ ${total_amount}. Distribua proporcionalmente entre os itens; soma DEVE ser EXATAMENTE ${total_amount}.`
+        : `Estime valores de mercado brasileiros plausíveis (BRL): due diligence imobiliária 15.000–60.000; constituição societária 8.000–25.000; licenciamento urbanístico 10.000–40.000; consultoria/negociação 5.000–20.000; pareceres 4.000–15.000; coordenação multidisciplinar 5.000–15.000.`
+    }
+- VALOR ZERO PROIBIDO em qualquer scope_items[].amount.`;
 
-ESTRUTURA OBRIGATÓRIA DO CAMPO proposal_structure (Markdown, nesta ordem, com os títulos EXATOS abaixo em ${S.langName}):
-
-# {${S.title}}
-
-## ${S.sec1}
-- **${S.provider}:** Lundgaard Jensen Advocacia e Consultoria Internacional
-- **${S.client}:** {nome do cliente e demais dados disponíveis}
-
-## ${S.sec2}
-2 a 4 parágrafos densos descrevendo: (a) o contexto da reunião e situação atual do cliente, (b) o problema/desafio identificado, (c) o objetivo geral da contratação, (d) o resultado esperado. Citar fatos específicos do relatório.
-
-### ${S.scope}
-Lista A) B) C)... (no mínimo 3, idealmente 4–6 itens). Para CADA item siga EXATAMENTE este formato (labels em ${S.langName}):
-
-**A) Título do serviço — BRL VALOR**
-*${S.lblDesc}:* 3 a 6 frases descrevendo o serviço em profundidade, com base no relatório.
-*${S.lblDeliv}:* lista curta dos entregáveis concretos (documentos, pareceres, atos).
-*${S.lblParties}:* quem participa (cliente, escritório, notário, arquiteto, etc.).
-*${S.lblMetrics}:* critérios mensuráveis de conclusão.
-*${S.lblDuration}:* prazo estimado dessa etapa.
-
-## ${S.sec3}
-- Detalhar o **${S.lblTotal}** dos serviços (deve bater EXATAMENTE com a soma dos itens A+B+C+...).
-- **${S.lblDown}** na assinatura: valor em BRL.
-- **${S.lblBalance}** na conclusão: valor em BRL.
-- Condições de pagamento, forma (PIX/transferência), prazo de pagamento das parcelas.
-- Cláusula curta de reajuste por IPCA caso a execução ultrapasse 12 meses.
-
-## ${S.sec4}
-Cronograma por fase, com marcos (kickoff, entregas intermediárias, encerramento). Datas relativas (ex.: "D+15", "D+30") quando não houver datas fixas no relatório.
-
-## ${S.sec5}
-Parágrafo curto descrevendo obrigações do prestador (diligência, confidencialidade, relatórios periódicos) e do cliente (fornecer documentos, decisões tempestivas, pagamento).
-
-## ${S.sec6}
-Parágrafo padrão jurídico (sigilo, NDA implícito, titularidade dos pareceres permanecendo do prestador com licença de uso ao cliente).
-
-## ${S.sec7}
-Foro de eleição (Fortaleza/CE, salvo indicação em contrário no relatório), rescisão por inadimplemento, vigência até a conclusão dos serviços ou 12 meses (o que ocorrer primeiro).
-
-REGRAS DE VALORES (CRÍTICAS):
-${
-  hasTotal
-    ? `- O cliente já definiu um VALOR TOTAL de R$ ${total_amount}. Distribua esse valor entre os itens de escopo proporcionalmente ao esforço de cada um. A soma dos amounts dos scope_items DEVE ser EXATAMENTE ${total_amount}. total_amount no retorno = ${total_amount}.`
-    : `- O cliente NÃO informou valor total. Você DEVE ESTIMAR valores de mercado brasileiros plausíveis para cada item de escopo (em BRL), considerando complexidade jurídica. Faixas de referência (BRL):
-  • Due diligence imobiliária completa: 15.000 a 60.000
-  • Constituição de sociedade (LTDA/SA) com aditivo: 8.000 a 25.000
-  • Acompanhamento de procedimentos urbanísticos (licenças, alvarás): 10.000 a 40.000
-  • Consultoria estratégica / negociação contratual pontual: 5.000 a 20.000
-  • Pareceres jurídicos especializados: 4.000 a 15.000
-  • Coordenação multidisciplinar (notário, arquiteto, etc.): 5.000 a 15.000
-  Ajuste para cima em casos de alta complexidade, urgência ou cliente internacional. total_amount = soma exata dos amounts dos scope_items.`
-}
-- VALOR ZERO É PROIBIDO em qualquer scope_items[].amount.
-- Todos os valores em BRL no markdown devem ser formatados como "BRL 12.345,00" (separador de milhar ".", decimal ",").`;
-
-    const userPrompt = `Relatório da reunião com o cliente${client_name ? ` "${client_name}"` : ""}:
+    const userPrompt = `Relatório da reunião${client_name ? ` com o cliente "${client_name}"` : ""}:
 
 ${meeting_report}
 
-${hasTotal ? `Valor total alvo: R$ ${total_amount}\n` : "O cliente NÃO informou valor total — estime conforme as faixas do system prompt.\n"}
-Gere a proposta jurídica completa em ${S.langName}, seguindo TODAS as seções obrigatórias (I a VII) com os títulos e labels EXATOS fornecidos. Não use bilíngue, não use barras, não misture idiomas. Personalize tudo com base no relatório acima.`;
+${hasTotal ? `Valor total alvo: R$ ${total_amount}` : "Sem valor definido — estime conforme faixas."}
+
+Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃO gere as demais seções do contrato — elas são montadas por template fixo pelo sistema.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -209,110 +177,58 @@ Gere a proposta jurídica completa em ${S.langName}, seguindo TODAS as seções 
           {
             type: "function",
             function: {
-              name: "build_proposal",
-              description: "Estrutura a proposta comercial jurídica completa",
+              name: "build_scope",
+              description: "Gera apenas o escopo da proposta (título, resumo, itens).",
               parameters: {
                 type: "object",
                 properties: {
-                  title: { type: "string", description: "Título da proposta no idioma alvo" },
+                  title: { type: "string" },
                   service_type: { type: "string" },
                   responsible_sector: { type: "string" },
-                  scope_description: {
-                    type: "string",
-                    description: "Resumo executivo do escopo (2 a 4 frases densas), no idioma alvo",
-                  },
-                  proposal_structure: {
-                    type: "string",
-                    description:
-                      "Texto Markdown COMPLETO da proposta, contendo OBRIGATORIAMENTE as 7 seções I a VII conforme instruído, 100% no idioma alvo, SEM bilíngue, SEM barras. Mínimo ~2500 caracteres.",
-                  },
+                  scope_description: { type: "string" },
                   scope_items: {
                     type: "array",
                     minItems: 3,
                     items: {
                       type: "object",
                       properties: {
-                        letter: { type: "string", description: "A, B, C, ..." },
+                        letter: { type: "string" },
                         title: { type: "string" },
-                        description: {
-                          type: "string",
-                          description: "3 a 6 frases descritivas do item",
-                        },
-                        deliverables: {
-                          type: "array",
-                          items: { type: "string" },
-                          description: "Entregáveis concretos do item",
-                        },
-                        stakeholders: {
-                          type: "array",
-                          items: { type: "string" },
-                        },
-                        success_metrics: {
-                          type: "array",
-                          items: { type: "string" },
-                        },
-                        duration: { type: "string", description: "Prazo estimado da etapa" },
-                        amount: {
-                          type: "number",
-                          description: "Valor em BRL, OBRIGATORIAMENTE > 0",
-                          exclusiveMinimum: 0,
-                        },
+                        description: { type: "string" },
+                        deliverables: { type: "array", items: { type: "string" } },
+                        stakeholders: { type: "array", items: { type: "string" } },
+                        success_metrics: { type: "array", items: { type: "string" } },
+                        duration: { type: "string" },
+                        amount: { type: "number", exclusiveMinimum: 0 },
                       },
-                      required: [
-                        "letter",
-                        "title",
-                        "description",
-                        "deliverables",
-                        "duration",
-                        "amount",
-                      ],
+                      required: ["letter", "title", "description", "duration", "amount"],
                     },
                   },
-                  milestones: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        label: { type: "string" },
-                        date: { type: "string", description: "ISO YYYY-MM-DD ou relativo (D+15)" },
-                      },
-                      required: ["label", "date"],
-                    },
-                  },
+                  total_amount: { type: "number", exclusiveMinimum: 0 },
+                  deadline_date: { type: "string" },
                   payment_terms: { type: "string" },
-                  assumptions: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Premissas e exclusões",
-                  },
-                  total_amount: {
-                    type: "number",
-                    description: "Soma EXATA dos amounts dos scope_items",
-                    exclusiveMinimum: 0,
-                  },
-                  deadline_date: { type: "string", description: "ISO date YYYY-MM-DD" },
+                  assumptions: { type: "array", items: { type: "string" } },
                 },
-                required: [
-                  "title",
-                  "scope_description",
-                  "proposal_structure",
-                  "scope_items",
-                  "total_amount",
-                  "payment_terms",
-                ],
+                required: ["title", "scope_description", "scope_items", "total_amount"],
               },
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "build_proposal" } },
+        tool_choice: { type: "function", function: { name: "build_scope" } },
       }),
     });
 
     if (response.status === 429) {
-      return new Response(JSON.stringify({ error: "Limite de requisições da OpenAI atingido. Tente novamente em instantes." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(
+        JSON.stringify({ error: "Limite de requisições da OpenAI atingido. Tente novamente em instantes." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
     if (response.status === 401) {
-      return new Response(JSON.stringify({ error: "Chave OPENAI_API_KEY inválida." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Chave OPENAI_API_KEY inválida." }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
     if (!response.ok) {
       const t = await response.text();
@@ -323,11 +239,48 @@ Gere a proposta jurídica completa em ${S.langName}, seguindo TODAS as seções 
     const result = await response.json();
     const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error("Resposta sem tool_call");
-    const proposal = JSON.parse(toolCall.function.arguments);
+    const ai = JSON.parse(toolCall.function.arguments);
 
-    return new Response(JSON.stringify({ proposal, model_used: model }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const scopeItems: ScopeItem[] = Array.isArray(ai.scope_items) ? ai.scope_items : [];
+    const computedTotal = scopeItems.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+    const finalTotal = hasTotal ? Number(total_amount) : Number(ai.total_amount) || computedTotal;
+    const downPayment = +(finalTotal * 0.5).toFixed(2);
+
+    const proposal_structure = buildProposalMarkdown({
+      title: ai.title || "Proposta de Prestação de Serviços Jurídicos",
+      client_name,
+      client_document,
+      client_address,
+      scope_description: ai.scope_description || "",
+      scope_items: scopeItems,
+      total_amount: finalTotal,
+      down_payment_amount: downPayment,
+      deadline_date: deadline_date || ai.deadline_date || null,
+    });
+
+    const proposal = {
+      title: ai.title,
+      service_type: ai.service_type,
+      responsible_sector: ai.responsible_sector,
+      scope_description: ai.scope_description,
+      scope_items: scopeItems,
+      total_amount: finalTotal,
+      deadline_date: ai.deadline_date || deadline_date || null,
+      payment_terms:
+        ai.payment_terms ||
+        "50% na assinatura via PIX/transferência; 50% na conclusão. Reajuste pelo IPCA acima de 12 meses.",
+      assumptions: ai.assumptions || [],
+      proposal_structure,
+    };
+
+    return new Response(JSON.stringify({ proposal, model_used: model }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (e) {
     console.error("generate-devis-proposal error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

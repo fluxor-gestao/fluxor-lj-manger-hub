@@ -24,6 +24,7 @@ import DevisPdfTemplate from "@/components/devis/DevisPdfTemplate";
 import SendDevisDialog from "@/components/devis/SendDevisDialog";
 import { exportDevisPdfFromContainer } from "@/lib/exportDevisPdf";
 import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
+import { getMissingClauses } from "@/lib/validateProposal";
 import { createRoot } from "react-dom/client";
 import { Send } from "lucide-react";
 
@@ -145,7 +146,10 @@ function DevisDetail() {
         body: {
           meeting_report: form.meeting_report,
           client_name: client?.name,
+          client_document: client?.document,
+          client_address: [client?.address, client?.city].filter(Boolean).join(", ") || undefined,
           total_amount: Number(form.total_amount) || undefined,
+          deadline_date: form.deadline_date ? format(form.deadline_date, "yyyy-MM-dd") : undefined,
           tier,
         },
       });
@@ -175,6 +179,11 @@ function DevisDetail() {
 
   const handleExportPdf = async () => {
     if (!devis) return;
+    const missing = getMissingClauses(devis.proposal_structure);
+    if (missing.length > 0) {
+      toast.error(`Proposta incompleta — regere a proposta. Cláusulas faltantes: ${missing.join(", ")}`);
+      return;
+    }
     const client = clientsById[devis.client_id ?? ""];
     const host = document.createElement("div");
     host.style.position = "fixed";

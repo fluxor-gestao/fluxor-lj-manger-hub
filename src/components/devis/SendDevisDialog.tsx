@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import DevisPdfTemplate from "./DevisPdfTemplate";
 import { generateDevisPdfBase64 } from "@/lib/exportDevisPdf";
 import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
+import { getMissingClauses } from "@/lib/validateProposal";
 
 type Lang = "pt" | "fr" | "en" | "es";
 
@@ -74,6 +75,11 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
     }
     if (!subject.trim() || !message.trim()) {
       toast.error("Assunto e mensagem são obrigatórios");
+      return;
+    }
+    const missing = getMissingClauses(devis?.proposal_structure);
+    if (missing.length > 0) {
+      toast.error(`Proposta incompleta — regere a proposta. Cláusulas faltantes: ${missing.join(", ")}`);
       return;
     }
 

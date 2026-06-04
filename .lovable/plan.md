@@ -1,64 +1,54 @@
-# Refinar tradução automática para PT
+# Reestruturação jurídica do gerador de propostas
 
-## Diagnóstico
+Mantém 100% do design, logo, bilíngue, numeração, assinaturas e fluxo de aceite. Altera apenas a estrutura jurídica do conteúdo gerado.
 
-Quando o devis é gerado em outro idioma (FR/EN/ES) e o usuário clica em **"Traduzir para Português"**, a função `translate-devis` é chamada. Hoje o resultado fica "técnico/literal" — frases longas, pouca fluidez, e termos jurídicos não adaptados ao português jurídico brasileiro (ex.: estrutura de bullets cruas, repetição de "do vendedor"/"de la propriété", anglicismos como "Due Diligence" sem padronização, marcadores "(página X)" presos ao original).
+## Princípio
 
-A causa está em `supabase/functions/translate-devis/index.ts`:
-- Prompt genérico ("tradutor profissional"), sem tom jurídico nem regras de adaptação.
-- Não preserva nem reescreve a estrutura de listas A/B/C, parágrafos com travessão, fases ("Fase A", "Phase A").
-- `temperature`/`reasoning_effort` não controlados → saída instável.
-- Não passa contexto do tipo de documento (proposta jurídica LJ).
+A IA passa a gerar **apenas o conteúdo da Seção III — Escopo dos Serviços** (itens A/B/C com descrição, entregáveis, prazo, valor). Todas as demais 10 cláusulas vêm de um **template fixo em PT** montado no servidor, com placeholders preenchidos a partir dos dados do devis/cliente (nome, CNPJ, endereço, totais, datas, foro).
 
-## Mudanças (escopo: somente backend de tradução + uma pequena melhoria na chamada do front)
+O resultado final é um único `proposal_structure` em Markdown contendo as 11 seções na ordem exigida — exatamente o campo já renderizado hoje no preview, no PDF, no e-mail e na página de aceite. Nada nessas superfícies precisa mudar.
 
-### 1. `supabase/functions/translate-devis/index.ts`
+## Estrutura fixa (template servidor)
 
-Refazer prompts para qualidade jurídica + manter estrutura:
+Ordem obrigatória e imutável:
 
-- **System prompt** novo, dirigido ao escritório (LJ), com regras explícitas:
-  - Tom: proposta jurídica formal brasileira (pt-BR), 3ª pessoa, voz ativa, frases curtas.
-  - Padronizar termos: "Due Diligence" → "Due Diligence (auditoria legal)" na 1ª ocorrência, depois "due diligence"; "Phase/Fase" → "Fase"; "escrow" → "escrow (depósito em garantia)" 1x; "stakeholders" → "partes interessadas"; "memorando de impacto na avaliação" preferido a calques.
-  - Preservar e traduzir marcadores estruturais: bullets `- `, letras `A)`/`a)`, fases `Fase A —`, referências `(página N)` → `(página N)`.
-  - Manter valores, datas, siglas (CNPJ, OAB, BRL, R$), nomes próprios, e-mails e telefones intactos.
-  - **Reescrever**, não traduzir palavra-a-palavra: combinar trechos redundantes, manter sentido jurídico, garantir leitura natural em pt-BR.
-  - Para listas: cada item começa com verbo no infinitivo ou substantivo claro, sem "que/de" pendurado.
-  - Saída SOMENTE JSON, mesmas chaves.
+```text
+I.   Identificação das Partes        (template + dados do cliente/contratado)
+II.  Objeto do Contrato              (template + resumo curto da IA)
+III. Escopo dos Serviços             (100% IA — itens A/B/C…)
+IV.  Honorários                      (template + total_amount / down_payment)
+V.   Forma de Pagamento              (template fixo: 50%+50%, PIX/transf., IPCA 12m)
+VI.  Obrigações do Contratado        (template fixo)
+VII. Obrigações do Contratante       (template fixo)
+VIII.Limitação de Escopo             (template fixo)
+IX.  Rescisão                        (template fixo)
+X.   Foro                            (template fixo — Fortaleza/CE)
+XI.  Assinaturas                     (marcador final; assinaturas reais no PDF)
+```
 
-- **User prompt** novo: lista as chaves esperadas, diz quais são markdown estruturado (`proposal_structure`, `scope_items`, `assumptions`) vs texto corrido (`title`, `scope_description`, `payment_terms`, `meeting_summary`, `meeting_report`, `notes`).
+## Mudanças por arquivo
 
-- **Parâmetros do modelo**:
-  - Trocar `gpt-5-mini` por `gpt-5` (já há outras chamadas usando modelos maiores no projeto; melhora qualidade jurídica). Manter fallback de erro 429/401.
-  - Adicionar `reasoning_effort: "medium"` (gpt-5 aceita; melhora coerência sem custo alto).
-  - Manter `response_format: json_object`.
+### 1. `supabase/functions/generate-devis-proposal/index.ts`
+- Reduzir o prompt para pedir à IA **só**: `title`, `scope_description` (resumo do objeto, 2–4 frases) e `scope_items[]` (A/B/C com title, description, deliverables, stakeholders, success_metrics, duration, amount). Manter regras de valores e proibições de placeholders/bilíngue.
+- Após o tool_call, **montar `proposal_structure` no servidor** concatenando o template das 11 seções em PT, injetando:
+  - Dados do contratado fixos (Lundgaard Jensen, CNPJ, endereço).
+  - `client_name` recebido do payload.
+  - Os `scope_items` renderizados na Seção III no formato Markdown atual (`**A) Título — BRL X**` + labels).
+  - `total_amount`, entrada 50%, saldo 50% na Seção IV.
+- Remover seções V–VII antigas; substituir pelas 11 novas.
+- Retornar `proposal.proposal_structure` já com as 11 seções (a IA não escreve mais essa string diretamente).
 
-- **Pós-processamento leve em JS** (defensivo, antes de devolver):
-  - Trim em cada campo string.
-  - Normalizar quebras `\r\n` → `\n` e remover múltiplas linhas em branco (`\n{3,}` → `\n\n`).
-  - Se `target_language === "pt"`, substituir resíduos comuns: ` da propriedade ` → ` do imóvel `, ` da venda ` mantém, `Phase ` → `Fase `, `Page ` → `Página `, `\\bDue Diligence\\b` mantém no título; remover " — " duplicados.
+### 2. `supabase/functions/translate-devis/index.ts`
+- Sem mudanças estruturais: continua traduzindo `proposal_structure` inteiro. Acrescentar ao glossário a tradução estável dos títulos das novas seções (Forma de Pagamento, Obrigações do Contratado/Contratante, Limitação de Escopo, Rescisão, Foro, Assinaturas) para FR/EN/ES, garantindo que a coluna secundária do PDF exiba os mesmos 11 títulos.
 
-### 2. `src/routes/_authenticated/comercial_.devis.$id.tsx`
+### 3. Validação de emissão
+- Em `src/components/devis/SendDevisDialog.tsx` (e no `handleExportPdf` em `src/routes/_authenticated/comercial_.devis.$id.tsx`): antes de enviar/exportar, validar que `proposal_structure` contém os 11 marcadores (`I.` … `XI.`). Se faltar qualquer um, bloquear com toast "Proposta incompleta — regere a proposta" e impedir o envio/exportação.
 
-- No `handleToggleTranslate`, ao invés de só `title/scope_description/proposal_structure/meeting_summary/meeting_report/notes`, **também** mandar `service_type` e `responsible_sector` para tradução consistente. (Hoje já mandam — manter.)
-- Adicionar `assumptions` e `scope_items` se existirem no devis (alguns devis têm), para que a tela inteira traduza junto.
-- Quando o usuário clicar em "Traduzir para Português" pela 2ª vez para o mesmo devis na sessão, reaproveitar `translatedFields` (já faz). **Nenhuma mudança** de UI; só payload mais completo.
+### 4. Sem mudanças
+- `DevisPdfTemplate.tsx`, `proposta.aceite.$token.tsx`, `email-templates/devis-proposal`, migrações de banco, numeração, fluxo de aceite, layout, logo, marca d'água, assinaturas.
 
-### 3. Sem mudanças em:
-- `ensureDevisBilingual.ts` / PDF / fluxo de e-mail (eles usam a mesma função; vão se beneficiar automaticamente).
-- Banco / migrations.
-- Geração inicial (`generate-devis-proposal`).
+## Resultado
 
-## Verificação
-
-1. Abrir devis gerado em FR/EN, clicar "Traduzir para Português" e validar:
-   - Fluidez do "Relatório da reunião" (corresponder ao tom da imagem 2 que o usuário considera correta).
-   - "Estrutura da proposta" mantém "Fase A — ..." e fica em PT.
-   - Termos: "due diligence", "escrow", "memorando de impacto" aparecem padronizados.
-2. Clicar novamente para alternar entre original e PT — deve ser instantâneo (cache no estado).
-3. Não regredir: devis nascido em PT continua sem o botão (sourceLang === "pt").
-
-## Detalhes técnicos resumidos
-
-- Arquivos editados: `supabase/functions/translate-devis/index.ts`, `src/routes/_authenticated/comercial_.devis.$id.tsx`.
-- Modelo: `gpt-5` com `reasoning_effort: "medium"` e `response_format: json_object` (sem `temperature`, gpt-5 ignora).
-- Sem alterações de schema, RLS, ou rotas.
+- Toda proposta gerada (nova ou regerada) terá as 11 cláusulas, na mesma ordem, com texto jurídico padronizado em PT (e traduzido para FR/EN/ES quando o cliente for estrangeiro).
+- Preview da página de aceite, PDF baixado, PDF anexado ao e-mail e a página `/proposta/aceite/:token` exibirão exatamente o mesmo `proposal_structure` — consistência garantida por construção.
+- Nenhuma proposta pode ser enviada/exportada sem todas as cláusulas (validação no front).
