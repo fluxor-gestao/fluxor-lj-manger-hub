@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import DevisPdfTemplate from "./DevisPdfTemplate";
 import { generateDevisPdfBase64 } from "@/lib/exportDevisPdf";
 import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
+import { getMissingClauses } from "@/lib/validateProposal";
 
 type Lang = "pt" | "fr" | "en" | "es";
 
