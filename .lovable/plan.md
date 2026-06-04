@@ -1,87 +1,75 @@
-# Pagamento parcial na conciliação
 
-## 1. Migration: tabela `financial_payments`
+# Alinhar proposta ao modelo Lundgaard Jensen
 
-Criar tabela para histórico imutável de baixas:
+Objetivo: a proposta gerada e o PDF enviado ao cliente devem reproduzir fielmente o modelo do DOCX em anexo — layout bilíngue em duas colunas (PT + idioma do cliente quando estrangeiro), barra azul lateral, filetes dourados, cabeçalho com paginação e número do devis, marca d'água do mapa do Brasil e página de assinaturas bilíngue.
 
-- `id uuid pk default gen_random_uuid()`
-- `financial_entry_id uuid not null references financial_entries(id) on delete restrict`
-- `bank_statement_entry_id uuid references bank_statement_entries(id) on delete set null`
-- `conciliation_match_id uuid references conciliation_matches(id) on delete set null` (rastreabilidade)
-- `amount numeric(14,2) not null check (amount > 0)`
-- `paid_at date not null default current_date`
-- `payment_method_id uuid references payment_methods(id)`
-- `bank_account_id uuid references bank_accounts(id)`
-- `notes text`
-- `created_by uuid` (auth.uid)
-- `created_at timestamptz default now()`
+## 1. Conteúdo — geração inicial (momento 1)
 
-Índices: `(financial_entry_id)`, `(bank_statement_entry_id)`, `(paid_at)`.
+Regra: **PT é sempre o conteúdo-base.** Se o cliente for estrangeiro (`clients.language` ≠ `pt`), gera-se também uma versão no idioma do cliente para a 2ª coluna.
 
-GRANTs: `SELECT, INSERT, UPDATE, DELETE` para `authenticated`; `ALL` para `service_role`. RLS habilitada com policy alinhada ao padrão atual (admin + financeiro via `has_role`, igual a `financial_entries`).
+- `supabase/functions/generate-devis-proposal/index.ts`
+  - Forçar `lang = "pt"` na geração principal (PT continua sendo a fonte de verdade jurídica, independente do parâmetro recebido).
+  - Manter toda a estrutura atual de seções I–VII, scope_items, milestones, total_amount, etc.
+- Pipeline de criação do devis (em `src/routes/_authenticated/comercial_.devis.$id.tsx` e onde a geração é disparada):
+  1. Chamar `generate-devis-proposal` (sempre PT).
+  2. Se `client.language` ∈ {`fr`,`en`,`es`}, chamar `translate-devis` para os campos textuais: `title`, `scope_description`, `proposal_structure`, e para cada item de `scope_items` (`title`, `description`, `deliverables[]`, `stakeholders[]`, `success_metrics[]`, `duration`), além de `payment_terms` e `assumptions[]`.
+  3. Persistir o resultado traduzido em colunas novas (ver migração).
 
-Nada é apagado: sem trigger de delete, sem cascade destrutivo.
+### Migração de banco
+Adicionar à tabela `devis`:
+- `proposal_structure_secondary text`
+- `scope_description_secondary text`
+- `title_secondary text`
+- `scope_items_secondary jsonb` (mesmo shape de `scope_items`)
+- `payment_terms_secondary text`
+- `assumptions_secondary jsonb`
+- `secondary_language text` (`fr` | `en` | `es` | null)
 
-## 2. Lógica nova em `conciliatePair` (`src/routes/_authenticated/conciliacao.tsx`)
+Sem mudança de RLS (herdam as policies existentes de `devis`).
 
-Substitui o `feUpdate` simples (apenas `conciliation_status`) por fluxo baseado em `open_amount`:
+## 2. PDF — proposta enviada/recebida (momento 2)
 
-```text
-stmtAmt   = |stmt.amount|
-openAmt   = fe.open_amount ?? (fe.amount_in|amount_out) - (fe.paid_amount ?? 0)
-paidPrev  = fe.paid_amount ?? 0
+Reescrever `src/components/devis/DevisPdfTemplate.tsx` para reproduzir o modelo:
 
-if stmtAmt == openAmt (tol 0.01):
-    payment_status = 'pago'
-    paid_amount    = paidPrev + stmtAmt   (= valor total da parcela)
-    open_amount    = 0
-elif stmtAmt < openAmt:
-    payment_status = 'parcial'
-    paid_amount    = paidPrev + stmtAmt
-    open_amount    = openAmt - stmtAmt
-else (stmtAmt > openAmt):
-    confirm("Valor do banco (X) é maior que o saldo em aberto (Y). Registrar como pago e gerar sobra?")
-    se confirmar:
-        payment_status = 'pago'
-        paid_amount    = paidPrev + openAmt   (limita ao saldo)
-        open_amount    = 0
-        // sobra fica registrada em financial_payments.notes = "excedente R$ ..."
-    senão: throw
-```
+**Chrome (todas as páginas):**
+- Barra vertical azul (#1e40af) de ~14px na margem esquerda, indo de topo a base.
+- Logo Lundgaard Jensen no canto superior esquerdo (usar `src/assets/logo-banner.png` já existente).
+- "Página X de Y" no canto superior direito.
+- Filete dourado horizontal (#c8a96a) abaixo do bloco do logo.
+- Linha com `lundgaardjensen.com  |  @lundgaard.jensen` à esquerda e número do devis (ex: `DE202605060`) à direita.
+- Outro filete dourado.
+- Marca d'água: mapa do Brasil em cinza claro, centralizado/lado direito, ~70% da altura útil, atrás do conteúdo (z-index baixo, opacidade ~0.15).
+- Rodapé: filete dourado + `Rua João Cordeiro, 831 – Praia de Iracema  |  +55 (85) 9 94066042  |  +55 (85) 9 30379931`.
 
-Após update do `financial_entries`, INSERT em `financial_payments` com `amount = min(stmtAmt, openAmt)` (ou `stmtAmt` quando igual), `bank_statement_entry_id = stmt.id`, `bank_account_id = stmt.bank_account_id`, `payment_method_id = fe.payment_method_id`, `paid_at = stmt.transaction_date`, `created_by = user.id`, `conciliation_match_id = matchId`.
+**Conteúdo (páginas 1..N-1):**
+- Se `secondary_language` existir → duas colunas equivalentes (PT esquerda / 2º idioma direita), texto justificado, gap central. Cada seção (I–VII) aparece sincronizada lado a lado.
+- Se não existir → coluna única em PT ocupando toda a largura útil.
+- Títulos de seção em **negrito MAIÚSCULAS sublinhados** (ex.: `I. DA IDENTIFICAÇÃO DAS PARTES` / `I. IDENTIFICATION DES PARTIES`).
+- Itens de escopo: `**a) Título — BRL 4.000,00**` mantendo formato do modelo.
+- Quebra automática para múltiplas páginas mantendo o chrome.
 
-`bank_statement_entries.conciliation_status` continua indo para `'conciliado'` (extrato é uma linha = uma baixa). A divergência cambial / direção oposta atual é preservada antes desse bloco.
+**Página final (assinaturas):**
+- Centralizada, sem colunas.
+- Linha + `LUNDGAARD JENSEN ADVOCACIA E CONSULTORIA INTERNACIONAL` + `CONTRATADO / CABINET`.
+- Linha + `CONTRATANTE / CLIENT`.
+- Bloco `Testemunhas:` com 2 colunas (Nome / CPF / Assinatura) lado a lado, igual ao modelo.
 
-## 3. `undoMatch` — preservar histórico
+**Asset novo:** `src/assets/brazil-map.svg` (contorno do Brasil em cinza), importado pelo template e usado como `<img>` posicionado em absoluto.
 
-Hoje deleta o `conciliation_matches` e zera status. Novo comportamento:
+## 3. Detalhes técnicos
 
-- Marca match como `rejeitado` (não deleta) **ou** deleta apenas o match, mas **mantém** linhas de `financial_payments` intactas.
-- Reverte a baixa recalculando a partir do histórico: busca `sum(amount)` em `financial_payments` para o `financial_entry_id` **excluindo** o pagamento associado a esse match; recalcula `paid_amount`, `open_amount`, `payment_status` (`pago` / `parcial` / `aberto` / `vencido`) e atualiza `financial_entries`.
-- Remove apenas o registro de `financial_payments` daquele match (não é "apagar histórico anterior" — é cancelar a baixa específica) **ou**, alternativamente, mantém com `notes = 'estornado'`. **Decisão proposta:** delete somente a linha vinculada ao match desfeito; demais baixas permanecem.
-- `bank_statement_entries` volta para `pendente`.
+- `DevisPdfTemplate.tsx` recebe `devis` com os campos `_secondary` opcionais e `secondary_language`; computa `isBilingual` e ramifica o layout.
+- Largura A4 (`794px`) mantida; cada coluna no modo bilíngue ≈ 320px com gap de 24px e barra azul de 14px à esquerda.
+- A página de assinaturas é separada (`pageBreakBefore`) — `exportDevisPdf.ts` já itera por `.devis-pdf-page`, sem alteração necessária.
+- A capa de e-mail (`src/lib/email-templates/devis-proposal.tsx`) **não muda**: o anexo PDF carrega o novo layout.
 
-## 4. UI
+## 4. Não inclui
+- Mudanças no fluxo de envio de e-mail/aceite (`SendDevisDialog`, `proposta.aceite.$token`).
+- Re-tradução automática de devis antigos: as colunas `_secondary` ficam nulas e o PDF renderiza monolíngue, como hoje.
 
-- Botão "Conciliar" continua igual; o `window.confirm` extra aparece só no caso `stmtAmt > openAmt`.
-- Toast diferenciado: `"Baixa parcial registrada — saldo: R$ X"` quando `payment_status = 'parcial'`.
-- Sem nova tela de histórico nesta entrega (fora de escopo).
-
-## 5. Compatibilidade
-
-- `conciliation_status = 'conciliado'` continua sendo escrito para não quebrar filtros/relatórios existentes.
-- Campos `payment_status`, `paid_amount`, `open_amount` já existem em `financial_entries` (migration anterior).
-- Lançamentos antigos sem `open_amount` definido caem no fallback `amount_in|amount_out - paid_amount`.
-
-## Fora de escopo
-
-- Tela de listagem/edição de `financial_payments`.
-- Estorno em massa.
-- Trigger SQL que mantém `paid_amount/open_amount` sincronizados (mantemos cálculo no client, igual ao `NovoLancamentoDialog`).
-
-## Arquivos
-
-- **Nova migration**: `financial_payments` + GRANTs + RLS + índices.
-- **Editar**: `src/routes/_authenticated/conciliacao.tsx` (`conciliatePair`, `undoMatch`).
-- Types do Supabase regenerados após a migration.
+## 5. Ordem de execução
+1. Migração SQL (colunas `_secondary` em `devis`).
+2. Asset SVG do mapa do Brasil.
+3. `generate-devis-proposal`: forçar PT.
+4. Pipeline de criação do devis: encadear `translate-devis` quando `client.language ≠ pt` e gravar campos `_secondary`.
+5. Reescrita do `DevisPdfTemplate.tsx` com chrome novo, marca d'água, layout bilíngue condicional e página de assinaturas bilíngue.
