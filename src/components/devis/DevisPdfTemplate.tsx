@@ -262,15 +262,6 @@ export default function DevisPdfTemplate({
     letterSpacing: "0.4px",
   };
 
-  const secStyle: React.CSSProperties = {
-    fontSize: "11.5px",
-    fontWeight: 700,
-    textTransform: "uppercase",
-    textDecoration: "underline",
-    margin: "14px 0 8px 0",
-    color: TEXT,
-    letterSpacing: "0.3px",
-  };
 
   const subStyle: React.CSSProperties = {
     fontSize: "11px",

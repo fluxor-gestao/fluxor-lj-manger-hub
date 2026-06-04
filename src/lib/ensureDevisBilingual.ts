@@ -51,7 +51,7 @@ export async function ensureDevisBilingual(devis: any): Promise<any> {
     assumptions_secondary: t.assumptions ?? null,
   };
 
-  const { error: upErr } = await supabase.from("devis").update(patch).eq("id", devis.id);
+  const { error: upErr } = await supabase.from("devis").update(patch as any).eq("id", devis.id);
   if (upErr) throw upErr;
 
   return { ...devis, ...patch };
