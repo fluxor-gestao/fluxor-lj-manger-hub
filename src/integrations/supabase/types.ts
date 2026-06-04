@@ -360,6 +360,7 @@ export type Database = {
           accepted_at: string | null
           accepted_ip: string | null
           approved_at: string | null
+          assumptions_secondary: Json | null
           business_unit: string | null
           client_id: string | null
           commercial_responsible: string | null
@@ -376,17 +377,23 @@ export type Database = {
           meeting_report: string | null
           meeting_summary: string | null
           notes: string | null
+          payment_terms_secondary: string | null
           proposal_structure: string | null
+          proposal_structure_secondary: string | null
           reference_number: string | null
           rejected_at: string | null
           rejected_ip: string | null
           responsible_sector: string | null
           scope_description: string | null
+          scope_description_secondary: string | null
+          scope_items_secondary: Json | null
+          secondary_language: string | null
           sent_at: string | null
           service_type: string | null
           source_language: string
           status: Database["public"]["Enums"]["devis_status"]
           title: string
+          title_secondary: string | null
           total_amount: number
           updated_at: string
           validated_at: string | null
@@ -402,6 +409,7 @@ export type Database = {
           accepted_at?: string | null
           accepted_ip?: string | null
           approved_at?: string | null
+          assumptions_secondary?: Json | null
           business_unit?: string | null
           client_id?: string | null
           commercial_responsible?: string | null
@@ -418,17 +426,23 @@ export type Database = {
           meeting_report?: string | null
           meeting_summary?: string | null
           notes?: string | null
+          payment_terms_secondary?: string | null
           proposal_structure?: string | null
+          proposal_structure_secondary?: string | null
           reference_number?: string | null
           rejected_at?: string | null
           rejected_ip?: string | null
           responsible_sector?: string | null
           scope_description?: string | null
+          scope_description_secondary?: string | null
+          scope_items_secondary?: Json | null
+          secondary_language?: string | null
           sent_at?: string | null
           service_type?: string | null
           source_language?: string
           status?: Database["public"]["Enums"]["devis_status"]
           title: string
+          title_secondary?: string | null
           total_amount?: number
           updated_at?: string
           validated_at?: string | null
@@ -444,6 +458,7 @@ export type Database = {
           accepted_at?: string | null
           accepted_ip?: string | null
           approved_at?: string | null
+          assumptions_secondary?: Json | null
           business_unit?: string | null
           client_id?: string | null
           commercial_responsible?: string | null
@@ -460,17 +475,23 @@ export type Database = {
           meeting_report?: string | null
           meeting_summary?: string | null
           notes?: string | null
+          payment_terms_secondary?: string | null
           proposal_structure?: string | null
+          proposal_structure_secondary?: string | null
           reference_number?: string | null
           rejected_at?: string | null
           rejected_ip?: string | null
           responsible_sector?: string | null
           scope_description?: string | null
+          scope_description_secondary?: string | null
+          scope_items_secondary?: Json | null
+          secondary_language?: string | null
           sent_at?: string | null
           service_type?: string | null
           source_language?: string
           status?: Database["public"]["Enums"]["devis_status"]
           title?: string
+          title_secondary?: string | null
           total_amount?: number
           updated_at?: string
           validated_at?: string | null

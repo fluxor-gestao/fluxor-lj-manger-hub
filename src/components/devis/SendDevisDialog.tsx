@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import DevisPdfTemplate from "./DevisPdfTemplate";
 import { generateDevisPdfBase64 } from "@/lib/exportDevisPdf";
+import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
 
 type Lang = "pt" | "fr" | "en" | "es";
 
@@ -86,9 +87,15 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
     const root = createRoot(host);
 
     try {
+      let effectiveDevis: any = devis;
+      try {
+        effectiveDevis = await ensureDevisBilingual(devis);
+      } catch (e: any) {
+        console.warn("ensureDevisBilingual falhou — enviando monolíngue:", e?.message);
+      }
       await new Promise<void>((resolve) => {
-        root.render(<DevisPdfTemplate devis={devis} client={client} />);
-        setTimeout(resolve, 700);
+        root.render(<DevisPdfTemplate devis={effectiveDevis} client={client} />);
+        setTimeout(resolve, 800);
       });
       const safeName = (client?.name || "cliente").replace(/[^\w\-]+/g, "_");
       const filename = `Devis-${devisNumber}-${safeName}.pdf`;

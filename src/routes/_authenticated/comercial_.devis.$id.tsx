@@ -23,6 +23,7 @@ import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import DevisPdfTemplate from "@/components/devis/DevisPdfTemplate";
 import SendDevisDialog from "@/components/devis/SendDevisDialog";
 import { exportDevisPdfFromContainer } from "@/lib/exportDevisPdf";
+import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
 import { createRoot } from "react-dom/client";
 import { Send } from "lucide-react";
 
@@ -183,10 +184,17 @@ function DevisDetail() {
     document.body.appendChild(host);
     const root = createRoot(host);
     try {
+      // Garante versão bilíngue (PT + idioma do cliente) quando aplicável
+      let effectiveDevis: any = devis;
+      try {
+        effectiveDevis = await ensureDevisBilingual(devis);
+      } catch (e: any) {
+        console.warn("ensureDevisBilingual falhou — exportando monolíngue:", e?.message);
+      }
       await new Promise<void>((resolve) => {
-        root.render(<DevisPdfTemplate devis={devis} client={client} />);
+        root.render(<DevisPdfTemplate devis={effectiveDevis} client={client} />);
         // aguarda render + carregamento da imagem
-        setTimeout(resolve, 600);
+        setTimeout(resolve, 700);
       });
       const safeName = (client?.name || "cliente").replace(/[^\w\-]+/g, "_");
       await exportDevisPdfFromContainer(host, `Devis-${(devis?.devis_number ?? "") || (devis?.id ?? "").slice(0, 8)}-${safeName}.pdf`);
