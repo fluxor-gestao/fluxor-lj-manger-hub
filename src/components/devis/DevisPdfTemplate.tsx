@@ -241,24 +241,15 @@ export default function DevisPdfTemplate({
     overflow: "hidden",
   };
 
-  const sectionTitle = (text: string): React.CSSProperties => ({
-    fontSize: "12px",
+  const secStyle: React.CSSProperties = {
+    fontSize: "11.5px",
     fontWeight: 700,
     textTransform: "uppercase",
     textDecoration: "underline",
-    margin: "16px 0 10px 0",
-    color: TEXT,
-    letterSpacing: "0.3px",
-  }) && {
-    fontSize: "12px",
-    fontWeight: 700,
-    textTransform: "uppercase" as const,
-    textDecoration: "underline" as const,
-    margin: "16px 0 10px 0",
+    margin: "14px 0 8px 0",
     color: TEXT,
     letterSpacing: "0.3px",
   };
-  void sectionTitle;
 
   const titleStyle: React.CSSProperties = {
     fontSize: "13px",
