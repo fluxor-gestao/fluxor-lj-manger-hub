@@ -146,7 +146,10 @@ function DevisDetail() {
         body: {
           meeting_report: form.meeting_report,
           client_name: client?.name,
+          client_document: client?.document,
+          client_address: [client?.address, client?.city].filter(Boolean).join(", ") || undefined,
           total_amount: Number(form.total_amount) || undefined,
+          deadline_date: form.deadline_date ? format(form.deadline_date, "yyyy-MM-dd") : undefined,
           tier,
         },
       });
