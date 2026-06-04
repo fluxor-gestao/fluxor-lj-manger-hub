@@ -105,7 +105,11 @@ Deno.serve(async (req) => {
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
     if (!meeting_report) throw new Error("meeting_report é obrigatório");
 
-    const lang: Lang = (["pt", "fr", "en", "es"].includes(language) ? language : "pt") as Lang;
+    // REGRA: a geração da proposta é SEMPRE em português (PT é a fonte de verdade
+    // jurídica). A tradução para o idioma do cliente, quando estrangeiro, é feita
+    // posteriormente via translate-devis e armazenada nos campos _secondary do devis.
+    void language;
+    const lang: Lang = "pt";
     const S = STRUCTURE[lang];
 
     // Tier de qualidade: 'final' usa gpt-5 (refinamento de proposta enviada ao cliente),
