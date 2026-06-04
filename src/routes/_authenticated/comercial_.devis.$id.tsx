@@ -176,6 +176,11 @@ function DevisDetail() {
 
   const handleExportPdf = async () => {
     if (!devis) return;
+    const missing = getMissingClauses(devis.proposal_structure);
+    if (missing.length > 0) {
+      toast.error(`Proposta incompleta — regere a proposta. Cláusulas faltantes: ${missing.join(", ")}`);
+      return;
+    }
     const client = clientsById[devis.client_id ?? ""];
     const host = document.createElement("div");
     host.style.position = "fixed";
