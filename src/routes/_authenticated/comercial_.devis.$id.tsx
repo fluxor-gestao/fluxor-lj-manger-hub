@@ -224,16 +224,23 @@ function DevisDetail() {
     }
     setTranslating(true);
     try {
-      const fields = {
+      const fields: Record<string, any> = {
         title: devis.title || "",
         service_type: devis.service_type || "",
         responsible_sector: devis.responsible_sector || "",
         scope_description: devis.scope_description || "",
         proposal_structure: devis.proposal_structure || "",
+        payment_terms: (devis as any).payment_terms || "",
         meeting_summary: devis.meeting_summary || "",
         meeting_report: devis.meeting_report || "",
         notes: devis.notes || "",
       };
+      if (Array.isArray((devis as any).scope_items) && (devis as any).scope_items.length) {
+        fields.scope_items = (devis as any).scope_items;
+      }
+      if (Array.isArray((devis as any).assumptions) && (devis as any).assumptions.length) {
+        fields.assumptions = (devis as any).assumptions;
+      }
       const { data, error } = await supabase.functions.invoke("translate-devis", {
         body: { fields, target_language: "pt", source_language: sourceLang },
       });
