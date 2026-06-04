@@ -24,6 +24,7 @@ import DevisPdfTemplate from "@/components/devis/DevisPdfTemplate";
 import SendDevisDialog from "@/components/devis/SendDevisDialog";
 import { exportDevisPdfFromContainer } from "@/lib/exportDevisPdf";
 import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
+import { getMissingClauses } from "@/lib/validateProposal";
 import { createRoot } from "react-dom/client";
 import { Send } from "lucide-react";
 
