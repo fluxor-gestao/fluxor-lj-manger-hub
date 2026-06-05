@@ -143,7 +143,7 @@ function AceitarProposta() {
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
-        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center gap-4">
+        <div className={`${containerCls} mx-auto px-6 py-5 flex items-center gap-4`}>
           <img src={logo} alt="Lundgaard Jensen" className="h-10 w-auto" />
           <div>
             <div className="font-display text-lg font-semibold tracking-wide text-foreground leading-tight">
