@@ -1,54 +1,58 @@
-# Reestruturação jurídica do gerador de propostas
+# Proposta bilíngue lado a lado (PT fixo + idioma do cliente)
 
-Mantém 100% do design, logo, bilíngue, numeração, assinaturas e fluxo de aceite. Altera apenas a estrutura jurídica do conteúdo gerado.
+Mantém design, logo, numeração, assinaturas, fluxo de aceite, estrutura de 11 cláusulas e PDF intactos. Corrige 3 problemas: (1) IA gerando texto misturado com FR/ES, (2) `*_secondary` não persistido antes do envio, (3) página de aceite monolíngue.
 
-## Princípio
+## Regra de idioma
 
-A IA passa a gerar **apenas o conteúdo da Seção III — Escopo dos Serviços** (itens A/B/C com descrição, entregáveis, prazo, valor). Todas as demais 10 cláusulas vêm de um **template fixo em PT** montado no servidor, com placeholders preenchidos a partir dos dados do devis/cliente (nome, CNPJ, endereço, totais, datas, foro).
+- **PT é sempre a fonte de verdade** (gerado pela IA, coluna esquerda).
+- **2ª coluna varia** conforme `source_language` detectado do cliente:
+  - `fr` → coluna direita em francês
+  - `en` → coluna direita em inglês
+  - `es` → coluna direita em espanhol
+  - `pt` (cliente brasileiro) → coluna única, sem 2ª coluna
+- Tradução vem de `translate-devis` e é gravada em `*_secondary` no banco.
 
-O resultado final é um único `proposal_structure` em Markdown contendo as 11 seções na ordem exigida — exatamente o campo já renderizado hoje no preview, no PDF, no e-mail e na página de aceite. Nada nessas superfícies precisa mudar.
-
-## Estrutura fixa (template servidor)
-
-Ordem obrigatória e imutável:
-
-```text
-I.   Identificação das Partes        (template + dados do cliente/contratado)
-II.  Objeto do Contrato              (template + resumo curto da IA)
-III. Escopo dos Serviços             (100% IA — itens A/B/C…)
-IV.  Honorários                      (template + total_amount / down_payment)
-V.   Forma de Pagamento              (template fixo: 50%+50%, PIX/transf., IPCA 12m)
-VI.  Obrigações do Contratado        (template fixo)
-VII. Obrigações do Contratante       (template fixo)
-VIII.Limitação de Escopo             (template fixo)
-IX.  Rescisão                        (template fixo)
-X.   Foro                            (template fixo — Fortaleza/CE)
-XI.  Assinaturas                     (marcador final; assinaturas reais no PDF)
-```
-
-## Mudanças por arquivo
+## Mudanças
 
 ### 1. `supabase/functions/generate-devis-proposal/index.ts`
-- Reduzir o prompt para pedir à IA **só**: `title`, `scope_description` (resumo do objeto, 2–4 frases) e `scope_items[]` (A/B/C com title, description, deliverables, stakeholders, success_metrics, duration, amount). Manter regras de valores e proibições de placeholders/bilíngue.
-- Após o tool_call, **montar `proposal_structure` no servidor** concatenando o template das 11 seções em PT, injetando:
-  - Dados do contratado fixos (Lundgaard Jensen, CNPJ, endereço).
-  - `client_name` recebido do payload.
-  - Os `scope_items` renderizados na Seção III no formato Markdown atual (`**A) Título — BRL X**` + labels).
-  - `total_amount`, entrada 50%, saldo 50% na Seção IV.
-- Remover seções V–VII antigas; substituir pelas 11 novas.
-- Retornar `proposal.proposal_structure` já com as 11 seções (a IA não escreve mais essa string diretamente).
+Endurecer o system prompt para **garantir pt-BR puro**:
+- Proibir qualquer token em FR/EN/ES nos campos `title`, `scope_description`, `scope_items.*` (ex: "Proposition", "lieu", "honoraires", "scope", "client").
+- Proibir placeholders `[ ]`, `{ }`, `< >`, `« »`, "lorem", "TBD".
+- Se o documento do cliente estiver em outro idioma, traduzir tudo para PT antes de redigir.
+- Pós-processamento server-side: remover colchetes/chaves residuais; se detectar palavra-chave estrangeira no título, fallback para título genérico PT.
+- **Sem mudança** na estrutura das 11 cláusulas nem na montagem do `proposal_structure`.
 
-### 2. `supabase/functions/translate-devis/index.ts`
-- Sem mudanças estruturais: continua traduzindo `proposal_structure` inteiro. Acrescentar ao glossário a tradução estável dos títulos das novas seções (Forma de Pagamento, Obrigações do Contratado/Contratante, Limitação de Escopo, Rescisão, Foro, Assinaturas) para FR/EN/ES, garantindo que a coluna secundária do PDF exiba os mesmos 11 títulos.
+### 2. `src/components/devis/SendDevisDialog.tsx`
+Já chama `ensureDevisBilingual(devis)` antes de gerar o PDF — manter. **Adicionar**: propagar o `effectiveDevis` (com `*_secondary` persistido) ao payload de `send-devis-proposal` para que o link de aceite use os dados já traduzidos no banco.
 
-### 3. Validação de emissão
-- Em `src/components/devis/SendDevisDialog.tsx` (e no `handleExportPdf` em `src/routes/_authenticated/comercial_.devis.$id.tsx`): antes de enviar/exportar, validar que `proposal_structure` contém os 11 marcadores (`I.` … `XI.`). Se faltar qualquer um, bloquear com toast "Proposta incompleta — regere a proposta" e impedir o envio/exportação.
+### 3. `supabase/functions/accept-devis-proposal/index.ts`
+Expandir `PREVIEW_FIELDS` e `previewPayload` para incluir:
+- `secondary_language`, `source_language`
+- `title_secondary`, `scope_description_secondary`, `proposal_structure_secondary`
+- (já inclui `down_payment_amount`)
 
-### 4. Sem mudanças
-- `DevisPdfTemplate.tsx`, `proposta.aceite.$token.tsx`, `email-templates/devis-proposal`, migrações de banco, numeração, fluxo de aceite, layout, logo, marca d'água, assinaturas.
+Sem mudanças nas regras de aceite/recusa.
+
+### 4. `src/routes/proposta.aceite.$token.tsx` — Layout bilíngue lado a lado
+Espelhar exatamente o .docx de referência:
+- Se `secondary_language` existir e `proposal_structure_secondary` não estiver vazio:
+  - Container `max-w-6xl`.
+  - Header do título: 2 colunas (PT à esquerda, idioma secundário à direita) com micro-labels `PT` / `FR`|`EN`|`ES`.
+  - Corpo do `proposal_structure`: `grid md:grid-cols-2 gap-8`, PT à esquerda + secundário à direita, ambos renderizados com `ReactMarkdown` + `remarkGfm`.
+  - Mobile (`<md`): colunas empilhadas (PT primeiro, secundário depois).
+- Se cliente PT (sem `*_secondary`): mantém layout atual de coluna única (`max-w-3xl`).
+- Cards de **Valor total / Entrada / Prazo permanecem únicos** (valores em BRL, datas universais).
+- Botões "Aceitar" / "Recusar", header com logo, footer, diálogo de recusa: **sem mudanças**.
+
+### 5. Sem mudanças
+- `DevisPdfTemplate.tsx` (já é bilíngue lado a lado).
+- `translate-devis` (já traduz todos os campos necessários).
+- `send-devis-proposal` (e-mail).
+- Migrações de banco, numeração, validação das 11 cláusulas, assinaturas, marca d'água, design tokens, logo.
 
 ## Resultado
 
-- Toda proposta gerada (nova ou regerada) terá as 11 cláusulas, na mesma ordem, com texto jurídico padronizado em PT (e traduzido para FR/EN/ES quando o cliente for estrangeiro).
-- Preview da página de aceite, PDF baixado, PDF anexado ao e-mail e a página `/proposta/aceite/:token` exibirão exatamente o mesmo `proposal_structure` — consistência garantida por construção.
-- Nenhuma proposta pode ser enviada/exportada sem todas as cláusulas (validação no front).
+- Propostas geradas saem 100% em pt-BR, sem fragmentos FR/ES.
+- Antes do envio, `*_secondary` é persistido no banco para clientes estrangeiros.
+- Página `/proposta/aceite/:token` exibe layout idêntico ao PDF: 2 colunas (PT | idioma do cliente) lado a lado em desktop, empilhadas em mobile. Cliente PT vê coluna única.
+- PDF, e-mail, preview interno e página pública mostram o mesmo conteúdo.

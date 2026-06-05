@@ -135,16 +135,24 @@ Deno.serve(async (req) => {
     const model = tier === "final" ? "gpt-5" : "gpt-5-mini";
     const hasTotal = typeof total_amount === "number" && total_amount > 0;
 
-    const systemPrompt = `Você é advogado(a) sênior de Lundgaard Jensen, redator(a) de propostas comerciais jurídicas (devis) em português do Brasil.
+    const systemPrompt = `Você é advogado(a) sênior de Lundgaard Jensen, redator(a) de propostas comerciais jurídicas (devis) em português do Brasil (pt-BR).
 
 Sua tarefa NÃO é redigir o contrato inteiro. As cláusulas padrão (I, II, IV–XI) são geradas por template fixo pelo sistema. Você é responsável APENAS por:
-1. "title" — título da proposta (1 linha, em PT, descritivo do escopo).
-2. "scope_description" — resumo executivo do objeto (2 a 4 frases densas, em PT), citando fatos concretos do relatório.
+1. "title" — título da proposta (1 linha, em pt-BR, descritivo do escopo).
+2. "scope_description" — resumo executivo do objeto (2 a 4 frases densas, em pt-BR), citando fatos concretos do relatório.
 3. "scope_items" — lista A/B/C... (3 a 6 itens) com title, description (3–6 frases), deliverables, stakeholders, success_metrics, duration (prazo da etapa) e amount (BRL, > 0).
 4. "total_amount" — soma EXATA dos amounts dos scope_items.
 
-REGRAS:
-- Tom jurídico formal, parágrafos densos, sem placeholders entre colchetes, sem bilíngue, sem barras "/".
+REGRAS DE IDIOMA (CRÍTICO):
+- TODOS os textos (title, scope_description, scope_items.*) devem ser ESCRITOS EM PORTUGUÊS DO BRASIL (pt-BR) PURO.
+- Se o relatório da reunião estiver em outro idioma (francês, inglês, espanhol), TRADUZA o conteúdo para pt-BR antes de redigir.
+- PROIBIDO usar palavras estrangeiras no texto final: "Proposition", "lieu", "honoraires", "fees", "scope", "deliverables", "stakeholders" (use "partes envolvidas"), "propuesta", "report", "due diligence" sozinho (use "auditoria/due diligence").
+- PROIBIDO termos em francês ("apostille" → "apostilamento"; "notaire" → "tabelião/notário"; "mairie" → "prefeitura"; "Chambre des Notaires" → "Câmara de Notários"), inglês ou espanhol — sempre traduza para pt-BR.
+- PROIBIDO placeholders: [...], {...}, <...>, «...», "lorem", "TBD", "XXX".
+- PROIBIDO formato bilíngue ou barras "/" separando idiomas.
+
+REGRAS GERAIS:
+- Tom jurídico formal, parágrafos densos.
 - Personalize tudo com base no relatório da reunião. NUNCA texto genérico.
 - ${
       hasTotal
@@ -241,13 +249,41 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃ
     if (!toolCall) throw new Error("Resposta sem tool_call");
     const ai = JSON.parse(toolCall.function.arguments);
 
-    const scopeItems: ScopeItem[] = Array.isArray(ai.scope_items) ? ai.scope_items : [];
+    // ---- Pós-processamento: remover placeholders e detectar idioma estrangeiro ----
+    const FOREIGN_TOKENS = /\b(Proposition|Proposal|Propuesta|honoraires|Honoraires|fees|Fees|scope|Scope|deliverables|stakeholders|notaire|Notaire|mairie|Mairie|apostille|Apostille|Chambre|propuesta)\b/;
+    const scrub = (s: string): string => {
+      if (!s) return s;
+      return s
+        .replace(/\[([^\]]*)\]/g, "$1") // remove colchetes mantendo conteúdo
+        .replace(/\{([^}]*)\}/g, "$1") // remove chaves mantendo conteúdo
+        .replace(/«\s*([^»]*)\s*»/g, "$1") // remove guillemets franceses
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    };
+    if (typeof ai.title === "string") ai.title = scrub(ai.title);
+    if (typeof ai.scope_description === "string") ai.scope_description = scrub(ai.scope_description);
+    const scopeItems: ScopeItem[] = (Array.isArray(ai.scope_items) ? ai.scope_items : []).map((it: any) => ({
+      ...it,
+      title: typeof it.title === "string" ? scrub(it.title) : it.title,
+      description: typeof it.description === "string" ? scrub(it.description) : it.description,
+      duration: typeof it.duration === "string" ? scrub(it.duration) : it.duration,
+      deliverables: Array.isArray(it.deliverables) ? it.deliverables.map((d: any) => typeof d === "string" ? scrub(d) : d) : it.deliverables,
+      stakeholders: Array.isArray(it.stakeholders) ? it.stakeholders.map((d: any) => typeof d === "string" ? scrub(d) : d) : it.stakeholders,
+      success_metrics: Array.isArray(it.success_metrics) ? it.success_metrics.map((d: any) => typeof d === "string" ? scrub(d) : d) : it.success_metrics,
+    }));
+    // Fallback de título se contiver token estrangeiro
+    let finalTitle = ai.title || "Proposta de Prestação de Serviços Jurídicos";
+    if (FOREIGN_TOKENS.test(finalTitle)) {
+      console.warn("Título com token estrangeiro detectado, aplicando fallback:", finalTitle);
+      finalTitle = "Proposta de Prestação de Serviços Jurídicos e Consultoria";
+    }
+
     const computedTotal = scopeItems.reduce((s, i) => s + (Number(i.amount) || 0), 0);
     const finalTotal = hasTotal ? Number(total_amount) : Number(ai.total_amount) || computedTotal;
     const downPayment = +(finalTotal * 0.5).toFixed(2);
 
     const proposal_structure = buildProposalMarkdown({
-      title: ai.title || "Proposta de Prestação de Serviços Jurídicos",
+      title: finalTitle,
       client_name,
       client_document,
       client_address,
@@ -259,7 +295,7 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃ
     });
 
     const proposal = {
-      title: ai.title,
+      title: finalTitle,
       service_type: ai.service_type,
       responsible_sector: ai.responsible_sector,
       scope_description: ai.scope_description,

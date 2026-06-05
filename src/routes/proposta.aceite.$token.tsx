@@ -31,7 +31,14 @@ type Preview = {
   proposal_structure: string | null;
   accepted_at: string | null;
   rejected_at: string | null;
+  source_language?: string | null;
+  secondary_language?: string | null;
+  title_secondary?: string | null;
+  scope_description_secondary?: string | null;
+  proposal_structure_secondary?: string | null;
 };
+
+const LANG_LABEL: Record<string, string> = { fr: "FR", en: "EN", es: "ES", pt: "PT" };
 
 type State =
   | "loading"
@@ -124,10 +131,19 @@ function AceitarProposta() {
   const showAccepted = state === "success" || state === "already_accepted";
   const showRejected = state === "rejected" || state === "already_rejected";
 
+  const isBilingual = !!(
+    preview?.secondary_language &&
+    preview?.proposal_structure_secondary &&
+    preview.proposal_structure_secondary.trim().length > 0
+  );
+  const secLang = (preview?.secondary_language || "").toLowerCase();
+  const secLabel = LANG_LABEL[secLang] || secLang.toUpperCase();
+  const containerCls = isBilingual ? "max-w-6xl" : "max-w-3xl";
+
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
-        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center gap-4">
+        <div className={`${containerCls} mx-auto px-6 py-5 flex items-center gap-4`}>
           <img src={logo} alt="Lundgaard Jensen" className="h-10 w-auto" />
           <div>
             <div className="font-display text-lg font-semibold tracking-wide text-foreground leading-tight">
@@ -140,7 +156,7 @@ function AceitarProposta() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-6 py-10 md:py-14">
+      <main className={`${containerCls} mx-auto px-6 py-10 md:py-14`}>
         {state === "loading" && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <Loader2 className="h-8 w-8 animate-spin mb-3" />
@@ -223,9 +239,22 @@ function AceitarProposta() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-2xl">{preview.title}</CardTitle>
+                  {isBilingual ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">PT</div>
+                        <CardTitle className="text-2xl">{preview.title}</CardTitle>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">{secLabel}</div>
+                        <CardTitle className="text-2xl">{preview.title_secondary || preview.title}</CardTitle>
+                      </div>
+                    </div>
+                  ) : (
+                    <CardTitle className="text-2xl">{preview.title}</CardTitle>
+                  )}
                   {preview.client_name && (
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mt-2">
                       Para: <span className="font-medium text-foreground">{preview.client_name}</span>
                     </p>
                   )}
@@ -255,7 +284,20 @@ function AceitarProposta() {
                       <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
                         <FileText className="h-4 w-4" /> Escopo
                       </div>
-                      <p className="text-sm whitespace-pre-wrap text-muted-foreground">{preview.scope_description}</p>
+                      {isBilingual ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">PT</div>
+                            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{preview.scope_description}</p>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">{secLabel}</div>
+                            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{preview.scope_description_secondary || preview.scope_description}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm whitespace-pre-wrap text-muted-foreground">{preview.scope_description}</p>
+                      )}
                     </div>
                   )}
 
@@ -264,11 +306,32 @@ function AceitarProposta() {
                       <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
                         <FileText className="h-4 w-4" /> Estrutura da proposta
                       </div>
-                      <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {preview.proposal_structure}
-                        </ReactMarkdown>
-                      </div>
+                      {isBilingual ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">PT</div>
+                            <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {preview.proposal_structure}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">{secLabel}</div>
+                            <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {preview.proposal_structure_secondary || preview.proposal_structure}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {preview.proposal_structure}
+                          </ReactMarkdown>
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -320,7 +383,7 @@ function AceitarProposta() {
       </main>
 
       <footer className="border-t bg-background mt-12">
-        <div className="max-w-3xl mx-auto px-6 py-6 text-xs text-muted-foreground leading-relaxed">
+        <div className={`${containerCls} mx-auto px-6 py-6 text-xs text-muted-foreground leading-relaxed`}>
           <div className="font-medium text-foreground">Lundgaard Jensen Advocacia &amp; Consultoria Internacional</div>
           <div>Rua João Cordeiro, 831 – Praia de Iracema</div>
           <div>+55 (85) 9 9406-6042 &nbsp;|&nbsp; +55 (85) 9 3037-9931</div>
