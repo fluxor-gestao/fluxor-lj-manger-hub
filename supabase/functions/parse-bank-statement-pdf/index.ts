@@ -8,10 +8,21 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { fileBase64, fileName } = await req.json();
+    const { fileBase64, fileName, text } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
-    if (!fileBase64) throw new Error("fileBase64 é obrigatório");
+    if (!fileBase64 && !text) throw new Error("fileBase64 ou text é obrigatório");
+
+    // Preferimos texto pré-extraído (muito mais rápido e barato que reenviar PDF binário).
+    const userContent: any[] = text
+      ? [{
+          type: "text",
+          text: `Analise o extrato bancário${fileName ? ` "${fileName}"` : ""} abaixo (texto já extraído do PDF) e retorne TODAS as transações.\n\n---\n${String(text).slice(0, 180000)}\n---`,
+        }]
+      : [
+          { type: "text", text: `Analise o extrato${fileName ? ` "${fileName}"` : ""} e extraia todas as transações.` },
+          { type: "file", file: { filename: fileName || "extrato.pdf", file_data: `data:application/pdf;base64,${fileBase64}` } },
+        ];
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -20,19 +31,7 @@ Deno.serve(async (req) => {
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: "Extraia TODAS as transações de um extrato bancário. Datas em ISO (YYYY-MM-DD). Valores em número (positivo crédito, negativo débito)." },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: `Analise o extrato${fileName ? ` "${fileName}"` : ""} e extraia todas as transações.` },
-              {
-                type: "file",
-                file: {
-                  filename: fileName || "extrato.pdf",
-                  file_data: `data:application/pdf;base64,${fileBase64}`,
-                },
-              },
-            ],
-          },
+          { role: "user", content: userContent },
         ],
         tools: [{
           type: "function",

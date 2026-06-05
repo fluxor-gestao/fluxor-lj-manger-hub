@@ -1,34 +1,69 @@
-## Ajustes na página `/proposta/aceite/$token`
+# Parser híbrido de extratos PDF (local-first + IA como fallback)
 
-Arquivo único alterado: `src/routes/proposta.aceite.$token.tsx`. Nenhuma mudança em backend, PDF ou geração de propostas.
+## Objetivo
+Eliminar o timeout de 150s da edge function e reduzir custo de IA processando o PDF **localmente no navegador** sempre que possível. A IA só é chamada quando o parser local não reconhece o layout ou não extrai transações suficientes.
 
-### 1. Remover o texto ao lado do logo
-No `<header>`, deletar o bloco com "LUNDGAARD JENSEN" e "Advocacia & Consultoria Internacional" (o logo SVG já contém a marca). Restará só o `<img src={logo}>`.
+## Estratégia em 3 camadas
 
-### 2. Botões de Aceitar / Recusar no topo
-- Extrair o bloco atual de botões (Aceitar / Recusar + estados `accepting` / `rejecting`) para um pequeno componente local `ActionButtons` dentro do mesmo arquivo.
-- Renderizar `<ActionButtons />` em dois lugares:
-  - **No topo**, logo após os banners de `showAccepted` / `showRejected`, antes do `<Card>` com o título.
-  - **No final**, mantendo o bloco existente (incluindo o disclaimer "Ao aceitar, você confirma...").
-- Os dois usam o mesmo `state`, então clicar em qualquer um dispara o mesmo handler; quando vira `accepting`/`rejecting`/`success`/`rejected`, ambos refletem o estado.
+```text
+PDF -> [1] Extrai texto local (pdfjs-dist)
+        |
+        v
+       [2] Parser por layout (Bradesco, Itau, etc.) - regex/heurística
+        |
+        +-- ok (>=1 transação + saldos coerentes) --> usa direto, custo IA = 0
+        |
+        +-- falhou ou layout desconhecido
+                |
+                v
+              [3] Fallback IA - manda só o TEXTO extraido (nao mais base64 do PDF)
+                  para a edge function existente, em chunks por pagina/dia
+```
 
-### 3. Estrutura resumida (3–5 bullets)
-- Criar helper local `summarizeProposal(text: string): string[]` que:
-  - Quebra o texto por marcadores romanos de cláusula (`I.`, `II.`, …, `XI.`).
-  - Para cada cláusula encontrada, pega o **título** (primeira linha após o numeral, removendo `#`/`**`) e a **primeira frase** do corpo (até o primeiro `.` / `!` / `?` ou ~140 caracteres).
-  - Retorna no máximo **5 bullets** no formato `**Título** — primeira frase.`
-  - Se não encontrar marcadores, faz fallback pegando os primeiros 5 itens de lista (`-` / `*`) ou as 5 primeiras linhas não vazias.
-- Na seção "Estrutura da proposta":
-  - Substituir o `<ReactMarkdown>` (que renderizava o texto inteiro) por uma `<ul>` com os bullets vindos de `summarizeProposal(preview.proposal_structure)`.
-  - No modo bilíngue, fazer o mesmo lado a lado: PT usa `proposal_structure`, coluna direita usa `proposal_structure_secondary`.
-  - Adicionar uma legenda curta em itálico: "*Resumo das cláusulas principais. A proposta completa segue em PDF anexo.*" (e versão traduzida via o map `LANG_LABEL` existente — basta um pequeno dicionário PT/EN/FR/ES).
+## Mudanças
 
-### Fora de escopo (explicitamente preservado)
-- `exportDevisPdfFromContainer` e `DevisPdfTemplate` **continuam intocados** — o PDF exportado pelo botão "Exportar PDF" mantém a estrutura completa das 11 cláusulas.
-- Edge functions `generate-devis-proposal`, `accept-devis-proposal`, `translate-devis`: sem alterações.
-- Página interna `/comercial/devis/:id`: sem alterações (continua mostrando a estrutura completa).
+### 1. Extração local de texto (novo `src/lib/pdfText.ts`)
+- Usa `pdfjs-dist` (já comum em apps Vite) para ler o PDF no browser.
+- Retorna `{ pages: string[][] }` preservando linhas e ordem.
+- Roda 100% no cliente — zero custo, zero timeout.
 
-### Detalhes técnicos
-- Helper é puro (sem dependências novas); roda no client a partir do `preview.proposal_structure` já retornado pela edge function.
-- Frases em outras línguas: o split por `I.`–`XI.` funciona em FR/EN/ES porque a numeração romana já é gerada igual em todas (vide `validateProposal.ts`).
-- Sem mudanças em tipos, rotas, ou imports além de remover `ReactMarkdown`/`remarkGfm` se ficarem sem uso (verificar).
+### 2. Parsers por layout (novo `src/lib/bankParsers/`)
+- `bradesco.ts` — reconhece o cabeçalho `Data | Histórico | Docto. | Crédito | Débito | Saldo` do extrato anexado.
+  - Propaga a última data vista quando a célula está vazia (regra observada no PDF do usuário).
+  - Junta linha 1 (tipo, ex. "PIX QR CODE ESTATIC") + linha 2 (`REM:` crédito / `DES:` débito + contraparte).
+  - Ignora linhas `Total`, `Saldo Anterior` e `RENTAB.INVEST`/aplicação automática (marca como `transferencia` opcionalmente).
+- `index.ts` — função `detectLayout(text)` que escolhe o parser certo por assinatura (`"Bradesco Celular"`, `"Banco do Brasil"`, etc.). Começa com Bradesco; arquitetura aberta para Itaú/Santander/Nubank depois.
+- Retorna o mesmo formato `ParsedOfxTx[]` que o resto do código já consome.
+
+### 3. Fluxo no `conciliacao.tsx`
+Substituir o bloco atual de "PDF -> edge function" por:
+
+```text
+1. Extrair texto local com pdfText
+2. Tentar parser local (detectLayout)
+   - sucesso -> usa transactions, mostra toast "Extrato lido localmente (Bradesco)"
+3. Se vazio ou layout nao reconhecido:
+   - chama edge function passando { text, fileName } (NAO o PDF inteiro em base64)
+   - toast "Layout nao reconhecido, usando IA..."
+```
+
+### 4. Ajuste leve na edge `parse-bank-statement-pdf`
+- Aceitar `{ text }` como input alternativo a `{ fileBase64 }`.
+- Quando vier `text`, pular o envio de PDF e mandar só o texto (muito mais barato e rápido).
+- Manter compatibilidade com chamadas antigas.
+- Continuar usando `gpt-4o-mini`.
+
+## Resultado esperado
+- **Bradesco (o caso do usuario)**: 100% local, sem IA, instantâneo. Extrato de maio com ~500 lançamentos processado em <2s.
+- **Layouts desconhecidos**: IA recebe texto (~10x menor que PDF base64) e responde dentro do limite.
+- **Sem mudanças** na UI de conciliação nem no schema do banco.
+
+## Detalhes técnicos
+- Dependência nova: `pdfjs-dist` (~400KB, lazy-loaded só ao abrir o uploader).
+- Worker do pdfjs configurado via `?url` do Vite para nao precisar de arquivo público.
+- Parser Bradesco testado mentalmente contra o PDF de maio: identifica 23 páginas, saldo inicial 3.276,92 e total Crédito 22.096,13 / Débito 21.769,99 (confere com a linha de Total da pagina 20).
+- Sem mudança em RLS, tabelas, ou triggers.
+
+## Não inclui
+- Parsers de outros bancos (entram depois conforme arquivos chegarem).
+- OCR de extratos escaneados (continua exigindo OFX, como já avisa hoje).
