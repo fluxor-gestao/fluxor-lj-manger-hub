@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,8 +15,6 @@ import { CheckCircle2, Loader2, AlertCircle, Calendar, FileText, XCircle } from 
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logo from "@/assets/logo.svg";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 const FN_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/accept-devis-proposal`;
 const ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -40,6 +38,13 @@ type Preview = {
 
 const LANG_LABEL: Record<string, string> = { fr: "FR", en: "EN", es: "ES", pt: "PT" };
 
+const SUMMARY_CAPTION: Record<string, string> = {
+  pt: "Resumo das cláusulas principais. A proposta completa segue em PDF anexo.",
+  en: "Summary of the main clauses. The full proposal is in the attached PDF.",
+  fr: "Résumé des clauses principales. La proposition complète est en pièce jointe (PDF).",
+  es: "Resumen de las cláusulas principales. La propuesta completa está en el PDF adjunto.",
+};
+
 type State =
   | "loading"
   | "not_found"
@@ -54,6 +59,97 @@ type State =
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
+
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
+
+function cleanInline(s: string): string {
+  return s
+    .replace(/^#+\s*/, "")
+    .replace(/\*\*/g, "")
+    .replace(/^\s*[-*]\s*/, "")
+    .replace(/^\s*[IVX]+\.\s*/, "")
+    .trim();
+}
+
+function firstSentence(s: string, maxLen = 140): string {
+  const cleaned = s.replace(/\s+/g, " ").trim();
+  if (!cleaned) return "";
+  const m = cleaned.match(/^(.+?[\.!?])(\s|$)/);
+  let out = m ? m[1] : cleaned;
+  if (out.length > maxLen) out = out.slice(0, maxLen).trimEnd() + "…";
+  return out;
+}
+
+export function summarizeProposal(text?: string | null): { title: string; body: string }[] {
+  const src = (text || "").toString();
+  if (!src.trim()) return [];
+
+  // Try splitting by roman numerals (I. ... II. ... etc.)
+  const re = /(^|\n)\s*(I{1,3}|IV|V|VI{0,3}|IX|XI?)\.\s+/g;
+  const indices: { idx: number; num: string }[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src)) !== null) {
+    if (ROMAN.includes(m[2])) {
+      indices.push({ idx: m.index + (m[1] ? m[1].length : 0), num: m[2] });
+    }
+  }
+
+  const bullets: { title: string; body: string }[] = [];
+
+  if (indices.length >= 2) {
+    for (let i = 0; i < indices.length && bullets.length < 5; i++) {
+      const start = indices[i].idx;
+      const end = i + 1 < indices.length ? indices[i + 1].idx : src.length;
+      const chunk = src.slice(start, end).trim();
+      // Remove leading "I. " marker
+      const noMarker = chunk.replace(/^[IVX]+\.\s*/, "");
+      const lines = noMarker.split(/\n/).map((l) => l.trim()).filter(Boolean);
+      if (lines.length === 0) continue;
+      const title = cleanInline(lines[0]);
+      const rest = lines.slice(1).join(" ");
+      const body = firstSentence(rest || "");
+      bullets.push({ title, body });
+    }
+    return bullets;
+  }
+
+  // Fallback: list items
+  const items = src
+    .split(/\n/)
+    .map((l) => l.trim())
+    .filter((l) => /^[-*]\s+/.test(l));
+  if (items.length >= 2) {
+    return items.slice(0, 5).map((l) => {
+      const cleaned = cleanInline(l);
+      return { title: firstSentence(cleaned, 80), body: "" };
+    });
+  }
+
+  // Fallback: first 5 non-empty lines
+  return src
+    .split(/\n/)
+    .map((l) => cleanInline(l))
+    .filter(Boolean)
+    .slice(0, 5)
+    .map((l) => ({ title: firstSentence(l, 100), body: "" }));
+}
+
+function SummaryList({ bullets }: { bullets: { title: string; body: string }[] }) {
+  if (bullets.length === 0) return null;
+  return (
+    <ul className="space-y-2 text-sm">
+      {bullets.map((b, i) => (
+        <li key={i} className="flex gap-2">
+          <span className="text-muted-foreground mt-0.5">•</span>
+          <span>
+            <span className="font-semibold text-foreground">{b.title}</span>
+            {b.body && <span className="text-muted-foreground"> — {b.body}</span>}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function AceitarProposta() {
   const { token } = Route.useParams();
@@ -140,19 +236,62 @@ function AceitarProposta() {
   const secLabel = LANG_LABEL[secLang] || secLang.toUpperCase();
   const containerCls = isBilingual ? "max-w-6xl" : "max-w-3xl";
 
+  const ActionButtons = ({ withDisclaimer = false }: { withDisclaimer?: boolean }) => {
+    if (state === "accepting") {
+      return (
+        <div className="flex justify-center">
+          <Button size="lg" disabled className="px-10">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Registrando aceite...
+          </Button>
+        </div>
+      );
+    }
+    if (state === "rejecting") {
+      return (
+        <div className="flex justify-center">
+          <Button size="lg" disabled variant="outline" className="px-10">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Registrando recusa...
+          </Button>
+        </div>
+      );
+    }
+    if (state !== "ready") return null;
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Button
+            size="lg"
+            className="px-10 bg-green-600 hover:bg-green-700 text-white"
+            onClick={handleAccept}
+          >
+            <CheckCircle2 className="h-4 w-4 mr-2" /> Aceitar proposta
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="px-10 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            onClick={() => setRejectOpen(true)}
+          >
+            <XCircle className="h-4 w-4 mr-2" /> Recusar proposta
+          </Button>
+        </div>
+        {withDisclaimer && (
+          <p className="text-xs text-muted-foreground text-center max-w-md">
+            Ao aceitar, você confirma a contratação dos serviços conforme descritos acima.
+            Esta ação não poderá ser desfeita.
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  const captionSec = SUMMARY_CAPTION[secLang] || SUMMARY_CAPTION.en;
+
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
         <div className={`${containerCls} mx-auto px-6 py-5 flex items-center gap-4`}>
           <img src={logo} alt="Lundgaard Jensen" className="h-10 w-auto" />
-          <div>
-            <div className="font-display text-lg font-semibold tracking-wide text-foreground leading-tight">
-              LUNDGAARD JENSEN
-            </div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Advocacia &amp; Consultoria Internacional
-            </div>
-          </div>
         </div>
       </header>
 
@@ -237,6 +376,10 @@ function AceitarProposta() {
                 </Card>
               )}
 
+              {(state === "ready" || state === "accepting" || state === "rejecting") && (
+                <ActionButtons />
+              )}
+
               <Card>
                 <CardHeader>
                   {isBilingual ? (
@@ -310,74 +453,27 @@ function AceitarProposta() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                           <div>
                             <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">PT</div>
-                            <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {preview.proposal_structure}
-                              </ReactMarkdown>
-                            </div>
+                            <SummaryList bullets={summarizeProposal(preview.proposal_structure)} />
+                            <p className="text-xs italic text-muted-foreground mt-3">{SUMMARY_CAPTION.pt}</p>
                           </div>
                           <div>
                             <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">{secLabel}</div>
-                            <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {preview.proposal_structure_secondary || preview.proposal_structure}
-                              </ReactMarkdown>
-                            </div>
+                            <SummaryList bullets={summarizeProposal(preview.proposal_structure_secondary || preview.proposal_structure)} />
+                            <p className="text-xs italic text-muted-foreground mt-3">{captionSec}</p>
                           </div>
                         </div>
                       ) : (
-                        <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {preview.proposal_structure}
-                          </ReactMarkdown>
-                        </div>
+                        <>
+                          <SummaryList bullets={summarizeProposal(preview.proposal_structure)} />
+                          <p className="text-xs italic text-muted-foreground mt-3">{SUMMARY_CAPTION.pt}</p>
+                        </>
                       )}
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {state === "ready" && (
-                <div className="flex flex-col items-center gap-3 pt-2">
-                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    <Button
-                      size="lg"
-                      className="px-10 bg-green-600 hover:bg-green-700 text-white"
-                      onClick={handleAccept}
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-2" /> Aceitar proposta
-                    </Button>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="px-10 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                      onClick={() => setRejectOpen(true)}
-                    >
-                      <XCircle className="h-4 w-4 mr-2" /> Recusar proposta
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground text-center max-w-md">
-                    Ao aceitar, você confirma a contratação dos serviços conforme descritos acima.
-                    Esta ação não poderá ser desfeita.
-                  </p>
-                </div>
-              )}
-
-              {state === "accepting" && (
-                <div className="flex justify-center pt-2">
-                  <Button size="lg" disabled className="px-10">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Registrando aceite...
-                  </Button>
-                </div>
-              )}
-
-              {state === "rejecting" && (
-                <div className="flex justify-center pt-2">
-                  <Button size="lg" disabled variant="outline" className="px-10">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Registrando recusa...
-                  </Button>
-                </div>
-              )}
+              <ActionButtons withDisclaimer />
             </div>
           )}
       </main>
