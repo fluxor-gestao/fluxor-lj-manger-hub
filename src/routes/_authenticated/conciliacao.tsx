@@ -16,6 +16,7 @@ import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { toast } from "sonner";
 import { Upload, CheckCircle, XCircle, Link2, ArrowLeftRight, Search, ArrowLeft, Pencil, Trash2, Building2, Banknote, Plus, RotateCcw, EyeOff } from "lucide-react";
 import { parseOfx, type ParsedOfxTx } from "@/lib/parseOfx";
+import { parseBankStatementPdfLocal } from "@/lib/bankParsers";
 import { NovoLancamentoDialog, type NovoLancamentoPrefill } from "@/components/financeiro/NovoLancamentoDialog";
 
 type BankStatementEntry = {
@@ -106,48 +107,70 @@ function Conciliacao() {
           return;
         }
       } else {
-        // PDF -> edge function (AI)
-        const toastId = toast.loading("Lendo PDF do extrato com IA, pode levar alguns segundos...");
+        // PDF: 1) tenta extração 100% local (sem custo de IA, sem timeout)
+        const toastId = toast.loading("Lendo PDF do extrato...");
         const buf = await file.arrayBuffer();
-        // base64 encode
-        let binary = "";
-        const bytes = new Uint8Array(buf);
-        const chunk = 0x8000;
-        for (let i = 0; i < bytes.length; i += chunk) {
-          binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
+        let localText = "";
+        try {
+          const local = await parseBankStatementPdfLocal(buf);
+          localText = local.text;
+          if (local.transactions.length > 0) {
+            transactions = local.transactions;
+            toast.dismiss(toastId);
+            toast.success(`Extrato lido localmente (${local.layout}) — ${local.transactions.length} lançamentos.`);
+          }
+        } catch (err) {
+          console.warn("Falha na extração local do PDF:", err);
         }
-        const fileBase64 = btoa(binary);
 
-        const { data, error } = await supabase.functions.invoke("parse-bank-statement-pdf", {
-          body: { fileBase64, fileName: file.name },
-        });
-        toast.dismiss(toastId);
-
-        if (error) {
-          const isAiCreditError = error.message.includes("402") || error.message.toLowerCase().includes("créditos de ia");
-          toast.error(
-            isAiCreditError
-              ? "Créditos de IA esgotados e o PDF não pôde ser lido em modo manual. Envie o extrato em OFX."
-              : `Erro ao processar PDF: ${error.message}`,
-          );
-          e.target.value = "";
-          return;
-        }
-        if (data?.error) {
-          toast.error(data.error);
-          e.target.value = "";
-          return;
-        }
-        transactions = (data?.transactions ?? []) as ParsedOfxTx[];
+        // 2) Fallback IA — manda só o TEXTO (muito mais barato/rápido que o PDF inteiro)
         if (transactions.length === 0) {
-          toast.error(
-            "Nenhuma transação reconhecida no PDF. Pode ser um extrato escaneado (imagem) ou um layout não suportado. Tente exportar como OFX/CSV.",
-          );
-          e.target.value = "";
-          return;
-        }
-        if (data?.source === "manual") {
-          toast.warning("Extrato lido em modo manual (IA indisponível). Revise os lançamentos antes de conciliar.");
+          toast.dismiss(toastId);
+          const aiToastId = toast.loading("Layout não reconhecido — usando IA para interpretar o extrato...");
+
+          let payload: Record<string, unknown> = { fileName: file.name };
+          if (localText && localText.length > 100) {
+            payload.text = localText;
+          } else {
+            // último recurso: manda o PDF em base64 (PDFs muito antigos / sem texto)
+            let binary = "";
+            const bytes = new Uint8Array(buf);
+            const chunk = 0x8000;
+            for (let i = 0; i < bytes.length; i += chunk) {
+              binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
+            }
+            payload.fileBase64 = btoa(binary);
+          }
+
+          const { data, error } = await supabase.functions.invoke("parse-bank-statement-pdf", { body: payload });
+          toast.dismiss(aiToastId);
+
+          if (error) {
+            const isAiCreditError = error.message.includes("402") || error.message.toLowerCase().includes("créditos de ia");
+            toast.error(
+              isAiCreditError
+                ? "Créditos de IA esgotados e o PDF não pôde ser lido. Envie o extrato em OFX."
+                : `Erro ao processar PDF: ${error.message}`,
+            );
+            e.target.value = "";
+            return;
+          }
+          if (data?.error) {
+            toast.error(data.error);
+            e.target.value = "";
+            return;
+          }
+          transactions = (data?.transactions ?? []) as ParsedOfxTx[];
+          if (transactions.length === 0) {
+            toast.error(
+              "Nenhuma transação reconhecida no PDF. Pode ser um extrato escaneado (imagem) ou um layout não suportado. Tente exportar como OFX/CSV.",
+            );
+            e.target.value = "";
+            return;
+          }
+          if (data?.source === "manual") {
+            toast.warning("Extrato lido em modo manual (IA indisponível). Revise os lançamentos antes de conciliar.");
+          }
         }
       }
     } catch (err: any) {
