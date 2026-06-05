@@ -156,7 +156,7 @@ function AceitarProposta() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-6 py-10 md:py-14">
+      <main className={`${containerCls} mx-auto px-6 py-10 md:py-14`}>
         {state === "loading" && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <Loader2 className="h-8 w-8 animate-spin mb-3" />
