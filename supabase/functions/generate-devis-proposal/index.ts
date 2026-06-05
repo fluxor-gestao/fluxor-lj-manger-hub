@@ -295,7 +295,7 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃ
     });
 
     const proposal = {
-      title: ai.title,
+      title: finalTitle,
       service_type: ai.service_type,
       responsible_sector: ai.responsible_sector,
       scope_description: ai.scope_description,
