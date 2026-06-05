@@ -878,10 +878,31 @@ function Comercial() {
                     <TableCell>{c.email}</TableCell>
                     <TableCell>{c.phone}</TableCell>
                     <TableCell>{c.document}</TableCell>
-                    <TableCell>
-                      <Button size="icon" variant="ghost" onClick={() => openEditClient(c)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                     <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => openEditClient(c)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="icon" variant="ghost" disabled={deleteClient.isPending}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação é permanente. O cliente <strong>{c.name}</strong> será removido. Clientes com devis vinculados não podem ser excluídos.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteClient.mutate(c.id)}>Excluir</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
