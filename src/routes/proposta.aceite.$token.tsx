@@ -31,7 +31,14 @@ type Preview = {
   proposal_structure: string | null;
   accepted_at: string | null;
   rejected_at: string | null;
+  source_language?: string | null;
+  secondary_language?: string | null;
+  title_secondary?: string | null;
+  scope_description_secondary?: string | null;
+  proposal_structure_secondary?: string | null;
 };
+
+const LANG_LABEL: Record<string, string> = { fr: "FR", en: "EN", es: "ES", pt: "PT" };
 
 type State =
   | "loading"
