@@ -249,13 +249,41 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃ
     if (!toolCall) throw new Error("Resposta sem tool_call");
     const ai = JSON.parse(toolCall.function.arguments);
 
-    const scopeItems: ScopeItem[] = Array.isArray(ai.scope_items) ? ai.scope_items : [];
+    // ---- Pós-processamento: remover placeholders e detectar idioma estrangeiro ----
+    const FOREIGN_TOKENS = /\b(Proposition|Proposal|Propuesta|honoraires|Honoraires|fees|Fees|scope|Scope|deliverables|stakeholders|notaire|Notaire|mairie|Mairie|apostille|Apostille|Chambre|propuesta)\b/;
+    const scrub = (s: string): string => {
+      if (!s) return s;
+      return s
+        .replace(/\[([^\]]*)\]/g, "$1") // remove colchetes mantendo conteúdo
+        .replace(/\{([^}]*)\}/g, "$1") // remove chaves mantendo conteúdo
+        .replace(/«\s*([^»]*)\s*»/g, "$1") // remove guillemets franceses
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    };
+    if (typeof ai.title === "string") ai.title = scrub(ai.title);
+    if (typeof ai.scope_description === "string") ai.scope_description = scrub(ai.scope_description);
+    const scopeItems: ScopeItem[] = (Array.isArray(ai.scope_items) ? ai.scope_items : []).map((it: any) => ({
+      ...it,
+      title: typeof it.title === "string" ? scrub(it.title) : it.title,
+      description: typeof it.description === "string" ? scrub(it.description) : it.description,
+      duration: typeof it.duration === "string" ? scrub(it.duration) : it.duration,
+      deliverables: Array.isArray(it.deliverables) ? it.deliverables.map((d: any) => typeof d === "string" ? scrub(d) : d) : it.deliverables,
+      stakeholders: Array.isArray(it.stakeholders) ? it.stakeholders.map((d: any) => typeof d === "string" ? scrub(d) : d) : it.stakeholders,
+      success_metrics: Array.isArray(it.success_metrics) ? it.success_metrics.map((d: any) => typeof d === "string" ? scrub(d) : d) : it.success_metrics,
+    }));
+    // Fallback de título se contiver token estrangeiro
+    let finalTitle = ai.title || "Proposta de Prestação de Serviços Jurídicos";
+    if (FOREIGN_TOKENS.test(finalTitle)) {
+      console.warn("Título com token estrangeiro detectado, aplicando fallback:", finalTitle);
+      finalTitle = "Proposta de Prestação de Serviços Jurídicos e Consultoria";
+    }
+
     const computedTotal = scopeItems.reduce((s, i) => s + (Number(i.amount) || 0), 0);
     const finalTotal = hasTotal ? Number(total_amount) : Number(ai.total_amount) || computedTotal;
     const downPayment = +(finalTotal * 0.5).toFixed(2);
 
     const proposal_structure = buildProposalMarkdown({
-      title: ai.title || "Proposta de Prestação de Serviços Jurídicos",
+      title: finalTitle,
       client_name,
       client_document,
       client_address,
