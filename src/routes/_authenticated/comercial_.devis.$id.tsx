@@ -95,6 +95,33 @@ function DevisDetail() {
     });
   }, [devis, editing]);
 
+  // Garante tradução para o idioma do cliente (campos *_secondary)
+  // assim que o devis é carregado, quando source_language != pt.
+  useEffect(() => {
+    if (!devis?.id) return;
+    const src = (devis as any).source_language || "pt";
+    if (src === "pt") return;
+    const hasSec =
+      typeof (devis as any).proposal_structure_secondary === "string" &&
+      (devis as any).proposal_structure_secondary.trim().length > 0;
+    const hasContent =
+      ((devis as any).proposal_structure || "").trim().length > 0 ||
+      ((devis as any).scope_description || "").trim().length > 0;
+    if (hasSec || !hasContent) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await ensureDevisBilingual(devis);
+        if (!cancelled) queryClient.invalidateQueries({ queryKey: ["devis", devis.id] });
+      } catch (e) {
+        console.warn("auto ensureDevisBilingual falhou:", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [devis?.id, (devis as any)?.source_language, (devis as any)?.proposal_structure_secondary, queryClient]);
+
   const update = useMutation({
     mutationFn: async () => {
       // Bloqueio: status que exige validação não pode ser salvo se ainda não validado
@@ -264,8 +291,22 @@ function DevisDetail() {
     }
   };
 
+  // Campos que existem em versão *_secondary (traduzida para o idioma do cliente)
+  const SECONDARY_FIELDS = new Set([
+    "title",
+    "scope_description",
+    "proposal_structure",
+    "payment_terms",
+  ]);
+
   const view = (key: string, fallback: string) => {
+    // Toggle manual: usuário pediu para ver PT traduzido
     if (viewLang === "pt" && translatedFields && translatedFields[key]) return translatedFields[key];
+    // Padrão: se o idioma detectado do cliente não for PT, mostra a versão no idioma do cliente
+    if (viewLang === "native" && sourceLang !== "pt" && SECONDARY_FIELDS.has(key)) {
+      const sec = (devis as any)?.[`${key}_secondary`];
+      if (typeof sec === "string" && sec.trim().length > 0) return sec;
+    }
     return fallback;
   };
 
