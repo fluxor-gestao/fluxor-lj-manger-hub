@@ -309,6 +309,26 @@ function Comercial() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const deleteClient = useMutation({
+    mutationFn: async (id: string) => {
+      const { count, error: countErr } = await supabase
+        .from("devis")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", id);
+      if (countErr) throw countErr;
+      if ((count ?? 0) > 0) {
+        throw new Error(`Cliente possui ${count} devis vinculado(s). Exclua/realoque antes.`);
+      }
+      const { error } = await supabase.from("clients").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Cliente excluído.");
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const createDevis = useMutation({
     mutationFn: async (form: DevisForm) => {
       const total = Number(form.total_amount) || 0;
