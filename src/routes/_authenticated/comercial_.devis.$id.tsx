@@ -264,8 +264,22 @@ function DevisDetail() {
     }
   };
 
+  // Campos que existem em versão *_secondary (traduzida para o idioma do cliente)
+  const SECONDARY_FIELDS = new Set([
+    "title",
+    "scope_description",
+    "proposal_structure",
+    "payment_terms",
+  ]);
+
   const view = (key: string, fallback: string) => {
+    // Toggle manual: usuário pediu para ver PT traduzido
     if (viewLang === "pt" && translatedFields && translatedFields[key]) return translatedFields[key];
+    // Padrão: se o idioma detectado do cliente não for PT, mostra a versão no idioma do cliente
+    if (viewLang === "native" && sourceLang !== "pt" && SECONDARY_FIELDS.has(key)) {
+      const sec = (devis as any)?.[`${key}_secondary`];
+      if (typeof sec === "string" && sec.trim().length > 0) return sec;
+    }
     return fallback;
   };
 
