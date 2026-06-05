@@ -239,9 +239,22 @@ function AceitarProposta() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-2xl">{preview.title}</CardTitle>
+                  {isBilingual ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">PT</div>
+                        <CardTitle className="text-2xl">{preview.title}</CardTitle>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">{secLabel}</div>
+                        <CardTitle className="text-2xl">{preview.title_secondary || preview.title}</CardTitle>
+                      </div>
+                    </div>
+                  ) : (
+                    <CardTitle className="text-2xl">{preview.title}</CardTitle>
+                  )}
                   {preview.client_name && (
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mt-2">
                       Para: <span className="font-medium text-foreground">{preview.client_name}</span>
                     </p>
                   )}
@@ -271,7 +284,20 @@ function AceitarProposta() {
                       <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
                         <FileText className="h-4 w-4" /> Escopo
                       </div>
-                      <p className="text-sm whitespace-pre-wrap text-muted-foreground">{preview.scope_description}</p>
+                      {isBilingual ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">PT</div>
+                            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{preview.scope_description}</p>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">{secLabel}</div>
+                            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{preview.scope_description_secondary || preview.scope_description}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm whitespace-pre-wrap text-muted-foreground">{preview.scope_description}</p>
+                      )}
                     </div>
                   )}
 
@@ -280,11 +306,32 @@ function AceitarProposta() {
                       <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
                         <FileText className="h-4 w-4" /> Estrutura da proposta
                       </div>
-                      <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {preview.proposal_structure}
-                        </ReactMarkdown>
-                      </div>
+                      {isBilingual ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">PT</div>
+                            <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {preview.proposal_structure}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">{secLabel}</div>
+                            <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {preview.proposal_structure_secondary || preview.proposal_structure}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h2:mt-5 prose-h3:mt-4">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {preview.proposal_structure}
+                          </ReactMarkdown>
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>
