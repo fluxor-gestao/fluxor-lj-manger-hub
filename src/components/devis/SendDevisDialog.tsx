@@ -45,7 +45,11 @@ interface Props {
 
 export default function SendDevisDialog({ open, onOpenChange, devis, client }: Props) {
   const queryClient = useQueryClient();
-  const language = useMemo<Lang>(() => detectLanguage(devis?.proposal_structure), [devis?.proposal_structure]);
+  const language = useMemo<Lang>(() => {
+    const src = (devis?.source_language || "").toLowerCase();
+    if (src === "pt" || src === "fr" || src === "en" || src === "es") return src as Lang;
+    return detectLanguage(devis?.proposal_structure);
+  }, [devis?.source_language, devis?.proposal_structure]);
   const publicBase =
     (import.meta.env.VITE_PUBLIC_SITE_URL as string | undefined) ||
     "https://ljmanager.fluxorbi.com";
