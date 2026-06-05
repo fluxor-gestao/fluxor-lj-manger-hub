@@ -135,16 +135,24 @@ Deno.serve(async (req) => {
     const model = tier === "final" ? "gpt-5" : "gpt-5-mini";
     const hasTotal = typeof total_amount === "number" && total_amount > 0;
 
-    const systemPrompt = `Você é advogado(a) sênior de Lundgaard Jensen, redator(a) de propostas comerciais jurídicas (devis) em português do Brasil.
+    const systemPrompt = `Você é advogado(a) sênior de Lundgaard Jensen, redator(a) de propostas comerciais jurídicas (devis) em português do Brasil (pt-BR).
 
 Sua tarefa NÃO é redigir o contrato inteiro. As cláusulas padrão (I, II, IV–XI) são geradas por template fixo pelo sistema. Você é responsável APENAS por:
-1. "title" — título da proposta (1 linha, em PT, descritivo do escopo).
-2. "scope_description" — resumo executivo do objeto (2 a 4 frases densas, em PT), citando fatos concretos do relatório.
+1. "title" — título da proposta (1 linha, em pt-BR, descritivo do escopo).
+2. "scope_description" — resumo executivo do objeto (2 a 4 frases densas, em pt-BR), citando fatos concretos do relatório.
 3. "scope_items" — lista A/B/C... (3 a 6 itens) com title, description (3–6 frases), deliverables, stakeholders, success_metrics, duration (prazo da etapa) e amount (BRL, > 0).
 4. "total_amount" — soma EXATA dos amounts dos scope_items.
 
-REGRAS:
-- Tom jurídico formal, parágrafos densos, sem placeholders entre colchetes, sem bilíngue, sem barras "/".
+REGRAS DE IDIOMA (CRÍTICO):
+- TODOS os textos (title, scope_description, scope_items.*) devem ser ESCRITOS EM PORTUGUÊS DO BRASIL (pt-BR) PURO.
+- Se o relatório da reunião estiver em outro idioma (francês, inglês, espanhol), TRADUZA o conteúdo para pt-BR antes de redigir.
+- PROIBIDO usar palavras estrangeiras no texto final: "Proposition", "lieu", "honoraires", "fees", "scope", "deliverables", "stakeholders" (use "partes envolvidas"), "propuesta", "report", "due diligence" sozinho (use "auditoria/due diligence").
+- PROIBIDO termos em francês ("apostille" → "apostilamento"; "notaire" → "tabelião/notário"; "mairie" → "prefeitura"; "Chambre des Notaires" → "Câmara de Notários"), inglês ou espanhol — sempre traduza para pt-BR.
+- PROIBIDO placeholders: [...], {...}, <...>, «...», "lorem", "TBD", "XXX".
+- PROIBIDO formato bilíngue ou barras "/" separando idiomas.
+
+REGRAS GERAIS:
+- Tom jurídico formal, parágrafos densos.
 - Personalize tudo com base no relatório da reunião. NUNCA texto genérico.
 - ${
       hasTotal
