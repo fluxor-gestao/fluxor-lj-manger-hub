@@ -11,12 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { Plus, Users, FileText, Eye, Pencil, CalendarIcon, Filter, LayoutGrid, List, Sparkles, Loader2, Upload, ArrowLeft, Send, Clock, CheckCircle2, HelpCircle, Search } from "lucide-react";
+import { Plus, Users, FileText, Eye, Pencil, Trash2, CalendarIcon, Filter, LayoutGrid, List, Sparkles, Loader2, Upload, ArrowLeft, Send, Clock, CheckCircle2, HelpCircle, Search } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -304,6 +305,26 @@ function Comercial() {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       setClientDialogOpen(false);
       setClientForm(emptyClient);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteClient = useMutation({
+    mutationFn: async (id: string) => {
+      const { count, error: countErr } = await supabase
+        .from("devis")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", id);
+      if (countErr) throw countErr;
+      if ((count ?? 0) > 0) {
+        throw new Error(`Cliente possui ${count} devis vinculado(s). Exclua/realoque antes.`);
+      }
+      const { error } = await supabase.from("clients").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Cliente excluído.");
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -857,10 +878,31 @@ function Comercial() {
                     <TableCell>{c.email}</TableCell>
                     <TableCell>{c.phone}</TableCell>
                     <TableCell>{c.document}</TableCell>
-                    <TableCell>
-                      <Button size="icon" variant="ghost" onClick={() => openEditClient(c)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                     <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => openEditClient(c)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="icon" variant="ghost" disabled={deleteClient.isPending}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação é permanente. O cliente <strong>{c.name}</strong> será removido. Clientes com devis vinculados não podem ser excluídos.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteClient.mutate(c.id)}>Excluir</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
