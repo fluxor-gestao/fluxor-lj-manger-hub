@@ -336,7 +336,7 @@ function AceitarProposta() {
       </main>
 
       <footer className="border-t bg-background mt-12">
-        <div className="max-w-3xl mx-auto px-6 py-6 text-xs text-muted-foreground leading-relaxed">
+        <div className={`${containerCls} mx-auto px-6 py-6 text-xs text-muted-foreground leading-relaxed`}>
           <div className="font-medium text-foreground">Lundgaard Jensen Advocacia &amp; Consultoria Internacional</div>
           <div>Rua João Cordeiro, 831 – Praia de Iracema</div>
           <div>+55 (85) 9 9406-6042 &nbsp;|&nbsp; +55 (85) 9 3037-9931</div>
