@@ -131,6 +131,15 @@ function AceitarProposta() {
   const showAccepted = state === "success" || state === "already_accepted";
   const showRejected = state === "rejected" || state === "already_rejected";
 
+  const isBilingual = !!(
+    preview?.secondary_language &&
+    preview?.proposal_structure_secondary &&
+    preview.proposal_structure_secondary.trim().length > 0
+  );
+  const secLang = (preview?.secondary_language || "").toLowerCase();
+  const secLabel = LANG_LABEL[secLang] || secLang.toUpperCase();
+  const containerCls = isBilingual ? "max-w-6xl" : "max-w-3xl";
+
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
