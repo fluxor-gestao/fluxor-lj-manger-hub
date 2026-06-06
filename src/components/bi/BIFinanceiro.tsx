@@ -560,8 +560,20 @@ export default function BIFinanceiro() {
         severidade: "baixa",
         acao: "Avaliar oportunidades de redução.",
       });
+    // Cliente com maior risco financeiro
+    const risco = [...topClientes]
+      .map((c) => ({ ...c, risco: c.vencido * 0.7 + c.aberto * 0.3 }))
+      .filter((c) => c.risco > 0)
+      .sort((a, b) => b.risco - a.risco)[0];
+    if (risco)
+      list.push({
+        titulo: "Cliente com maior risco financeiro",
+        descricao: `${risco.name} — ${BRL(risco.vencido)} vencido e ${BRL(risco.aberto)} em aberto.`,
+        severidade: risco.vencido > 0 ? "alta" : "media",
+        acao: "Revisar limite de crédito e renegociar.",
+      });
     return list;
-  }, [monthly, top10Inadimplentes, agg, rows, despesaCategorias]);
+  }, [monthly, top10Inadimplentes, agg, rows, despesaCategorias, topClientes]);
 
   const clearFilters = () => setFilters(defaultFilters);
 
