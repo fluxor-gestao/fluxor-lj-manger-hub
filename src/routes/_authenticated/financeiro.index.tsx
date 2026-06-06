@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Wallet, ArrowDownCircle, ArrowUpCircle, BarChart3, type LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
-export const Route = createFileRoute("/_authenticated/financeiro")({
+export const Route = createFileRoute("/_authenticated/financeiro/")({
   component: FinanceiroHub,
 });
 
