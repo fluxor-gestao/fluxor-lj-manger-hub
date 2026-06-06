@@ -23,6 +23,7 @@ import { Route as AuthenticatedComercialRouteImport } from './routes/_authentica
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAjudaRouteImport } from './routes/_authenticated/ajuda'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedFinanceiroIndexRouteImport } from './routes/_authenticated/financeiro.index'
 import { Route as PropostaAceiteTokenRouteImport } from './routes/proposta.aceite.$token'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicBiOperacaoRouteImport } from './routes/api/public/bi-operacao'
@@ -113,6 +114,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedFinanceiroIndexRoute =
+  AuthenticatedFinanceiroIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedFinanceiroRoute,
+  } as any)
 const PropostaAceiteTokenRoute = PropostaAceiteTokenRouteImport.update({
   id: '/proposta/aceite/$token',
   path: '/proposta/aceite/$token',
@@ -250,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
+  '/financeiro/': typeof AuthenticatedFinanceiroIndexRoute
   '/comercial/devis/$id': typeof AuthenticatedComercialDevisIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -264,7 +272,6 @@ export interface FileRoutesByTo {
   '/bi': typeof AuthenticatedBiRoute
   '/comercial': typeof AuthenticatedComercialRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
-  '/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
   '/gestao': typeof AuthenticatedGestaoRoute
   '/hub': typeof AuthenticatedHubRoute
   '/operacao': typeof AuthenticatedOperacaoRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
+  '/financeiro': typeof AuthenticatedFinanceiroIndexRoute
   '/comercial/devis/$id': typeof AuthenticatedComercialDevisIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -320,6 +328,7 @@ export interface FileRoutesById {
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
+  '/_authenticated/financeiro/': typeof AuthenticatedFinanceiroIndexRoute
   '/_authenticated/comercial_/devis/$id': typeof AuthenticatedComercialDevisIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-operacao'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
+    | '/financeiro/'
     | '/comercial/devis/$id'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -370,7 +380,6 @@ export interface FileRouteTypes {
     | '/bi'
     | '/comercial'
     | '/conciliacao'
-    | '/financeiro'
     | '/gestao'
     | '/hub'
     | '/operacao'
@@ -390,6 +399,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-operacao'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
+    | '/financeiro'
     | '/comercial/devis/$id'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-operacao'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
+    | '/_authenticated/financeiro/'
     | '/_authenticated/comercial_/devis/$id'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -550,6 +561,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/financeiro/': {
+      id: '/_authenticated/financeiro/'
+      path: '/'
+      fullPath: '/financeiro/'
+      preLoaderRoute: typeof AuthenticatedFinanceiroIndexRouteImport
+      parentRoute: typeof AuthenticatedFinanceiroRoute
     }
     '/proposta/aceite/$token': {
       id: '/proposta/aceite/$token'
@@ -692,6 +710,7 @@ interface AuthenticatedFinanceiroRouteChildren {
   AuthenticatedFinanceiroContasAPagarRoute: typeof AuthenticatedFinanceiroContasAPagarRoute
   AuthenticatedFinanceiroContasAReceberRoute: typeof AuthenticatedFinanceiroContasAReceberRoute
   AuthenticatedFinanceiroRapportRoute: typeof AuthenticatedFinanceiroRapportRoute
+  AuthenticatedFinanceiroIndexRoute: typeof AuthenticatedFinanceiroIndexRoute
 }
 
 const AuthenticatedFinanceiroRouteChildren: AuthenticatedFinanceiroRouteChildren =
@@ -702,6 +721,7 @@ const AuthenticatedFinanceiroRouteChildren: AuthenticatedFinanceiroRouteChildren
     AuthenticatedFinanceiroContasAReceberRoute:
       AuthenticatedFinanceiroContasAReceberRoute,
     AuthenticatedFinanceiroRapportRoute: AuthenticatedFinanceiroRapportRoute,
+    AuthenticatedFinanceiroIndexRoute: AuthenticatedFinanceiroIndexRoute,
   }
 
 const AuthenticatedFinanceiroRouteWithChildren =
