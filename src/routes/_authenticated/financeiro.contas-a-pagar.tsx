@@ -1,27 +1,385 @@
+import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  ArrowLeft, Search, Filter, MoreHorizontal, Eye, FileText, DollarSign, CheckCircle2,
+  AlertTriangle, CalendarClock, Wallet, ListChecks, Receipt,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ContasTable } from "@/components/financeiro/ContasTable";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
+import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-pagar")({
   component: ContasAPagarPage,
 });
 
+const fmt = (n: number) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
+
+const today = () => new Date().toISOString().slice(0, 10);
+const addDays = (iso: string, d: number) => {
+  const dt = new Date(iso + "T00:00:00");
+  dt.setDate(dt.getDate() + d);
+  return dt.toISOString().slice(0, 10);
+};
+const fmtDateBR = (iso: string | null) =>
+  iso ? new Date(iso + "T00:00:00").toLocaleDateString("pt-BR") : "—";
+
+type Row = {
+  id: string;
+  due_date: string | null;
+  entry_date: string;
+  competence_month: string | null;
+  movement_description: string | null;
+  counterparty_name: string | null;
+  amount_out: number | null;
+  total_brl: number | null;
+  paid_amount: number | null;
+  open_amount: number | null;
+  payment_status: string | null;
+  document_reference: string | null;
+  notes: string | null;
+  supplier_id: string | null;
+  supplier: { name: string } | null;
+};
+
+const COLS =
+  "id, due_date, entry_date, competence_month, movement_description, counterparty_name, amount_out, total_brl, paid_amount, open_amount, payment_status, document_reference, notes, supplier_id, supplier:suppliers(name)";
+
+type Status = "pago" | "parcial" | "vencido" | "aberto";
+
+function statusOf(r: Row): Status {
+  if (r.payment_status === "pago" || Number(r.open_amount ?? 0) <= 0.0049) return "pago";
+  if (
+    r.payment_status === "parcial" ||
+    (Number(r.paid_amount ?? 0) > 0 && Number(r.open_amount ?? 0) > 0)
+  ) return "parcial";
+  if (r.due_date && r.due_date < today()) return "vencido";
+  return "aberto";
+}
+
+const statusBadge: Record<Status, string> = {
+  pago: "bg-success/15 text-success border-success/30",
+  parcial: "bg-warning/15 text-warning border-warning/30",
+  vencido: "bg-destructive/15 text-destructive border-destructive/30",
+  aberto: "bg-muted text-muted-foreground border-border",
+};
+const statusLabel: Record<Status, string> = {
+  pago: "Pago", parcial: "Parcial", vencido: "Vencido", aberto: "Em aberto",
+};
+
 function ContasAPagarPage() {
   const navigate = useNavigate();
+  const { suppliers } = useFinanceiroCatalogs();
+
+  // Filtros
+  const [search, setSearch] = useState("");
+  const [supplierFilter, setSupplierFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dueFrom, setDueFrom] = useState<string>("");
+  const [dueTo, setDueTo] = useState<string>("");
+  const [onlyOverdue, setOnlyOverdue] = useState(false);
+  const [onlyOpen, setOnlyOpen] = useState(true);
+
+  const q = useQuery({
+    queryKey: ["contas-a-pagar", "v2"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("financial_entries")
+        .select(COLS)
+        .eq("entry_type", "despesa" as any)
+        .order("due_date", { ascending: true, nullsFirst: false })
+        .limit(1000);
+      if (error) throw error;
+      return (data ?? []) as unknown as Row[];
+    },
+  });
+
+  const allRows = q.data ?? [];
+
+  const filtered = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    return allRows.filter((r) => {
+      const st = statusOf(r);
+      if (onlyOpen && st === "pago") return false;
+      if (onlyOverdue && st !== "vencido") return false;
+      if (statusFilter !== "all" && st !== statusFilter) return false;
+      if (supplierFilter !== "all" && r.supplier_id !== supplierFilter) return false;
+      if (dueFrom && (!r.due_date || r.due_date < dueFrom)) return false;
+      if (dueTo && (!r.due_date || r.due_date > dueTo)) return false;
+      if (s) {
+        const hay = `${r.movement_description ?? ""} ${r.counterparty_name ?? ""} ${r.supplier?.name ?? ""}`.toLowerCase();
+        if (!hay.includes(s)) return false;
+      }
+      return true;
+    });
+  }, [allRows, search, supplierFilter, statusFilter, dueFrom, dueTo, onlyOverdue, onlyOpen]);
+
+  const metrics = useMemo(() => {
+    const t = today();
+    const in7 = addDays(t, 7);
+    const monthPrefix = t.slice(0, 7);
+    let totalAberto = 0, vencidoVal = 0, vencidoQtd = 0;
+    let a7Val = 0, a7Qtd = 0, pagoMes = 0, pendentesQtd = 0;
+    for (const r of allRows) {
+      const st = statusOf(r);
+      const open = Number(r.open_amount ?? 0);
+      const paid = Number(r.paid_amount ?? 0);
+      if (st !== "pago") {
+        totalAberto += open;
+        pendentesQtd += 1;
+        if (st === "vencido") { vencidoVal += open; vencidoQtd += 1; }
+        if (r.due_date && r.due_date >= t && r.due_date <= in7) { a7Val += open; a7Qtd += 1; }
+      }
+      if (paid > 0 && r.entry_date?.startsWith(monthPrefix)) {
+        pagoMes += paid;
+      }
+    }
+    return { totalAberto, vencidoVal, vencidoQtd, a7Val, a7Qtd, pagoMes, pendentesQtd };
+  }, [allRows]);
+
+  const totals = useMemo(() => {
+    return filtered.reduce(
+      (acc, r) => {
+        const total = Number(r.total_brl ?? r.amount_out ?? 0);
+        const paid = Number(r.paid_amount ?? 0);
+        const open = Number(r.open_amount ?? Math.max(0, total - paid));
+        acc.total += total; acc.paid += paid; acc.open += open;
+        return acc;
+      },
+      { total: 0, paid: 0, open: 0 },
+    );
+  }, [filtered]);
+
+  const clearFilters = () => {
+    setSearch(""); setSupplierFilter("all"); setStatusFilter("all");
+    setDueFrom(""); setDueTo(""); setOnlyOverdue(false); setOnlyOpen(true);
+  };
+
+  const act = (label: string, r: Row) => {
+    toast.info(`${label} — em breve`, {
+      description: `${r.supplier?.name ?? r.counterparty_name ?? "Fornecedor"} · ${fmt(Number(r.open_amount ?? 0))}`,
+    });
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/financeiro" })}>
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold font-display">Contas a Pagar</h1>
-          <p className="text-sm text-muted-foreground">Pagamentos em aberto</p>
+    <div className="space-y-6 pb-10">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/financeiro" })}>
+            <ArrowLeft className="h-4 w-4" /> Voltar
+          </Button>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold font-display">Contas a Pagar</h1>
+            <p className="text-sm text-muted-foreground">
+              Controle de fornecedores, vencimentos e pagamentos
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => toast.info("Exportar — em breve")}>
+            <FileText className="h-4 w-4 mr-2" /> Exportar
+          </Button>
+          <Button onClick={() => toast.info("Novo pagamento — em breve")}>
+            <DollarSign className="h-4 w-4 mr-2" /> Novo pagamento
+          </Button>
         </div>
       </div>
-      <ContasTable kind="pagar" />
+
+      {/* KPI cards */}
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+        <KpiCard tone="primary" icon={<Wallet className="h-4 w-4" />} label="Total em aberto" value={fmt(metrics.totalAberto)} />
+        <KpiCard tone="danger" icon={<AlertTriangle className="h-4 w-4" />} label="Vencidos" value={fmt(metrics.vencidoVal)} hint={`${metrics.vencidoQtd} pagamento(s)`} />
+        <KpiCard tone="warning" icon={<CalendarClock className="h-4 w-4" />} label="A vencer (7 dias)" value={fmt(metrics.a7Val)} hint={`${metrics.a7Qtd} pagamento(s)`} />
+        <KpiCard tone="success" icon={<CheckCircle2 className="h-4 w-4" />} label="Pagos no mês" value={fmt(metrics.pagoMes)} />
+        <KpiCard tone="muted" icon={<ListChecks className="h-4 w-4" />} label="Pagamentos pendentes" value={String(metrics.pendentesQtd)} />
+      </div>
+
+      {/* Filtros */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <Filter className="h-3.5 w-3.5" /> Filtros
+            </div>
+            <Button variant="ghost" size="sm" onClick={clearFilters}>Limpar</Button>
+          </div>
+          <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+            <div className="relative xl:col-span-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar descrição ou fornecedor..."
+                className="pl-9"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Select value={supplierFilter} onValueChange={setSupplierFilter}>
+              <SelectTrigger><SelectValue placeholder="Fornecedor" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os fornecedores</SelectItem>
+                {suppliers.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos status</SelectItem>
+                <SelectItem value="aberto">Em aberto</SelectItem>
+                <SelectItem value="parcial">Parcial</SelectItem>
+                <SelectItem value="vencido">Vencido</SelectItem>
+                <SelectItem value="pago">Pago</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input type="date" value={dueFrom} onChange={(e) => setDueFrom(e.target.value)} />
+            <Input type="date" value={dueTo} onChange={(e) => setDueTo(e.target.value)} />
+          </div>
+          <div className="flex flex-wrap items-center gap-4 pt-1">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <Checkbox checked={onlyOverdue} onCheckedChange={(v) => setOnlyOverdue(!!v)} />
+              Apenas vencidos
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <Checkbox checked={onlyOpen} onCheckedChange={(v) => setOnlyOpen(!!v)} />
+              Apenas em aberto
+            </label>
+            <span className="text-xs text-muted-foreground ml-auto">
+              {filtered.length} de {allRows.length} pagamento(s)
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabela */}
+      {q.isLoading ? (
+        <Card><CardContent><LoadingState /></CardContent></Card>
+      ) : q.isError ? (
+        <Card><CardContent><ErrorState onRetry={() => q.refetch()} /></CardContent></Card>
+      ) : filtered.length === 0 ? (
+        <Card><CardContent>
+          <EmptyState title="Nenhum pagamento encontrado" description="Ajuste os filtros para visualizar as contas a pagar." />
+        </CardContent></Card>
+      ) : (
+        <Card className="overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/40">
+                <TableHead className="font-semibold">Fornecedor</TableHead>
+                <TableHead className="font-semibold">Descrição</TableHead>
+                <TableHead className="font-semibold">Vencimento</TableHead>
+                <TableHead className="font-semibold text-right">Valor total</TableHead>
+                <TableHead className="font-semibold text-right">Pago</TableHead>
+                <TableHead className="font-semibold text-right">Saldo aberto</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((r) => {
+                const total = Number(r.total_brl ?? r.amount_out ?? 0);
+                const paid = Number(r.paid_amount ?? 0);
+                const open = Number(r.open_amount ?? Math.max(0, total - paid));
+                const st = statusOf(r);
+                const fornecedor = r.supplier?.name || r.counterparty_name || "—";
+                return (
+                  <TableRow key={r.id} className="even:bg-muted/20 hover:bg-muted/40">
+                    <TableCell className="py-2 font-medium">{fornecedor}</TableCell>
+                    <TableCell className="py-2 max-w-[280px] truncate" title={r.movement_description ?? ""}>
+                      {r.movement_description ?? "—"}
+                    </TableCell>
+                    <TableCell className="py-2 whitespace-nowrap text-xs tabular-nums">
+                      {fmtDateBR(r.due_date)}
+                    </TableCell>
+                    <TableCell className="py-2 text-right tabular-nums">{fmt(total)}</TableCell>
+                    <TableCell className="py-2 text-right tabular-nums text-success">
+                      {paid ? fmt(paid) : "—"}
+                    </TableCell>
+                    <TableCell className="py-2 text-right font-semibold tabular-nums">{fmt(open)}</TableCell>
+                    <TableCell className="py-2">
+                      <Badge variant="outline" className={statusBadge[st]}>{statusLabel[st]}</Badge>
+                    </TableCell>
+                    <TableCell className="py-2 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          <DropdownMenuItem onClick={() => act("Ver detalhes", r)}>
+                            <Eye className="h-4 w-4 mr-2" /> Ver detalhes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => act("Registrar pagamento", r)}>
+                            <DollarSign className="h-4 w-4 mr-2" /> Registrar pagamento
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => act("Marcar como pago", r)}>
+                            <CheckCircle2 className="h-4 w-4 mr-2" /> Marcar como pago
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => act("Ver comprovante", r)}>
+                            <Receipt className="h-4 w-4 mr-2" /> Ver comprovante
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              <TableRow className="bg-muted/40 font-semibold">
+                <TableCell colSpan={3} className="py-2">Totais (filtrados)</TableCell>
+                <TableCell className="py-2 text-right tabular-nums">{fmt(totals.total)}</TableCell>
+                <TableCell className="py-2 text-right tabular-nums text-success">{fmt(totals.paid)}</TableCell>
+                <TableCell className="py-2 text-right tabular-nums">{fmt(totals.open)}</TableCell>
+                <TableCell colSpan={2} />
+              </TableRow>
+            </TableBody>
+          </Table>
+        </Card>
+      )}
     </div>
+  );
+}
+
+type Tone = "success" | "danger" | "warning" | "primary" | "muted";
+const toneStyles: Record<Tone, { icon: string; bar: string; ring: string }> = {
+  success: { icon: "text-success bg-success/10", bar: "bg-success", ring: "" },
+  danger:  { icon: "text-destructive bg-destructive/10", bar: "bg-destructive", ring: "" },
+  warning: { icon: "text-warning bg-warning/10", bar: "bg-warning", ring: "" },
+  primary: { icon: "text-primary bg-primary/10", bar: "bg-primary", ring: "ring-1 ring-primary/30" },
+  muted:   { icon: "text-muted-foreground bg-muted", bar: "bg-muted-foreground/40", ring: "" },
+};
+
+function KpiCard({
+  icon, label, value, hint, tone = "muted",
+}: { icon: React.ReactNode; label: string; value: string; hint?: string; tone?: Tone }) {
+  const t = toneStyles[tone];
+  return (
+    <Card className={`relative overflow-hidden transition-shadow hover:shadow-md ${t.ring}`}>
+      <span className={`absolute left-0 top-0 h-full w-1 ${t.bar}`} aria-hidden />
+      <CardContent className="pt-5 pb-4 pl-5">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-medium text-muted-foreground">{label}</span>
+          <span className={`flex h-7 w-7 items-center justify-center rounded-md ${t.icon}`}>{icon}</span>
+        </div>
+        <p className="text-xl font-bold font-display tabular-nums leading-tight">{value}</p>
+        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+      </CardContent>
+    </Card>
   );
 }
