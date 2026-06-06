@@ -106,72 +106,121 @@ function RapportPage() {
   const months3 = useMemo(() => [addMonths(month, -2), addMonths(month, -1), month], [month]);
 
   const q = useQuery({
-    queryKey: ["rapport", clientId, month, generatedAt],
+    queryKey: ["rapport", clientId, months3, generatedAt],
     queryFn: async () => {
-      const startKey = addMonths(month, -2);
-      const { start } = monthRange(startKey);
-      const { end } = monthRange(month);
       let qb = supabase
         .from("financial_entries")
         .select(
-          "id, entry_type, total_brl, paid_amount, open_amount, due_date, paid_at, payment_status, conciliation_status, client_id, category_id, movement_description, category:financial_categories(name)"
+          "id, entry_type, total_brl, paid_amount, open_amount, due_date, paid_at, payment_status, conciliation_status, client_id, category_id, competence_month, movement_description, category:financial_categories(name)"
         )
-        .or(`paid_at.gte.${start},due_date.gte.${start}`)
-        .limit(2000);
+        .in("competence_month", months3)
+        .limit(5000);
       if (clientId !== "all") qb = qb.eq("client_id", clientId);
       const { data, error } = await qb;
       if (error) throw error;
-      void end;
       return (data ?? []) as unknown as EntryRow[];
     },
   });
 
   const rows = q.data ?? [];
+  const isEmpty = !q.isLoading && rows.length === 0;
 
-  // Aggregations per month (use paid_at when available, fallback to due_date)
+  // Aggregations por competência
   const byMonth = useMemo(() => {
-    const map = new Map<string, { receitas: number; despesas: number }>();
-    for (const k of months3) map.set(k, { receitas: 0, despesas: 0 });
+    const map = new Map<
+      string,
+      {
+        receitasPrev: number;
+        despesasPrev: number;
+        recebido: number;
+        pago: number;
+        abertoIn: number;
+        abertoOut: number;
+      }
+    >();
+    for (const k of months3)
+      map.set(k, {
+        receitasPrev: 0,
+        despesasPrev: 0,
+        recebido: 0,
+        pago: 0,
+        abertoIn: 0,
+        abertoOut: 0,
+      });
     for (const r of rows) {
-      const ref = r.paid_at ?? r.due_date;
-      if (!ref) continue;
-      const k = ref.slice(0, 7);
-      if (!map.has(k)) continue;
+      const k = (r as any).competence_month as string | null;
+      if (!k || !map.has(k)) continue;
+      if (r.entry_type === "transferencia") continue;
       const bucket = map.get(k)!;
-      const v = Number(r.paid_amount ?? r.total_brl ?? 0);
-      if (r.entry_type === "receita") bucket.receitas += v;
-      else if (r.entry_type === "despesa") bucket.despesas += v;
+      const total = Number(r.total_brl ?? 0);
+      const paid = Number(r.paid_amount ?? 0);
+      const open = Number(
+        r.open_amount ?? Math.max(total - paid, 0)
+      );
+      if (r.entry_type === "receita") {
+        bucket.receitasPrev += total;
+        bucket.recebido += paid;
+        bucket.abertoIn += open;
+      } else if (r.entry_type === "despesa") {
+        bucket.despesasPrev += total;
+        bucket.pago += paid;
+        bucket.abertoOut += open;
+      }
     }
     return map;
   }, [rows, months3]);
 
-  const current = byMonth.get(month) ?? { receitas: 0, despesas: 0 };
-  const previous = byMonth.get(addMonths(month, -1)) ?? { receitas: 0, despesas: 0 };
+  const current = byMonth.get(month)!;
+  const previous = byMonth.get(addMonths(month, -1))!;
 
-  // Saldo inicial / final — mockado (sem extrato real)
-  const saldoInicial = 25000; // placeholder visual
-  const resultado = current.receitas - current.despesas;
+  const resultado = current.recebido - current.pago;
+  const resultadoPrevisto = current.receitasPrev - current.despesasPrev;
+  const saldoInicial = 0; // sem extrato bancário ainda; mantido como referência visual
   const saldoFinal = saldoInicial + resultado;
+
+  // Vencidos e pendências (no escopo retornado)
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const vencidos = useMemo(
+    () =>
+      rows.filter(
+        (r) =>
+          r.payment_status !== "pago" &&
+          r.due_date &&
+          r.due_date < todayStr &&
+          Number(r.open_amount ?? 0) > 0
+      ),
+    [rows, todayStr]
+  );
+  const vencidosTotalIn = vencidos
+    .filter((r) => r.entry_type === "receita")
+    .reduce((s, r) => s + Number(r.open_amount ?? 0), 0);
+  const vencidosTotalOut = vencidos
+    .filter((r) => r.entry_type === "despesa")
+    .reduce((s, r) => s + Number(r.open_amount ?? 0), 0);
+
+  const pendentesConciliacao = rows.filter(
+    (r) => (r.conciliation_status ?? "pendente") === "pendente"
+  ).length;
 
   const monthlySeries = months3.map((k) => {
     const v = byMonth.get(k)!;
     return {
       month: monthLabel(k),
-      receitas: Math.round(v.receitas),
-      despesas: Math.round(v.despesas),
-      resultado: Math.round(v.receitas - v.despesas),
+      receitas: Math.round(v.recebido),
+      despesas: Math.round(v.pago),
+      resultado: Math.round(v.recebido - v.pago),
     };
   });
 
-  // Top despesas por categoria (mês atual)
+  // Top despesas por categoria (mês atual) — usa valor pago, fallback para total
   const topDespesas = useMemo(() => {
     const map = new Map<string, number>();
     for (const r of rows) {
       if (r.entry_type !== "despesa") continue;
-      const ref = r.paid_at ?? r.due_date;
-      if (!ref || ref.slice(0, 7) !== month) continue;
+      if ((r as any).competence_month !== month) continue;
       const name = r.category?.name ?? "Sem categoria";
       const v = Number(r.paid_amount ?? r.total_brl ?? 0);
+      if (v <= 0) continue;
       map.set(name, (map.get(name) ?? 0) + v);
     }
     const arr = Array.from(map.entries()).map(([name, value]) => ({ name, value: Math.round(value) }));
