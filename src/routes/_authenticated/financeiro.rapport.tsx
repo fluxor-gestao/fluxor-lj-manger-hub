@@ -106,72 +106,121 @@ function RapportPage() {
   const months3 = useMemo(() => [addMonths(month, -2), addMonths(month, -1), month], [month]);
 
   const q = useQuery({
-    queryKey: ["rapport", clientId, month, generatedAt],
+    queryKey: ["rapport", clientId, months3, generatedAt],
     queryFn: async () => {
-      const startKey = addMonths(month, -2);
-      const { start } = monthRange(startKey);
-      const { end } = monthRange(month);
       let qb = supabase
         .from("financial_entries")
         .select(
-          "id, entry_type, total_brl, paid_amount, open_amount, due_date, paid_at, payment_status, conciliation_status, client_id, category_id, movement_description, category:financial_categories(name)"
+          "id, entry_type, total_brl, paid_amount, open_amount, due_date, paid_at, payment_status, conciliation_status, client_id, category_id, competence_month, movement_description, category:financial_categories(name)"
         )
-        .or(`paid_at.gte.${start},due_date.gte.${start}`)
-        .limit(2000);
+        .in("competence_month", months3)
+        .limit(5000);
       if (clientId !== "all") qb = qb.eq("client_id", clientId);
       const { data, error } = await qb;
       if (error) throw error;
-      void end;
       return (data ?? []) as unknown as EntryRow[];
     },
   });
 
   const rows = q.data ?? [];
+  const isEmpty = !q.isLoading && rows.length === 0;
 
-  // Aggregations per month (use paid_at when available, fallback to due_date)
+  // Aggregations por competência
   const byMonth = useMemo(() => {
-    const map = new Map<string, { receitas: number; despesas: number }>();
-    for (const k of months3) map.set(k, { receitas: 0, despesas: 0 });
+    const map = new Map<
+      string,
+      {
+        receitasPrev: number;
+        despesasPrev: number;
+        recebido: number;
+        pago: number;
+        abertoIn: number;
+        abertoOut: number;
+      }
+    >();
+    for (const k of months3)
+      map.set(k, {
+        receitasPrev: 0,
+        despesasPrev: 0,
+        recebido: 0,
+        pago: 0,
+        abertoIn: 0,
+        abertoOut: 0,
+      });
     for (const r of rows) {
-      const ref = r.paid_at ?? r.due_date;
-      if (!ref) continue;
-      const k = ref.slice(0, 7);
-      if (!map.has(k)) continue;
+      const k = (r as any).competence_month as string | null;
+      if (!k || !map.has(k)) continue;
+      if (r.entry_type === "transferencia") continue;
       const bucket = map.get(k)!;
-      const v = Number(r.paid_amount ?? r.total_brl ?? 0);
-      if (r.entry_type === "receita") bucket.receitas += v;
-      else if (r.entry_type === "despesa") bucket.despesas += v;
+      const total = Number(r.total_brl ?? 0);
+      const paid = Number(r.paid_amount ?? 0);
+      const open = Number(
+        r.open_amount ?? Math.max(total - paid, 0)
+      );
+      if (r.entry_type === "receita") {
+        bucket.receitasPrev += total;
+        bucket.recebido += paid;
+        bucket.abertoIn += open;
+      } else if (r.entry_type === "despesa") {
+        bucket.despesasPrev += total;
+        bucket.pago += paid;
+        bucket.abertoOut += open;
+      }
     }
     return map;
   }, [rows, months3]);
 
-  const current = byMonth.get(month) ?? { receitas: 0, despesas: 0 };
-  const previous = byMonth.get(addMonths(month, -1)) ?? { receitas: 0, despesas: 0 };
+  const current = byMonth.get(month)!;
+  const previous = byMonth.get(addMonths(month, -1))!;
 
-  // Saldo inicial / final — mockado (sem extrato real)
-  const saldoInicial = 25000; // placeholder visual
-  const resultado = current.receitas - current.despesas;
+  const resultado = current.recebido - current.pago;
+  const resultadoPrevisto = current.receitasPrev - current.despesasPrev;
+  const saldoInicial = 0; // sem extrato bancário ainda; mantido como referência visual
   const saldoFinal = saldoInicial + resultado;
+
+  // Vencidos e pendências (no escopo retornado)
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const vencidos = useMemo(
+    () =>
+      rows.filter(
+        (r) =>
+          r.payment_status !== "pago" &&
+          r.due_date &&
+          r.due_date < todayStr &&
+          Number(r.open_amount ?? 0) > 0
+      ),
+    [rows, todayStr]
+  );
+  const vencidosTotalIn = vencidos
+    .filter((r) => r.entry_type === "receita")
+    .reduce((s, r) => s + Number(r.open_amount ?? 0), 0);
+  const vencidosTotalOut = vencidos
+    .filter((r) => r.entry_type === "despesa")
+    .reduce((s, r) => s + Number(r.open_amount ?? 0), 0);
+
+  const pendentesConciliacao = rows.filter(
+    (r) => (r.conciliation_status ?? "pendente") === "pendente"
+  ).length;
 
   const monthlySeries = months3.map((k) => {
     const v = byMonth.get(k)!;
     return {
       month: monthLabel(k),
-      receitas: Math.round(v.receitas),
-      despesas: Math.round(v.despesas),
-      resultado: Math.round(v.receitas - v.despesas),
+      receitas: Math.round(v.recebido),
+      despesas: Math.round(v.pago),
+      resultado: Math.round(v.recebido - v.pago),
     };
   });
 
-  // Top despesas por categoria (mês atual)
+  // Top despesas por categoria (mês atual) — usa valor pago, fallback para total
   const topDespesas = useMemo(() => {
     const map = new Map<string, number>();
     for (const r of rows) {
       if (r.entry_type !== "despesa") continue;
-      const ref = r.paid_at ?? r.due_date;
-      if (!ref || ref.slice(0, 7) !== month) continue;
+      if ((r as any).competence_month !== month) continue;
       const name = r.category?.name ?? "Sem categoria";
       const v = Number(r.paid_amount ?? r.total_brl ?? 0);
+      if (v <= 0) continue;
       map.set(name, (map.get(name) ?? 0) + v);
     }
     const arr = Array.from(map.entries()).map(([name, value]) => ({ name, value: Math.round(value) }));
@@ -183,35 +232,27 @@ function RapportPage() {
   const atencao = useMemo(() => {
     const items: { icon: any; title: string; description: string; tone: "warn" | "danger" | "info" }[] = [];
 
-    // Despesas que aumentaram
-    if (previous.despesas > 0) {
-      const delta = current.despesas - previous.despesas;
-      const pct = (delta / previous.despesas) * 100;
+    // Despesas que aumentaram (compara pagos do mês vs. mês anterior)
+    if (previous.pago > 0) {
+      const delta = current.pago - previous.pago;
+      const pct = (delta / previous.pago) * 100;
       if (pct >= 10) {
         items.push({
           icon: TrendingUp,
           title: "Despesas em alta",
-          description: `Despesas subiram ${pct.toFixed(1)}% vs. mês anterior (${BRL(delta)} a mais).`,
+          description: `Pagamentos cresceram ${pct.toFixed(1)}% vs. mês anterior (${BRL(delta)} a mais).`,
           tone: "warn",
         });
       }
     }
 
     // Contas vencidas
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const vencidas = rows.filter(
-      (r) =>
-        r.payment_status !== "pago" &&
-        r.due_date &&
-        r.due_date < todayStr &&
-        Number(r.open_amount ?? 0) > 0
-    );
-    if (vencidas.length > 0) {
-      const total = vencidas.reduce((s, r) => s + Number(r.open_amount ?? 0), 0);
+    if (vencidos.length > 0) {
+      const total = vencidosTotalIn + vencidosTotalOut;
       items.push({
         icon: AlertOctagon,
-        title: `${vencidas.length} contas vencidas`,
-        description: `Total em atraso: ${BRL(total)}. Priorize a regularização.`,
+        title: `${vencidos.length} contas vencidas`,
+        description: `Total em atraso: ${BRL(total)} (a receber ${BRL(vencidosTotalIn)} · a pagar ${BRL(vencidosTotalOut)}).`,
         tone: "danger",
       });
     }
@@ -220,21 +261,18 @@ function RapportPage() {
     if (saldoFinal < 0) {
       items.push({
         icon: AlertTriangle,
-        title: "Saldo final negativo",
-        description: `O mês fecha com saldo de ${BRL(saldoFinal)}. Avalie aporte ou postergação de despesas.`,
+        title: "Resultado negativo no mês",
+        description: `O mês fecha com ${BRL(saldoFinal)} de resultado. Avalie aporte ou postergação de despesas.`,
         tone: "danger",
       });
     }
 
     // Pendências de conciliação
-    const naoConciliadas = rows.filter(
-      (r) => r.paid_at && (r.conciliation_status ?? "pendente") !== "conciliado"
-    );
-    if (naoConciliadas.length > 0) {
+    if (pendentesConciliacao > 0) {
       items.push({
         icon: RefreshCcw,
-        title: `${naoConciliadas.length} lançamentos sem conciliação`,
-        description: "Existem pagamentos registrados ainda não conciliados com o extrato bancário.",
+        title: `${pendentesConciliacao} lançamentos sem conciliação`,
+        description: "Existem lançamentos com conciliação pendente no período.",
         tone: "info",
       });
     }
@@ -243,14 +281,14 @@ function RapportPage() {
       items.push({
         icon: Sparkles,
         title: "Nenhum ponto crítico no período",
-        description: "O mês está saudável: sem atrasos relevantes, alta de despesas ou saldo negativo.",
+        description: "O mês está saudável: sem atrasos relevantes, alta de despesas ou resultado negativo.",
         tone: "info",
       });
     }
     return items;
-  }, [rows, current, previous, saldoFinal]);
+  }, [current, previous, saldoFinal, vencidos, vencidosTotalIn, vencidosTotalOut, pendentesConciliacao]);
 
-  // Resumo executivo (mock baseado nos números)
+  // Resumo executivo (gerado a partir dos números)
   const resumoExecutivo = useMemo(() => {
     const clienteNome =
       clientId === "all" ? "a operação" : clients.find((c) => c.id === clientId)?.name ?? "o cliente";
@@ -261,15 +299,15 @@ function RapportPage() {
         ? `resultado negativo de ${BRL(Math.abs(resultado))}`
         : `resultado equilibrado`;
     const variacao =
-      previous.despesas > 0
-        ? `As despesas variaram ${(((current.despesas - previous.despesas) / previous.despesas) * 100).toFixed(1)}% em relação ao mês anterior.`
+      previous.pago > 0
+        ? `Os pagamentos variaram ${(((current.pago - previous.pago) / previous.pago) * 100).toFixed(1)}% em relação ao mês anterior.`
         : `Não há base do mês anterior para comparação de despesas.`;
-    return `No período de ${monthLabel(month)}, ${clienteNome} apresentou ${tendencia}. As receitas totalizaram ${BRL(
-      current.receitas
-    )} e as despesas ${BRL(current.despesas)}. ${variacao} O saldo final estimado é de ${BRL(
-      saldoFinal
-    )}, partindo de um saldo inicial de ${BRL(saldoInicial)}.`;
-  }, [clientId, clients, month, current, previous, resultado, saldoFinal]);
+    return `No período de ${monthLabel(month)}, ${clienteNome} apresentou ${tendencia}. Recebemos ${BRL(
+      current.recebido
+    )} e pagamos ${BRL(current.pago)}. ${variacao} Ainda há ${BRL(current.abertoIn)} a receber e ${BRL(
+      current.abertoOut
+    )} a pagar em aberto.`;
+  }, [clientId, clients, month, current, previous, resultado]);
 
   function handleGenerate() {
     setGeneratedAt(Date.now());
@@ -366,32 +404,63 @@ function RapportPage() {
         </CardContent>
       </Card>
 
-      {/* KPIs */}
+      {/* Empty state */}
+      {isEmpty ? (
+        <Card>
+          <CardContent className="py-8 text-center text-sm text-muted-foreground">
+            Nenhum lançamento encontrado para o cliente e competência selecionados.
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {/* KPIs principais */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <KpiCard label="Saldo inicial" value={BRL(saldoInicial)} icon={Wallet} tone="muted" hint="estimado" />
+        <KpiCard label="Saldo inicial" value={BRL(saldoInicial)} icon={Wallet} tone="muted" hint="sem extrato bancário" />
         <KpiCard
           label="Entradas do mês"
-          value={BRL(current.receitas)}
+          value={BRL(current.recebido)}
           icon={ArrowUpRight}
           tone="success"
+          hint={`previsto ${BRL(current.receitasPrev)}`}
         />
         <KpiCard
           label="Saídas do mês"
-          value={BRL(current.despesas)}
+          value={BRL(current.pago)}
           icon={ArrowDownRight}
           tone="danger"
+          hint={`previsto ${BRL(current.despesasPrev)}`}
         />
         <KpiCard
           label="Resultado do mês"
           value={BRL(resultado)}
           icon={resultado >= 0 ? TrendingUp : TrendingDown}
           tone={resultado >= 0 ? "success" : "danger"}
+          hint={`previsto ${BRL(resultadoPrevisto)}`}
         />
         <KpiCard
           label="Saldo final"
           value={BRL(saldoFinal)}
           icon={Wallet}
           tone={saldoFinal >= 0 ? "primary" : "danger"}
+        />
+      </div>
+
+      {/* KPIs secundários */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard label="A receber em aberto" value={BRL(current.abertoIn)} icon={ArrowUpRight} tone="primary" />
+        <KpiCard label="A pagar em aberto" value={BRL(current.abertoOut)} icon={ArrowDownRight} tone="muted" />
+        <KpiCard
+          label="Vencidos"
+          value={BRL(vencidosTotalIn + vencidosTotalOut)}
+          icon={AlertOctagon}
+          tone={vencidos.length > 0 ? "danger" : "muted"}
+          hint={`${vencidos.length} lançamento(s)`}
+        />
+        <KpiCard
+          label="Pendências de conciliação"
+          value={String(pendentesConciliacao)}
+          icon={RefreshCcw}
+          tone={pendentesConciliacao > 0 ? "primary" : "muted"}
         />
       </div>
 
