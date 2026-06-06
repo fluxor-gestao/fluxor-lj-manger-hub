@@ -191,7 +191,7 @@ export default function BIFinanceiro() {
       if (filters.paymentStatus !== "all") qb = qb.eq("payment_status", filters.paymentStatus);
       if (filters.categoryId !== "all") qb = qb.eq("category_id", filters.categoryId);
       if (filters.origin === "transferencia") qb = qb.eq("entry_type", "transferencia");
-      else if (filters.origin === "ofx") qb = qb.in("source_type", ["ofx", "extrato"]);
+      else if (filters.origin === "ofx") qb = qb.in("source_type", ["importacao_extrato", "importacao_planilha"]);
       else if (filters.origin === "manual")
         qb = qb.eq("source_type", "manual").is("document_reference", null);
       else if (filters.origin === "comercial")
