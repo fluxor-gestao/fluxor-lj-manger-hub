@@ -178,7 +178,7 @@ export default function BIFinanceiro() {
       let qb = supabase
         .from("financial_entries")
         .select(
-          "id, entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, due_date, paid_at, entry_date, competence_month, payment_status, conciliation_status, client_id, supplier_id, category_id, bank_account_id, business_unit, movement_description, counterparty_name"
+          "id, entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, due_date, paid_at, entry_date, competence_month, payment_status, conciliation_status, client_id, supplier_id, category_id, bank_account_id, business_unit, movement_description, counterparty_name, source_type, document_reference"
         )
         .gte("entry_date", filters.from)
         .lte("entry_date", filters.to)
@@ -191,13 +191,21 @@ export default function BIFinanceiro() {
       if (filters.paymentStatus !== "all") qb = qb.eq("payment_status", filters.paymentStatus);
       if (filters.categoryId !== "all") qb = qb.eq("category_id", filters.categoryId);
       if (filters.origin === "transferencia") qb = qb.eq("entry_type", "transferencia");
+      else if (filters.origin === "ofx") qb = qb.in("source_type", ["importacao_extrato", "importacao_planilha"]);
+      else if (filters.origin === "manual")
+        qb = qb.eq("source_type", "manual").is("document_reference", null);
+      else if (filters.origin === "comercial")
+        qb = qb.not("document_reference", "is", null).neq("entry_type", "transferencia");
       const { data, error } = await qb;
       if (error) throw error;
       return (data ?? []) as Row[];
     },
   });
 
-  const rows = (q.data ?? []).filter((r) => r.entry_type !== "transferencia");
+  const rows =
+    filters.origin === "transferencia"
+      ? q.data ?? []
+      : (q.data ?? []).filter((r) => r.entry_type !== "transferencia");
   const isLoading = q.isLoading;
 
   // --------- Aggregations ---------
@@ -552,8 +560,20 @@ export default function BIFinanceiro() {
         severidade: "baixa",
         acao: "Avaliar oportunidades de redução.",
       });
+    // Cliente com maior risco financeiro
+    const risco = [...topClientes]
+      .map((c) => ({ ...c, risco: c.vencido * 0.7 + c.aberto * 0.3 }))
+      .filter((c) => c.risco > 0)
+      .sort((a, b) => b.risco - a.risco)[0];
+    if (risco)
+      list.push({
+        titulo: "Cliente com maior risco financeiro",
+        descricao: `${risco.name} — ${BRL(risco.vencido)} vencido e ${BRL(risco.aberto)} em aberto.`,
+        severidade: risco.vencido > 0 ? "alta" : "media",
+        acao: "Revisar limite de crédito e renegociar.",
+      });
     return list;
-  }, [monthly, top10Inadimplentes, agg, rows, despesaCategorias]);
+  }, [monthly, top10Inadimplentes, agg, rows, despesaCategorias, topClientes]);
 
   const clearFilters = () => setFilters(defaultFilters);
 
@@ -778,7 +798,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Top 10 clientes por receita">
-          {top10ClientesReceita.length === 0 ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : top10ClientesReceita.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={top10ClientesReceita} layout="vertical" onClick={() => setTabFocus("receber")}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -792,7 +812,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Top 10 clientes inadimplentes">
-          {top10Inadimplentes.length === 0 ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : top10Inadimplentes.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={top10Inadimplentes} layout="vertical" onClick={() => setTabFocus("receber")}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -806,7 +826,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Top 10 fornecedores por despesa">
-          {topFornecedores.length === 0 ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : topFornecedores.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={topFornecedores} layout="vertical" onClick={() => setTabFocus("pagar")}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -820,7 +840,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Funil de recebimento">
-          {funil.every((f) => f.value === 0) ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : funil.every((f) => f.value === 0) ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={funil} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -838,7 +858,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Conciliação bancária">
-          {conciliacao.every((c) => c.value === 0) ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : conciliacao.every((c) => c.value === 0) ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie data={conciliacao} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} onClick={() => setTabFocus("conciliacao")}>
