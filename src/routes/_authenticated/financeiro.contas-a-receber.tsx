@@ -99,6 +99,9 @@ function ContasAReceberPage() {
   const [onlyOverdue, setOnlyOverdue] = useState(false);
   const [onlyOpen, setOnlyOpen] = useState(true);
 
+  // Detalhe da cobrança
+  const [detail, setDetail] = useState<CobrancaRow | null>(null);
+
   const q = useQuery({
     queryKey: ["contas-a-receber", "v2"],
     queryFn: async () => {
