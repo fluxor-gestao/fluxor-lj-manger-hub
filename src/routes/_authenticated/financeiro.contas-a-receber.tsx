@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { CobrancaDetailSheet, type CobrancaRow } from "@/components/financeiro/CobrancaDetailSheet";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-receber")({
   component: ContasAReceberPage,
@@ -42,6 +43,7 @@ type Row = {
   id: string;
   due_date: string | null;
   entry_date: string;
+  competence_month: string | null;
   movement_description: string | null;
   counterparty_name: string | null;
   amount_in: number | null;
@@ -49,12 +51,14 @@ type Row = {
   paid_amount: number | null;
   open_amount: number | null;
   payment_status: string | null;
+  document_reference: string | null;
+  notes: string | null;
   client_id: string | null;
   client: { name: string } | null;
 };
 
 const COLS =
-  "id, due_date, entry_date, movement_description, counterparty_name, amount_in, total_brl, paid_amount, open_amount, payment_status, client_id, client:clients(name)";
+  "id, due_date, entry_date, competence_month, movement_description, counterparty_name, amount_in, total_brl, paid_amount, open_amount, payment_status, document_reference, notes, client_id, client:clients(name)";
 
 type Status = "pago" | "parcial" | "vencido" | "aberto";
 
@@ -94,6 +98,9 @@ function ContasAReceberPage() {
   const [dueTo, setDueTo] = useState<string>("");
   const [onlyOverdue, setOnlyOverdue] = useState(false);
   const [onlyOpen, setOnlyOpen] = useState(true);
+
+  // Detalhe da cobrança
+  const [detail, setDetail] = useState<CobrancaRow | null>(null);
 
   const q = useQuery({
     queryKey: ["contas-a-receber", "v2"],
@@ -333,7 +340,7 @@ function ContasAReceberPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={() => act("Ver detalhes", r)}>
+                          <DropdownMenuItem onClick={() => setDetail(r as CobrancaRow)}>
                             <Eye className="h-4 w-4 mr-2" /> Ver detalhes
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => act("Gerar cobrança", r)}>
@@ -363,6 +370,11 @@ function ContasAReceberPage() {
           </Table>
         </Card>
       )}
+      <CobrancaDetailSheet
+        row={detail}
+        open={!!detail}
+        onOpenChange={(o) => { if (!o) setDetail(null); }}
+      />
     </div>
   );
 }
