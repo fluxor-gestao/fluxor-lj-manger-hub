@@ -1371,6 +1371,8 @@ export type Database = {
         | "concluido"
         | "cancelado"
         | "a_iniciar"
+        | "aguardando_cliente"
+        | "aguardando_aprovacao"
       source_type:
         | "manual"
         | "importacao_planilha"
@@ -1541,6 +1543,8 @@ export const Constants = {
         "concluido",
         "cancelado",
         "a_iniciar",
+        "aguardando_cliente",
+        "aguardando_aprovacao",
       ],
       source_type: [
         "manual",
