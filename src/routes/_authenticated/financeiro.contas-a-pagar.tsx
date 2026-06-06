@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { RegisterPaymentDialog, type PayableEntry } from "@/components/financeiro/RegisterPaymentDialog";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-pagar")({
   component: ContasAPagarPage,
