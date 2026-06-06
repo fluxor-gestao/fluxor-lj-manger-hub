@@ -232,35 +232,27 @@ function RapportPage() {
   const atencao = useMemo(() => {
     const items: { icon: any; title: string; description: string; tone: "warn" | "danger" | "info" }[] = [];
 
-    // Despesas que aumentaram
-    if (previous.despesas > 0) {
-      const delta = current.despesas - previous.despesas;
-      const pct = (delta / previous.despesas) * 100;
+    // Despesas que aumentaram (compara pagos do mês vs. mês anterior)
+    if (previous.pago > 0) {
+      const delta = current.pago - previous.pago;
+      const pct = (delta / previous.pago) * 100;
       if (pct >= 10) {
         items.push({
           icon: TrendingUp,
           title: "Despesas em alta",
-          description: `Despesas subiram ${pct.toFixed(1)}% vs. mês anterior (${BRL(delta)} a mais).`,
+          description: `Pagamentos cresceram ${pct.toFixed(1)}% vs. mês anterior (${BRL(delta)} a mais).`,
           tone: "warn",
         });
       }
     }
 
     // Contas vencidas
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const vencidas = rows.filter(
-      (r) =>
-        r.payment_status !== "pago" &&
-        r.due_date &&
-        r.due_date < todayStr &&
-        Number(r.open_amount ?? 0) > 0
-    );
-    if (vencidas.length > 0) {
-      const total = vencidas.reduce((s, r) => s + Number(r.open_amount ?? 0), 0);
+    if (vencidos.length > 0) {
+      const total = vencidosTotalIn + vencidosTotalOut;
       items.push({
         icon: AlertOctagon,
-        title: `${vencidas.length} contas vencidas`,
-        description: `Total em atraso: ${BRL(total)}. Priorize a regularização.`,
+        title: `${vencidos.length} contas vencidas`,
+        description: `Total em atraso: ${BRL(total)} (a receber ${BRL(vencidosTotalIn)} · a pagar ${BRL(vencidosTotalOut)}).`,
         tone: "danger",
       });
     }
@@ -269,21 +261,18 @@ function RapportPage() {
     if (saldoFinal < 0) {
       items.push({
         icon: AlertTriangle,
-        title: "Saldo final negativo",
-        description: `O mês fecha com saldo de ${BRL(saldoFinal)}. Avalie aporte ou postergação de despesas.`,
+        title: "Resultado negativo no mês",
+        description: `O mês fecha com ${BRL(saldoFinal)} de resultado. Avalie aporte ou postergação de despesas.`,
         tone: "danger",
       });
     }
 
     // Pendências de conciliação
-    const naoConciliadas = rows.filter(
-      (r) => r.paid_at && (r.conciliation_status ?? "pendente") !== "conciliado"
-    );
-    if (naoConciliadas.length > 0) {
+    if (pendentesConciliacao > 0) {
       items.push({
         icon: RefreshCcw,
-        title: `${naoConciliadas.length} lançamentos sem conciliação`,
-        description: "Existem pagamentos registrados ainda não conciliados com o extrato bancário.",
+        title: `${pendentesConciliacao} lançamentos sem conciliação`,
+        description: "Existem lançamentos com conciliação pendente no período.",
         tone: "info",
       });
     }
@@ -292,14 +281,14 @@ function RapportPage() {
       items.push({
         icon: Sparkles,
         title: "Nenhum ponto crítico no período",
-        description: "O mês está saudável: sem atrasos relevantes, alta de despesas ou saldo negativo.",
+        description: "O mês está saudável: sem atrasos relevantes, alta de despesas ou resultado negativo.",
         tone: "info",
       });
     }
     return items;
-  }, [rows, current, previous, saldoFinal]);
+  }, [current, previous, saldoFinal, vencidos, vencidosTotalIn, vencidosTotalOut, pendentesConciliacao]);
 
-  // Resumo executivo (mock baseado nos números)
+  // Resumo executivo (gerado a partir dos números)
   const resumoExecutivo = useMemo(() => {
     const clienteNome =
       clientId === "all" ? "a operação" : clients.find((c) => c.id === clientId)?.name ?? "o cliente";
@@ -310,15 +299,15 @@ function RapportPage() {
         ? `resultado negativo de ${BRL(Math.abs(resultado))}`
         : `resultado equilibrado`;
     const variacao =
-      previous.despesas > 0
-        ? `As despesas variaram ${(((current.despesas - previous.despesas) / previous.despesas) * 100).toFixed(1)}% em relação ao mês anterior.`
+      previous.pago > 0
+        ? `Os pagamentos variaram ${(((current.pago - previous.pago) / previous.pago) * 100).toFixed(1)}% em relação ao mês anterior.`
         : `Não há base do mês anterior para comparação de despesas.`;
-    return `No período de ${monthLabel(month)}, ${clienteNome} apresentou ${tendencia}. As receitas totalizaram ${BRL(
-      current.receitas
-    )} e as despesas ${BRL(current.despesas)}. ${variacao} O saldo final estimado é de ${BRL(
-      saldoFinal
-    )}, partindo de um saldo inicial de ${BRL(saldoInicial)}.`;
-  }, [clientId, clients, month, current, previous, resultado, saldoFinal]);
+    return `No período de ${monthLabel(month)}, ${clienteNome} apresentou ${tendencia}. Recebemos ${BRL(
+      current.recebido
+    )} e pagamos ${BRL(current.pago)}. ${variacao} Ainda há ${BRL(current.abertoIn)} a receber e ${BRL(
+      current.abertoOut
+    )} a pagar em aberto.`;
+  }, [clientId, clients, month, current, previous, resultado]);
 
   function handleGenerate() {
     setGeneratedAt(Date.now());
