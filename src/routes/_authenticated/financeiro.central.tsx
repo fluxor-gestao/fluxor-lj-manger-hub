@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import {
   Plus, Search, Download, ArrowDownCircle, ArrowUpCircle, ArrowLeftRight,
   ArrowLeft, Wallet, TrendingUp, CheckCircle2, CircleDashed,
+  LayoutGrid, ReceiptText, Banknote, Activity, BarChart3, Filter,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { FxTicker } from "@/components/financeiro/FxTicker";
