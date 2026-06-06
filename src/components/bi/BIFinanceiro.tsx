@@ -798,7 +798,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Top 10 clientes por receita">
-          {top10ClientesReceita.length === 0 ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : top10ClientesReceita.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={top10ClientesReceita} layout="vertical" onClick={() => setTabFocus("receber")}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -812,7 +812,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Top 10 clientes inadimplentes">
-          {top10Inadimplentes.length === 0 ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : top10Inadimplentes.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={top10Inadimplentes} layout="vertical" onClick={() => setTabFocus("receber")}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -826,7 +826,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Top 10 fornecedores por despesa">
-          {topFornecedores.length === 0 ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : topFornecedores.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={topFornecedores} layout="vertical" onClick={() => setTabFocus("pagar")}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -840,7 +840,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Funil de recebimento">
-          {funil.every((f) => f.value === 0) ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : funil.every((f) => f.value === 0) ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={funil} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -858,7 +858,7 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Conciliação bancária">
-          {conciliacao.every((c) => c.value === 0) ? <Empty /> : (
+          {isLoading ? <Skeleton className="h-[260px]" /> : conciliacao.every((c) => c.value === 0) ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie data={conciliacao} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} onClick={() => setTabFocus("conciliacao")}>
