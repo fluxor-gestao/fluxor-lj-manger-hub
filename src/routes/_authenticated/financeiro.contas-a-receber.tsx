@@ -340,7 +340,7 @@ function ContasAReceberPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={() => act("Ver detalhes", r)}>
+                          <DropdownMenuItem onClick={() => setDetail(r as CobrancaRow)}>
                             <Eye className="h-4 w-4 mr-2" /> Ver detalhes
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => act("Gerar cobrança", r)}>
