@@ -17,6 +17,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as AuthenticatedOperacaoRouteImport } from './routes/_authenticated/operacao'
 import { Route as AuthenticatedHubRouteImport } from './routes/_authenticated/hub'
 import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
+import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedConciliacaoRouteImport } from './routes/_authenticated/conciliacao'
 import { Route as AuthenticatedComercialRouteImport } from './routes/_authenticated/comercial'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
@@ -31,6 +32,9 @@ import { Route as ApiPublicBiKpisComercialRouteImport } from './routes/api/publi
 import { Route as ApiPublicBiFinanceiroRouteImport } from './routes/api/public/bi-financeiro'
 import { Route as ApiPublicBiComercialRouteImport } from './routes/api/public/bi-comercial'
 import { Route as ApiPublicSplatRouteImport } from './routes/api/public/$'
+import { Route as AuthenticatedFinanceiroRapportRouteImport } from './routes/_authenticated/financeiro.rapport'
+import { Route as AuthenticatedFinanceiroContasAReceberRouteImport } from './routes/_authenticated/financeiro.contas-a-receber'
+import { Route as AuthenticatedFinanceiroContasAPagarRouteImport } from './routes/_authenticated/financeiro.contas-a-pagar'
 import { Route as AuthenticatedFinanceiroCentralRouteImport } from './routes/_authenticated/financeiro.central'
 import { Route as AuthenticatedAjudaComercialRouteImport } from './routes/_authenticated/ajuda_.comercial'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin_.api-keys'
@@ -76,6 +80,11 @@ const AuthenticatedHubRoute = AuthenticatedHubRouteImport.update({
 const AuthenticatedGestaoRoute = AuthenticatedGestaoRouteImport.update({
   id: '/gestao',
   path: '/gestao',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFinanceiroRoute = AuthenticatedFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedConciliacaoRoute =
@@ -151,11 +160,29 @@ const ApiPublicSplatRoute = ApiPublicSplatRouteImport.update({
   path: '/api/public/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedFinanceiroRapportRoute =
+  AuthenticatedFinanceiroRapportRouteImport.update({
+    id: '/rapport',
+    path: '/rapport',
+    getParentRoute: () => AuthenticatedFinanceiroRoute,
+  } as any)
+const AuthenticatedFinanceiroContasAReceberRoute =
+  AuthenticatedFinanceiroContasAReceberRouteImport.update({
+    id: '/contas-a-receber',
+    path: '/contas-a-receber',
+    getParentRoute: () => AuthenticatedFinanceiroRoute,
+  } as any)
+const AuthenticatedFinanceiroContasAPagarRoute =
+  AuthenticatedFinanceiroContasAPagarRouteImport.update({
+    id: '/contas-a-pagar',
+    path: '/contas-a-pagar',
+    getParentRoute: () => AuthenticatedFinanceiroRoute,
+  } as any)
 const AuthenticatedFinanceiroCentralRoute =
   AuthenticatedFinanceiroCentralRouteImport.update({
-    id: '/financeiro/central',
-    path: '/financeiro/central',
-    getParentRoute: () => AuthenticatedRoute,
+    id: '/central',
+    path: '/central',
+    getParentRoute: () => AuthenticatedFinanceiroRoute,
   } as any)
 const AuthenticatedAjudaComercialRoute =
   AuthenticatedAjudaComercialRouteImport.update({
@@ -203,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/bi': typeof AuthenticatedBiRoute
   '/comercial': typeof AuthenticatedComercialRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
+  '/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
   '/gestao': typeof AuthenticatedGestaoRoute
   '/hub': typeof AuthenticatedHubRoute
   '/operacao': typeof AuthenticatedOperacaoRoute
@@ -210,6 +238,9 @@ export interface FileRoutesByFullPath {
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
   '/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
+  '/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
+  '/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
+  '/financeiro/rapport': typeof AuthenticatedFinanceiroRapportRoute
   '/api/public/$': typeof ApiPublicSplatRoute
   '/api/public/bi-comercial': typeof ApiPublicBiComercialRoute
   '/api/public/bi-financeiro': typeof ApiPublicBiFinanceiroRoute
@@ -233,6 +264,7 @@ export interface FileRoutesByTo {
   '/bi': typeof AuthenticatedBiRoute
   '/comercial': typeof AuthenticatedComercialRoute
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
+  '/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
   '/gestao': typeof AuthenticatedGestaoRoute
   '/hub': typeof AuthenticatedHubRoute
   '/operacao': typeof AuthenticatedOperacaoRoute
@@ -240,6 +272,9 @@ export interface FileRoutesByTo {
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
   '/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
+  '/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
+  '/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
+  '/financeiro/rapport': typeof AuthenticatedFinanceiroRapportRoute
   '/api/public/$': typeof ApiPublicSplatRoute
   '/api/public/bi-comercial': typeof ApiPublicBiComercialRoute
   '/api/public/bi-financeiro': typeof ApiPublicBiFinanceiroRoute
@@ -265,6 +300,7 @@ export interface FileRoutesById {
   '/_authenticated/bi': typeof AuthenticatedBiRoute
   '/_authenticated/comercial': typeof AuthenticatedComercialRoute
   '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
+  '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/hub': typeof AuthenticatedHubRoute
   '/_authenticated/operacao': typeof AuthenticatedOperacaoRoute
@@ -272,6 +308,9 @@ export interface FileRoutesById {
   '/_authenticated/admin_/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/_authenticated/ajuda_/comercial': typeof AuthenticatedAjudaComercialRoute
   '/_authenticated/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
+  '/_authenticated/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
+  '/_authenticated/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
+  '/_authenticated/financeiro/rapport': typeof AuthenticatedFinanceiroRapportRoute
   '/api/public/$': typeof ApiPublicSplatRoute
   '/api/public/bi-comercial': typeof ApiPublicBiComercialRoute
   '/api/public/bi-financeiro': typeof ApiPublicBiFinanceiroRoute
@@ -297,6 +336,7 @@ export interface FileRouteTypes {
     | '/bi'
     | '/comercial'
     | '/conciliacao'
+    | '/financeiro'
     | '/gestao'
     | '/hub'
     | '/operacao'
@@ -304,6 +344,9 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/ajuda/comercial'
     | '/financeiro/central'
+    | '/financeiro/contas-a-pagar'
+    | '/financeiro/contas-a-receber'
+    | '/financeiro/rapport'
     | '/api/public/$'
     | '/api/public/bi-comercial'
     | '/api/public/bi-financeiro'
@@ -327,6 +370,7 @@ export interface FileRouteTypes {
     | '/bi'
     | '/comercial'
     | '/conciliacao'
+    | '/financeiro'
     | '/gestao'
     | '/hub'
     | '/operacao'
@@ -334,6 +378,9 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/ajuda/comercial'
     | '/financeiro/central'
+    | '/financeiro/contas-a-pagar'
+    | '/financeiro/contas-a-receber'
+    | '/financeiro/rapport'
     | '/api/public/$'
     | '/api/public/bi-comercial'
     | '/api/public/bi-financeiro'
@@ -358,6 +405,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi'
     | '/_authenticated/comercial'
     | '/_authenticated/conciliacao'
+    | '/_authenticated/financeiro'
     | '/_authenticated/gestao'
     | '/_authenticated/hub'
     | '/_authenticated/operacao'
@@ -365,6 +413,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin_/api-keys'
     | '/_authenticated/ajuda_/comercial'
     | '/_authenticated/financeiro/central'
+    | '/_authenticated/financeiro/contas-a-pagar'
+    | '/_authenticated/financeiro/contas-a-receber'
+    | '/_authenticated/financeiro/rapport'
     | '/api/public/$'
     | '/api/public/bi-comercial'
     | '/api/public/bi-financeiro'
@@ -456,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/gestao'
       fullPath: '/gestao'
       preLoaderRoute: typeof AuthenticatedGestaoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/financeiro': {
+      id: '/_authenticated/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof AuthenticatedFinanceiroRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/conciliacao': {
@@ -556,12 +614,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/financeiro/rapport': {
+      id: '/_authenticated/financeiro/rapport'
+      path: '/rapport'
+      fullPath: '/financeiro/rapport'
+      preLoaderRoute: typeof AuthenticatedFinanceiroRapportRouteImport
+      parentRoute: typeof AuthenticatedFinanceiroRoute
+    }
+    '/_authenticated/financeiro/contas-a-receber': {
+      id: '/_authenticated/financeiro/contas-a-receber'
+      path: '/contas-a-receber'
+      fullPath: '/financeiro/contas-a-receber'
+      preLoaderRoute: typeof AuthenticatedFinanceiroContasAReceberRouteImport
+      parentRoute: typeof AuthenticatedFinanceiroRoute
+    }
+    '/_authenticated/financeiro/contas-a-pagar': {
+      id: '/_authenticated/financeiro/contas-a-pagar'
+      path: '/contas-a-pagar'
+      fullPath: '/financeiro/contas-a-pagar'
+      preLoaderRoute: typeof AuthenticatedFinanceiroContasAPagarRouteImport
+      parentRoute: typeof AuthenticatedFinanceiroRoute
+    }
     '/_authenticated/financeiro/central': {
       id: '/_authenticated/financeiro/central'
-      path: '/financeiro/central'
+      path: '/central'
       fullPath: '/financeiro/central'
       preLoaderRoute: typeof AuthenticatedFinanceiroCentralRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedFinanceiroRoute
     }
     '/_authenticated/ajuda_/comercial': {
       id: '/_authenticated/ajuda_/comercial'
@@ -608,18 +687,40 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedFinanceiroRouteChildren {
+  AuthenticatedFinanceiroCentralRoute: typeof AuthenticatedFinanceiroCentralRoute
+  AuthenticatedFinanceiroContasAPagarRoute: typeof AuthenticatedFinanceiroContasAPagarRoute
+  AuthenticatedFinanceiroContasAReceberRoute: typeof AuthenticatedFinanceiroContasAReceberRoute
+  AuthenticatedFinanceiroRapportRoute: typeof AuthenticatedFinanceiroRapportRoute
+}
+
+const AuthenticatedFinanceiroRouteChildren: AuthenticatedFinanceiroRouteChildren =
+  {
+    AuthenticatedFinanceiroCentralRoute: AuthenticatedFinanceiroCentralRoute,
+    AuthenticatedFinanceiroContasAPagarRoute:
+      AuthenticatedFinanceiroContasAPagarRoute,
+    AuthenticatedFinanceiroContasAReceberRoute:
+      AuthenticatedFinanceiroContasAReceberRoute,
+    AuthenticatedFinanceiroRapportRoute: AuthenticatedFinanceiroRapportRoute,
+  }
+
+const AuthenticatedFinanceiroRouteWithChildren =
+  AuthenticatedFinanceiroRoute._addFileChildren(
+    AuthenticatedFinanceiroRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAjudaRoute: typeof AuthenticatedAjudaRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRoute
   AuthenticatedComercialRoute: typeof AuthenticatedComercialRoute
   AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
+  AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRouteWithChildren
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedHubRoute: typeof AuthenticatedHubRoute
   AuthenticatedOperacaoRoute: typeof AuthenticatedOperacaoRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
   AuthenticatedAjudaComercialRoute: typeof AuthenticatedAjudaComercialRoute
-  AuthenticatedFinanceiroCentralRoute: typeof AuthenticatedFinanceiroCentralRoute
   AuthenticatedComercialDevisIdRoute: typeof AuthenticatedComercialDevisIdRoute
 }
 
@@ -629,12 +730,12 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBiRoute: AuthenticatedBiRoute,
   AuthenticatedComercialRoute: AuthenticatedComercialRoute,
   AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
+  AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRouteWithChildren,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedHubRoute: AuthenticatedHubRoute,
   AuthenticatedOperacaoRoute: AuthenticatedOperacaoRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
   AuthenticatedAjudaComercialRoute: AuthenticatedAjudaComercialRoute,
-  AuthenticatedFinanceiroCentralRoute: AuthenticatedFinanceiroCentralRoute,
   AuthenticatedComercialDevisIdRoute: AuthenticatedComercialDevisIdRoute,
 }
 
@@ -664,3 +765,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
