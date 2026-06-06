@@ -43,6 +43,7 @@ type Row = {
   id: string;
   due_date: string | null;
   entry_date: string;
+  competence_month: string | null;
   movement_description: string | null;
   counterparty_name: string | null;
   amount_in: number | null;
@@ -50,12 +51,14 @@ type Row = {
   paid_amount: number | null;
   open_amount: number | null;
   payment_status: string | null;
+  document_reference: string | null;
+  notes: string | null;
   client_id: string | null;
   client: { name: string } | null;
 };
 
 const COLS =
-  "id, due_date, entry_date, movement_description, counterparty_name, amount_in, total_brl, paid_amount, open_amount, payment_status, client_id, client:clients(name)";
+  "id, due_date, entry_date, competence_month, movement_description, counterparty_name, amount_in, total_brl, paid_amount, open_amount, payment_status, document_reference, notes, client_id, client:clients(name)";
 
 type Status = "pago" | "parcial" | "vencido" | "aberto";
 
