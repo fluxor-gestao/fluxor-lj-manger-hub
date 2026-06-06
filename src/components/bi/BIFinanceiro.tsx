@@ -147,9 +147,15 @@ export default function BIFinanceiro() {
     queryKey: ["bi", "banks"],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("bank_accounts").select("id, name").order("name");
+      const { data, error } = await supabase
+        .from("bank_accounts")
+        .select("id, bank_name, account_number")
+        .order("bank_name");
       if (error) throw error;
-      return (data ?? []) as { id: string; name: string }[];
+      return (data ?? []).map((b: any) => ({
+        id: b.id as string,
+        name: `${b.bank_name}${b.account_number ? ` · ${b.account_number}` : ""}`,
+      }));
     },
   });
 
