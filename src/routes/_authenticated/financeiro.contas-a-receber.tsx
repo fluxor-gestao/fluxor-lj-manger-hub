@@ -370,6 +370,11 @@ function ContasAReceberPage() {
           </Table>
         </Card>
       )}
+      <CobrancaDetailSheet
+        row={detail}
+        open={!!detail}
+        onOpenChange={(o) => { if (!o) setDetail(null); }}
+      />
     </div>
   );
 }
