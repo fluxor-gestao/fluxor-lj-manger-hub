@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { RegisterPaymentDialog, type PayableEntry } from "@/components/financeiro/RegisterPaymentDialog";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-pagar")({
   component: ContasAPagarPage,
@@ -84,6 +85,9 @@ const statusLabel: Record<Status, string> = {
 function ContasAPagarPage() {
   const navigate = useNavigate();
   const { suppliers } = useFinanceiroCatalogs();
+
+  // Pagamento
+  const [payRow, setPayRow] = useState<Row | null>(null);
 
   // Filtros
   const [search, setSearch] = useState("");
@@ -325,10 +329,10 @@ function ContasAPagarPage() {
                           <DropdownMenuItem onClick={() => act("Ver detalhes", r)}>
                             <Eye className="h-4 w-4 mr-2" /> Ver detalhes
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => act("Registrar pagamento", r)}>
+                          <DropdownMenuItem onClick={() => setPayRow(r)}>
                             <DollarSign className="h-4 w-4 mr-2" /> Registrar pagamento
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => act("Marcar como pago", r)}>
+                          <DropdownMenuItem onClick={() => setPayRow(r)}>
                             <CheckCircle2 className="h-4 w-4 mr-2" /> Marcar como pago
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -352,6 +356,12 @@ function ContasAPagarPage() {
           </Table>
         </Card>
       )}
+
+      <RegisterPaymentDialog
+        entry={payRow as PayableEntry | null}
+        open={!!payRow}
+        onOpenChange={(o) => { if (!o) setPayRow(null); }}
+      />
     </div>
   );
 }
