@@ -608,17 +608,43 @@ function Financeiro() {
 
 // ----- Subcomponents -----
 
-function SummaryCard({
-  icon, label, value, highlight,
-}: { icon: React.ReactNode; label: string; value: string; highlight?: boolean }) {
+function KpiSection({
+  title, subtitle, children,
+}: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <Card className={highlight ? "border-primary/40" : ""}>
-      <CardContent className="pt-5 pb-4">
-        <div className="flex items-center gap-2 mb-1">
-          {icon}
-          <span className="text-xs text-muted-foreground">{label}</span>
+    <div>
+      <div className="mb-2 flex items-baseline justify-between gap-3 px-0.5">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h2>
+        {subtitle && <p className="hidden sm:block text-xs text-muted-foreground/80 truncate">{subtitle}</p>}
+      </div>
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">{children}</div>
+    </div>
+  );
+}
+
+type Tone = "success" | "danger" | "warning" | "primary" | "muted";
+
+const toneStyles: Record<Tone, { icon: string; bar: string; ring: string }> = {
+  success: { icon: "text-success bg-success/10", bar: "bg-success", ring: "" },
+  danger:  { icon: "text-destructive bg-destructive/10", bar: "bg-destructive", ring: "" },
+  warning: { icon: "text-warning bg-warning/10", bar: "bg-warning", ring: "" },
+  primary: { icon: "text-primary bg-primary/10", bar: "bg-primary", ring: "ring-1 ring-primary/30" },
+  muted:   { icon: "text-muted-foreground bg-muted", bar: "bg-muted-foreground/40", ring: "" },
+};
+
+function SummaryCard({
+  icon, label, value, highlight, tone = "muted",
+}: { icon: React.ReactNode; label: string; value: string; highlight?: boolean; tone?: Tone }) {
+  const t = toneStyles[tone];
+  return (
+    <Card className={`relative overflow-hidden transition-shadow hover:shadow-md ${highlight ? "border-primary/40" : ""} ${t.ring}`}>
+      <span className={`absolute left-0 top-0 h-full w-1 ${t.bar}`} aria-hidden />
+      <CardContent className="pt-5 pb-4 pl-5">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-medium text-muted-foreground">{label}</span>
+          <span className={`flex h-7 w-7 items-center justify-center rounded-md ${t.icon}`}>{icon}</span>
         </div>
-        <p className="text-lg font-bold font-display tabular-nums">{value}</p>
+        <p className="text-xl font-bold font-display tabular-nums leading-tight">{value}</p>
       </CardContent>
     </Card>
   );
@@ -633,7 +659,7 @@ function EntriesTable({
   isError: boolean;
   hideBank?: boolean;
   onRetry?: () => void;
-}) {
+} ) {
   if (isLoading) {
     return <Card><CardContent><LoadingState /></CardContent></Card>;
   }
