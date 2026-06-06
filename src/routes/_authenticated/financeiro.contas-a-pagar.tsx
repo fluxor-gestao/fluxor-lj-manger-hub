@@ -356,6 +356,12 @@ function ContasAPagarPage() {
           </Table>
         </Card>
       )}
+
+      <RegisterPaymentDialog
+        entry={payRow as PayableEntry | null}
+        open={!!payRow}
+        onOpenChange={(o) => { if (!o) setPayRow(null); }}
+      />
     </div>
   );
 }
