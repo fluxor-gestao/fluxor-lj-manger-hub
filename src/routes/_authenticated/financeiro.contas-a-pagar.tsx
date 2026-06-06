@@ -330,10 +330,10 @@ function ContasAPagarPage() {
                           <DropdownMenuItem onClick={() => act("Ver detalhes", r)}>
                             <Eye className="h-4 w-4 mr-2" /> Ver detalhes
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => act("Registrar pagamento", r)}>
+                          <DropdownMenuItem onClick={() => setPayRow(r)}>
                             <DollarSign className="h-4 w-4 mr-2" /> Registrar pagamento
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => act("Marcar como pago", r)}>
+                          <DropdownMenuItem onClick={() => setMarkPaidRow(r)}>
                             <CheckCircle2 className="h-4 w-4 mr-2" /> Marcar como pago
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
