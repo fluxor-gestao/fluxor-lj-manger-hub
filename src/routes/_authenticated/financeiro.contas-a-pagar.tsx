@@ -86,6 +86,10 @@ function ContasAPagarPage() {
   const navigate = useNavigate();
   const { suppliers } = useFinanceiroCatalogs();
 
+  // Pagamento
+  const [payRow, setPayRow] = useState<Row | null>(null);
+  const [markPaidRow, setMarkPaidRow] = useState<Row | null>(null);
+
   // Filtros
   const [search, setSearch] = useState("");
   const [supplierFilter, setSupplierFilter] = useState<string>("all");
