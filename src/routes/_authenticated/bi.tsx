@@ -6,6 +6,7 @@ import { ArrowLeft, BarChart3, BriefcaseBusiness, DollarSign, ShieldAlert, Shopp
 import { useAuth } from "@/contexts/AuthContext";
 import { canAccessBiDashboard } from "@/lib/access";
 import BIFinanceiro from "@/components/bi/BIFinanceiro";
+import BIComercial from "@/components/bi/BIComercial";
 
 const dashboards = [
   {
@@ -117,9 +118,9 @@ function BI() {
           </CardHeader>
           <CardContent className="p-0">
             {activeDashboard.id === "financeiro" ? (
-              <div className="p-4">
-                <BIFinanceiro />
-              </div>
+              <div className="p-4"><BIFinanceiro /></div>
+            ) : activeDashboard.id === "comercial" ? (
+              <div className="p-4"><BIComercial /></div>
             ) : activeDashboard.embedUrl ? (
               <iframe
                 title={activeDashboard.title}
