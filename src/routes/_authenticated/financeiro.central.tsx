@@ -695,6 +695,6 @@ function EntriesTable({
   );
 }
 
-export const Route = createFileRoute("/_authenticated/financeiro")({
+export const Route = createFileRoute("/_authenticated/financeiro/central")({
   component: Financeiro,
 });
