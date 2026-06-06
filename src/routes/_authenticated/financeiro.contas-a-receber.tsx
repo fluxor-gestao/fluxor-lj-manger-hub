@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { CobrancaDetailSheet, type CobrancaRow } from "@/components/financeiro/CobrancaDetailSheet";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-receber")({
   component: ContasAReceberPage,
