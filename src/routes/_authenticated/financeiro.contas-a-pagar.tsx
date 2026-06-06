@@ -88,7 +88,6 @@ function ContasAPagarPage() {
 
   // Pagamento
   const [payRow, setPayRow] = useState<Row | null>(null);
-  const [markPaidRow, setMarkPaidRow] = useState<Row | null>(null);
 
   // Filtros
   const [search, setSearch] = useState("");
