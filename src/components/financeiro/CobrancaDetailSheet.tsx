@@ -190,6 +190,7 @@ export function CobrancaDetailSheet({
 }) {
   const steps = useMemo(() => (row ? buildTimeline(row) : []), [row]);
   const next = useMemo(() => (row ? nextActionOf(row) : null), [row]);
+  const [faturaOpen, setFaturaOpen] = useState(false);
 
   if (!row) return null;
 
