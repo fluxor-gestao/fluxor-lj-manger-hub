@@ -96,7 +96,7 @@ type EntryRow = {
 function RapportPage() {
   const navigate = useNavigate();
   const cats = useFinanceiroCatalogs();
-  const clients = cats.clients.data ?? [];
+  const clients = cats.clients ?? [];
 
   const now = new Date();
   const [clientId, setClientId] = useState<string>("all");
