@@ -1,148 +1,194 @@
-import { useState } from "react";
-import { useNavigate, useParams, Link, createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, KanbanSquare, List } from "lucide-react";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Settings2 } from "lucide-react";
 
-const serviceStatusColors: Record<string, string> = {
-  a_iniciar: "bg-accent/30 text-accent-foreground border-accent/40",
-  pendente: "bg-warning/20 text-warning border-warning/30",
-  em_andamento: "bg-primary/20 text-primary border-primary/30",
-  concluido: "bg-success/20 text-success border-success/30",
-  cancelado: "bg-destructive/20 text-destructive border-destructive/30",
-};
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-const statusLabels: Record<string, string> = {
-  a_iniciar: "A iniciar",
-  pendente: "Pendente",
-  em_andamento: "Em Andamento",
-  concluido: "Concluído",
-  cancelado: "Cancelado",
-};
+import { NovoProcessoDialog } from "@/components/operacao/NovoProcessoDialog";
+import { OperacaoKpis } from "@/components/operacao/OperacaoKpis";
+import {
+  OperacaoFilters,
+  applyFilters,
+  initialFilters,
+  type OperacaoFilterState,
+} from "@/components/operacao/OperacaoFilters";
+import { OperacaoKanban } from "@/components/operacao/OperacaoKanban";
+import { OperacaoLista } from "@/components/operacao/OperacaoLista";
+import { ProcessoDetailSheet } from "@/components/operacao/ProcessoDetailSheet";
+import {
+  InsightsBlock,
+  buildInsightsForBoard,
+} from "@/components/operacao/InsightsOperacionais";
+import type { OpStatus, ServiceLike } from "@/components/operacao/status";
 
-function Operacao() {
-  const { user } = useAuth();
+export const Route = createFileRoute("/_authenticated/operacao")({
+  component: OperacaoPage,
+});
+
+function OperacaoPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", business_unit: "", start_date: "", expected_end_date: "" });
+  const qc = useQueryClient();
 
-  const { data: services = [] } = useQuery({
-    queryKey: ["services"],
-    queryFn: async () => { const { data } = await supabase.from("services").select("*").order("created_at", { ascending: false }); return data ?? []; },
-  });
+  const [view, setView] = useState<"lista" | "kanban">("lista");
+  const [filters, setFilters] = useState<OperacaoFilterState>(initialFilters);
+  const [detail, setDetail] = useState<ServiceLike | null>(null);
 
-  const createService = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("services").insert({
-        ...form,
-        start_date: form.start_date || null,
-        expected_end_date: form.expected_end_date || null,
-        assigned_to: user?.id,
-      });
-      if (error) throw error;
+  const q = useQuery({
+    queryKey: ["operacao-services"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("services")
+        .select(
+          "id, title, description, business_unit, responsible_sector, assigned_to, start_date, expected_end_date, actual_end_date, status, created_at, updated_at, client_id, client:clients(name), assignee:profiles!services_assigned_to_fkey(full_name)"
+        )
+        .order("updated_at", { ascending: false })
+        .limit(1000);
+      if (error) {
+        // fallback sem o join de profiles se a FK não existir
+        const { data: d2, error: e2 } = await supabase
+          .from("services")
+          .select(
+            "id, title, description, business_unit, responsible_sector, assigned_to, start_date, expected_end_date, actual_end_date, status, created_at, updated_at, client_id, client:clients(name)"
+          )
+          .order("updated_at", { ascending: false })
+          .limit(1000);
+        if (e2) throw e2;
+        return (d2 ?? []) as unknown as ServiceLike[];
+      }
+      return (data ?? []) as unknown as ServiceLike[];
     },
-    onSuccess: () => { toast.success("Serviço criado!"); queryClient.invalidateQueries({ queryKey: ["services"] }); setDialogOpen(false); setForm({ title: "", description: "", business_unit: "", start_date: "", expected_end_date: "" }); },
-    onError: (e: any) => toast.error(e.message),
   });
+
+  const profilesQ = useQuery({
+    queryKey: ["operacao-profiles"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("user_id, full_name").limit(500);
+      return (data ?? []) as { user_id: string; full_name: string | null }[];
+    },
+  });
+
+  const services = q.data ?? [];
+
+  const responsibles = useMemo(() => {
+    const map = new Map<string, string>();
+    (profilesQ.data ?? []).forEach((p) => {
+      if (p.user_id) map.set(p.user_id, p.full_name || p.user_id.slice(0, 8));
+    });
+    services.forEach((s) => {
+      if (s.assigned_to && !map.has(s.assigned_to)) {
+        map.set(s.assigned_to, s.assignee?.full_name || s.assigned_to.slice(0, 8));
+      }
+    });
+    return Array.from(map.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [profilesQ.data, services]);
+
+  const businessUnits = useMemo(() => {
+    const set = new Set<string>();
+    services.forEach((s) => s.business_unit && set.add(s.business_unit));
+    return Array.from(set).sort();
+  }, [services]);
+
+  const filtered = useMemo(() => applyFilters(services, filters), [services, filters]);
+
+  const boardInsights = useMemo(() => buildInsightsForBoard(filtered), [filtered]);
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const updates: any = { status };
-      if (status === "concluido") updates.actual_end_date = new Date().toISOString().split("T")[0];
-      const { error } = await supabase.from("services").update(updates).eq("id", id);
+    mutationFn: async ({ id, status }: { id: string; status: OpStatus }) => {
+      const patch: any = { status };
+      if (status === "concluido") patch.actual_end_date = new Date().toISOString().slice(0, 10);
+      const { error } = await supabase.from("services").update(patch).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Status atualizado!"); queryClient.invalidateQueries({ queryKey: ["services"] }); },
+    onSuccess: (_d, vars) => {
+      toast.success("Status atualizado");
+      qc.invalidateQueries({ queryKey: ["operacao-services"] });
+      if (detail && detail.id === vars.id) {
+        setDetail((d) => (d ? { ...d, status: vars.status } : d));
+      }
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao atualizar"),
   });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-display">Operação</h1>
-          <p className="text-muted-foreground mt-1">Serviços e processos operacionais</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={() => window.history.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
+      {/* Header */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/hub" })}>
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
           </Button>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Novo Serviço</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Novo Serviço</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <Input placeholder="Título *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              <Input placeholder="Descrição" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-              <Input placeholder="Negócio" value={form.business_unit} onChange={(e) => setForm({ ...form, business_unit: e.target.value })} />
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs text-muted-foreground">Início</label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
-                <div><label className="text-xs text-muted-foreground">Previsão</label><Input type="date" value={form.expected_end_date} onChange={(e) => setForm({ ...form, expected_end_date: e.target.value })} /></div>
-              </div>
-              <Button className="w-full" onClick={() => createService.mutate()} disabled={!form.title}>Salvar</Button>
-            </div>
-          </DialogContent>
-          </Dialog>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold font-display">Operação</h1>
+            <p className="text-sm text-muted-foreground">
+              Gestão de processos, tarefas, prazos e execução operacional
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
+          <ToggleGroup
+            type="single"
+            value={view}
+            onValueChange={(v) => v && setView(v as "lista" | "kanban")}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="lista" aria-label="Lista">
+              <List className="h-4 w-4" />
+              Lista
+            </ToggleGroupItem>
+            <ToggleGroupItem value="kanban" aria-label="Kanban">
+              <KanbanSquare className="h-4 w-4" />
+              Kanban
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <NovoProcessoDialog />
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        {(["pendente", "em_andamento", "concluido", "cancelado"] as const).map((s) => (
-          <Card key={s}><CardContent className="pt-6 text-center">
-            <p className="text-2xl font-bold font-display">{services.filter((sv) => sv.status === s).length}</p>
-            <p className="text-xs text-muted-foreground">{statusLabels[s]}</p>
-          </CardContent></Card>
-        ))}
-      </div>
+      {/* KPIs */}
+      <OperacaoKpis services={services} />
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead><TableHead>Negócio</TableHead><TableHead>Setor</TableHead><TableHead>Início</TableHead><TableHead>Previsão</TableHead><TableHead>Conclusão</TableHead><TableHead>Status</TableHead><TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {services.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum serviço cadastrado</TableCell></TableRow>
-            ) : services.map((s) => (
-              <TableRow key={s.id}>
-                <TableCell className="font-medium">{s.title}</TableCell>
-                <TableCell>{s.business_unit}</TableCell>
-                <TableCell>{(s as any).responsible_sector || "—"}</TableCell>
-                <TableCell>{s.start_date}</TableCell>
-                <TableCell>{s.expected_end_date}</TableCell>
-                <TableCell>{s.actual_end_date}</TableCell>
-                <TableCell><Badge variant="outline" className={serviceStatusColors[s.status] || ""}>{statusLabels[s.status] || s.status}</Badge></TableCell>
-                <TableCell>
-                  <Select value="" onValueChange={(v) => updateStatus.mutate({ id: s.id, status: v })}>
-                    <SelectTrigger className="w-36 h-8"><SelectValue placeholder="Alterar" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="a_iniciar">A iniciar</SelectItem>
-                      <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                      <SelectItem value="concluido">Concluído</SelectItem>
-                      <SelectItem value="cancelado">Cancelado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+      {/* Insights globais */}
+      {boardInsights.length > 0 ? <InsightsBlock items={boardInsights} /> : null}
+
+      {/* Filtros */}
+      <OperacaoFilters
+        value={filters}
+        onChange={setFilters}
+        responsibles={responsibles}
+        businessUnits={businessUnits}
+      />
+
+      {/* Conteúdo */}
+      {q.isLoading ? (
+        <div className="text-sm text-muted-foreground py-8 text-center">Carregando processos…</div>
+      ) : view === "kanban" ? (
+        <OperacaoKanban
+          services={filtered}
+          onChangeStatus={(id, status) => updateStatus.mutate({ id, status })}
+          onOpenDetail={(s) => setDetail(s)}
+        />
+      ) : (
+        <OperacaoLista
+          services={filtered}
+          onChangeStatus={(id, status) => updateStatus.mutate({ id, status })}
+          onOpenDetail={(s) => setDetail(s)}
+        />
+      )}
+
+      <ProcessoDetailSheet
+        service={detail}
+        open={!!detail}
+        onOpenChange={(v) => !v && setDetail(null)}
+        onChangeStatus={(id, status) => updateStatus.mutate({ id, status })}
+      />
     </div>
   );
 }
-
-export const Route = createFileRoute("/_authenticated/operacao")({
-  component: Operacao,
-});
