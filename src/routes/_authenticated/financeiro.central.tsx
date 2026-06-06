@@ -365,16 +365,20 @@ function Financeiro() {
         </div>
       </div>
 
-      {/* Cards superiores — 8 indicadores */}
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard icon={<ArrowDownCircle className="h-5 w-5 text-success" />} label="Previsto a receber" value={fmt(metrics.previstoIn)} />
-        <SummaryCard icon={<ArrowUpCircle className="h-5 w-5 text-destructive" />} label="Previsto a pagar" value={fmt(metrics.previstoOut)} />
-        <SummaryCard icon={<CheckCircle2 className="h-5 w-5 text-success" />} label="Recebido (realizado)" value={fmt(metrics.recebido)} />
-        <SummaryCard icon={<CheckCircle2 className="h-5 w-5 text-destructive" />} label="Pago (realizado)" value={fmt(metrics.pago)} />
-        <SummaryCard icon={<CircleDashed className="h-5 w-5 text-warning" />} label="Saldo aberto a receber" value={fmt(metrics.abertoIn)} />
-        <SummaryCard icon={<CircleDashed className="h-5 w-5 text-warning" />} label="Saldo aberto a pagar" value={fmt(metrics.abertoOut)} />
-        <SummaryCard icon={<Wallet className="h-5 w-5 text-primary" />} label="Saldo bancário conciliado" value={fmt(metrics.saldoBanco)} highlight />
-        <SummaryCard icon={<ArrowLeftRight className="h-5 w-5 text-primary" />} label="Pendências de conciliação" value={`${metrics.pendConcCount}${metrics.divConcCount ? ` · ${metrics.divConcCount} div.` : ""}`} />
+      {/* KPIs — agrupados por categoria */}
+      <div className="space-y-3">
+        <KpiSection title="Previsto" subtitle="Lançamentos com vencimento futuro ou pendentes de conciliação">
+          <SummaryCard tone="success" icon={<ArrowDownCircle className="h-4 w-4" />} label="Previsto a receber" value={fmt(metrics.previstoIn)} />
+          <SummaryCard tone="danger"  icon={<ArrowUpCircle className="h-4 w-4" />}   label="Previsto a pagar"   value={fmt(metrics.previstoOut)} />
+          <SummaryCard tone="warning" icon={<CircleDashed className="h-4 w-4" />}    label="Saldo aberto a receber" value={fmt(metrics.abertoIn)} />
+          <SummaryCard tone="warning" icon={<CircleDashed className="h-4 w-4" />}    label="Saldo aberto a pagar"   value={fmt(metrics.abertoOut)} />
+        </KpiSection>
+        <KpiSection title="Realizado & Posição" subtitle="Movimentação conciliada e posição bancária">
+          <SummaryCard tone="success" icon={<CheckCircle2 className="h-4 w-4" />}    label="Recebido (realizado)" value={fmt(metrics.recebido)} />
+          <SummaryCard tone="danger"  icon={<CheckCircle2 className="h-4 w-4" />}    label="Pago (realizado)"     value={fmt(metrics.pago)} />
+          <SummaryCard tone="primary" icon={<Wallet className="h-4 w-4" />}          label="Saldo bancário conciliado" value={fmt(metrics.saldoBanco)} highlight />
+          <SummaryCard tone="muted"   icon={<ArrowLeftRight className="h-4 w-4" />}  label="Pendências de conciliação" value={`${metrics.pendConcCount}${metrics.divConcCount ? ` · ${metrics.divConcCount} div.` : ""}`} />
+        </KpiSection>
       </div>
 
 
@@ -382,85 +386,91 @@ function Financeiro() {
       <FxTicker />
 
       {/* Filtros */}
-      <div className="flex flex-wrap gap-2">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar descrição ou fornecedor..."
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <Input
-          placeholder="Competência (YYYY-MM)"
-          className="w-44"
-          value={competence}
-          onChange={(e) => setCompetence(e.target.value)}
-        />
-        <Input
-          placeholder="Negócio"
-          className="w-36"
-          value={businessFilter}
-          onChange={(e) => setBusinessFilter(e.target.value)}
-        />
-        <Select value={bankFilter} onValueChange={setBankFilter}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="Banco" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os bancos</SelectItem>
-            {bankAccounts.map((b) => (
-              <SelectItem key={b.id} value={b.id}>{b.bank_name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Tipo" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os tipos</SelectItem>
-            <SelectItem value="receita">Receita</SelectItem>
-            <SelectItem value="despesa">Despesa</SelectItem>
-            <SelectItem value="transferencia">Transferência</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos status</SelectItem>
-            <SelectItem value="pendente">Pendente</SelectItem>
-            <SelectItem value="conciliado">Conciliado</SelectItem>
-            <SelectItem value="divergente">Divergente</SelectItem>
-            <SelectItem value="ignorado">Ignorado</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={originFilter} onValueChange={setOriginFilter}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Origem" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas origens</SelectItem>
-            <SelectItem value="comercial">Comercial</SelectItem>
-            <SelectItem value="manual">Manual</SelectItem>
-            <SelectItem value="ofx">OFX</SelectItem>
-            <SelectItem value="transferência">Transferência</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={realizedFilter} onValueChange={setRealizedFilter}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Previsto/Realizado" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Previsto + Realizado</SelectItem>
-            <SelectItem value="previsto">Apenas previstos</SelectItem>
-            <SelectItem value="realizado">Apenas realizados</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <Filter className="h-3.5 w-3.5" />
+            Filtros
+          </div>
+          <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+            <div className="relative sm:col-span-2 xl:col-span-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar descrição ou fornecedor..."
+                className="pl-9"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Input
+              placeholder="Competência (YYYY-MM)"
+              value={competence}
+              onChange={(e) => setCompetence(e.target.value)}
+            />
+            <Input
+              placeholder="Negócio"
+              value={businessFilter}
+              onChange={(e) => setBusinessFilter(e.target.value)}
+            />
+            <Select value={bankFilter} onValueChange={setBankFilter}>
+              <SelectTrigger><SelectValue placeholder="Banco" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os bancos</SelectItem>
+                {bankAccounts.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.bank_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                <SelectItem value="receita">Receita</SelectItem>
+                <SelectItem value="despesa">Despesa</SelectItem>
+                <SelectItem value="transferencia">Transferência</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos status</SelectItem>
+                <SelectItem value="pendente">Pendente</SelectItem>
+                <SelectItem value="conciliado">Conciliado</SelectItem>
+                <SelectItem value="divergente">Divergente</SelectItem>
+                <SelectItem value="ignorado">Ignorado</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={originFilter} onValueChange={setOriginFilter}>
+              <SelectTrigger><SelectValue placeholder="Origem" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas origens</SelectItem>
+                <SelectItem value="comercial">Comercial</SelectItem>
+                <SelectItem value="manual">Manual</SelectItem>
+                <SelectItem value="ofx">OFX</SelectItem>
+                <SelectItem value="transferência">Transferência</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={realizedFilter} onValueChange={setRealizedFilter}>
+              <SelectTrigger><SelectValue placeholder="Previsto/Realizado" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Previsto + Realizado</SelectItem>
+                <SelectItem value="previsto">Apenas previstos</SelectItem>
+                <SelectItem value="realizado">Apenas realizados</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="w-full">
-        <TabsList>
-          <TabsTrigger value="consolidado">Consolidado</TabsTrigger>
-          <TabsTrigger value="receber">Contas a Receber</TabsTrigger>
-          <TabsTrigger value="pagar">Contas a Pagar</TabsTrigger>
-          <TabsTrigger value="realizados">Realizados</TabsTrigger>
-          <TabsTrigger value="fluxo">Fluxo Bancário</TabsTrigger>
-          <TabsTrigger value="analitico">Receitas × Despesas</TabsTrigger>
+        <TabsList className="h-auto flex-wrap justify-start gap-1 bg-muted/60 p-1">
+          <TabsTrigger value="consolidado" className="gap-1.5"><LayoutGrid className="h-3.5 w-3.5" />Consolidado</TabsTrigger>
+          <TabsTrigger value="receber" className="gap-1.5"><ArrowDownCircle className="h-3.5 w-3.5" />Contas a Receber</TabsTrigger>
+          <TabsTrigger value="pagar" className="gap-1.5"><ArrowUpCircle className="h-3.5 w-3.5" />Contas a Pagar</TabsTrigger>
+          <TabsTrigger value="realizados" className="gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" />Realizados</TabsTrigger>
+          <TabsTrigger value="fluxo" className="gap-1.5"><Banknote className="h-3.5 w-3.5" />Fluxo Bancário</TabsTrigger>
+          <TabsTrigger value="analitico" className="gap-1.5"><BarChart3 className="h-3.5 w-3.5" />Receitas × Despesas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="consolidado" className="mt-4 space-y-2">
