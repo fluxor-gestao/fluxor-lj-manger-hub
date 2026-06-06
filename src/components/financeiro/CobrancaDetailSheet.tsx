@@ -276,7 +276,7 @@ export function CobrancaDetailSheet({
 
         {/* Ações */}
         <div className="mt-6 grid grid-cols-2 gap-2">
-          <Button variant="outline" onClick={() => placeholder("Gerar fatura")}>
+          <Button variant="outline" onClick={() => setFaturaOpen(true)}>
             <FileText className="h-4 w-4 mr-2" /> Gerar fatura
           </Button>
           <Button variant="outline" onClick={() => placeholder("Enviar cobrança")}>
@@ -294,6 +294,8 @@ export function CobrancaDetailSheet({
           Ações de envio e geração são placeholders nesta etapa.
         </p>
       </SheetContent>
+
+      <FaturaPreviewDialog row={row} open={faturaOpen} onOpenChange={setFaturaOpen} />
     </Sheet>
   );
 }
