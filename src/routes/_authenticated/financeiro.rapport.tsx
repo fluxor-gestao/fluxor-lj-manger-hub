@@ -404,32 +404,63 @@ function RapportPage() {
         </CardContent>
       </Card>
 
-      {/* KPIs */}
+      {/* Empty state */}
+      {isEmpty ? (
+        <Card>
+          <CardContent className="py-8 text-center text-sm text-muted-foreground">
+            Nenhum lançamento encontrado para o cliente e competência selecionados.
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {/* KPIs principais */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <KpiCard label="Saldo inicial" value={BRL(saldoInicial)} icon={Wallet} tone="muted" hint="estimado" />
+        <KpiCard label="Saldo inicial" value={BRL(saldoInicial)} icon={Wallet} tone="muted" hint="sem extrato bancário" />
         <KpiCard
           label="Entradas do mês"
-          value={BRL(current.receitas)}
+          value={BRL(current.recebido)}
           icon={ArrowUpRight}
           tone="success"
+          hint={`previsto ${BRL(current.receitasPrev)}`}
         />
         <KpiCard
           label="Saídas do mês"
-          value={BRL(current.despesas)}
+          value={BRL(current.pago)}
           icon={ArrowDownRight}
           tone="danger"
+          hint={`previsto ${BRL(current.despesasPrev)}`}
         />
         <KpiCard
           label="Resultado do mês"
           value={BRL(resultado)}
           icon={resultado >= 0 ? TrendingUp : TrendingDown}
           tone={resultado >= 0 ? "success" : "danger"}
+          hint={`previsto ${BRL(resultadoPrevisto)}`}
         />
         <KpiCard
           label="Saldo final"
           value={BRL(saldoFinal)}
           icon={Wallet}
           tone={saldoFinal >= 0 ? "primary" : "danger"}
+        />
+      </div>
+
+      {/* KPIs secundários */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard label="A receber em aberto" value={BRL(current.abertoIn)} icon={ArrowUpRight} tone="primary" />
+        <KpiCard label="A pagar em aberto" value={BRL(current.abertoOut)} icon={ArrowDownRight} tone="muted" />
+        <KpiCard
+          label="Vencidos"
+          value={BRL(vencidosTotalIn + vencidosTotalOut)}
+          icon={AlertOctagon}
+          tone={vencidos.length > 0 ? "danger" : "muted"}
+          hint={`${vencidos.length} lançamento(s)`}
+        />
+        <KpiCard
+          label="Pendências de conciliação"
+          value={String(pendentesConciliacao)}
+          icon={RefreshCcw}
+          tone={pendentesConciliacao > 0 ? "primary" : "muted"}
         />
       </div>
 
