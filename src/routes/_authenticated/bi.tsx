@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, BarChart3, BriefcaseBusiness, DollarSign, ShieldAlert, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { canAccessBiDashboard } from "@/lib/access";
+import BIFinanceiro from "@/components/bi/BIFinanceiro";
 
 const dashboards = [
   {
@@ -115,7 +116,11 @@ function BI() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            {activeDashboard.embedUrl ? (
+            {activeDashboard.id === "financeiro" ? (
+              <div className="p-4">
+                <BIFinanceiro />
+              </div>
+            ) : activeDashboard.embedUrl ? (
               <iframe
                 title={activeDashboard.title}
                 src={activeDashboard.embedUrl}
