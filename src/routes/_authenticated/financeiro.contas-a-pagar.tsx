@@ -234,11 +234,75 @@ function ContasAPagarPage() {
     setDueFrom(""); setDueTo(""); setOnlyOverdue(false); setOnlyOpen(true);
   };
 
-  const act = (label: string, r: Row) => {
-    toast.info(`${label} — em breve`, {
-      description: `${r.supplier?.name ?? r.counterparty_name ?? "Fornecedor"} · ${fmt(Number(r.open_amount ?? 0))}`,
-    });
-  };
+  // Cash health
+  const cash = useCashSettings();
+  const [cashOpen, setCashOpen] = useState(false);
+  const [detailRow, setDetailRow] = useState<Row | null>(null);
+
+  const openByDue = useMemo(
+    () =>
+      allRows
+        .filter((r) => statusOf(r) !== "pago")
+        .slice()
+        .sort((a, b) => (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999")),
+    [allRows],
+  );
+
+  const coverage = useMemo(() => {
+    const map = new Map<string, Coverage>();
+    let cum = 0;
+    for (const r of openByDue) {
+      const open = Number(r.open_amount ?? 0);
+      const prev = cum;
+      cum += open;
+      if (cum <= cash.available) map.set(r.id, "coberto");
+      else if (prev < cash.available) map.set(r.id, "apertado");
+      else map.set(r.id, "sem");
+    }
+    return map;
+  }, [openByDue, cash.available]);
+
+  const previstoTotal = metrics.totalAberto;
+  const previsto7d = metrics.a7Val;
+  const saldoProjetado = cash.available - previstoTotal;
+  const deficit = Math.max(0, previstoTotal - cash.available);
+
+  const health: "saudavel" | "atencao" | "insuficiente" = !cash.configured
+    ? "atencao"
+    : cash.available < previstoTotal || cash.available < previsto7d
+      ? "insuficiente"
+      : cash.available < cash.minBalance
+        ? "atencao"
+        : "saudavel";
+
+  const insights = useMemo(() => {
+    let semQtd = 0, semValor = 0, apertadoQtd = 0, apertadoSemCob = 0;
+    const criticas: Row[] = [];
+    const t = today();
+    const lim = addDays(t, 7);
+    let acc = 0;
+    for (const r of openByDue) {
+      const c = coverage.get(r.id);
+      const open = Number(r.open_amount ?? 0);
+      if (c === "sem") { semQtd += 1; semValor += open; }
+      if (c === "apertado") {
+        apertadoQtd += 1;
+        apertadoSemCob += Math.max(0, (acc + open) - cash.available);
+      }
+      acc += open;
+      if ((c === "sem" || c === "apertado") && r.due_date && r.due_date >= t && r.due_date <= lim) {
+        criticas.push(r);
+      }
+    }
+    return {
+      fundosInsuficientes: health === "insuficiente",
+      emRisco: semQtd + apertadoQtd,
+      semCobertura: semValor + apertadoSemCob,
+      criticas: criticas.slice(0, 5),
+    };
+  }, [openByDue, coverage, cash.available, health]);
+
+
 
   return (
     <div className="space-y-6 pb-10">
