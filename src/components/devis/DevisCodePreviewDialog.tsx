@@ -7,18 +7,22 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Hash, FileText } from "lucide-react";
 
-export type ServicePrefix = "DE" | "AM" | "CO";
+export type ServicePrefix = "DE" | "AM" | "CO" | "IM" | "GE";
 
 const PREFIX_LABEL: Record<ServicePrefix, string> = {
   DE: "Advocacia",
   AM: "Ambiental",
   CO: "Contábil",
+  IM: "Imobiliário",
+  GE: "Gestão",
 };
 
 export function inferServicePrefix(...sources: (string | null | undefined)[]): ServicePrefix {
   const text = sources.filter(Boolean).join(" ").toLowerCase();
   if (/(ambient|environment|ambiental|sustent)/.test(text)) return "AM";
   if (/(cont[áa]bil|cont[aá]bei|accounting|fiscal|tribut|imposto)/.test(text)) return "CO";
+  if (/(imobili[áa]rio|imobili[áa]ria|real estate|im[óo]vel|im[óo]veis|loca[çc][ãa]o|aluguel)/.test(text)) return "IM";
+  if (/(gest[ãa]o|management|administra[çc][ãa]o|consultoria)/.test(text)) return "GE";
   return "DE";
 }
 
