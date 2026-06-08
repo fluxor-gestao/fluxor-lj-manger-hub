@@ -99,7 +99,7 @@ export default function DevisCodePreviewDialog({
             <RadioGroup
               value={prefix}
               onValueChange={(v) => setPrefix(v as ServicePrefix)}
-              className="grid grid-cols-3 gap-2"
+              className="grid grid-cols-3 sm:grid-cols-5 gap-2"
             >
               {(Object.keys(PREFIX_LABEL) as ServicePrefix[]).map((p) => (
                 <label
