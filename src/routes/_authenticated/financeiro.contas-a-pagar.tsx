@@ -387,6 +387,27 @@ function ContasAPagarPage() {
         open={!!payRow}
         onOpenChange={(o) => { if (!o) setPayRow(null); }}
       />
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => { if (!o) setToDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir pagamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {toDelete?.supplier?.name || toDelete?.counterparty_name || "Fornecedor"} ·{" "}
+              {fmt(Number(toDelete?.total_brl ?? toDelete?.amount_out ?? 0))}
+              <br />Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); if (toDelete) deleteMutation.mutate(toDelete.id); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
