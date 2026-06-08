@@ -432,6 +432,7 @@ function ContasAPagarPage() {
                 <TableHead className="font-semibold text-right">Pago</TableHead>
                 <TableHead className="font-semibold text-right">Saldo aberto</TableHead>
                 <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Impacto no Caixa</TableHead>
                 <TableHead className="font-semibold text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
