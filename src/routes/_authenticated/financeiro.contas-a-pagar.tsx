@@ -650,3 +650,226 @@ function KpiCard({
     </Card>
   );
 }
+
+const HEALTH_META: Record<"saudavel" | "atencao" | "insuficiente", { label: string; badge: string; tone: Tone; icon: React.ReactNode }> = {
+  saudavel:     { label: "Saudável",      badge: "bg-success/15 text-success border-success/30",            tone: "success", icon: <ShieldCheck className="h-4 w-4" /> },
+  atencao:      { label: "Atenção",       badge: "bg-warning/15 text-warning border-warning/30",            tone: "warning", icon: <AlertTriangle className="h-4 w-4" /> },
+  insuficiente: { label: "Insuficiente",  badge: "bg-destructive/15 text-destructive border-destructive/30", tone: "danger",  icon: <TrendingDown className="h-4 w-4" /> },
+};
+
+function CashHealthCard({
+  configured, health, available, minBalance, previstoTotal, saldoProjetado, deficit, onConfigure,
+}: {
+  configured: boolean;
+  health: "saudavel" | "atencao" | "insuficiente";
+  available: number; minBalance: number; previstoTotal: number; saldoProjetado: number; deficit: number;
+  onConfigure: () => void;
+}) {
+  const meta = HEALTH_META[health];
+  const minPct = minBalance > 0 ? Math.min(100, Math.max(0, (available / minBalance) * 100)) : 0;
+  const showLowAlert = configured && available < previstoTotal;
+  const showMinAlert = configured && minBalance > 0 && available < minBalance;
+
+  return (
+    <Card className="relative overflow-hidden">
+      <span className={`absolute left-0 top-0 h-full w-1 ${toneStyles[meta.tone].bar}`} aria-hidden />
+      <CardContent className="p-5 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className={`flex h-7 w-7 items-center justify-center rounded-md ${toneStyles[meta.tone].icon}`}>{meta.icon}</span>
+              <h3 className="font-semibold font-display">Saúde de Caixa</h3>
+              <Badge variant="outline" className={meta.badge}>{meta.label}</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Compara o saldo disponível com seus pagamentos previstos.
+            </p>
+          </div>
+          {!configured && (
+            <Button size="sm" variant="outline" onClick={onConfigure}>
+              <Settings2 className="h-4 w-4 mr-2" /> Configurar caixa
+            </Button>
+          )}
+        </div>
+
+        {!configured ? (
+          <p className="text-sm text-muted-foreground">
+            Defina seu saldo disponível e o limite mínimo de caixa para ativar o monitoramento.
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-3 items-center">
+              <Metric label="Saldo disponível" value={fmt(available)} />
+              <Metric label="Pagamentos previstos" value={`− ${fmt(previstoTotal)}`} tone="warning" />
+              <Metric label="Saldo projetado" value={fmt(saldoProjetado)} tone={saldoProjetado < 0 ? "danger" : "success"} bold />
+            </div>
+
+            {minBalance > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Limite mínimo: {fmt(minBalance)}</span>
+                  <span className={`tabular-nums ${available < minBalance ? "text-destructive" : "text-success"}`}>
+                    {fmt(available)} ({minPct.toFixed(0)}%)
+                  </span>
+                </div>
+                <Progress value={minPct} />
+              </div>
+            )}
+
+            {showLowAlert && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Saldo insuficiente</AlertTitle>
+                <AlertDescription>
+                  Faltam <strong className="tabular-nums">{fmt(deficit)}</strong> para cobrir todos os pagamentos previstos.
+                </AlertDescription>
+              </Alert>
+            )}
+            {!showLowAlert && showMinAlert && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Saldo abaixo do limite mínimo</AlertTitle>
+                <AlertDescription>
+                  Reforce seu caixa para manter a reserva de segurança.
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Metric({ label, value, tone, bold }: { label: string; value: string; tone?: "success" | "danger" | "warning"; bold?: boolean }) {
+  const color = tone === "danger" ? "text-destructive" : tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : "text-foreground";
+  return (
+    <div className="space-y-1">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className={`tabular-nums leading-tight ${bold ? "text-2xl font-bold font-display" : "text-lg font-semibold"} ${color}`}>{value}</p>
+    </div>
+  );
+}
+
+function CashSettingsDialog({
+  open, onOpenChange, available, minBalance, onSave,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  available: number; minBalance: number;
+  onSave: (a: number, m: number) => void;
+}) {
+  const [a, setA] = useState(String(available || ""));
+  const [m, setM] = useState(String(minBalance || ""));
+  useEffect(() => { if (open) { setA(String(available || "")); setM(String(minBalance || "")); } }, [open, available, minBalance]);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Configurar caixa</DialogTitle>
+          <DialogDescription>
+            Informe o saldo disponível atual e o limite mínimo de segurança. Os valores são salvos neste navegador.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3 py-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="cap-avail">Saldo disponível (BRL)</Label>
+            <Input id="cap-avail" type="number" inputMode="decimal" step="0.01" value={a} onChange={(e) => setA(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="cap-min">Limite mínimo (BRL)</Label>
+            <Input id="cap-min" type="number" inputMode="decimal" step="0.01" value={m} onChange={(e) => setM(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button onClick={() => { onSave(Number(a) || 0, Number(m) || 0); onOpenChange(false); toast.success("Configuração de caixa salva"); }}>
+            Salvar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PayableDetailSheet({
+  row, available, coverage: cov, onOpenChange,
+}: {
+  row: Row | null;
+  available: number;
+  coverage: Coverage | undefined;
+  onOpenChange: (o: boolean) => void;
+}) {
+  if (!row) {
+    return (
+      <Sheet open={false} onOpenChange={onOpenChange}>
+        <SheetContent />
+      </Sheet>
+    );
+  }
+  const fornecedor = row.supplier?.name || row.counterparty_name || "—";
+  const open = Number(row.open_amount ?? 0);
+  const proj = available - open;
+  const isDeficit = proj < 0;
+
+  return (
+    <Sheet open={!!row} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>{fornecedor}</SheetTitle>
+          <SheetDescription>{row.movement_description ?? "—"}</SheetDescription>
+        </SheetHeader>
+        <div className="space-y-4 mt-6">
+          <DetailRow label="Vencimento" value={fmtDateBR(row.due_date)} />
+          <DetailRow label="Valor da despesa" value={fmt(open)} strong />
+          <DetailRow label="Saldo disponível" value={fmt(available)} />
+          <DetailRow
+            label="Saldo projetado após pagamento"
+            value={fmt(proj)}
+            tone={isDeficit ? "danger" : "success"}
+            strong
+          />
+          <DetailRow
+            label={isDeficit ? "Déficit" : "Sobra"}
+            value={fmt(Math.abs(proj))}
+            tone={isDeficit ? "danger" : "success"}
+          />
+          {cov && (
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className="text-sm text-muted-foreground">Impacto no caixa</span>
+              <Badge variant="outline" className={COVERAGE_BADGE[cov]}>{COVERAGE_LABEL[cov]}</Badge>
+            </div>
+          )}
+          {cov === "sem" && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Sem cobertura</AlertTitle>
+              <AlertDescription>
+                Este pagamento ultrapassa o saldo disponível considerando as obrigações anteriores.
+              </AlertDescription>
+            </Alert>
+          )}
+          {cov === "apertado" && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Cobertura apertada</AlertTitle>
+              <AlertDescription>
+                O caixa cobre parcialmente este pagamento dentro da ordem de vencimento.
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function DetailRow({ label, value, tone, strong }: { label: string; value: string; tone?: "success" | "danger"; strong?: boolean }) {
+  const color = tone === "danger" ? "text-destructive" : tone === "success" ? "text-success" : "text-foreground";
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className={`tabular-nums ${strong ? "font-bold text-lg" : "font-medium"} ${color}`}>{value}</span>
+    </div>
+  );
+}
