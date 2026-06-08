@@ -93,6 +93,7 @@ const statusLabel: Record<Status, string> = {
 function ContasAReceberPage() {
   const navigate = useNavigate();
   const { clients } = useFinanceiroCatalogs();
+  const queryClient = useQueryClient();
 
   // Filtros
   const [search, setSearch] = useState("");
@@ -105,6 +106,20 @@ function ContasAReceberPage() {
 
   // Detalhe da cobrança
   const [detail, setDetail] = useState<CobrancaRow | null>(null);
+  const [toDelete, setToDelete] = useState<Row | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("financial_entries").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Cobrança excluída");
+      queryClient.invalidateQueries({ queryKey: ["contas-a-receber"] });
+      setToDelete(null);
+    },
+    onError: (e: any) => toast.error("Erro ao excluir", { description: e?.message }),
+  });
 
   const q = useQuery({
     queryKey: ["contas-a-receber", "v2"],
