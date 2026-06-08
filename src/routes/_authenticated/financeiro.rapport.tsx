@@ -21,6 +21,7 @@ import {
   Hash,
   Tag,
   Layers,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -1315,6 +1316,7 @@ function RapportPage() {
                       <TableHead className="text-right">{t.colAmount}</TableHead>
                       <TableHead>{t.colCategory}</TableHead>
                       <TableHead>{t.colNote}</TableHead>
+                      <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1346,6 +1348,19 @@ function RapportPage() {
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {tx.note || ""}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-destructive hover:text-destructive"
+                            onClick={() =>
+                              setTransactions((prev) => prev.filter((x) => x.id !== tx.id))
+                            }
+                            title="Excluir"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

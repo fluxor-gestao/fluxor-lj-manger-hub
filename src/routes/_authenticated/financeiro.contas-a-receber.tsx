@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft, Search, Filter, MoreHorizontal, Eye, FileText, Send, DollarSign,
-  AlertTriangle, CalendarClock, Wallet, CheckCircle2, ListChecks,
+  AlertTriangle, CalendarClock, Wallet, CheckCircle2, ListChecks, Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { CobrancaDetailSheet, type CobrancaRow } from "@/components/financeiro/CobrancaDetailSheet";
@@ -89,6 +93,7 @@ const statusLabel: Record<Status, string> = {
 function ContasAReceberPage() {
   const navigate = useNavigate();
   const { clients } = useFinanceiroCatalogs();
+  const queryClient = useQueryClient();
 
   // Filtros
   const [search, setSearch] = useState("");
@@ -101,6 +106,20 @@ function ContasAReceberPage() {
 
   // Detalhe da cobrança
   const [detail, setDetail] = useState<CobrancaRow | null>(null);
+  const [toDelete, setToDelete] = useState<Row | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("financial_entries").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Cobrança excluída");
+      queryClient.invalidateQueries({ queryKey: ["contas-a-receber"] });
+      setToDelete(null);
+    },
+    onError: (e: any) => toast.error("Erro ao excluir", { description: e?.message }),
+  });
 
   const q = useQuery({
     queryKey: ["contas-a-receber", "v2"],
@@ -353,6 +372,13 @@ function ContasAReceberPage() {
                           <DropdownMenuItem onClick={() => act("Registrar pagamento", r)}>
                             <DollarSign className="h-4 w-4 mr-2" /> Registrar pagamento
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => setToDelete(r)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -375,6 +401,27 @@ function ContasAReceberPage() {
         open={!!detail}
         onOpenChange={(o) => { if (!o) setDetail(null); }}
       />
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => { if (!o) setToDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir cobrança?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {toDelete?.client?.name || toDelete?.counterparty_name || "Cliente"} ·{" "}
+              {fmt(Number(toDelete?.total_brl ?? toDelete?.amount_in ?? 0))}
+              <br />Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); if (toDelete) deleteMutation.mutate(toDelete.id); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

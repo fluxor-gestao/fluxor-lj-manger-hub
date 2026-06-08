@@ -780,9 +780,41 @@ function Comercial() {
                       <TableCell>{d.meeting_date ? format(parseISO(d.meeting_date), "dd/MM/yyyy") : "—"}</TableCell>
                       <TableCell>{profilesById[d.commercial_responsible]?.full_name || profilesById[d.commercial_responsible]?.email || "—"}</TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Button size="icon" variant="ghost" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1 justify-end">
+                          <Button size="icon" variant="ghost" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir devis?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {d.devis_number ? `${d.devis_number} — ` : ""}{d.title || clientsById[d.client_id]?.name || "Devis"}
+                                  <br />Esta ação não pode ser desfeita e removerá lançamentos financeiros e serviços vinculados que dependam deste registro.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={async () => {
+                                    const { error } = await supabase.from("devis").delete().eq("id", d.id);
+                                    if (error) { toast.error("Erro ao excluir", { description: error.message }); return; }
+                                    toast.success("Devis excluído");
+                                    queryClient.invalidateQueries({ queryKey: ["devis"] });
+                                  }}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
