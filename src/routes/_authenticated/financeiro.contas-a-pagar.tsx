@@ -89,9 +89,24 @@ const statusLabel: Record<Status, string> = {
 function ContasAPagarPage() {
   const navigate = useNavigate();
   const { suppliers } = useFinanceiroCatalogs();
+  const queryClient = useQueryClient();
 
   // Pagamento
   const [payRow, setPayRow] = useState<Row | null>(null);
+  const [toDelete, setToDelete] = useState<Row | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("financial_entries").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Pagamento excluído");
+      queryClient.invalidateQueries({ queryKey: ["contas-a-pagar"] });
+      setToDelete(null);
+    },
+    onError: (e: any) => toast.error("Erro ao excluir", { description: e?.message }),
+  });
 
   // Filtros
   const [search, setSearch] = useState("");
