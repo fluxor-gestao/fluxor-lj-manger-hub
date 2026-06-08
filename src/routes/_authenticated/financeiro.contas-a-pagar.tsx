@@ -358,6 +358,12 @@ function ContasAPagarPage() {
                           <DropdownMenuItem onClick={() => act("Ver comprovante", r)}>
                             <Receipt className="h-4 w-4 mr-2" /> Ver comprovante
                           </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setToDelete(r)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
