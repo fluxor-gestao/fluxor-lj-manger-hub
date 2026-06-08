@@ -320,6 +320,9 @@ function ContasAPagarPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setCashOpen(true)}>
+            <Settings2 className="h-4 w-4 mr-2" /> Configurar caixa
+          </Button>
           <Button variant="outline" onClick={() => toast.info("Exportar — em breve")}>
             <FileText className="h-4 w-4 mr-2" /> Exportar
           </Button>
