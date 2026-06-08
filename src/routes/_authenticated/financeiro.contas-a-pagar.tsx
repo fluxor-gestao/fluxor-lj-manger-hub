@@ -513,6 +513,71 @@ function ContasAPagarPage() {
         </Card>
       )}
 
+      {/* Insights de Caixa */}
+      {cash.configured && (
+        <Card>
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <Activity className="h-3.5 w-3.5" /> Insights de Caixa
+            </div>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+              <KpiCard
+                tone={insights.fundosInsuficientes ? "danger" : "success"}
+                icon={insights.fundosInsuficientes ? <AlertTriangle className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
+                label="Fundos insuficientes"
+                value={insights.fundosInsuficientes ? "Sim" : "Não"}
+              />
+              <KpiCard
+                tone={insights.emRisco > 0 ? "warning" : "muted"}
+                icon={<AlertTriangle className="h-4 w-4" />}
+                label="Pagamentos em risco"
+                value={String(insights.emRisco)}
+              />
+              <KpiCard
+                tone={insights.semCobertura > 0 ? "danger" : "muted"}
+                icon={<TrendingDown className="h-4 w-4" />}
+                label="Total sem cobertura"
+                value={fmt(insights.semCobertura)}
+              />
+              <KpiCard
+                tone={insights.criticas.length > 0 ? "warning" : "muted"}
+                icon={<CalendarClock className="h-4 w-4" />}
+                label="Críticas (7 dias)"
+                value={String(insights.criticas.length)}
+              />
+            </div>
+            {insights.criticas.length > 0 && (
+              <div className="space-y-1.5 pt-1">
+                <p className="text-xs font-medium text-muted-foreground">Contas críticas dos próximos 7 dias</p>
+                <div className="rounded-md border divide-y">
+                  {insights.criticas.map((r) => {
+                    const cov = coverage.get(r.id);
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => setDetailRow(r)}
+                        className="flex w-full items-center justify-between px-3 py-2 text-sm hover:bg-muted/40 text-left"
+                      >
+                        <span className="truncate">
+                          <span className="font-medium">{r.supplier?.name || r.counterparty_name || "—"}</span>
+                          <span className="text-muted-foreground"> · venc. {fmtDateBR(r.due_date)}</span>
+                        </span>
+                        <span className="flex items-center gap-2 shrink-0">
+                          <span className="tabular-nums font-semibold">{fmt(Number(r.open_amount ?? 0))}</span>
+                          {cov && <Badge variant="outline" className={COVERAGE_BADGE[cov]}>{COVERAGE_LABEL[cov]}</Badge>}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+
+
       <RegisterPaymentDialog
         entry={payRow as PayableEntry | null}
         open={!!payRow}
