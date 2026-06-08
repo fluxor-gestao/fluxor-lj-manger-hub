@@ -617,7 +617,7 @@ function ContasAPagarPage() {
         row={detailRow}
         available={cash.available}
         coverage={detailRow ? coverage.get(detailRow.id) : undefined}
-        onOpenChange={(o) => { if (!o) setDetailRow(null); }}
+        onOpenChange={(o: boolean) => { if (!o) setDetailRow(null); }}
       />
     </div>
   );
