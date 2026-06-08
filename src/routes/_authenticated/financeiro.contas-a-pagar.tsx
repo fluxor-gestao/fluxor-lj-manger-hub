@@ -1,16 +1,20 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft, Search, Filter, MoreHorizontal, Eye, FileText, DollarSign, CheckCircle2,
-  AlertTriangle, CalendarClock, Wallet, ListChecks, Receipt, Trash2,
+  AlertTriangle, CalendarClock, Wallet, ListChecks, Receipt, Trash2, Settings2,
+  ShieldCheck, TrendingDown, Activity,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -23,9 +27,47 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
+} from "@/components/ui/sheet";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { RegisterPaymentDialog, type PayableEntry } from "@/components/financeiro/RegisterPaymentDialog";
+
+type Coverage = "coberto" | "apertado" | "sem";
+const COVERAGE_LABEL: Record<Coverage, string> = {
+  coberto: "Coberto", apertado: "Apertado", sem: "Sem cobertura",
+};
+const COVERAGE_BADGE: Record<Coverage, string> = {
+  coberto: "bg-success/15 text-success border-success/30",
+  apertado: "bg-warning/15 text-warning border-warning/30",
+  sem: "bg-destructive/15 text-destructive border-destructive/30",
+};
+
+const LS_AVAILABLE = "cap.availableBalance";
+const LS_MIN = "cap.minBalance";
+
+function useCashSettings() {
+  const [available, setAvailable] = useState(0);
+  const [minBalance, setMinBalance] = useState(0);
+  useEffect(() => {
+    try {
+      setAvailable(Number(localStorage.getItem(LS_AVAILABLE) ?? 0) || 0);
+      setMinBalance(Number(localStorage.getItem(LS_MIN) ?? 0) || 0);
+    } catch {}
+  }, []);
+  const save = (a: number, m: number) => {
+    setAvailable(a); setMinBalance(m);
+    try {
+      localStorage.setItem(LS_AVAILABLE, String(a));
+      localStorage.setItem(LS_MIN, String(m));
+    } catch {}
+  };
+  return { available, minBalance, save, configured: available > 0 || minBalance > 0 };
+}
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-pagar")({
   component: ContasAPagarPage,
