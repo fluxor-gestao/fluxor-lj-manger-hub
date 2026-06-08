@@ -372,6 +372,13 @@ function ContasAReceberPage() {
                           <DropdownMenuItem onClick={() => act("Registrar pagamento", r)}>
                             <DollarSign className="h-4 w-4 mr-2" /> Registrar pagamento
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => setToDelete(r)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
