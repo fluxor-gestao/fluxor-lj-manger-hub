@@ -43,7 +43,7 @@ function OperacaoPage() {
       const { data, error } = await supabase
         .from("services")
         .select(
-          "id, title, description, business_unit, responsible_sector, assigned_to, start_date, expected_end_date, actual_end_date, status, created_at, updated_at, client_id, client:clients(name), assignee:profiles!services_assigned_to_fkey(full_name)"
+          "id, title, description, business_unit, responsible_sector, assigned_to, start_date, expected_end_date, actual_end_date, status, created_at, updated_at, client_id, devis_id, client:clients(name), devis:devis(id, devis_number), assignee:profiles!services_assigned_to_fkey(full_name)"
         )
         .order("updated_at", { ascending: false })
         .limit(1000);
@@ -52,7 +52,7 @@ function OperacaoPage() {
         const { data: d2, error: e2 } = await supabase
           .from("services")
           .select(
-            "id, title, description, business_unit, responsible_sector, assigned_to, start_date, expected_end_date, actual_end_date, status, created_at, updated_at, client_id, client:clients(name)"
+            "id, title, description, business_unit, responsible_sector, assigned_to, start_date, expected_end_date, actual_end_date, status, created_at, updated_at, client_id, devis_id, client:clients(name), devis:devis(id, devis_number)"
           )
           .order("updated_at", { ascending: false })
           .limit(1000);

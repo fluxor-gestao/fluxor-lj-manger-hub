@@ -1,84 +1,45 @@
-# Plano: Refatorar Rapport como gerador independente de extrato
+## Objetivo
 
-Transformar `src/routes/_authenticated/financeiro.rapport.tsx` em uma ferramenta autônoma de prestação de contas, desacoplada de `financial_entries`, baseada em upload de extrato bancário e geração multi-idioma.
+No `ProcessoDetailSheet` (drawer aberto em `/operacao`):
 
-## Escopo
+1. Prefixar o título com o código do Devis vinculado (ex.: `AM2026001 — Due Diligence...`).
+2. Substituir o badge de status operacional sublinhado por um badge de **status financeiro do pagamento do Devis** (pago / parcial / pendente / sem cobrança).
 
-Reescrever **apenas** o arquivo `src/routes/_authenticated/financeiro.rapport.tsx`. Nenhuma alteração em Central Financeira, Contas a Pagar/Receber, schema do banco ou outros módulos.
+## Contexto técnico
 
-## Fluxo do usuário (wizard linear no topo)
+- `services.devis_id` → `devis.id`. O código fica em `devis.devis_number`.
+- Cobranças do devis ficam em `financial_entries` com `document_reference = devis.id::text` (ver migration `20260513205723…`). O pagamento é refletido em `financial_entries.payment_status` (`pago` / `parcial` / `pendente`).
+- Hoje a query de `operacao.tsx` (`useQuery operacao-services`) **não** traz `devis`. Precisamos estender o `select` para incluir `devis:devis(id, devis_number)`.
 
-```text
-[1 Cliente] → [2 Mês] → [3 Idioma] → [4 Upload extrato] → [Processar] → [Gerar Rapport]
+## Mudanças
+
+### 1. `src/components/operacao/status.ts`
+Estender `ServiceLike` com:
+```ts
+devis_id?: string | null;
+devis?: { id: string; devis_number: string | null } | null;
 ```
 
-Botões de ação: **Processar extrato**, **Gerar Rapport**, **Copiar resumo**, **Exportar PDF** (toast "em breve"), **Enviar ao cliente** (toast "em breve").
+### 2. `src/routes/_authenticated/operacao.tsx`
+- Atualizar os dois selects (com e sem fallback) para incluir `devis_id, devis:devis(id, devis_number)`.
 
-## Estrutura da página (top → bottom)
+### 3. `src/components/operacao/ProcessoDetailSheet.tsx`
+- **Título**: se `service.devis?.devis_number` existir, prefixar: `{devis_number} — {title}`. Caso contrário, manter `title`.
+- **Badge financeiro** (substitui o atual `STATUS_BADGE[service.status]` no header):
+  - Adicionar `useQuery` (apenas quando `open && service.devis_id`) que busca em `financial_entries` os lançamentos com `document_reference = service.devis_id` (campos: `amount_in, paid_amount, payment_status, open_amount`).
+  - Derivar um `paymentStatus` agregado:
+    - sem registros → "Sem cobrança" (cinza)
+    - todos `pago` → "Pago" (verde)
+    - algum `parcial` ou soma de `paid_amount > 0` com saldo > 0 → "Pagamento parcial" (âmbar)
+    - todos `pendente` → "Aguardando pagamento" (laranja)
+  - Renderizar badge no lugar do badge operacional, com texto e tooltip (valor pago / total). O Select de alteração de status operacional permanece (mudança apenas visual no badge sublinhado).
+- Atualizar também `SheetDescription` para incluir o `devis_number` quando existir (no lugar do hash de 8 chars), mantendo o `client.name`.
 
-1. **Header** — título "Rapport", subtítulo "Relatório mensal a partir de extrato bancário", botão Voltar.
-2. **Card de configuração** — grid com:
-   - Select Cliente (de `useFinanceiroCatalogs().clients`)
-   - Input month (mês de referência)
-   - Select Idioma: PT, EN, ES, FR, DE, IT
-   - Dropzone de upload (PDF, CSV, XLS, XLSX) com estado vazio/arquivo carregado/processando
-   - Botão "Processar extrato" (habilita "Gerar Rapport" ao concluir)
-3. **6 KPI Cards**: Saldo inicial · Total de entradas · Total de saídas · Saldo líquido · Saldo final · Qtde de movimentações.
-4. **Gráficos (Recharts)**:
-   - Linha: Evolução do saldo no período
-   - Barras agrupadas: Entradas × Saídas por semana
-   - Barras horizontais: Top maiores entradas
-   - Barras horizontais: Top maiores saídas
-   - Pizza: Distribuição das saídas por categoria sugerida
-   - Pizza: Distribuição das entradas por origem sugerida
-5. **Tabela de movimentações** — colunas: Data, Descrição original, Tipo (badge Entrada/Saída), Valor, Categoria sugerida, Observação.
-6. **Resumo do Rapport** — bloco de texto gerado no idioma escolhido, com botão Copiar.
-7. **Itens de atenção** — cards inteligentes baseados em regras (ver abaixo).
+### 4. (Opcional, fora de escopo desta etapa)
+Não alterar a lista/kanban — apenas o detalhe, conforme o print.
 
-## Detalhes técnicos
+## Restrições
 
-### Estado e processamento (mock)
-
-- Estados: `clientId`, `month`, `language`, `file`, `status` (`idle | processing | ready`), `transactions` (array tipado).
-- Tipo: `Transaction { id, date, description, type: 'entrada'|'saida', amount, suggestedCategory, note }`.
-- "Processar extrato": após pequeno delay simulado, popula `transactions` com **dataset mock determinístico** derivado do mês selecionado (12–20 movimentações realistas: PIX, boletos, taxas, salários, fornecedores). Marca `status = 'ready'`. Mantemos a estrutura pronta para plugar parser real depois — nenhum parser real será implementado nesta etapa.
-- "Gerar Rapport": apenas seta um flag `generated = true` que revela KPIs/gráficos/resumo/atenção (já calculados via `useMemo`).
-- Saldo inicial: derivado do mock (valor base do mês). Saldo final = saldo inicial + soma líquida. Líquido = entradas − saídas.
-
-### Idiomas e dicionário i18n local
-
-- Objeto `i18n` no próprio arquivo com chaves para labels da UI **e** templates do resumo executivo nos 6 idiomas.
-- `language` (default `pt`) controla labels e geração do resumo. Sem dependência de biblioteca i18n — dicionário inline.
-- Resumo executivo: função pura que recebe métricas + idioma e devolve string com placeholders preenchidos (moeda, mês, comparações).
-
-### Agregações (useMemo)
-
-- Totais (entradas, saídas, líquido, qtd, saldo final).
-- Série diária de saldo acumulado para o gráfico de evolução.
-- Buckets semanais (Semana 1–5) com entradas/saídas.
-- Top 5 entradas e Top 5 saídas (por valor absoluto).
-- Distribuição por `suggestedCategory` (saídas) e por origem (entradas) — sugestão derivada do mock.
-
-### Itens de atenção (regras)
-
-Cada regra empurra um card com ícone, título, descrição e tom (info/warn/danger):
-- **Concentração de saídas**: top 1 saída ≥ 40% do total de saídas.
-- **Saldo final < saldo inicial**.
-- **Grande entrada pontual**: maior entrada ≥ 50% do total de entradas.
-- **Aumento de saídas recorrentes**: ≥ 3 descrições repetidas com valores crescentes.
-- **Movimentações sem categoria**: contagem de itens com `suggestedCategory` vazio.
-- **Possível cobrança duplicada**: mesma descrição + mesmo valor em datas próximas (±2 dias).
-- Fallback: card neutro "Nenhum ponto crítico identificado" se nenhuma regra disparar.
-
-### Restrições respeitadas
-
-- Zero uso de `financial_entries` ou `useFinanceiroCatalogs` além de `clients`.
-- Termos "receitas/despesas" removidos da UI; substituídos por Entradas/Saídas/Saldo.
-- Sem chamadas Supabase de leitura financeira nesta tela.
-- Sem parser real, sem integração bancária, sem novas tabelas, sem mexer em outros módulos.
-- Visual SaaS B2B: shadcn/ui, Tailwind, lucide, Recharts — mesmo padrão executivo das outras telas.
-
-## Entregáveis
-
-- `src/routes/_authenticated/financeiro.rapport.tsx` reescrito.
-- Nenhum outro arquivo alterado.
+- Sem novas tabelas, sem migrations.
+- Sem mexer em Financeiro/Comercial/BI.
+- Sem alterar o controle de status operacional (apenas a apresentação do badge no header).

@@ -62,6 +62,8 @@ export type ServiceLike = {
   client_id?: string | null;
   client?: { name: string | null } | null;
   assignee?: { full_name: string | null } | null;
+  devis_id?: string | null;
+  devis?: { id: string; devis_number: string | null } | null;
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
