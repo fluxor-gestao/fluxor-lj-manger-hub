@@ -401,6 +401,27 @@ function ContasAReceberPage() {
         open={!!detail}
         onOpenChange={(o) => { if (!o) setDetail(null); }}
       />
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => { if (!o) setToDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir cobrança?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {toDelete?.client?.name || toDelete?.counterparty_name || "Cliente"} ·{" "}
+              {fmt(Number(toDelete?.total_brl ?? toDelete?.amount_in ?? 0))}
+              <br />Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); if (toDelete) deleteMutation.mutate(toDelete.id); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
