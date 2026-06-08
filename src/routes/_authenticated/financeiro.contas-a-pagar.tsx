@@ -1,16 +1,20 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft, Search, Filter, MoreHorizontal, Eye, FileText, DollarSign, CheckCircle2,
-  AlertTriangle, CalendarClock, Wallet, ListChecks, Receipt, Trash2,
+  AlertTriangle, CalendarClock, Wallet, ListChecks, Receipt, Trash2, Settings2,
+  ShieldCheck, TrendingDown, Activity,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -23,9 +27,47 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
+} from "@/components/ui/sheet";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { RegisterPaymentDialog, type PayableEntry } from "@/components/financeiro/RegisterPaymentDialog";
+
+type Coverage = "coberto" | "apertado" | "sem";
+const COVERAGE_LABEL: Record<Coverage, string> = {
+  coberto: "Coberto", apertado: "Apertado", sem: "Sem cobertura",
+};
+const COVERAGE_BADGE: Record<Coverage, string> = {
+  coberto: "bg-success/15 text-success border-success/30",
+  apertado: "bg-warning/15 text-warning border-warning/30",
+  sem: "bg-destructive/15 text-destructive border-destructive/30",
+};
+
+const LS_AVAILABLE = "cap.availableBalance";
+const LS_MIN = "cap.minBalance";
+
+function useCashSettings() {
+  const [available, setAvailable] = useState(0);
+  const [minBalance, setMinBalance] = useState(0);
+  useEffect(() => {
+    try {
+      setAvailable(Number(localStorage.getItem(LS_AVAILABLE) ?? 0) || 0);
+      setMinBalance(Number(localStorage.getItem(LS_MIN) ?? 0) || 0);
+    } catch {}
+  }, []);
+  const save = (a: number, m: number) => {
+    setAvailable(a); setMinBalance(m);
+    try {
+      localStorage.setItem(LS_AVAILABLE, String(a));
+      localStorage.setItem(LS_MIN, String(m));
+    } catch {}
+  };
+  return { available, minBalance, save, configured: available > 0 || minBalance > 0 };
+}
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-pagar")({
   component: ContasAPagarPage,
@@ -192,11 +234,75 @@ function ContasAPagarPage() {
     setDueFrom(""); setDueTo(""); setOnlyOverdue(false); setOnlyOpen(true);
   };
 
-  const act = (label: string, r: Row) => {
-    toast.info(`${label} — em breve`, {
-      description: `${r.supplier?.name ?? r.counterparty_name ?? "Fornecedor"} · ${fmt(Number(r.open_amount ?? 0))}`,
-    });
-  };
+  // Cash health
+  const cash = useCashSettings();
+  const [cashOpen, setCashOpen] = useState(false);
+  const [detailRow, setDetailRow] = useState<Row | null>(null);
+
+  const openByDue = useMemo(
+    () =>
+      allRows
+        .filter((r) => statusOf(r) !== "pago")
+        .slice()
+        .sort((a, b) => (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999")),
+    [allRows],
+  );
+
+  const coverage = useMemo(() => {
+    const map = new Map<string, Coverage>();
+    let cum = 0;
+    for (const r of openByDue) {
+      const open = Number(r.open_amount ?? 0);
+      const prev = cum;
+      cum += open;
+      if (cum <= cash.available) map.set(r.id, "coberto");
+      else if (prev < cash.available) map.set(r.id, "apertado");
+      else map.set(r.id, "sem");
+    }
+    return map;
+  }, [openByDue, cash.available]);
+
+  const previstoTotal = metrics.totalAberto;
+  const previsto7d = metrics.a7Val;
+  const saldoProjetado = cash.available - previstoTotal;
+  const deficit = Math.max(0, previstoTotal - cash.available);
+
+  const health: "saudavel" | "atencao" | "insuficiente" = !cash.configured
+    ? "atencao"
+    : cash.available < previstoTotal || cash.available < previsto7d
+      ? "insuficiente"
+      : cash.available < cash.minBalance
+        ? "atencao"
+        : "saudavel";
+
+  const insights = useMemo(() => {
+    let semQtd = 0, semValor = 0, apertadoQtd = 0, apertadoSemCob = 0;
+    const criticas: Row[] = [];
+    const t = today();
+    const lim = addDays(t, 7);
+    let acc = 0;
+    for (const r of openByDue) {
+      const c = coverage.get(r.id);
+      const open = Number(r.open_amount ?? 0);
+      if (c === "sem") { semQtd += 1; semValor += open; }
+      if (c === "apertado") {
+        apertadoQtd += 1;
+        apertadoSemCob += Math.max(0, (acc + open) - cash.available);
+      }
+      acc += open;
+      if ((c === "sem" || c === "apertado") && r.due_date && r.due_date >= t && r.due_date <= lim) {
+        criticas.push(r);
+      }
+    }
+    return {
+      fundosInsuficientes: health === "insuficiente",
+      emRisco: semQtd + apertadoQtd,
+      semCobertura: semValor + apertadoSemCob,
+      criticas: criticas.slice(0, 5),
+    };
+  }, [openByDue, coverage, cash.available, health]);
+
+
 
   return (
     <div className="space-y-6 pb-10">
@@ -214,6 +320,9 @@ function ContasAPagarPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setCashOpen(true)}>
+            <Settings2 className="h-4 w-4 mr-2" /> Configurar caixa
+          </Button>
           <Button variant="outline" onClick={() => toast.info("Exportar — em breve")}>
             <FileText className="h-4 w-4 mr-2" /> Exportar
           </Button>
@@ -231,6 +340,19 @@ function ContasAPagarPage() {
         <KpiCard tone="success" icon={<CheckCircle2 className="h-4 w-4" />} label="Pagos no mês" value={fmt(metrics.pagoMes)} />
         <KpiCard tone="muted" icon={<ListChecks className="h-4 w-4" />} label="Pagamentos pendentes" value={String(metrics.pendentesQtd)} />
       </div>
+
+      {/* Saúde de Caixa */}
+      <CashHealthCard
+        configured={cash.configured}
+        health={health}
+        available={cash.available}
+        minBalance={cash.minBalance}
+        previstoTotal={previstoTotal}
+        saldoProjetado={saldoProjetado}
+        deficit={deficit}
+        onConfigure={() => setCashOpen(true)}
+      />
+
 
       {/* Filtros */}
       <Card>
@@ -310,6 +432,7 @@ function ContasAPagarPage() {
                 <TableHead className="font-semibold text-right">Pago</TableHead>
                 <TableHead className="font-semibold text-right">Saldo aberto</TableHead>
                 <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Impacto no Caixa</TableHead>
                 <TableHead className="font-semibold text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -320,6 +443,7 @@ function ContasAPagarPage() {
                 const open = Number(r.open_amount ?? Math.max(0, total - paid));
                 const st = statusOf(r);
                 const fornecedor = r.supplier?.name || r.counterparty_name || "—";
+                const cov = coverage.get(r.id);
                 return (
                   <TableRow key={r.id} className="even:bg-muted/20 hover:bg-muted/40">
                     <TableCell className="py-2 font-medium">{fornecedor}</TableCell>
@@ -337,6 +461,13 @@ function ContasAPagarPage() {
                     <TableCell className="py-2">
                       <Badge variant="outline" className={statusBadge[st]}>{statusLabel[st]}</Badge>
                     </TableCell>
+                    <TableCell className="py-2">
+                      {cov && cash.configured ? (
+                        <Badge variant="outline" className={COVERAGE_BADGE[cov]}>{COVERAGE_LABEL[cov]}</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="py-2 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -345,7 +476,7 @@ function ContasAPagarPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-52">
-                          <DropdownMenuItem onClick={() => act("Ver detalhes", r)}>
+                          <DropdownMenuItem onClick={() => setDetailRow(r)}>
                             <Eye className="h-4 w-4 mr-2" /> Ver detalhes
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setPayRow(r)}>
@@ -355,7 +486,7 @@ function ContasAPagarPage() {
                             <CheckCircle2 className="h-4 w-4 mr-2" /> Marcar como pago
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => act("Ver comprovante", r)}>
+                          <DropdownMenuItem onClick={() => toast.info("Ver comprovante — em breve")}>
                             <Receipt className="h-4 w-4 mr-2" /> Ver comprovante
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -375,12 +506,77 @@ function ContasAPagarPage() {
                 <TableCell className="py-2 text-right tabular-nums">{fmt(totals.total)}</TableCell>
                 <TableCell className="py-2 text-right tabular-nums text-success">{fmt(totals.paid)}</TableCell>
                 <TableCell className="py-2 text-right tabular-nums">{fmt(totals.open)}</TableCell>
-                <TableCell colSpan={2} />
+                <TableCell colSpan={3} />
               </TableRow>
             </TableBody>
           </Table>
         </Card>
       )}
+
+      {/* Insights de Caixa */}
+      {cash.configured && (
+        <Card>
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <Activity className="h-3.5 w-3.5" /> Insights de Caixa
+            </div>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+              <KpiCard
+                tone={insights.fundosInsuficientes ? "danger" : "success"}
+                icon={insights.fundosInsuficientes ? <AlertTriangle className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
+                label="Fundos insuficientes"
+                value={insights.fundosInsuficientes ? "Sim" : "Não"}
+              />
+              <KpiCard
+                tone={insights.emRisco > 0 ? "warning" : "muted"}
+                icon={<AlertTriangle className="h-4 w-4" />}
+                label="Pagamentos em risco"
+                value={String(insights.emRisco)}
+              />
+              <KpiCard
+                tone={insights.semCobertura > 0 ? "danger" : "muted"}
+                icon={<TrendingDown className="h-4 w-4" />}
+                label="Total sem cobertura"
+                value={fmt(insights.semCobertura)}
+              />
+              <KpiCard
+                tone={insights.criticas.length > 0 ? "warning" : "muted"}
+                icon={<CalendarClock className="h-4 w-4" />}
+                label="Críticas (7 dias)"
+                value={String(insights.criticas.length)}
+              />
+            </div>
+            {insights.criticas.length > 0 && (
+              <div className="space-y-1.5 pt-1">
+                <p className="text-xs font-medium text-muted-foreground">Contas críticas dos próximos 7 dias</p>
+                <div className="rounded-md border divide-y">
+                  {insights.criticas.map((r) => {
+                    const cov = coverage.get(r.id);
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => setDetailRow(r)}
+                        className="flex w-full items-center justify-between px-3 py-2 text-sm hover:bg-muted/40 text-left"
+                      >
+                        <span className="truncate">
+                          <span className="font-medium">{r.supplier?.name || r.counterparty_name || "—"}</span>
+                          <span className="text-muted-foreground"> · venc. {fmtDateBR(r.due_date)}</span>
+                        </span>
+                        <span className="flex items-center gap-2 shrink-0">
+                          <span className="tabular-nums font-semibold">{fmt(Number(r.open_amount ?? 0))}</span>
+                          {cov && <Badge variant="outline" className={COVERAGE_BADGE[cov]}>{COVERAGE_LABEL[cov]}</Badge>}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+
 
       <RegisterPaymentDialog
         entry={payRow as PayableEntry | null}
@@ -408,6 +604,21 @@ function ContasAPagarPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <CashSettingsDialog
+        open={cashOpen}
+        onOpenChange={setCashOpen}
+        available={cash.available}
+        minBalance={cash.minBalance}
+        onSave={cash.save}
+      />
+
+      <PayableDetailSheet
+        row={detailRow}
+        available={cash.available}
+        coverage={detailRow ? coverage.get(detailRow.id) : undefined}
+        onOpenChange={(o: boolean) => { if (!o) setDetailRow(null); }}
+      />
     </div>
   );
 }
@@ -437,5 +648,228 @@ function KpiCard({
         {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </CardContent>
     </Card>
+  );
+}
+
+const HEALTH_META: Record<"saudavel" | "atencao" | "insuficiente", { label: string; badge: string; tone: Tone; icon: React.ReactNode }> = {
+  saudavel:     { label: "Saudável",      badge: "bg-success/15 text-success border-success/30",            tone: "success", icon: <ShieldCheck className="h-4 w-4" /> },
+  atencao:      { label: "Atenção",       badge: "bg-warning/15 text-warning border-warning/30",            tone: "warning", icon: <AlertTriangle className="h-4 w-4" /> },
+  insuficiente: { label: "Insuficiente",  badge: "bg-destructive/15 text-destructive border-destructive/30", tone: "danger",  icon: <TrendingDown className="h-4 w-4" /> },
+};
+
+function CashHealthCard({
+  configured, health, available, minBalance, previstoTotal, saldoProjetado, deficit, onConfigure,
+}: {
+  configured: boolean;
+  health: "saudavel" | "atencao" | "insuficiente";
+  available: number; minBalance: number; previstoTotal: number; saldoProjetado: number; deficit: number;
+  onConfigure: () => void;
+}) {
+  const meta = HEALTH_META[health];
+  const minPct = minBalance > 0 ? Math.min(100, Math.max(0, (available / minBalance) * 100)) : 0;
+  const showLowAlert = configured && available < previstoTotal;
+  const showMinAlert = configured && minBalance > 0 && available < minBalance;
+
+  return (
+    <Card className="relative overflow-hidden">
+      <span className={`absolute left-0 top-0 h-full w-1 ${toneStyles[meta.tone].bar}`} aria-hidden />
+      <CardContent className="p-5 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className={`flex h-7 w-7 items-center justify-center rounded-md ${toneStyles[meta.tone].icon}`}>{meta.icon}</span>
+              <h3 className="font-semibold font-display">Saúde de Caixa</h3>
+              <Badge variant="outline" className={meta.badge}>{meta.label}</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Compara o saldo disponível com seus pagamentos previstos.
+            </p>
+          </div>
+          {!configured && (
+            <Button size="sm" variant="outline" onClick={onConfigure}>
+              <Settings2 className="h-4 w-4 mr-2" /> Configurar caixa
+            </Button>
+          )}
+        </div>
+
+        {!configured ? (
+          <p className="text-sm text-muted-foreground">
+            Defina seu saldo disponível e o limite mínimo de caixa para ativar o monitoramento.
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-3 items-center">
+              <Metric label="Saldo disponível" value={fmt(available)} />
+              <Metric label="Pagamentos previstos" value={`− ${fmt(previstoTotal)}`} tone="warning" />
+              <Metric label="Saldo projetado" value={fmt(saldoProjetado)} tone={saldoProjetado < 0 ? "danger" : "success"} bold />
+            </div>
+
+            {minBalance > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Limite mínimo: {fmt(minBalance)}</span>
+                  <span className={`tabular-nums ${available < minBalance ? "text-destructive" : "text-success"}`}>
+                    {fmt(available)} ({minPct.toFixed(0)}%)
+                  </span>
+                </div>
+                <Progress value={minPct} />
+              </div>
+            )}
+
+            {showLowAlert && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Saldo insuficiente</AlertTitle>
+                <AlertDescription>
+                  Faltam <strong className="tabular-nums">{fmt(deficit)}</strong> para cobrir todos os pagamentos previstos.
+                </AlertDescription>
+              </Alert>
+            )}
+            {!showLowAlert && showMinAlert && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Saldo abaixo do limite mínimo</AlertTitle>
+                <AlertDescription>
+                  Reforce seu caixa para manter a reserva de segurança.
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Metric({ label, value, tone, bold }: { label: string; value: string; tone?: "success" | "danger" | "warning"; bold?: boolean }) {
+  const color = tone === "danger" ? "text-destructive" : tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : "text-foreground";
+  return (
+    <div className="space-y-1">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className={`tabular-nums leading-tight ${bold ? "text-2xl font-bold font-display" : "text-lg font-semibold"} ${color}`}>{value}</p>
+    </div>
+  );
+}
+
+function CashSettingsDialog({
+  open, onOpenChange, available, minBalance, onSave,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  available: number; minBalance: number;
+  onSave: (a: number, m: number) => void;
+}) {
+  const [a, setA] = useState(String(available || ""));
+  const [m, setM] = useState(String(minBalance || ""));
+  useEffect(() => { if (open) { setA(String(available || "")); setM(String(minBalance || "")); } }, [open, available, minBalance]);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Configurar caixa</DialogTitle>
+          <DialogDescription>
+            Informe o saldo disponível atual e o limite mínimo de segurança. Os valores são salvos neste navegador.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3 py-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="cap-avail">Saldo disponível (BRL)</Label>
+            <Input id="cap-avail" type="number" inputMode="decimal" step="0.01" value={a} onChange={(e) => setA(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="cap-min">Limite mínimo (BRL)</Label>
+            <Input id="cap-min" type="number" inputMode="decimal" step="0.01" value={m} onChange={(e) => setM(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button onClick={() => { onSave(Number(a) || 0, Number(m) || 0); onOpenChange(false); toast.success("Configuração de caixa salva"); }}>
+            Salvar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PayableDetailSheet({
+  row, available, coverage: cov, onOpenChange,
+}: {
+  row: Row | null;
+  available: number;
+  coverage: Coverage | undefined;
+  onOpenChange: (o: boolean) => void;
+}) {
+  if (!row) {
+    return (
+      <Sheet open={false} onOpenChange={onOpenChange}>
+        <SheetContent />
+      </Sheet>
+    );
+  }
+  const fornecedor = row.supplier?.name || row.counterparty_name || "—";
+  const open = Number(row.open_amount ?? 0);
+  const proj = available - open;
+  const isDeficit = proj < 0;
+
+  return (
+    <Sheet open={!!row} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>{fornecedor}</SheetTitle>
+          <SheetDescription>{row.movement_description ?? "—"}</SheetDescription>
+        </SheetHeader>
+        <div className="space-y-4 mt-6">
+          <DetailRow label="Vencimento" value={fmtDateBR(row.due_date)} />
+          <DetailRow label="Valor da despesa" value={fmt(open)} strong />
+          <DetailRow label="Saldo disponível" value={fmt(available)} />
+          <DetailRow
+            label="Saldo projetado após pagamento"
+            value={fmt(proj)}
+            tone={isDeficit ? "danger" : "success"}
+            strong
+          />
+          <DetailRow
+            label={isDeficit ? "Déficit" : "Sobra"}
+            value={fmt(Math.abs(proj))}
+            tone={isDeficit ? "danger" : "success"}
+          />
+          {cov && (
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className="text-sm text-muted-foreground">Impacto no caixa</span>
+              <Badge variant="outline" className={COVERAGE_BADGE[cov]}>{COVERAGE_LABEL[cov]}</Badge>
+            </div>
+          )}
+          {cov === "sem" && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Sem cobertura</AlertTitle>
+              <AlertDescription>
+                Este pagamento ultrapassa o saldo disponível considerando as obrigações anteriores.
+              </AlertDescription>
+            </Alert>
+          )}
+          {cov === "apertado" && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Cobertura apertada</AlertTitle>
+              <AlertDescription>
+                O caixa cobre parcialmente este pagamento dentro da ordem de vencimento.
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function DetailRow({ label, value, tone, strong }: { label: string; value: string; tone?: "success" | "danger"; strong?: boolean }) {
+  const color = tone === "danger" ? "text-destructive" : tone === "success" ? "text-success" : "text-foreground";
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className={`tabular-nums ${strong ? "font-bold text-lg" : "font-medium"} ${color}`}>{value}</span>
+    </div>
   );
 }

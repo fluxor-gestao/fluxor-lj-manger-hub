@@ -1,45 +1,71 @@
 ## Objetivo
 
-No `ProcessoDetailSheet` (drawer aberto em `/operacao`):
+Transformar `/financeiro/contas-a-pagar` em uma ferramenta preventiva de gestão de caixa, mostrando se o saldo disponível cobre os pagamentos previstos e sinalizando riscos.
 
-1. Prefixar o título com o código do Devis vinculado (ex.: `AM2026001 — Due Diligence...`).
-2. Substituir o badge de status operacional sublinhado por um badge de **status financeiro do pagamento do Devis** (pago / parcial / pendente / sem cobrança).
+Esta etapa é apenas de UI/lógica de apresentação — sem integração bancária real e sem nova migration. O "saldo disponível" virá de uma fonte simplificada (ver Fonte do saldo).
 
-## Contexto técnico
+## Fonte do saldo disponível
 
-- `services.devis_id` → `devis.id`. O código fica em `devis.devis_number`.
-- Cobranças do devis ficam em `financial_entries` com `document_reference = devis.id::text` (ver migration `20260513205723…`). O pagamento é refletido em `financial_entries.payment_status` (`pago` / `parcial` / `pendente`).
-- Hoje a query de `operacao.tsx` (`useQuery operacao-services`) **não** traz `devis`. Precisamos estender o `select` para incluir `devis:devis(id, devis_number)`.
+Sem integração bancária ainda, uso uma estratégia leve, configurável pelo usuário:
 
-## Mudanças
+1. **Persistência local (localStorage)** com duas chaves:
+   - `cap.availableBalance` (number, BRL) — saldo disponível atual.
+   - `cap.minBalance` (number, BRL) — limite mínimo de caixa.
+2. Pequeno botão "Configurar caixa" no header da página abre um dialog para editar esses dois valores. Default: 0.
+3. Se ambos forem 0/indefinidos, mostro um estado "Caixa não configurado" no card de Saúde de Caixa com CTA para configurar (sem quebrar a tela).
 
-### 1. `src/components/operacao/status.ts`
-Estender `ServiceLike` com:
-```ts
-devis_id?: string | null;
-devis?: { id: string; devis_number: string | null } | null;
-```
+Isso satisfaz o item 7 (cálculo simplificado/mockado) sem criar tabelas.
 
-### 2. `src/routes/_authenticated/operacao.tsx`
-- Atualizar os dois selects (com e sem fallback) para incluir `devis_id, devis:devis(id, devis_number)`.
+## Cálculos
 
-### 3. `src/components/operacao/ProcessoDetailSheet.tsx`
-- **Título**: se `service.devis?.devis_number` existir, prefixar: `{devis_number} — {title}`. Caso contrário, manter `title`.
-- **Badge financeiro** (substitui o atual `STATUS_BADGE[service.status]` no header):
-  - Adicionar `useQuery` (apenas quando `open && service.devis_id`) que busca em `financial_entries` os lançamentos com `document_reference = service.devis_id` (campos: `amount_in, paid_amount, payment_status, open_amount`).
-  - Derivar um `paymentStatus` agregado:
-    - sem registros → "Sem cobrança" (cinza)
-    - todos `pago` → "Pago" (verde)
-    - algum `parcial` ou soma de `paid_amount > 0` com saldo > 0 → "Pagamento parcial" (âmbar)
-    - todos `pendente` → "Aguardando pagamento" (laranja)
-  - Renderizar badge no lugar do badge operacional, com texto e tooltip (valor pago / total). O Select de alteração de status operacional permanece (mudança apenas visual no badge sublinhado).
-- Atualizar também `SheetDescription` para incluir o `devis_number` quando existir (no lugar do hash de 8 chars), mantendo o `client.name`.
+- `previstoTotal` = soma de `open_amount` de todas as despesas com status ≠ pago.
+- `previsto7d` = soma de `open_amount` cujo `due_date` ∈ [hoje, hoje+7].
+- `saldoProjetado` = `available − previstoTotal`.
+- `deficit` = `max(0, previstoTotal − available)`.
 
-### 4. (Opcional, fora de escopo desta etapa)
-Não alterar a lista/kanban — apenas o detalhe, conforme o print.
+### Status do card "Saúde de Caixa"
+- **Saudável** (verde): `available ≥ previstoTotal` e `available ≥ minBalance`.
+- **Atenção** (âmbar): `available ≥ previstoTotal` mas `available < minBalance`; **ou** `saldoProjetado` cobre 7 dias mas não o total.
+- **Insuficiente** (vermelho): `available < previstoTotal` (ou `available < previsto7d`).
 
-## Restrições
+### Impacto no Caixa por linha (coluna nova)
+Acumulo `open_amount` em ordem de vencimento (asc). Para cada linha `r`:
+- `cumulative += r.open`.
+- **Coberto** (verde): `cumulative ≤ available`.
+- **Apertado** (âmbar): `cumulative > available` e `cumulative − r.open < available` (linha que cruza o limite, parcialmente coberta).
+- **Sem cobertura** (vermelho): `cumulative − r.open ≥ available`.
 
-- Sem novas tabelas, sem migrations.
-- Sem mexer em Financeiro/Comercial/BI.
-- Sem alterar o controle de status operacional (apenas a apresentação do badge no header).
+Linhas já pagas exibem "—".
+
+## Mudanças de arquivos
+
+### 1. `src/routes/_authenticated/financeiro.contas-a-pagar.tsx`
+- Hook `useCashSettings()` lendo/escrevendo `available` e `minBalance` no localStorage (com `useState` + `useEffect`).
+- Botão "Configurar caixa" no header, abre `<CashSettingsDialog />` (inline, simples — dois inputs BRL + salvar).
+- Novo card **Saúde de Caixa** logo abaixo da linha de KPIs (full-width em mobile, ocupa 2 cols em lg), mostrando:
+  - Status badge (Saudável / Atenção / Insuficiente) com ícone.
+  - 3 valores em linha: `Saldo disponível − Pagamentos previstos = Saldo projetado` (com sinal e cor).
+  - Linha extra: `Limite mínimo: X` + barra de progresso (saldo vs mínimo) quando `minBalance > 0`.
+  - Alert visual (`<Alert variant="destructive">` ou warning) quando `available < previstoTotal` ou `available < minBalance`.
+- `coverageByRow` calculado uma vez via `useMemo` sobre `allRows` ordenados por `due_date` asc (mapa `id → "coberto"|"apertado"|"sem"`), reaproveitado na tabela.
+- Nova coluna **Impacto no Caixa** na tabela (após "Status"), renderizando um `Badge` com a cor correspondente; para linhas pagas, "—".
+- Novo bloco **Insights de Caixa** (Card) abaixo da tabela, com 4 mini-cards:
+  - Fundos insuficientes: `Sim/Não` baseado no status do card.
+  - Pagamentos em risco: contagem de linhas `apertado + sem cobertura`.
+  - Valor total sem cobertura: soma do `open_amount` das "sem cobertura" + parcela descoberta da "apertado".
+  - Contas críticas próximos 7 dias: lista compacta (até 5) das `sem cobertura` ou `apertado` com `due_date ≤ hoje+7`, mostrando fornecedor, vencimento e valor.
+- Dialog "Ver detalhes" (substitui o `act("Ver detalhes", …)` atual) abre um `Sheet` simples mostrando:
+  - Fornecedor, descrição, vencimento.
+  - Valor da despesa (`open_amount`).
+  - Saldo disponível atual.
+  - Saldo projetado após pagamento (`available − open`).
+  - Déficit (se < 0) ou Sobra (se ≥ 0).
+  - Badge "Impacto no Caixa" + Alert visual quando sem cobertura.
+
+Tudo isolado a esta página; nenhuma outra rota é alterada.
+
+## Restrições respeitadas
+- Sem nova tabela / migration / edge function.
+- Sem integração bancária.
+- Sem alteração no Contas a Receber, Rapport, Comercial, Operação, BI.
+- Visual mantém o padrão SaaS B2B (Card + Badge + Alert do design system).
