@@ -443,6 +443,7 @@ function ContasAPagarPage() {
                 const open = Number(r.open_amount ?? Math.max(0, total - paid));
                 const st = statusOf(r);
                 const fornecedor = r.supplier?.name || r.counterparty_name || "—";
+                const cov = coverage.get(r.id);
                 return (
                   <TableRow key={r.id} className="even:bg-muted/20 hover:bg-muted/40">
                     <TableCell className="py-2 font-medium">{fornecedor}</TableCell>
@@ -460,6 +461,13 @@ function ContasAPagarPage() {
                     <TableCell className="py-2">
                       <Badge variant="outline" className={statusBadge[st]}>{statusLabel[st]}</Badge>
                     </TableCell>
+                    <TableCell className="py-2">
+                      {cov && cash.configured ? (
+                        <Badge variant="outline" className={COVERAGE_BADGE[cov]}>{COVERAGE_LABEL[cov]}</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="py-2 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -468,7 +476,7 @@ function ContasAPagarPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-52">
-                          <DropdownMenuItem onClick={() => act("Ver detalhes", r)}>
+                          <DropdownMenuItem onClick={() => setDetailRow(r)}>
                             <Eye className="h-4 w-4 mr-2" /> Ver detalhes
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setPayRow(r)}>
@@ -478,7 +486,7 @@ function ContasAPagarPage() {
                             <CheckCircle2 className="h-4 w-4 mr-2" /> Marcar como pago
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => act("Ver comprovante", r)}>
+                          <DropdownMenuItem onClick={() => toast.info("Ver comprovante — em breve")}>
                             <Receipt className="h-4 w-4 mr-2" /> Ver comprovante
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -498,7 +506,7 @@ function ContasAPagarPage() {
                 <TableCell className="py-2 text-right tabular-nums">{fmt(totals.total)}</TableCell>
                 <TableCell className="py-2 text-right tabular-nums text-success">{fmt(totals.paid)}</TableCell>
                 <TableCell className="py-2 text-right tabular-nums">{fmt(totals.open)}</TableCell>
-                <TableCell colSpan={2} />
+                <TableCell colSpan={3} />
               </TableRow>
             </TableBody>
           </Table>
