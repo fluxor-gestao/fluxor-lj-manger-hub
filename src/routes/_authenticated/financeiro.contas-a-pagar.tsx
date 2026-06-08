@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft, Search, Filter, MoreHorizontal, Eye, FileText, DollarSign, CheckCircle2,
-  AlertTriangle, CalendarClock, Wallet, ListChecks, Receipt,
+  AlertTriangle, CalendarClock, Wallet, ListChecks, Receipt, Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { RegisterPaymentDialog, type PayableEntry } from "@/components/financeiro/RegisterPaymentDialog";
