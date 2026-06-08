@@ -341,6 +341,19 @@ function ContasAPagarPage() {
         <KpiCard tone="muted" icon={<ListChecks className="h-4 w-4" />} label="Pagamentos pendentes" value={String(metrics.pendentesQtd)} />
       </div>
 
+      {/* Saúde de Caixa */}
+      <CashHealthCard
+        configured={cash.configured}
+        health={health}
+        available={cash.available}
+        minBalance={cash.minBalance}
+        previstoTotal={previstoTotal}
+        saldoProjetado={saldoProjetado}
+        deficit={deficit}
+        onConfigure={() => setCashOpen(true)}
+      />
+
+
       {/* Filtros */}
       <Card>
         <CardContent className="p-4 space-y-3">
