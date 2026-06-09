@@ -62,8 +62,8 @@ export function OperacaoLista({
         <TableHeader>
           <TableRow>
             <TableHead>Processo</TableHead>
-            <TableHead>BU</TableHead>
-            <TableHead>Responsável/Setor</TableHead>
+            <TableHead>Empresa / Área</TableHead>
+            <TableHead>Responsável</TableHead>
             <TableHead>Início</TableHead>
             <TableHead>Previsão</TableHead>
             <TableHead>Conclusão</TableHead>
@@ -97,9 +97,14 @@ export function OperacaoLista({
                     ) : null}
                   </button>
                 </TableCell>
-                <TableCell className="text-xs">{s.business_unit ?? "—"}</TableCell>
                 <TableCell className="text-xs">
-                  {s.assignee?.full_name ?? s.responsible_sector ?? "—"}
+                  <div className="flex flex-col gap-1">
+                    <span>{s.business_unit ?? "—"}</span>
+                    {s.responsible_sector && <span className="text-[10px] text-muted-foreground">{s.responsible_sector}</span>}
+                  </div>
+                </TableCell>
+                <TableCell className="text-xs">
+                  {s.assignee?.full_name ?? "—"}
                 </TableCell>
                 <TableCell className="text-xs">{fmt(s.start_date)}</TableCell>
                 <TableCell className="text-xs">
