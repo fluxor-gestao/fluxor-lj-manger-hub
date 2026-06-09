@@ -47,14 +47,21 @@ export function PageProgress() {
   return (
     <div
       className={cn(
-        "fixed left-0 right-0 top-0 z-[9999] transition-opacity duration-300",
+        "fixed left-0 right-0 top-0 z-[9999] transition-opacity duration-300 pointer-events-none",
         visible ? "opacity-100" : "opacity-0"
       )}
     >
-      <Progress 
-        value={progress} 
-        className="h-[2px] w-full rounded-none bg-transparent" 
-      />
+      <div className="relative w-full">
+        <Progress 
+          value={progress} 
+          className="h-[3px] w-full rounded-none bg-primary/10" 
+        />
+        {isLoading && progress > 0 && progress < 100 && (
+          <div className="absolute right-2 top-2 text-[10px] font-medium text-primary bg-background/80 px-1 rounded backdrop-blur-sm">
+            {Math.round(progress)}%
+          </div>
+        )}
+      </div>
     </div>
   );
 }
