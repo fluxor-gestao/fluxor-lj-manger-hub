@@ -882,11 +882,11 @@ function Comercial() {
                 </TableHeader>
                 <TableBody>
                   {devisListQuery.isLoading && !devisListQuery.data ? (
-                    <TableRow><TableCell colSpan={8}><LoadingState /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9}><LoadingState /></TableCell></TableRow>
                   ) : devisListQuery.isError ? (
-                    <TableRow><TableCell colSpan={8}><ErrorState onRetry={() => devisListQuery.refetch()} /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9}><ErrorState onRetry={() => devisListQuery.refetch()} /></TableCell></TableRow>
                   ) : devisListRows.length === 0 ? (
-                    <TableRow><TableCell colSpan={8}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
                   ) : devisListRows.map((d: any) => (
                     <TableRow key={d.id} className="cursor-pointer" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
                       <TableCell className="font-medium">{clientsById[d.client_id]?.name || "—"}</TableCell>
