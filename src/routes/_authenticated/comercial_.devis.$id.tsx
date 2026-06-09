@@ -135,6 +135,9 @@ function DevisDetail() {
       if (!isCompanyCode(form.business_unit)) {
         throw new Error("Selecione a empresa responsável.");
       }
+      if (!isValidAreaForCompany(form.business_unit, form.responsible_sector)) {
+        throw new Error("Selecione a área principal.");
+      }
       const payload = {
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
