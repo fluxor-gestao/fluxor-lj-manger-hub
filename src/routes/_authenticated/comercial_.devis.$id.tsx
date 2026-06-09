@@ -432,6 +432,7 @@ function DevisDetail() {
             </span>
           </div>
         </div>
+      )}
       {devis.accepted_at && !linkedService && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
