@@ -802,6 +802,59 @@ export default function BIFinanceiro() {
         <Kpi label="Ticket médio recebido" value={BRL(agg.ticketMedio)} icon={Users} />
         <Kpi label="Maior cliente em aberto" value={maiorClienteAberto ? maiorClienteAberto.name : "—"} sub={maiorClienteAberto ? BRL(maiorClienteAberto.aberto) : ""} icon={Users} />
         <Kpi label="Maior fornec. em aberto" value={maiorFornecedorAberto ? maiorFornecedorAberto.name : "—"} sub={maiorFornecedorAberto ? BRL(maiorFornecedorAberto.value) : ""} icon={Building2} />
+
+        {/* Multi-company KPIs */}
+        <Card className="col-span-full mt-4 bg-muted/20">
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Activity className="h-4 w-4" /> Detalhamento por Empresa e Área
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="py-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita Realizada e Resultado por Empresa</h4>
+                <div className="grid gap-2">
+                  {receitaEmpresa.slice(0, 5).map((s) => {
+                    const res = resultadoEmpresa.find(r => r.name === s.name)?.value ?? 0;
+                    return (
+                      <div key={s.name} className="flex items-center justify-between text-sm">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{s.name}</span>
+                          <span className={`text-[10px] ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">{BRL(s.value)}</div>
+                          <div className="text-[10px] text-muted-foreground">Participação: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita Realizada e Resultado por Área</h4>
+                <div className="grid gap-2">
+                  {receitaArea.slice(0, 5).map((s) => {
+                    const res = resultadoArea.find(r => r.name === s.name)?.value ?? 0;
+                    return (
+                      <div key={s.name} className="flex items-center justify-between text-sm">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{s.name}</span>
+                          <span className={`text-[10px] ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">{BRL(s.value)}</div>
+                          <div className="text-[10px] text-muted-foreground">Participação: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Charts */}

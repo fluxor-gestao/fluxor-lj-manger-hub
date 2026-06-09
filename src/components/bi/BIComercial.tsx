@@ -706,6 +706,53 @@ export default function BIComercial() {
         <Kpi label="Propostas vencidas" value={String(agg.vencidas)} icon={AlertTriangle} tone={agg.vencidas > 0 ? "negative" : undefined} />
         <Kpi label="Melhor vendedor" value={agg.melhorVend?.name ?? "—"} sub={agg.melhorVend ? BRL(agg.melhorVend.valor) : ""} icon={Award} />
         <Kpi label="Principal serviço" value={agg.principalServ?.name ?? "—"} sub={agg.principalServ ? BRL(agg.principalServ.valor) : ""} />
+
+        {/* Multi-company KPIs */}
+        <Card className="col-span-full mt-4 bg-muted/20">
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Activity className="h-4 w-4" /> Detalhamento por Empresa e Área
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="py-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Empresa</h4>
+                <div className="grid gap-2">
+                  {statsPorEmpresa.slice(0, 5).map((s) => (
+                    <div key={s.name} className="flex items-center justify-between text-sm">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{s.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">{BRL(s.valorAceito)}</div>
+                        <div className="text-[10px] text-muted-foreground">Ticket: {BRL(s.ticket)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Área</h4>
+                <div className="grid gap-2">
+                  {statsPorArea.slice(0, 5).map((s) => (
+                    <div key={s.name} className="flex items-center justify-between text-sm">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{s.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">{BRL(s.valorAceito)}</div>
+                        <div className="text-[10px] text-muted-foreground">Ticket: {BRL(s.ticket)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Gráficos */}
