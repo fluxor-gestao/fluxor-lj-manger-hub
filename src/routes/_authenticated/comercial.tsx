@@ -600,6 +600,21 @@ function Comercial() {
                 </Select>
               </div>
               <div>
+                <Label className="text-xs">Área principal</Label>
+                <Select
+                  value={filterArea}
+                  onValueChange={setFilterArea}
+                  disabled={!(companyCode ?? (filterCompany !== "all" ? filterCompany : null))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {getAreasFor((companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null))).map((a) => (
+                      <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              <div>
                 <Label className="text-xs">Cliente</Label>
                 <Select value={filterClient} onValueChange={setFilterClient}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
