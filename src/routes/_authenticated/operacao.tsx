@@ -136,6 +136,7 @@ function OperacaoPage() {
             <p className="text-sm text-muted-foreground">
               Gestão de processos, tarefas, prazos e execução operacional
             </p>
+            <ActiveCompanyBanner className="mt-2" />
           </div>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
