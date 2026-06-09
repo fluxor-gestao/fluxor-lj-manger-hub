@@ -559,7 +559,7 @@ function Comercial() {
             <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
               <Filter className="h-4 w-4" /> Filtros
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div>
                 <Label className="text-xs">Status {view === "kanban" && <span className="text-[10px]">(desativado no Kanban)</span>}</Label>
                 <Select value={filterStatus} onValueChange={setFilterStatus} disabled={view === "kanban"}>
@@ -567,6 +567,21 @@ function Comercial() {
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
                     {ALL_STATUSES.map((k) => <SelectItem key={k} value={k}>{statusLabels[k]}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Empresa {companyCode && <span className="text-[10px]">(global ativo)</span>}</Label>
+                <Select value={companyCode ?? filterCompany} onValueChange={setFilterCompany} disabled={!!companyCode}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {COMPANY_LIST.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        <span className="font-mono text-[10px] mr-2">{c.code}</span>
+                        {c.short}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -609,9 +624,9 @@ function Comercial() {
                 </Popover>
               </div>
             </div>
-            {(filterStatus !== "all" || filterClient !== "all" || filterStart || filterEnd) && (
+            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterStart || filterEnd) && (
               <div className="mt-3">
-                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
                   Limpar filtros
                 </Button>
               </div>
