@@ -37,7 +37,16 @@ function OperacaoPage() {
   const { filterCode: companyCode } = useCompany();
 
   const [view, setView] = useState<"lista" | "kanban">("lista");
-  const [filters, setFilters] = useState<OperacaoFilterState>(initialFilters);
+  const [filters, setFilters] = useState<OperacaoFilterState>({
+    ...initialFilters,
+    bu: companyCode || "all",
+  });
+
+  useEffect(() => {
+    if (companyCode) {
+      setFilters(f => ({ ...f, bu: companyCode }));
+    }
+  }, [companyCode]);
   const [detail, setDetail] = useState<ServiceLike | null>(null);
 
   const q = useQuery({
@@ -98,6 +107,12 @@ function OperacaoPage() {
   const businessUnits = useMemo(() => {
     const set = new Set<string>();
     services.forEach((s) => s.business_unit && set.add(s.business_unit));
+    return Array.from(set).sort();
+  }, [services]);
+
+  const areas = useMemo(() => {
+    const set = new Set<string>();
+    services.forEach((s) => s.responsible_sector && set.add(s.responsible_sector));
     return Array.from(set).sort();
   }, [services]);
 
@@ -172,6 +187,7 @@ function OperacaoPage() {
         onChange={setFilters}
         responsibles={responsibles}
         businessUnits={businessUnits}
+        areas={areas}
       />
 
       {/* Conteúdo */}
