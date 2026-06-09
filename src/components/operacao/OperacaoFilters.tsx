@@ -35,11 +35,13 @@ export function OperacaoFilters({
   onChange,
   responsibles,
   businessUnits,
+  areas = [],
 }: {
   value: OperacaoFilterState;
   onChange: (v: OperacaoFilterState) => void;
   responsibles: { id: string; name: string }[];
   businessUnits: string[];
+  areas?: string[];
 }) {
   const set = <K extends keyof OperacaoFilterState>(k: K, v: OperacaoFilterState[K]) =>
     onChange({ ...value, [k]: v });
@@ -47,7 +49,7 @@ export function OperacaoFilters({
   return (
     <Card>
       <CardContent className="py-4 space-y-3">
-        <div className="grid gap-3 md:grid-cols-[1fr_180px_200px_200px]">
+        <div className="grid gap-3 md:grid-cols-[1fr_180px_180px_180px_180px]">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Busca</Label>
             <div className="relative">
@@ -97,6 +99,18 @@ export function OperacaoFilters({
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Área principal</Label>
+            <Select value={value.area} onValueChange={(v) => set("area", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {areas.map((a) => (
+                  <SelectItem key={a} value={a}>{a}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
@@ -138,6 +152,7 @@ export function applyFilters(rows: any[], f: OperacaoFilterState): any[] {
     if (f.responsavel === "none" && r.assigned_to) return false;
     if (f.responsavel !== "all" && f.responsavel !== "none" && r.assigned_to !== f.responsavel) return false;
     if (f.bu !== "all" && r.business_unit !== f.bu) return false;
+    if (f.area !== "all" && r.responsible_sector !== f.area) return false;
     if (f.startFrom && (!r.start_date || r.start_date < f.startFrom)) return false;
     if (f.startTo && (!r.start_date || r.start_date > f.startTo)) return false;
     if (f.dueFrom && (!r.expected_end_date || r.expected_end_date < f.dueFrom)) return false;
