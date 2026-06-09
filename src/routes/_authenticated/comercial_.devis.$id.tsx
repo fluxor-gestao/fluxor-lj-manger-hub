@@ -337,6 +337,7 @@ function DevisDetail() {
               <span>Detalhes do devis</span>
               {(devis?.devis_number ?? "") && <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{(devis?.devis_number ?? "")}</span>}
               <CompanyBadge code={(devis as any)?.business_unit} />
+              <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
             </p>
           </div>
         </div>
