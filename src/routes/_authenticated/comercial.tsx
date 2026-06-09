@@ -284,11 +284,12 @@ function Comercial() {
   const kanbanDevis = useMemo(() => {
     return devisSummary.filter((d: any) => {
       if (filterClient !== "all" && d.client_id !== filterClient) return false;
+      if (filterCompany !== "all" && d.business_unit !== filterCompany) return false;
       if (filterStart && d.meeting_date && parseISO(d.meeting_date) < filterStart) return false;
       if (filterEnd && d.meeting_date && parseISO(d.meeting_date) > filterEnd) return false;
       return true;
     });
-  }, [devisSummary, filterClient, filterStart, filterEnd]);
+  }, [devisSummary, filterClient, filterCompany, filterStart, filterEnd]);
 
   // List usa a query paginada (filtros já server-side)
   const devisListRows = devisListQuery.data?.rows ?? [];
