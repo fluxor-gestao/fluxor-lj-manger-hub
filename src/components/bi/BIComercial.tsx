@@ -319,8 +319,6 @@ export default function BIComercial() {
         month: monthLabel(b.k),
         ...b,
         Resultado: b.valorAceito, // Para compatibilidade se necessário
-      }));
-  }, [rows]);
         Criadas: b.criadas,
         Aceitas: b.aceitas,
         "Valor proposto": b.valorProp,
