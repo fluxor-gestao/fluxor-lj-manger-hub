@@ -13,6 +13,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 
+import { PageProgress } from "@/components/PageProgress";
+
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -130,6 +132,7 @@ function RootComponent() {
       <AuthProvider>
         <CompanyProvider>
           <TooltipProvider>
+            <PageProgress />
             <Toaster />
             <Sonner />
             <Outlet />
