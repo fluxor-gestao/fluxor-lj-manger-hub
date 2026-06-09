@@ -607,7 +607,7 @@ function Conciliacao() {
         financial_entry_id: fe.id,
         bank_statement_entry_id: stmt.id,
         conciliation_match_id: matchId,
-        amount: appliedAmount,
+        amount: finalPaymentAmount,
         paid_at: stmt.transaction_date,
         payment_method_id: fe.payment_method_id ?? null,
         bank_account_id: stmt.bank_account_id ?? fe.payment_account_id ?? fe.bank_account_id ?? null,
