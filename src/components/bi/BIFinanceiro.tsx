@@ -18,6 +18,7 @@ import {
   YAxis,
 } from "recharts";
 import {
+  Activity,
   AlertOctagon,
   AlertTriangle,
   ArrowDownRight,
@@ -61,6 +62,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { findArea, getAreasFor } from "@/lib/businessAreas";
+import { isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
 
 // ------------ helpers ------------
 const BRL = (n: number) =>
@@ -105,6 +108,7 @@ type Row = {
   category_id: string | null;
   bank_account_id: string | null;
   business_unit: string | null;
+  responsible_sector: string | null;
   movement_description: string | null;
   counterparty_name: string | null;
 };
@@ -116,6 +120,7 @@ type Filters = {
   clientId: string;
   supplierId: string;
   bu: string;
+  area: string;
   bankId: string;
   paymentStatus: string;
   categoryId: string;
@@ -134,6 +139,7 @@ const defaultFilters: Filters = {
   clientId: "all",
   supplierId: "all",
   bu: "all",
+  area: "all",
   bankId: "all",
   paymentStatus: "all",
   categoryId: "all",
@@ -181,7 +187,7 @@ export default function BIFinanceiro() {
       let qb = supabase
         .from("financial_entries")
         .select(
-          "id, entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, due_date, paid_at, entry_date, competence_month, payment_status, conciliation_status, client_id, supplier_id, category_id, bank_account_id, business_unit, movement_description, counterparty_name, source_type, document_reference"
+          "id, entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, due_date, paid_at, entry_date, competence_month, payment_status, conciliation_status, client_id, supplier_id, category_id, bank_account_id, business_unit, responsible_sector, movement_description, counterparty_name, source_type, document_reference"
         )
         .gte("entry_date", filters.from)
         .lte("entry_date", filters.to)
@@ -191,6 +197,7 @@ export default function BIFinanceiro() {
       if (filters.supplierId !== "all") qb = qb.eq("supplier_id", filters.supplierId);
       const effectiveBu = companyCode ?? (filters.bu !== "all" ? filters.bu : null);
       if (effectiveBu) qb = qb.eq("business_unit", effectiveBu);
+      if (filters.area !== "all") qb = qb.eq("responsible_sector", filters.area);
       if (filters.bankId !== "all") qb = qb.eq("bank_account_id", filters.bankId);
       if (filters.paymentStatus !== "all") qb = qb.eq("payment_status", filters.paymentStatus);
       if (filters.categoryId !== "all") qb = qb.eq("category_id", filters.categoryId);
