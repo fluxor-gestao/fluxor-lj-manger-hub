@@ -470,6 +470,7 @@ function Comercial() {
         <div>
           <h1 className="text-3xl font-bold font-display">Devis</h1>
           <p className="text-muted-foreground mt-1">Gestão comercial — clientes e propostas</p>
+          <ActiveCompanyBanner className="mt-2" />
         </div>
         <div className="flex gap-2 sm:self-start">
           <Button variant="ghost" size="icon" asChild title="Central de Ajuda — Comercial">
