@@ -1,65 +1,21 @@
-# Área Principal (Centro de Resultado) por Devis
+## Diagnóstico
 
-## Objetivo
-Cada Devis passa a ter, além da **Empresa Responsável**, uma **Área Principal** obrigatória, escolhida a partir do catálogo da empresa selecionada. Visível na listagem, no detalhe, nos filtros e preparada para reutilização em Operação, Financeiro e BI.
+O login no Supabase está funcionando — os logs de auth confirmam `Login` bem-sucedido para `gestao@fluxorbi.com` às 13:31:44. O problema é no front: após o `window.location.assign("/hub")`, o navegador tenta carregar o módulo dinâmico do TanStack Start e recebe:
 
-## Catálogo de áreas (front-end, fixo)
-Novo arquivo `src/lib/businessAreas.ts` com mapa `CompanyCode → Area[]`:
+```
+Failed to fetch dynamically imported module: /@id/virtual:tanstack-start-client-entry
+```
 
-| Empresa | Áreas |
-|---|---|
-| `DE` Advocatício | Migratório, Civil, Contencioso, Consultivo |
-| `AM` Ambiental | Topografia, Licenciamento, Regularização |
-| `CO` Contábil | Fiscal, Contábil, Departamento Pessoal |
-| `IM` Imobiliária | Venda de Imóveis, Regularização Imobiliária, Administração de Imóveis |
-| `GE` Gestão | Consultoria, BPO Financeiro, Planejamento |
+Isso veio de um crash de SSR anterior (resíduo dos erros de JSX em `comercial.tsx` corrigidos nas últimas iterações). O Vite ficou com cache inválido e o overlay de erro bloqueou a navegação. O `tsc --noEmit` atual passa sem erros e o dev server já reiniciou (`VITE v7.3.2 ready`), mas a aba do usuário ainda está presa no estado antigo.
 
-Cada área = `{ slug: string; label: string }` (ex.: `migratorio` / "Migratório"). Helpers: `getAreasFor(code)`, `findArea(code, slug)`, `AREA_BADGE_CLASS` (paleta neutra com tonalidade derivada da empresa).
+## Ação
 
-## Armazenamento (sem migração)
-Reutiliza a coluna existente `devis.responsible_sector` (texto livre hoje) para gravar o **slug** da área. Vantagens:
-- zero migração SQL nesta etapa;
-- já é lida por Operação (`services.responsible_sector` é copiada do Devis no trigger `devis_accepted_create_service`);
-- listagem/detalhe atuais continuam compatíveis (a UI renderiza o `label` a partir do slug).
+1. Forçar restart limpo do dev server para garantir que nenhum módulo SSR esteja em cache stale.
+2. Pedir ao usuário um hard refresh (Ctrl+Shift+R) na aba `/auth` para descartar o chunk antigo `virtual:tanstack-start-client-entry` em cache no navegador.
+3. Validar fluxo: login → redirecionamento para `/hub` → render do `AppLayout` com o `CompanySelector`.
 
-Migração SQL e tabela própria de áreas ficam **fora do escopo** desta etapa (preparação apenas estrutural).
+Nenhuma alteração de código é necessária — o código está válido. É somente limpar caches.
 
-## Mudanças
+## Fora de escopo
 
-### 1. Novo: `src/lib/businessAreas.ts`
-Catálogo + helpers + tipo `AreaSlug`.
-
-### 2. Novo: `src/components/AreaBadge.tsx`
-Badge compacta `Building → Área` (ícone `Layers`) usando classes neutras; aceita `companyCode` + `areaSlug` e cai para "—" quando ausente.
-
-### 3. `src/routes/_authenticated/comercial.tsx` (criar Devis)
-- Substituir o input livre de "Setor responsável" por um `<Select>` populado por `getAreasFor(form.business_unit)`.
-- Desabilitado enquanto `business_unit` não estiver selecionada; resetar `responsible_sector` quando a empresa muda.
-- Validação: bloquear `createDevis` quando `responsible_sector` vazio (mensagem "Selecione a área principal").
-- Listagem: nova coluna **Área** (após "Empresa") com `<AreaBadge>`.
-- Filtros: novo `filterArea` (`"all" | slug`), dependente de `filterCompany`/`companyCode`; aplica `q.eq("responsible_sector", slug)` na query paginada e no filtro client-side.
-- Pré-preenchimento via ATA (`handleCodeConfirmed`): se `payload.devis.responsible_sector` casar com um slug válido da empresa, manter; senão, deixar vazio e exigir seleção manual.
-
-### 4. `src/routes/_authenticated/comercial_.devis.$id.tsx` (detalhe/edição)
-- Header: exibir `<AreaBadge>` ao lado do `<CompanyBadge>`.
-- Bloco "Escopo": trocar o `<Input>` de "Setor responsável" por `<Select>` com as áreas da empresa atual; bloquear save quando vazio.
-- Em modo leitura: mostrar o `label` (não o slug).
-- Reset de área ao trocar empresa em edição.
-
-### 5. `src/components/operacao/OperacaoFilters.tsx` + `operacao.tsx`
-- O filtro existente "Setor" passa a usar `getAreasFor(companyCode)` quando uma empresa está ativa; em modo Consolidado, mostra a união de áreas com prefixo da empresa (`Advocatício · Civil`). Renderização do badge no Kanban/Lista usa `<AreaBadge>`.
-- Sem mudança no schema de `services`.
-
-### 6. Preparação para Financeiro/BI (somente estrutura)
-- Exportar `AREA_SLUGS_BY_COMPANY` em `businessAreas.ts` para reutilização futura nos selects de `NovoLancamentoDialog` e nos filtros de `BIComercial`/`BIFinanceiro`.
-- **Nenhuma alteração** nesses módulos nesta etapa.
-
-## Fora do escopo
-- Migração SQL / tabela `business_areas` / FKs.
-- Rateio entre áreas.
-- Filtros de área em Financeiro/BI (apenas estrutura preparada).
-- Edição do catálogo via UI admin.
-
-## Arquivos
-- **Novos**: `src/lib/businessAreas.ts`, `src/components/AreaBadge.tsx`.
-- **Editados**: `src/routes/_authenticated/comercial.tsx`, `src/routes/_authenticated/comercial_.devis.$id.tsx`, `src/components/operacao/OperacaoFilters.tsx`, `src/components/operacao/OperacaoKanban.tsx` e `OperacaoLista.tsx` (apenas para usar `<AreaBadge>` onde hoje mostra `responsible_sector` cru).
+Não vou mexer em regras de auth, no `AuthContext`, no `_authenticated/route.tsx` (gerenciado pela integração) nem nos componentes de Devis/Empresa criados nas etapas anteriores.
