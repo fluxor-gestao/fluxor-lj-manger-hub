@@ -726,6 +726,7 @@ function Comercial() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
                   <div className="md:col-span-2">
                     <Label>Cliente *</Label>
                     <Select value={devisForm.client_id} onValueChange={(v) => setDevisForm({ ...devisForm, client_id: v })}>
