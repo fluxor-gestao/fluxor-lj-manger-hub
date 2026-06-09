@@ -126,8 +126,28 @@ function DevisDetail() {
     };
   }, [devis?.id, (devis as any)?.source_language, (devis as any)?.proposal_structure_secondary, queryClient]);
 
-  const update = useMutation({
-    mutationFn: async () => {
+      const createService = useMutation({
+        mutationFn: async () => {
+          const { error } = await supabase.from("services").insert({
+            title: devis.title,
+            description: devis.scope_description,
+            business_unit: devis.business_unit,
+            responsible_sector: devis.responsible_sector,
+            client_id: devis.client_id,
+            devis_id: devis.id,
+            status: "a_iniciar",
+          });
+          if (error) throw error;
+        },
+        onSuccess: () => {
+          toast.success("Processo criado na operação!");
+          queryClient.invalidateQueries({ queryKey: ["devis-service", id] });
+        },
+        onError: (e: any) => toast.error(e.message),
+      });
+
+      const update = useMutation({
+        mutationFn: async () => {
       // Bloqueio: status que exige validação não pode ser salvo se ainda não validado
       if (requiresValidation(form.status) && !devis?.validated_at) {
         throw new Error("Valide a proposta antes de mover para este status.");
