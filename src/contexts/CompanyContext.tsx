@@ -28,7 +28,7 @@ function loadInitial(): ActiveCompany {
   if (typeof window === "undefined") return "__all__";
   try {
     const v = localStorage.getItem(LS_KEY);
-    // Migração: valor antigo "AD" passa a ser "DE" (Advocatício usa prefixo DE).
+    // Migração: valor antigo "AD" passa a ser "DE" (Advocacia usa prefixo DE).
     if (v === "AD") return "DE";
     if (v === "__all__" || v === "DE" || v === "CO" || v === "AM" || v === "IM" || v === "GE") {
       return v as ActiveCompany;

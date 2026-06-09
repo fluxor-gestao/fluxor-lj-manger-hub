@@ -18,7 +18,7 @@ const LABELS: Record<Lang, {
   contractorLabel: string; clientLabel: string;
 }> = {
   pt: {
-    title: "CONTRATO DE PRESTAÇÃO DE SERVIÇOS ADVOCATÍCIOS",
+    title: "CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE ADVOCACIA",
     parties: "I. DA IDENTIFICAÇÃO DAS PARTES",
     contractor: "CONTRATADO",
     client: "CONTRATANTE",
@@ -380,7 +380,7 @@ export default function DevisPdfTemplate({
         <div style={justified}>
           {isSecondary
             ? "Les parties ci-après qualifiées conviennent entre elles du présent Contrat de Prestation de Services Juridiques, lequel sera régi par les clauses ci-après stipulées, les engageant à respecter toutes les dispositions convenues."
-            : "As partes abaixo qualificadas têm, entre si, justo e acertado, o presente Contrato de Prestação de Serviços Advocatícios, que será regido pelas cláusulas descritas no presente instrumento, obrigando-se a cumprir com todas as disposições aqui pactuadas."}
+            : "As partes abaixo qualificadas têm, entre si, justo e acertado, o presente Contrato de Prestação de Serviços de Advocacia, que será regido pelas cláusulas descritas no presente instrumento, obrigando-se a cumprir com todas as disposições aqui pactuadas."}
         </div>
 
         <div style={secStyle}>{L.parties}</div>

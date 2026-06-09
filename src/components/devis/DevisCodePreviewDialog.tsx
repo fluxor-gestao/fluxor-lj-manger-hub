@@ -10,7 +10,7 @@ import { Loader2, Hash, FileText } from "lucide-react";
 export type ServicePrefix = "DE" | "AM" | "CO" | "IM" | "GE";
 
 const PREFIX_LABEL: Record<ServicePrefix, string> = {
-  DE: "Advocatício",
+  DE: "Advocacia",
   AM: "Ambiental",
   CO: "Contábil",
   IM: "Imobiliária",
