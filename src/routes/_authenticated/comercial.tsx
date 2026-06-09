@@ -161,12 +161,12 @@ function Comercial() {
   const endISO = filterEnd ? format(filterEnd, "yyyy-MM-dd") : null;
   const effectiveCompany = companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null);
   const devisListQuery = useQuery({
-    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany }],
+    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany, area: filterArea }],
     queryFn: async () => {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible", { count: "exact" })
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, responsible_sector, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to);
       if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
@@ -174,6 +174,7 @@ function Comercial() {
       if (startISO) q = q.gte("meeting_date", startISO);
       if (endISO) q = q.lte("meeting_date", endISO);
       if (effectiveCompany) q = q.eq("business_unit", effectiveCompany);
+      if (filterArea !== "all") q = q.eq("responsible_sector", filterArea);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
