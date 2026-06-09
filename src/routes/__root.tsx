@@ -132,6 +132,7 @@ function RootComponent() {
       <AuthProvider>
         <CompanyProvider>
           <TooltipProvider>
+            <PageProgress />
             <Toaster />
             <Sonner />
             <Outlet />
