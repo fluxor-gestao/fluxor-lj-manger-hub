@@ -462,7 +462,7 @@ function DevisDetail() {
             {editing ? (
               <Select
                 value={form.business_unit ?? ""}
-                onValueChange={(v) => setForm({ ...form, business_unit: v as CompanyCode })}
+                onValueChange={(v) => setForm({ ...form, business_unit: v as CompanyCode, responsible_sector: "" })}
               >
                 <SelectTrigger><SelectValue placeholder="Selecionar empresa" /></SelectTrigger>
                 <SelectContent>
