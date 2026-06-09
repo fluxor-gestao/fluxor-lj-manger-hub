@@ -359,6 +359,9 @@ function Comercial() {
       if (!isCompanyCode(form.business_unit)) {
         throw new Error("Selecione a empresa responsável.");
       }
+      if (!isValidAreaForCompany(form.business_unit, form.responsible_sector)) {
+        throw new Error("Selecione a área principal.");
+      }
       const { error } = await supabase.from("devis").insert({
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
@@ -373,7 +376,7 @@ function Comercial() {
         created_by: user?.id,
         devis_number: form.devis_number || null,
         service_type: form.service_type || aiAccepted.service_type || null,
-        responsible_sector: aiAccepted.responsible_sector || null,
+        responsible_sector: form.responsible_sector,
         scope_description: aiAccepted.scope_description || null,
         proposal_structure: aiAccepted.proposal_structure || null,
         source_language: form.source_language || "pt",
