@@ -1,9 +1,10 @@
 import * as XLSX from 'xlsx';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const SUPABASE_URL = "https://uxwdzcjhrhlugrjgpkcr.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4d2R6Y2pocmhsdWdyamdwa2NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwOTQzODUsImV4cCI6MjA5NTY3MDM4NX0.Q3ZlbOlGeohoxrlWRcpLS7NNn2LaQ1KMctisAg_P2OQ";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 async function run() {
   const filePath = '/mnt/user-uploads/LISTAGEM_CLIENTES_36.xlsx';
@@ -14,7 +15,7 @@ async function run() {
 
   console.log(`Lendo ${data.length} linhas do Excel...`);
 
-  for (const row of data) {
+  for (const row of data as any[]) {
     const cnpj = String(row['CNPJ'] || '').trim();
     const empresa = String(row['EMPRESA'] || '').trim();
     const qsa = String(row['CLIENTE - QSA'] || '').trim();

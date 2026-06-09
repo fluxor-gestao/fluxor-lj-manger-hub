@@ -963,49 +963,112 @@ function Comercial() {
                 className="pl-8"
               />
             </div>
-            <Dialog open={clientDialogOpen} onOpenChange={(o) => { setClientDialogOpen(o); if (!o) setClientForm(emptyClient); }}>
-              <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Novo Cliente</Button></DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>{clientForm.id ? "Editar Cliente" : "Novo Cliente"}</DialogTitle></DialogHeader>
-                <div className="space-y-3">
-                  <div>
-                    <Label>Nome *</Label>
-                    <Input value={clientForm.name} onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>Tipo *</Label>
-                    <Select value={clientForm.type} onValueChange={(v: "PF" | "PJ") => setClientForm({ ...clientForm, type: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PF">Pessoa Física</SelectItem>
-                        <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.xlsx, .xls';
+                input.onchange = async (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (!file) return;
+                  
+                  const promise = new Promise(async (resolve, reject) => {
+                    try {
+                      const reader = new FileReader();
+                      reader.onload = async (evt) => {
+                        try {
+                          const bstr = evt.target?.result;
+                          const { read, utils } = await import('xlsx');
+                          const wb = read(bstr, { type: 'binary' });
+                          const wsname = wb.SheetNames[0];
+                          const ws = wb.Sheets[wsname];
+                          const data = utils.sheet_to_json(ws);
+                          
+                          let successCount = 0;
+                          for (const row of data as any[]) {
+                            const empresa = row['EMPRESA'] || row['Empresa'];
+                            if (!empresa) continue;
+                            
+                            const { error } = await supabase.from('clients').insert({
+                              name: String(empresa).trim(),
+                              document: String(row['CNPJ'] || '').trim() || null,
+                              email: String(row['e-mail de contato'] || row['Email'] || '').trim() || null,
+                              type: 'PJ',
+                              notes: `Sócio/QSA: ${row['CLIENTE - QSA'] || ''}\nIdioma: ${row['Idioma'] || ''}`,
+                              active: true
+                            });
+                            if (!error) successCount++;
+                          }
+                          resolve(successCount);
+                        } catch (err) {
+                          reject(err);
+                        }
+                      };
+                      reader.readAsBinaryString(file);
+                    } catch (err) {
+                      reject(err);
+                    }
+                  });
+
+                  toast.promise(promise, {
+                    loading: 'Processando planilha...',
+                    success: (count) => {
+                      queryClient.invalidateQueries({ queryKey: ["clients"] });
+                      return `${count} clientes importados com sucesso!`;
+                    },
+                    error: 'Erro ao importar clientes.'
+                  });
+                };
+                input.click();
+              }}>
+                <Upload className="h-4 w-4 mr-2" /> Upload de base
+              </Button>
+
+              <Dialog open={clientDialogOpen} onOpenChange={(o) => { setClientDialogOpen(o); if (!o) setClientForm(emptyClient); }}>
+                <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Novo Cliente</Button></DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>{clientForm.id ? "Editar Cliente" : "Novo Cliente"}</DialogTitle></DialogHeader>
+                  <div className="space-y-3">
                     <div>
-                      <Label>Email</Label>
-                      <Input value={clientForm.email} onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })} />
+                      <Label>Nome *</Label>
+                      <Input value={clientForm.name} onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })} />
                     </div>
                     <div>
-                      <Label>Telefone</Label>
-                      <Input value={clientForm.phone} onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })} />
+                      <Label>Tipo *</Label>
+                      <Select value={clientForm.type} onValueChange={(v: "PF" | "PJ") => setClientForm({ ...clientForm, type: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PF">Pessoa Física</SelectItem>
+                          <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Email</Label>
+                        <Input value={clientForm.email} onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label>Telefone</Label>
+                        <Input value={clientForm.phone} onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })} />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Documento (CPF/CNPJ)</Label>
+                      <Input value={clientForm.document} onChange={(e) => setClientForm({ ...clientForm, document: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Observações</Label>
+                      <Textarea rows={3} value={clientForm.notes} onChange={(e) => setClientForm({ ...clientForm, notes: e.target.value })} />
                     </div>
                   </div>
-                  <div>
-                    <Label>Documento (CPF/CNPJ)</Label>
-                    <Input value={clientForm.document} onChange={(e) => setClientForm({ ...clientForm, document: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>Observações</Label>
-                    <Textarea rows={3} value={clientForm.notes} onChange={(e) => setClientForm({ ...clientForm, notes: e.target.value })} />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button onClick={() => saveClient.mutate(clientForm)} disabled={!clientForm.name || saveClient.isPending}>Salvar</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                  <DialogFooter>
+                    <Button onClick={() => saveClient.mutate(clientForm)} disabled={!clientForm.name || saveClient.isPending}>Salvar</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
           </div>
           <Card>
             <Table>
