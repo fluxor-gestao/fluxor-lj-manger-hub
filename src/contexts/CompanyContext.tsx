@@ -1,15 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { COMPANY_LIST, type CompanyCode } from "@/lib/companyCodes";
 
-export type CompanyCode = "AD" | "CO" | "AM" | "IM" | "GE";
+export type { CompanyCode } from "@/lib/companyCodes";
 export type ActiveCompany = CompanyCode | "__all__";
 
-export const COMPANIES: { code: CompanyCode; name: string; short: string }[] = [
-  { code: "AD", name: "Lundgaard Jensen — Advocatício", short: "Advocatício" },
-  { code: "CO", name: "Lundgaard Jensen — Contábil", short: "Contábil" },
-  { code: "AM", name: "Lundgaard Jensen — Ambiental", short: "Ambiental" },
-  { code: "IM", name: "Lundgaard Jensen — Imobiliária", short: "Imobiliária" },
-  { code: "GE", name: "Lundgaard Jensen — Gestão", short: "Gestão" },
-];
+// Re-exporta para compat com chamadas antigas que importavam de CompanyContext.
+export const COMPANIES = COMPANY_LIST;
 
 const LS_KEY = "lj.activeCompany";
 
@@ -32,8 +28,10 @@ function loadInitial(): ActiveCompany {
   if (typeof window === "undefined") return "__all__";
   try {
     const v = localStorage.getItem(LS_KEY);
-    if (v === "__all__" || v === "AD" || v === "CO" || v === "AM" || v === "IM" || v === "GE") {
-      return v;
+    // Migração: valor antigo "AD" passa a ser "DE" (Advocatício usa prefixo DE).
+    if (v === "AD") return "DE";
+    if (v === "__all__" || v === "DE" || v === "CO" || v === "AM" || v === "IM" || v === "GE") {
+      return v as ActiveCompany;
     }
   } catch {}
   return "__all__";
@@ -70,7 +68,6 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 export function useCompany(): Ctx {
   const ctx = useContext(CompanyContext);
   if (!ctx) {
-    // Safe fallback for any consumer mounted outside provider.
     return {
       activeCompany: "__all__",
       setActiveCompany: () => {},

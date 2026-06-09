@@ -33,6 +33,8 @@ import { Pagination } from "@/components/Pagination";
 import { rangeFor } from "@/lib/pagination";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
+import { CompanyBadge } from "@/components/CompanyBadge";
+import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
 
 const DEVIS_PAGE_SIZE = 20;
 const CLIENTS_PAGE_SIZE = 50;
@@ -67,6 +69,7 @@ type DevisForm = {
   devis_number: string;
   service_type: string;
   source_language: string;
+  business_unit: CompanyCode | "";
 };
 
 const emptyDevis: DevisForm = {
@@ -83,6 +86,7 @@ const emptyDevis: DevisForm = {
   devis_number: "",
   service_type: "",
   source_language: "pt",
+  business_unit: "",
 };
 
 function Comercial() {
@@ -99,6 +103,7 @@ function Comercial() {
 
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterClient, setFilterClient] = useState<string>("all");
+  const [filterCompany, setFilterCompany] = useState<string>("all");
   const [filterStart, setFilterStart] = useState<Date | undefined>();
   const [filterEnd, setFilterEnd] = useState<Date | undefined>();
   const [view, setView] = useState<"list" | "kanban">("list");
@@ -111,7 +116,7 @@ function Comercial() {
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
 
   // Reset paginação quando filtros mudam
-  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterStart, filterEnd]);
+  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterStart, filterEnd]);
   useEffect(() => { setClientsPage(0); }, [clientsSearch]);
 
   // Lookup de clientes (colunas mínimas, usado em selects e clientsById)
@@ -147,8 +152,9 @@ function Comercial() {
   // Lista paginada de devis (modo list) — filtros server-side
   const startISO = filterStart ? format(filterStart, "yyyy-MM-dd") : null;
   const endISO = filterEnd ? format(filterEnd, "yyyy-MM-dd") : null;
+  const effectiveCompany = companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null);
   const devisListQuery = useQuery({
-    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: companyCode }],
+    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany }],
     queryFn: async () => {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
@@ -160,7 +166,7 @@ function Comercial() {
       if (filterClient !== "all") q = q.eq("client_id", filterClient);
       if (startISO) q = q.gte("meeting_date", startISO);
       if (endISO) q = q.lte("meeting_date", endISO);
-      if (companyCode) q = q.eq("business_unit", companyCode);
+      if (effectiveCompany) q = q.eq("business_unit", effectiveCompany);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -278,11 +284,12 @@ function Comercial() {
   const kanbanDevis = useMemo(() => {
     return devisSummary.filter((d: any) => {
       if (filterClient !== "all" && d.client_id !== filterClient) return false;
+      if (filterCompany !== "all" && d.business_unit !== filterCompany) return false;
       if (filterStart && d.meeting_date && parseISO(d.meeting_date) < filterStart) return false;
       if (filterEnd && d.meeting_date && parseISO(d.meeting_date) > filterEnd) return false;
       return true;
     });
-  }, [devisSummary, filterClient, filterStart, filterEnd]);
+  }, [devisSummary, filterClient, filterCompany, filterStart, filterEnd]);
 
   // List usa a query paginada (filtros já server-side)
   const devisListRows = devisListQuery.data?.rows ?? [];
@@ -341,6 +348,9 @@ function Comercial() {
       const down = form.down_payment_amount === "" ? total * 0.5 : Number(form.down_payment_amount) || 0;
       const client = clientsById[form.client_id];
       const title = form.title || (client ? `Devis ${client.name}` : "Novo Devis");
+      if (!isCompanyCode(form.business_unit)) {
+        throw new Error("Selecione a empresa responsável.");
+      }
       const { error } = await supabase.from("devis").insert({
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
@@ -359,6 +369,7 @@ function Comercial() {
         scope_description: aiAccepted.scope_description || null,
         proposal_structure: aiAccepted.proposal_structure || null,
         source_language: form.source_language || "pt",
+        business_unit: form.business_unit,
       });
       if (error) throw error;
     },
@@ -418,7 +429,7 @@ function Comercial() {
     setCodePreviewOpen(true);
   };
 
-  const handleCodeConfirmed = ({ devis_number, service_type }: { prefix: ServicePrefix; devis_number: string; service_type: string }) => {
+  const handleCodeConfirmed = ({ prefix, devis_number, service_type }: { prefix: ServicePrefix; devis_number: string; service_type: string }) => {
     if (!pendingAta) return;
     const { client_id, payload } = pendingAta;
     const total = payload.devis.total_amount || 0;
@@ -437,6 +448,7 @@ function Comercial() {
       devis_number,
       service_type,
       source_language: payload.detected_language || "pt",
+      business_unit: prefix as CompanyCode,
     });
     setAiAccepted({
       service_type: payload.devis.service_type || service_type,
@@ -547,7 +559,7 @@ function Comercial() {
             <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
               <Filter className="h-4 w-4" /> Filtros
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div>
                 <Label className="text-xs">Status {view === "kanban" && <span className="text-[10px]">(desativado no Kanban)</span>}</Label>
                 <Select value={filterStatus} onValueChange={setFilterStatus} disabled={view === "kanban"}>
@@ -555,6 +567,21 @@ function Comercial() {
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
                     {ALL_STATUSES.map((k) => <SelectItem key={k} value={k}>{statusLabels[k]}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Empresa {companyCode && <span className="text-[10px]">(global ativo)</span>}</Label>
+                <Select value={companyCode ?? filterCompany} onValueChange={setFilterCompany} disabled={!!companyCode}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {COMPANY_LIST.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        <span className="font-mono text-[10px] mr-2">{c.code}</span>
+                        {c.short}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -597,9 +624,9 @@ function Comercial() {
                 </Popover>
               </div>
             </div>
-            {(filterStatus !== "all" || filterClient !== "all" || filterStart || filterEnd) && (
+            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterStart || filterEnd) && (
               <div className="mt-3">
-                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
                   Limpar filtros
                 </Button>
               </div>
@@ -615,11 +642,41 @@ function Comercial() {
               <Button variant="outline" onClick={() => setUploadAtaOpen(true)}>
                 <Upload className="h-4 w-4 mr-2" /> Upload de Relatório / Ata
               </Button>
-              <Dialog open={devisDialogOpen} onOpenChange={(o) => { setDevisDialogOpen(o); if (!o) { setDevisForm(emptyDevis); setAiSuggestions(null); setAiAccepted({}); } }}>
+              <Dialog
+                open={devisDialogOpen}
+                onOpenChange={(o) => {
+                  setDevisDialogOpen(o);
+                  if (o) {
+                    // Pré-preenche a empresa com a seleção global, se houver
+                    setDevisForm((f) => ({ ...f, business_unit: f.business_unit || (companyCode ?? "") }));
+                  } else {
+                    setDevisForm(emptyDevis);
+                    setAiSuggestions(null);
+                    setAiAccepted({});
+                  }
+                }}
+              >
                 <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Novo Devis</Button></DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>Novo Devis</DialogTitle></DialogHeader>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <Label>Empresa responsável *</Label>
+                    <Select
+                      value={devisForm.business_unit}
+                      onValueChange={(v) => setDevisForm({ ...devisForm, business_unit: v as CompanyCode })}
+                    >
+                      <SelectTrigger><SelectValue placeholder="Selecionar empresa do Grupo Lundgaard Jensen" /></SelectTrigger>
+                      <SelectContent>
+                        {COMPANY_LIST.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            <span className="font-mono text-[10px] mr-2">{c.code}</span>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="md:col-span-2">
                     <Label>Cliente *</Label>
                     <Select value={devisForm.client_id} onValueChange={(v) => setDevisForm({ ...devisForm, client_id: v })}>
@@ -718,7 +775,7 @@ function Comercial() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || createDevis.isPending}>Salvar</Button>
+                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || !isCompanyCode(devisForm.business_unit) || createDevis.isPending}>Salvar</Button>
                 </DialogFooter>
               </DialogContent>
               </Dialog>
@@ -763,6 +820,7 @@ function Comercial() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Cliente</TableHead>
+                    <TableHead>Empresa</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Valor Total</TableHead>
                     <TableHead className="text-right">Entrada</TableHead>
@@ -773,14 +831,15 @@ function Comercial() {
                 </TableHeader>
                 <TableBody>
                   {devisListQuery.isLoading && !devisListQuery.data ? (
-                    <TableRow><TableCell colSpan={7}><LoadingState /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8}><LoadingState /></TableCell></TableRow>
                   ) : devisListQuery.isError ? (
-                    <TableRow><TableCell colSpan={7}><ErrorState onRetry={() => devisListQuery.refetch()} /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8}><ErrorState onRetry={() => devisListQuery.refetch()} /></TableCell></TableRow>
                   ) : devisListRows.length === 0 ? (
-                    <TableRow><TableCell colSpan={7}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
                   ) : devisListRows.map((d: any) => (
                     <TableRow key={d.id} className="cursor-pointer" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
                       <TableCell className="font-medium">{clientsById[d.client_id]?.name || "—"}</TableCell>
+                      <TableCell><CompanyBadge code={d.business_unit} /></TableCell>
                       <TableCell><Badge variant="outline" className={devisStatusColors[d.status] || ""}>{statusLabels[d.status] || d.status}</Badge></TableCell>
                       <TableCell className="text-right">{fmtBRL(d.total_amount)}</TableCell>
                       <TableCell className="text-right">{fmtBRL(d.down_payment_amount)}</TableCell>
