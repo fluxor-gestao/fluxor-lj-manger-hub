@@ -460,6 +460,9 @@ function Comercial() {
       service_type,
       source_language: payload.detected_language || "pt",
       business_unit: prefix as CompanyCode,
+      responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
+        ? (payload.devis.responsible_sector as string)
+        : "",
     });
     setAiAccepted({
       service_type: payload.devis.service_type || service_type,
