@@ -17,6 +17,7 @@ import {
   YAxis,
 } from "recharts";
 import {
+  Activity,
   AlertTriangle,
   ArrowDownRight,
   ArrowUpRight,
@@ -59,6 +60,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { findArea, getAreasFor } from "@/lib/businessAreas";
+import { isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
 import { STATUS_LABELS, ALL_STATUSES } from "@/lib/devisStatus";
 
 // ----- helpers -----
@@ -92,6 +95,7 @@ type Devis = {
   status: string;
   total_amount: number | null;
   business_unit: string | null;
+  responsible_sector: string | null;
   service_type: string | null;
   client_id: string | null;
   commercial_responsible: string | null;
@@ -111,6 +115,7 @@ type Filters = {
   clientId: string;
   status: string;
   bu: string;
+  area: string;
   serviceType: string;
 };
 
@@ -124,6 +129,7 @@ const defaultFilters: Filters = {
   clientId: "all",
   status: "all",
   bu: "all",
+  area: "all",
   serviceType: "all",
 };
 
@@ -154,7 +160,7 @@ export default function BIComercial() {
       let qb = supabase
         .from("devis")
         .select(
-          "id, devis_number, title, status, total_amount, business_unit, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date"
+          "id, devis_number, title, status, total_amount, business_unit, responsible_sector, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date"
         )
         .gte("created_at", filters.from)
         .lte("created_at", filters.to + "T23:59:59")
@@ -164,6 +170,7 @@ export default function BIComercial() {
       if (filters.status !== "all") qb = qb.eq("status", filters.status as any);
       const effectiveBu = companyCode ?? (filters.bu !== "all" ? filters.bu : null);
       if (effectiveBu) qb = qb.eq("business_unit", effectiveBu);
+      if (filters.area !== "all") qb = qb.eq("responsible_sector", filters.area);
       if (filters.serviceType !== "all") qb = qb.eq("service_type", filters.serviceType);
       const { data, error } = await qb;
       if (error) throw error;
