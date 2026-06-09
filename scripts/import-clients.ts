@@ -13,12 +13,7 @@ async function run() {
   const worksheet = workbook.Sheets[sheetName];
   const data = XLSX.utils.sheet_to_json(worksheet);
 
-  console.log(`Lendo ${data.length} linhas do Excel para re-importação...`);
-
-  // Deletar clientes antigos importados (opcional, mas o usuário pediu para "subir tudo novamente")
-  // Para evitar apagar dados reais, vamos focar em atualizar ou apenas inserir os novos com o formato correto.
-  // Como o usuário disse "suba tudo novamente", vou tentar limpar os registros que não possuem vinculação se possível,
-  // ou apenas processar a planilha garantindo que Empresa vá para Empresa e Nome (QSA) vá para Nome.
+  console.log(`Lendo ${data.length} linhas do Excel para nova carga definitiva...`);
 
   for (const row of data as any[]) {
     const cnpj = String(row['CNPJ'] || '').trim();
@@ -29,32 +24,26 @@ async function run() {
 
     if (!empresa) continue;
 
-    // Se tiver mais de um email, pegamos o primeiro para a coluna email e deixamos o resto nas notas
+    // Tratamento de e-mails
     const emails = emailField.split(/[,;\s/]+/).filter(e => e.includes('@'));
     const primaryEmail = emails[0] || null;
     const allEmails = emails.join(', ');
 
     const clientData = {
-      name: nomeQsa || empresa, // Nome do cliente (QSA) ou Empresa se não houver QSA
-      company: empresa,         // Empresa
+      name: nomeQsa || empresa, // Nome do cliente (QSA)
+      company: empresa,         // Empresa (Razão Social)
       document: cnpj || null,
       email: primaryEmail,
       type: 'PJ',
-      notes: `E-mails: ${allEmails}\nSócio/QSA: ${nomeQsa}\nIdioma: ${idioma}`,
+      notes: `E-mails cadastrados: ${allEmails}\nIdioma: ${idioma}`,
       active: true
     };
 
-    // Tentar encontrar por documento ou empresa para evitar duplicatas infinitas se rodar várias vezes
-    const { data: existing } = await supabase.from('clients').select('id').eq('company', empresa).maybeSingle();
-
-    if (existing) {
-      const { error } = await supabase.from('clients').update(clientData).eq('id', existing.id);
-      if (error) console.error(`Erro ao atualizar ${empresa}:`, error.message);
-      else console.log(`Cliente atualizado: ${empresa}`);
+    const { error } = await supabase.from('clients').insert(clientData);
+    if (error) {
+      console.error(`Erro ao inserir ${empresa}:`, error.message);
     } else {
-      const { error } = await supabase.from('clients').insert(clientData);
-      if (error) console.error(`Erro ao inserir ${empresa}:`, error.message);
-      else console.log(`Cliente cadastrado: ${empresa}`);
+      console.log(`Cadastrado: [Empresa: ${empresa}] | [Nome/QSA: ${nomeQsa}]`);
     }
   }
 }
