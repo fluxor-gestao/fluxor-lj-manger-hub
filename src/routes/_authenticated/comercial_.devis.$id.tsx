@@ -147,8 +147,8 @@ function DevisDetail() {
     onError: (e: any) => toast.error(e.message),
   });
 
-      const update = useMutation({
-        mutationFn: async () => {
+  const update = useMutation({
+    mutationFn: async () => {
       // Bloqueio: status que exige validação não pode ser salvo se ainda não validado
       if (requiresValidation(form.status) && !devis?.validated_at) {
         throw new Error("Valide a proposta antes de mover para este status.");
