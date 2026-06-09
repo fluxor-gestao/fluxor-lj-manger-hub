@@ -563,6 +563,9 @@ function Conciliacao() {
       feUpdate.paid_amount = Number((paidPrev + appliedAmount).toFixed(2));
       feUpdate.open_amount = Number(Math.max(0, openPrev - appliedAmount).toFixed(2));
       feUpdate.payment_status = nextStatus;
+
+      // Proteção: Garante que o valor da baixa seja positivo para evitar erro no banco
+      const finalPaymentAmount = Math.max(0.01, appliedAmount);
       if (nextStatus === "pago" || !fe.paid_at) {
         feUpdate.paid_at = stmt.transaction_date;
       }
@@ -604,7 +607,7 @@ function Conciliacao() {
         financial_entry_id: fe.id,
         bank_statement_entry_id: stmt.id,
         conciliation_match_id: matchId,
-        amount: appliedAmount,
+        amount: finalPaymentAmount,
         paid_at: stmt.transaction_date,
         payment_method_id: fe.payment_method_id ?? null,
         bank_account_id: stmt.bank_account_id ?? fe.payment_account_id ?? fe.bank_account_id ?? null,
