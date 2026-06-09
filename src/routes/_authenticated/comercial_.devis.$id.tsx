@@ -628,7 +628,23 @@ function DevisDetail() {
           {editing && (
             <>
               <div className="md:col-span-2"><Label>Tipo de serviço</Label><Input value={form.service_type ?? ""} onChange={(e) => setForm({ ...form, service_type: e.target.value })} /></div>
-              <div className="md:col-span-2"><Label>Setor responsável</Label><Input value={form.responsible_sector ?? ""} onChange={(e) => setForm({ ...form, responsible_sector: e.target.value })} /></div>
+              <div className="md:col-span-2">
+                <Label>Área principal *</Label>
+                <Select
+                  value={form.responsible_sector ?? ""}
+                  onValueChange={(v) => setForm({ ...form, responsible_sector: v })}
+                  disabled={!isCompanyCode(form.business_unit)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={isCompanyCode(form.business_unit) ? "Selecionar área" : "Selecione a empresa primeiro"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAreasFor(isCompanyCode(form.business_unit) ? (form.business_unit as CompanyCode) : null).map((a) => (
+                      <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="md:col-span-2"><Label>Descrição do escopo</Label><Textarea rows={5} value={form.scope_description ?? ""} onChange={(e) => setForm({ ...form, scope_description: e.target.value })} /></div>
               <div className="md:col-span-2"><Label>Estrutura da proposta</Label><Textarea rows={8} value={form.proposal_structure ?? ""} onChange={(e) => setForm({ ...form, proposal_structure: e.target.value })} /></div>
             </>
