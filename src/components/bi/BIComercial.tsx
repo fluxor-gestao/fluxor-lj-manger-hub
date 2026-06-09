@@ -379,6 +379,50 @@ export default function BIComercial() {
     return rankingServicos.map((s) => ({ name: s.name, value: s.aceito })).filter((x) => x.value > 0).slice(0, 8);
   }, [rankingServicos]);
 
+  const statsPorEmpresa = useMemo(() => {
+    const m = new Map<string, { criadas: number; aceitas: number; valorProp: number; valorAceito: number; enviadas: number }>();
+    for (const r of rows) {
+      const k = r.business_unit ?? "Não informada";
+      if (!m.has(k)) m.set(k, { criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0, enviadas: 0 });
+      const b = m.get(k)!;
+      b.criadas++;
+      b.valorProp += Number(r.total_amount ?? 0);
+      if (r.sent_at || SENT_OR_LATER.includes(r.status)) b.enviadas++;
+      if (ACCEPTED.includes(r.status) || r.accepted_at) {
+        b.aceitas++;
+        b.valorAceito += Number(r.total_amount ?? 0);
+      }
+    }
+    return Array.from(m.entries()).map(([name, v]) => ({
+      name,
+      ...v,
+      conversao: v.enviadas > 0 ? v.aceitas / v.enviadas : 0,
+      ticket: v.aceitas > 0 ? v.valorAceito / v.aceitas : 0,
+    })).sort((a, b) => b.valorAceito - a.valorAceito);
+  }, [rows]);
+
+  const statsPorArea = useMemo(() => {
+    const m = new Map<string, { criadas: number; aceitas: number; valorProp: number; valorAceito: number; enviadas: number }>();
+    for (const r of rows) {
+      const k = findArea(r.business_unit as CompanyCode, r.responsible_sector)?.label ?? "Não informada";
+      if (!m.has(k)) m.set(k, { criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0, enviadas: 0 });
+      const b = m.get(k)!;
+      b.criadas++;
+      b.valorProp += Number(r.total_amount ?? 0);
+      if (r.sent_at || SENT_OR_LATER.includes(r.status)) b.enviadas++;
+      if (ACCEPTED.includes(r.status) || r.accepted_at) {
+        b.aceitas++;
+        b.valorAceito += Number(r.total_amount ?? 0);
+      }
+    }
+    return Array.from(m.entries()).map(([name, v]) => ({
+      name,
+      ...v,
+      conversao: v.enviadas > 0 ? v.aceitas / v.enviadas : 0,
+      ticket: v.aceitas > 0 ? v.valorAceito / v.aceitas : 0,
+    })).sort((a, b) => b.valorAceito - a.valorAceito);
+  }, [rows]);
+
   // Heatmap simples: volume por dia da semana
   const heatmap = useMemo(() => {
     const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -666,6 +710,62 @@ export default function BIComercial() {
 
       {/* Gráficos */}
       <div className="grid gap-4 lg:grid-cols-2">
+        <ChartCard title="Participação das Empresas (Valor Aceito)">
+          {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={statsPorEmpresa} dataKey="valorAceito" nameKey="name" innerRadius={55} outerRadius={100}>
+                  {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Participação das Áreas (Valor Aceito)">
+          {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={statsPorArea} dataKey="valorAceito" nameKey="name" innerRadius={55} outerRadius={100}>
+                  {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Conversão por Empresa">
+          {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={statsPorEmpresa}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis dataKey="name" fontSize={11} />
+                <YAxis fontSize={11} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip formatter={(v: any) => PCT(Number(v))} />
+                <Bar dataKey="conversao" fill={COLORS[2]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Conversão por Área">
+          {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={statsPorArea}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis dataKey="name" fontSize={11} />
+                <YAxis fontSize={11} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip formatter={(v: any) => PCT(Number(v))} />
+                <Bar dataKey="conversao" fill={COLORS[2]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
         <ChartCard title="Funil comercial">
           {isLoading ? <Skeleton className="h-[280px]" /> : funnel.every((f) => f.value === 0) ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
