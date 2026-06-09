@@ -48,6 +48,7 @@ const fmtBRL = (n: number) =>
 type ClientForm = {
   id?: string;
   name: string;
+  company: string;
   email: string;
   phone: string;
   document: string;
@@ -55,7 +56,8 @@ type ClientForm = {
   notes: string;
 };
 
-const emptyClient: ClientForm = { name: "", email: "", phone: "", document: "", type: "PJ", notes: "" };
+const emptyClient: ClientForm = { name: "", company: "", email: "", phone: "", document: "", type: "PJ", notes: "" };
+
 
 type DevisForm = {
   client_id: string;
@@ -132,13 +134,14 @@ function Comercial() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clients")
-        .select("id, name, email, phone, document, type, business_unit_id, active, notes")
+        .select("id, name, company, email, phone, document, type, business_unit_id, active, notes")
         .order("name")
         .range(0, SUMMARY_HARD_CAP - 1);
       if (error) throw error;
       return data ?? [];
     },
   });
+
 
   // Resumo leve de devis (alimenta indicadores + Kanban)
   const { data: devisSummary = [] } = useQuery({
@@ -199,9 +202,10 @@ function Comercial() {
       const [from, to] = rangeFor(clientsPage, CLIENTS_PAGE_SIZE);
       let q = supabase
         .from("clients")
-        .select("id, name, email, phone, document, type, business_unit_id, active", { count: "exact" })
+        .select("id, name, company, email, phone, document, type, business_unit_id, active", { count: "exact" })
         .order("name")
         .range(from, to);
+
       const term = clientsSearch.trim();
       if (term) q = q.or(`name.ilike.%${term}%,email.ilike.%${term}%,document.ilike.%${term}%`);
       const { data, count, error } = await q;
@@ -308,6 +312,7 @@ function Comercial() {
     mutationFn: async (form: ClientForm) => {
       const payload = {
         name: form.name,
+        company: form.company || null,
         email: form.email || null,
         phone: form.phone || null,
         document: form.document || null,
@@ -322,6 +327,7 @@ function Comercial() {
         if (error) throw error;
       }
     },
+
     onSuccess: () => {
       toast.success("Cliente salvo!");
       queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -482,12 +488,14 @@ function Comercial() {
     setClientForm({
       id: c.id,
       name: c.name ?? "",
+      company: c.company ?? "",
       email: c.email ?? "",
       phone: c.phone ?? "",
       document: c.document ?? "",
       type: (c.type as "PF" | "PJ") ?? "PJ",
       notes: c.notes ?? "",
     });
+
     setClientDialogOpen(true);
   };
 
@@ -987,18 +995,26 @@ function Comercial() {
                           let successCount = 0;
                           for (const row of data as any[]) {
                             const empresa = row['EMPRESA'] || row['Empresa'];
+                            const nomeQsa = row['CLIENTE - QSA'] || row['Nome'];
                             if (!empresa) continue;
                             
+                            const emailField = String(row['e-mail de contato'] || row['Email'] || '').trim();
+                            const emails = emailField.split(/[,;\s/]+/).filter(e => e.includes('@'));
+                            const primaryEmail = emails[0] || null;
+                            const allEmails = emails.join(', ');
+
                             const { error } = await supabase.from('clients').insert({
-                              name: String(empresa).trim(),
+                              name: String(nomeQsa || empresa).trim(),
+                              company: String(empresa).trim(),
                               document: String(row['CNPJ'] || '').trim() || null,
-                              email: String(row['e-mail de contato'] || row['Email'] || '').trim() || null,
+                              email: primaryEmail,
                               type: 'PJ',
-                              notes: `Sócio/QSA: ${row['CLIENTE - QSA'] || ''}\nIdioma: ${row['Idioma'] || ''}`,
+                              notes: `E-mails: ${allEmails}\nSócio/QSA: ${nomeQsa || ''}\nIdioma: ${row['Idioma'] || ''}`,
                               active: true
                             });
                             if (!error) successCount++;
                           }
+
                           resolve(successCount);
                         } catch (err) {
                           reject(err);
@@ -1030,9 +1046,14 @@ function Comercial() {
                   <DialogHeader><DialogTitle>{clientForm.id ? "Editar Cliente" : "Novo Cliente"}</DialogTitle></DialogHeader>
                   <div className="space-y-3">
                     <div>
-                      <Label>Nome *</Label>
+                      <Label>Nome (QSA) *</Label>
                       <Input value={clientForm.name} onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })} />
                     </div>
+                    <div>
+                      <Label>Empresa</Label>
+                      <Input value={clientForm.company} onChange={(e) => setClientForm({ ...clientForm, company: e.target.value })} />
+                    </div>
+
                     <div>
                       <Label>Tipo *</Label>
                       <Select value={clientForm.type} onValueChange={(v: "PF" | "PJ") => setClientForm({ ...clientForm, type: v })}>
@@ -1074,8 +1095,15 @@ function Comercial() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead><TableHead>Tipo</TableHead><TableHead>Email</TableHead><TableHead>Telefone</TableHead><TableHead>Documento</TableHead><TableHead className="w-20">Ações</TableHead>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Empresa</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Documento</TableHead>
+                  <TableHead className="w-20">Ações</TableHead>
                 </TableRow>
+
               </TableHeader>
               <TableBody>
                 {clientsListQuery.isLoading && !clientsListQuery.data ? (
@@ -1087,10 +1115,12 @@ function Comercial() {
                 ) : (clientsListQuery.data?.rows ?? []).map((c: any) => (
                   <TableRow key={c.id}>
                     <TableCell className="font-medium">{c.name}</TableCell>
+                    <TableCell>{c.company || "—"}</TableCell>
                     <TableCell><Badge variant="outline">{c.type || "PJ"}</Badge></TableCell>
                     <TableCell>{c.email}</TableCell>
                     <TableCell>{c.phone}</TableCell>
                     <TableCell>{c.document}</TableCell>
+
                      <TableCell>
                       <div className="flex items-center gap-1">
                         <Button size="icon" variant="ghost" onClick={() => openEditClient(c)}>

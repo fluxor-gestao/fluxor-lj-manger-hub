@@ -13,31 +13,48 @@ async function run() {
   const worksheet = workbook.Sheets[sheetName];
   const data = XLSX.utils.sheet_to_json(worksheet);
 
-  console.log(`Lendo ${data.length} linhas do Excel...`);
+  console.log(`Lendo ${data.length} linhas do Excel para re-importação...`);
+
+  // Deletar clientes antigos importados (opcional, mas o usuário pediu para "subir tudo novamente")
+  // Para evitar apagar dados reais, vamos focar em atualizar ou apenas inserir os novos com o formato correto.
+  // Como o usuário disse "suba tudo novamente", vou tentar limpar os registros que não possuem vinculação se possível,
+  // ou apenas processar a planilha garantindo que Empresa vá para Empresa e Nome (QSA) vá para Nome.
 
   for (const row of data as any[]) {
     const cnpj = String(row['CNPJ'] || '').trim();
     const empresa = String(row['EMPRESA'] || '').trim();
-    const qsa = String(row['CLIENTE - QSA'] || '').trim();
+    const nomeQsa = String(row['CLIENTE - QSA'] || '').trim();
     const idioma = String(row['Idioma'] || '').trim();
-    const email = String(row['e-mail de contato'] || '').trim();
+    const emailField = String(row['e-mail de contato'] || '').trim();
 
     if (!empresa) continue;
 
+    // Se tiver mais de um email, pegamos o primeiro para a coluna email e deixamos o resto nas notas
+    const emails = emailField.split(/[,;\s/]+/).filter(e => e.includes('@'));
+    const primaryEmail = emails[0] || null;
+    const allEmails = emails.join(', ');
+
     const clientData = {
-      name: empresa,
+      name: nomeQsa || empresa, // Nome do cliente (QSA) ou Empresa se não houver QSA
+      company: empresa,         // Empresa
       document: cnpj || null,
-      email: email || null,
+      email: primaryEmail,
       type: 'PJ',
-      notes: `Sócio/QSA: ${qsa}\nIdioma: ${idioma}`,
+      notes: `E-mails: ${allEmails}\nSócio/QSA: ${nomeQsa}\nIdioma: ${idioma}`,
       active: true
     };
 
-    const { error } = await supabase.from('clients').insert(clientData);
-    if (error) {
-      console.error(`Erro ao inserir ${empresa}:`, error.message);
+    // Tentar encontrar por documento ou empresa para evitar duplicatas infinitas se rodar várias vezes
+    const { data: existing } = await supabase.from('clients').select('id').eq('company', empresa).maybeSingle();
+
+    if (existing) {
+      const { error } = await supabase.from('clients').update(clientData).eq('id', existing.id);
+      if (error) console.error(`Erro ao atualizar ${empresa}:`, error.message);
+      else console.log(`Cliente atualizado: ${empresa}`);
     } else {
-      console.log(`Cliente cadastrado: ${empresa}`);
+      const { error } = await supabase.from('clients').insert(clientData);
+      if (error) console.error(`Erro ao inserir ${empresa}:`, error.message);
+      else console.log(`Cliente cadastrado: ${empresa}`);
     }
   }
 }
