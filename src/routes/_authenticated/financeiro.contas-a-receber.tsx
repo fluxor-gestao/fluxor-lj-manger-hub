@@ -230,6 +230,7 @@ function ContasAReceberPage() {
             <p className="text-sm text-muted-foreground">
               Controle de recebíveis, cobranças e inadimplência
             </p>
+            <ActiveCompanyBanner className="mt-2" />
           </div>
         </div>
         <div className="flex gap-2">
