@@ -152,8 +152,9 @@ function Comercial() {
   // Lista paginada de devis (modo list) — filtros server-side
   const startISO = filterStart ? format(filterStart, "yyyy-MM-dd") : null;
   const endISO = filterEnd ? format(filterEnd, "yyyy-MM-dd") : null;
+  const effectiveCompany = companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null);
   const devisListQuery = useQuery({
-    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: companyCode }],
+    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany }],
     queryFn: async () => {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
@@ -165,7 +166,7 @@ function Comercial() {
       if (filterClient !== "all") q = q.eq("client_id", filterClient);
       if (startISO) q = q.gte("meeting_date", startISO);
       if (endISO) q = q.lte("meeting_date", endISO);
-      if (companyCode) q = q.eq("business_unit", companyCode);
+      if (effectiveCompany) q = q.eq("business_unit", effectiveCompany);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
