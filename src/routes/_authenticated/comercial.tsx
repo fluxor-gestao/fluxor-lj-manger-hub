@@ -35,7 +35,7 @@ import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { CompanyBadge } from "@/components/CompanyBadge";
 import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
-import { getAreasFor, isValidAreaForCompany, ALL_AREAS } from "@/lib/businessAreas";
+import { getAreasFor, isValidAreaForCompany } from "@/lib/businessAreas";
 import { AreaBadge } from "@/components/AreaBadge";
 
 const DEVIS_PAGE_SIZE = 20;
