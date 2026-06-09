@@ -11,6 +11,7 @@ export type OperacaoFilterState = {
   status: string;
   responsavel: string;
   bu: string;
+  area: string;
   startFrom: string;
   startTo: string;
   dueFrom: string;
@@ -23,6 +24,7 @@ export const initialFilters: OperacaoFilterState = {
   status: "all",
   responsavel: "all",
   bu: "all",
+  area: "all",
   startFrom: "",
   startTo: "",
   dueFrom: "",
