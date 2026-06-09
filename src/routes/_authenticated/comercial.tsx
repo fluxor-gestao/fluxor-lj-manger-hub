@@ -103,6 +103,7 @@ function Comercial() {
 
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterClient, setFilterClient] = useState<string>("all");
+  const [filterCompany, setFilterCompany] = useState<string>("all");
   const [filterStart, setFilterStart] = useState<Date | undefined>();
   const [filterEnd, setFilterEnd] = useState<Date | undefined>();
   const [view, setView] = useState<"list" | "kanban">("list");
@@ -115,7 +116,7 @@ function Comercial() {
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
 
   // Reset paginação quando filtros mudam
-  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterStart, filterEnd]);
+  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterStart, filterEnd]);
   useEffect(() => { setClientsPage(0); }, [clientsSearch]);
 
   // Lookup de clientes (colunas mínimas, usado em selects e clientsById)
