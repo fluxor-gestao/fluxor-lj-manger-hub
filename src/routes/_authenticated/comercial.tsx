@@ -825,7 +825,7 @@ function Comercial() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || !isCompanyCode(devisForm.business_unit) || createDevis.isPending}>Salvar</Button>
+                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || !isCompanyCode(devisForm.business_unit) || !isValidAreaForCompany(devisForm.business_unit, devisForm.responsible_sector) || createDevis.isPending}>Salvar</Button>
                 </DialogFooter>
               </DialogContent>
               </Dialog>
