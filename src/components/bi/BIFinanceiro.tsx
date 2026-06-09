@@ -58,6 +58,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
+import { useCompany } from "@/contexts/CompanyContext";
+import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 
 // ------------ helpers ------------
