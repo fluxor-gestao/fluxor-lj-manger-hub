@@ -488,12 +488,14 @@ function Comercial() {
     setClientForm({
       id: c.id,
       name: c.name ?? "",
+      company: c.company ?? "",
       email: c.email ?? "",
       phone: c.phone ?? "",
       document: c.document ?? "",
       type: (c.type as "PF" | "PJ") ?? "PJ",
       notes: c.notes ?? "",
     });
+
     setClientDialogOpen(true);
   };
 
