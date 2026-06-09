@@ -29,6 +29,8 @@ import { createRoot } from "react-dom/client";
 import { Send } from "lucide-react";
 import { CompanyBadge } from "@/components/CompanyBadge";
 import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
+import { AreaBadge } from "@/components/AreaBadge";
+import { getAreasFor, isValidAreaForCompany, areaLabel } from "@/lib/businessAreas";
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
