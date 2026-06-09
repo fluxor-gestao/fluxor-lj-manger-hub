@@ -27,6 +27,8 @@ import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
 import { getMissingClauses } from "@/lib/validateProposal";
 import { createRoot } from "react-dom/client";
 import { Send } from "lucide-react";
+import { CompanyBadge } from "@/components/CompanyBadge";
+import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
@@ -128,6 +130,9 @@ function DevisDetail() {
       if (requiresValidation(form.status) && !devis?.validated_at) {
         throw new Error("Valide a proposta antes de mover para este status.");
       }
+      if (!isCompanyCode(form.business_unit)) {
+        throw new Error("Selecione a empresa responsável.");
+      }
       const payload = {
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
@@ -144,6 +149,7 @@ function DevisDetail() {
         responsible_sector: form.responsible_sector || null,
         scope_description: form.scope_description || null,
         proposal_structure: form.proposal_structure || null,
+        business_unit: form.business_unit,
         validation_client_confirmed: !!form.validation_client_confirmed,
         validation_service_confirmed: !!form.validation_service_confirmed,
         validation_sector_defined: !!form.validation_sector_defined,
