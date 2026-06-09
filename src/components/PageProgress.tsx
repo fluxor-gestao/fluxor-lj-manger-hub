@@ -56,8 +56,13 @@ export function PageProgress() {
           value={progress} 
           className="h-[3px] w-full rounded-none bg-primary/10" 
         />
+        {/* Glow effect */}
+        <div 
+          className="absolute top-0 h-[3px] bg-primary blur-[2px] transition-all duration-300"
+          style={{ width: `${progress}%` }}
+        />
         {isLoading && progress > 0 && progress < 100 && (
-          <div className="absolute right-2 top-2 text-[10px] font-medium text-primary bg-background/80 px-1 rounded backdrop-blur-sm">
+          <div className="absolute right-2 top-2 text-[10px] font-medium text-primary bg-background/80 px-1 py-0.5 rounded backdrop-blur-sm border border-primary/20 shadow-sm animate-in fade-in zoom-in duration-300">
             {Math.round(progress)}%
           </div>
         )}
