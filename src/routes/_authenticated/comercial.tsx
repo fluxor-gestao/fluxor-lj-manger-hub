@@ -655,9 +655,9 @@ function Comercial() {
                 </Popover>
               </div>
             </div>
-            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterStart || filterEnd) && (
+            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterArea !== "all" || filterStart || filterEnd) && (
               <div className="mt-3">
-                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterArea("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
                   Limpar filtros
                 </Button>
               </div>
