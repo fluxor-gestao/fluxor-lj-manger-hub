@@ -328,8 +328,10 @@ function DevisDetail() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold font-display">{(devis?.title ?? "")}</h1>
-            <p className="text-muted-foreground mt-1">
-              Detalhes do devis {(devis?.devis_number ?? "") && <span className="ml-2 font-mono text-xs px-2 py-0.5 rounded bg-muted">{(devis?.devis_number ?? "")}</span>}
+            <p className="text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
+              <span>Detalhes do devis</span>
+              {(devis?.devis_number ?? "") && <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{(devis?.devis_number ?? "")}</span>}
+              <CompanyBadge code={(devis as any)?.business_unit} />
             </p>
           </div>
         </div>
@@ -446,6 +448,27 @@ function DevisDetail() {
                 <SelectContent>{clients.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             ) : <p className="font-medium mt-1">{client?.name || "—"}</p>}
+          </div>
+
+          {/* Empresa responsável */}
+          <div>
+            <Label>Empresa responsável *</Label>
+            {editing ? (
+              <Select
+                value={form.business_unit ?? ""}
+                onValueChange={(v) => setForm({ ...form, business_unit: v as CompanyCode })}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecionar empresa" /></SelectTrigger>
+                <SelectContent>
+                  {COMPANY_LIST.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      <span className="font-mono text-[10px] mr-2">{c.code}</span>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : <div className="mt-1"><CompanyBadge code={(devis as any)?.business_unit} /></div>}
           </div>
 
           {/* Status — read-only (controlado pelo Kanban Comercial) */}
