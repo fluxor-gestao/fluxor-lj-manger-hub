@@ -938,10 +938,10 @@ export default function BIComercial() {
                 <Legend />
                 {Array.from(new Set(rows.map(r => r.business_unit).filter(Boolean))).map((code, i) => (
                   <Line 
-                    key={code} 
+                    key={code!} 
                     type="monotone" 
                     dataKey={`valorAceito_${code}`} 
-                    name={code} 
+                    name={code!} 
                     stroke={COLORS[i % COLORS.length]} 
                     strokeWidth={2} 
                   />
