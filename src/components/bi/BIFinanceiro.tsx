@@ -337,6 +337,56 @@ export default function BIFinanceiro() {
       .slice(0, 8);
   }, [rows, cats.categories]);
 
+  const receitaEmpresa = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of rows) {
+      if (r.entry_type !== "receita") continue;
+      const name = r.business_unit ?? "Não informada";
+      const v = Number(r.paid_amount ?? 0);
+      m.set(name, (m.get(name) ?? 0) + v);
+    }
+    return Array.from(m.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [rows]);
+
+  const receitaArea = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of rows) {
+      if (r.entry_type !== "receita") continue;
+      const name = findArea(r.business_unit as CompanyCode, r.responsible_sector)?.label ?? "Não informada";
+      const v = Number(r.paid_amount ?? 0);
+      m.set(name, (m.get(name) ?? 0) + v);
+    }
+    return Array.from(m.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [rows]);
+
+  const resultadoEmpresa = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of rows) {
+      const v = Number(r.paid_amount ?? 0) * (r.entry_type === "receita" ? 1 : -1);
+      const name = r.business_unit ?? "Não informada";
+      m.set(name, (m.get(name) ?? 0) + v);
+    }
+    return Array.from(m.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [rows]);
+
+  const resultadoArea = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of rows) {
+      const v = Number(r.paid_amount ?? 0) * (r.entry_type === "receita" ? 1 : -1);
+      const name = findArea(r.business_unit as CompanyCode, r.responsible_sector)?.label ?? "Não informada";
+      m.set(name, (m.get(name) ?? 0) + v);
+    }
+    return Array.from(m.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [rows]);
+
   const topClientes = useMemo(() => {
     const m = new Map<string, { receita: number; aberto: number; vencido: number }>();
     const tdy = today();
@@ -756,6 +806,74 @@ export default function BIFinanceiro() {
 
       {/* Charts */}
       <div className="grid gap-4 lg:grid-cols-2">
+        <ChartCard title="Participação das Empresas (Faturamento)">
+          {isLoading ? <Skeleton className="h-[260px]" /> : receitaEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={receitaEmpresa} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90}>
+                  {receitaEmpresa.map((_, i) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Participação das Áreas (Faturamento)">
+          {isLoading ? <Skeleton className="h-[260px]" /> : receitaArea.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={receitaArea} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90}>
+                  {receitaArea.map((_, i) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Resultado por Empresa">
+          {isLoading ? <Skeleton className="h-[260px]" /> : resultadoEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={resultadoEmpresa}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis dataKey="name" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Bar dataKey="value">
+                  {resultadoEmpresa.map((entry, i) => (
+                    <Cell key={i} fill={entry.value >= 0 ? CHART_COLORS[2] : CHART_COLORS[4]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Resultado por Área">
+          {isLoading ? <Skeleton className="h-[260px]" /> : resultadoArea.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={resultadoArea}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis dataKey="name" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Bar dataKey="value">
+                  {resultadoArea.map((entry, i) => (
+                    <Cell key={i} fill={entry.value >= 0 ? CHART_COLORS[2] : CHART_COLORS[4]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
         <ChartCard title="Evolução: Receita, Despesa, Resultado">
           {isLoading ? <Skeleton className="h-[260px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
