@@ -108,6 +108,7 @@ function Comercial() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterClient, setFilterClient] = useState<string>("all");
   const [filterCompany, setFilterCompany] = useState<string>("all");
+  const [filterArea, setFilterArea] = useState<string>("all");
   const [filterStart, setFilterStart] = useState<Date | undefined>();
   const [filterEnd, setFilterEnd] = useState<Date | undefined>();
   const [view, setView] = useState<"list" | "kanban">("list");
