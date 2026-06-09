@@ -621,6 +621,18 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
+            <Label className="text-xs">Área principal</Label>
+            <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {getAreasFor(filters.bu === "all" ? null : (filters.bu as CompanyCode)).map((a) => (
+                  <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
             <Label className="text-xs">Tipo de serviço</Label>
             <Select value={filters.serviceType} onValueChange={(v) => setFilters({ ...filters, serviceType: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
