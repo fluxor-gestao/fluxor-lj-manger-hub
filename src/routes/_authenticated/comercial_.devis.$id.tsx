@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { ArrowLeft, Pencil, Save, X, CalendarIcon, Sparkles, Loader2, Link as LinkIcon, CheckCircle2, FileDown, Languages } from "lucide-react";
+import { ArrowLeft, Pencil, Save, X, CalendarIcon, Sparkles, Loader2, Link as LinkIcon, CheckCircle2, FileDown, Languages, AlertTriangle, Plus } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -126,8 +126,29 @@ function DevisDetail() {
     };
   }, [devis?.id, (devis as any)?.source_language, (devis as any)?.proposal_structure_secondary, queryClient]);
 
-  const update = useMutation({
+  const createService = useMutation({
     mutationFn: async () => {
+      if (!devis) return;
+      const { error } = await supabase.from("services").insert({
+        title: devis.title,
+        description: devis.scope_description,
+        business_unit: devis.business_unit,
+        responsible_sector: devis.responsible_sector,
+        client_id: devis.client_id,
+        devis_id: devis.id,
+        status: "a_iniciar",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Processo criado na operação!");
+      queryClient.invalidateQueries({ queryKey: ["devis-service", id] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+      const update = useMutation({
+        mutationFn: async () => {
       // Bloqueio: status que exige validação não pode ser salvo se ainda não validado
       if (requiresValidation(form.status) && !devis?.validated_at) {
         throw new Error("Valide a proposta antes de mover para este status.");
@@ -410,6 +431,21 @@ function DevisDetail() {
               em {format(parseISO(devis.accepted_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
             </span>
           </div>
+        </div>
+      )}
+      {devis.accepted_at && !linkedService && (
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <div className="text-sm">
+              <span className="font-semibold text-amber-700 dark:text-amber-400">Conversão para operação pendente</span>
+              <p className="text-muted-foreground">Esta proposta foi aceita. Clique no botão ao lado para iniciar a execução operacional.</p>
+            </div>
+          </div>
+          <Button onClick={() => createService.mutate()} disabled={createService.isPending}>
+            {createService.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+            Criar processo operacional
+          </Button>
         </div>
       )}
 

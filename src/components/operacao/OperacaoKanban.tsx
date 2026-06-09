@@ -84,12 +84,15 @@ export function OperacaoKanban({
                     {s.client?.name ? (
                       <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{s.client.name}</p>
                     ) : null}
-                    <div className="flex flex-wrap gap-1.5 mt-2">
+                    <div className="flex flex-wrap gap-1 mt-2">
                       {s.business_unit ? (
-                        <Badge variant="secondary" className="text-[10px]">{s.business_unit}</Badge>
+                        <Badge variant="secondary" className="text-[10px] leading-none px-1 h-4">{s.business_unit}</Badge>
+                      ) : null}
+                      {s.responsible_sector ? (
+                        <Badge variant="outline" className="text-[10px] leading-none px-1 h-4">{s.responsible_sector}</Badge>
                       ) : null}
                       {s.assignee?.full_name ? (
-                        <Badge variant="outline" className="text-[10px] gap-1">
+                        <Badge variant="outline" className="text-[10px] gap-1 px-1 h-4">
                           <User2 className="h-3 w-3" />
                           {s.assignee.full_name}
                         </Badge>

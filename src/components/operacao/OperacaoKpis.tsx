@@ -1,4 +1,6 @@
 import { Activity, AlertOctagon, CheckCircle2, Clock, Loader2, Timer } from "lucide-react";
+import { useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ACTIVE_STATUSES, daysBetween, isOverdue, type ServiceLike } from "./status";
 
@@ -60,30 +62,85 @@ export function OperacaoKpis({ services }: { services: ServiceLike[] }) {
   const slaMedio =
     slaDias.length > 0 ? Math.round(slaDias.reduce((a, b) => a + b, 0) / slaDias.length) : 0;
 
+  // KPIs por BU
+  const buCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    services.forEach(s => {
+      if (s.business_unit) counts[s.business_unit] = (counts[s.business_unit] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [services]);
+
+  // KPIs por Área
+  const areaCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    services.forEach(s => {
+      if (s.responsible_sector) counts[s.responsible_sector] = (counts[s.responsible_sector] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [services]);
+
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-      <Kpi label="Processos ativos" value={ativos} icon={Activity} tone="primary" />
-      <Kpi label="Pendentes" value={pendentes} icon={Clock} tone="warn" />
-      <Kpi label="Em andamento" value={andamento} icon={Loader2} tone="primary" />
-      <Kpi
-        label="Atrasados"
-        value={atrasados}
-        icon={AlertOctagon}
-        tone={atrasados > 0 ? "danger" : "muted"}
-      />
-      <Kpi
-        label="Concluídos no mês"
-        value={concluidosMes.length}
-        icon={CheckCircle2}
-        tone="success"
-      />
-      <Kpi
-        label="SLA médio"
-        value={slaMedio ? `${slaMedio}d` : "—"}
-        icon={Timer}
-        tone="muted"
-        hint={slaMedio ? "conclusão no mês" : "sem dados no mês"}
-      />
+    <div className="space-y-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <Kpi label="Processos ativos" value={ativos} icon={Activity} tone="primary" />
+        <Kpi label="Pendentes" value={pendentes} icon={Clock} tone="warn" />
+        <Kpi label="Em andamento" value={andamento} icon={Loader2} tone="primary" />
+        <Kpi
+          label="Atrasados"
+          value={atrasados}
+          icon={AlertOctagon}
+          tone={atrasados > 0 ? "danger" : "muted"}
+        />
+        <Kpi
+          label="Concluídos no mês"
+          value={concluidosMes.length}
+          icon={CheckCircle2}
+          tone="success"
+        />
+        <Kpi
+          label="SLA médio"
+          value={slaMedio ? `${slaMedio}d` : "—"}
+          icon={Timer}
+          tone="muted"
+          hint={slaMedio ? "conclusão no mês" : "sem dados no mês"}
+        />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <Card>
+          <CardContent className="py-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+              <Activity className="h-3 w-3" /> Processos por Empresa
+            </h3>
+            <div className="space-y-2">
+              {buCounts.length === 0 ? <p className="text-xs text-muted-foreground italic">Sem dados</p> :
+               buCounts.slice(0, 5).map(([bu, count]) => (
+                <div key={bu} className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{bu}</span>
+                  <Badge variant="secondary">{count}</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="py-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+              <Activity className="h-3 w-3" /> Processos por Área
+            </h3>
+            <div className="space-y-2">
+              {areaCounts.length === 0 ? <p className="text-xs text-muted-foreground italic">Sem dados</p> :
+               areaCounts.slice(0, 5).map(([area, count]) => (
+                <div key={area} className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{area}</span>
+                  <Badge variant="secondary">{count}</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
