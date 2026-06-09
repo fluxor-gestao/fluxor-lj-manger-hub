@@ -614,6 +614,7 @@ function Comercial() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
               <div>
                 <Label className="text-xs">Cliente</Label>
                 <Select value={filterClient} onValueChange={setFilterClient}>
