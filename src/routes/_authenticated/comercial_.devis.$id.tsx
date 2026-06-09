@@ -433,7 +433,7 @@ function DevisDetail() {
           </div>
         </div>
       )}
-      {devis.accepted_at && !linkedService ? (
+      {devis.accepted_at && !linkedService && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
