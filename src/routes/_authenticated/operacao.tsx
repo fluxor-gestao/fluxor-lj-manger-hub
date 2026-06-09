@@ -24,6 +24,8 @@ import {
   buildInsightsForBoard,
 } from "@/components/operacao/InsightsOperacionais";
 import type { OpStatus, ServiceLike } from "@/components/operacao/status";
+import { useCompany } from "@/contexts/CompanyContext";
+import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 
 export const Route = createFileRoute("/_authenticated/operacao")({
   component: OperacaoPage,
@@ -32,30 +34,35 @@ export const Route = createFileRoute("/_authenticated/operacao")({
 function OperacaoPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { filterCode: companyCode } = useCompany();
 
   const [view, setView] = useState<"lista" | "kanban">("lista");
   const [filters, setFilters] = useState<OperacaoFilterState>(initialFilters);
   const [detail, setDetail] = useState<ServiceLike | null>(null);
 
   const q = useQuery({
-    queryKey: ["operacao-services"],
+    queryKey: ["operacao-services", companyCode],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let qb = supabase
         .from("services")
         .select(
           "id, title, description, business_unit, responsible_sector, assigned_to, start_date, expected_end_date, actual_end_date, status, created_at, updated_at, client_id, devis_id, client:clients(name), devis:devis(id, devis_number), assignee:profiles!services_assigned_to_fkey(full_name)"
         )
         .order("updated_at", { ascending: false })
         .limit(1000);
+      if (companyCode) qb = qb.eq("business_unit", companyCode);
+      const { data, error } = await qb;
       if (error) {
         // fallback sem o join de profiles se a FK não existir
-        const { data: d2, error: e2 } = await supabase
+        let qb2 = supabase
           .from("services")
           .select(
             "id, title, description, business_unit, responsible_sector, assigned_to, start_date, expected_end_date, actual_end_date, status, created_at, updated_at, client_id, devis_id, client:clients(name), devis:devis(id, devis_number)"
           )
           .order("updated_at", { ascending: false })
           .limit(1000);
+        if (companyCode) qb2 = qb2.eq("business_unit", companyCode);
+        const { data: d2, error: e2 } = await qb2;
         if (e2) throw e2;
         return (d2 ?? []) as unknown as ServiceLike[];
       }
