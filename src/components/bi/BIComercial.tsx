@@ -279,25 +279,48 @@ export default function BIComercial() {
 
   // ----- Monthly series -----
   const monthly = useMemo(() => {
-    const map = new Map<string, { k: string; criadas: number; aceitas: number; valorProp: number; valorAceito: number }>();
+    const map = new Map<string, { k: string; [key: string]: any }>();
+    const buCodes = Array.from(new Set(rows.map(r => r.business_unit).filter(Boolean)));
+
     for (const r of rows) {
       const k = monthKey(new Date(r.created_at));
-      if (!map.has(k)) map.set(k, { k, criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0 });
+      if (!map.has(k)) {
+        const entry: any = { k, criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0 };
+        buCodes.forEach(code => {
+          entry[`criadas_${code}`] = 0;
+          entry[`valorAceito_${code}`] = 0;
+        });
+        map.set(k, entry);
+      }
       const b = map.get(k)!;
       b.criadas++;
       b.valorProp += Number(r.total_amount ?? 0);
+      if (r.business_unit) b[`criadas_${r.business_unit}`]++;
+
       if (ACCEPTED.includes(r.status) || r.accepted_at) {
         const ka = r.accepted_at ? monthKey(new Date(r.accepted_at)) : k;
-        if (!map.has(ka)) map.set(ka, { k: ka, criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0 });
+        if (!map.has(ka)) {
+          const entry: any = { k: ka, criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0 };
+          buCodes.forEach(code => {
+            entry[`criadas_${code}`] = 0;
+            entry[`valorAceito_${code}`] = 0;
+          });
+          map.set(ka, entry);
+        }
         const ba = map.get(ka)!;
         ba.aceitas++;
         ba.valorAceito += Number(r.total_amount ?? 0);
+        if (r.business_unit) ba[`valorAceito_${r.business_unit}`] += Number(r.total_amount ?? 0);
       }
     }
     return Array.from(map.values())
       .sort((a, b) => a.k.localeCompare(b.k))
       .map((b) => ({
         month: monthLabel(b.k),
+        ...b,
+        Resultado: b.valorAceito, // Para compatibilidade se necessário
+      }));
+  }, [rows]);
         Criadas: b.criadas,
         Aceitas: b.aceitas,
         "Valor proposto": b.valorProp,
@@ -900,8 +923,32 @@ export default function BIComercial() {
                 <XAxis type="number" fontSize={11} />
                 <YAxis type="category" dataKey="name" width={120} fontSize={11} />
                 <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="aceito" fill={COLORS[2]} />
+                <Bar dataKey="valorAceito" fill={COLORS[2]} />
               </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Evolução Mensal (Valor Aceito por Empresa)">
+          {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={monthly}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis dataKey="month" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Legend />
+                {Array.from(new Set(rows.map(r => r.business_unit).filter(Boolean))).map((code, i) => (
+                  <Line 
+                    key={code} 
+                    type="monotone" 
+                    dataKey={`valorAceito_${code}`} 
+                    name={code} 
+                    stroke={COLORS[i % COLORS.length]} 
+                    strokeWidth={2} 
+                  />
+                ))}
+              </LineChart>
             </ResponsiveContainer>
           )}
         </ChartCard>
