@@ -17,6 +17,7 @@ import {
   YAxis,
 } from "recharts";
 import {
+  Activity,
   AlertTriangle,
   ArrowDownRight,
   ArrowUpRight,
@@ -59,6 +60,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { findArea, getAreasFor } from "@/lib/businessAreas";
+import { isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
 import { STATUS_LABELS, ALL_STATUSES } from "@/lib/devisStatus";
 
 // ----- helpers -----
@@ -92,6 +95,7 @@ type Devis = {
   status: string;
   total_amount: number | null;
   business_unit: string | null;
+  responsible_sector: string | null;
   service_type: string | null;
   client_id: string | null;
   commercial_responsible: string | null;
@@ -111,6 +115,7 @@ type Filters = {
   clientId: string;
   status: string;
   bu: string;
+  area: string;
   serviceType: string;
 };
 
@@ -124,6 +129,7 @@ const defaultFilters: Filters = {
   clientId: "all",
   status: "all",
   bu: "all",
+  area: "all",
   serviceType: "all",
 };
 
@@ -154,7 +160,7 @@ export default function BIComercial() {
       let qb = supabase
         .from("devis")
         .select(
-          "id, devis_number, title, status, total_amount, business_unit, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date"
+          "id, devis_number, title, status, total_amount, business_unit, responsible_sector, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date"
         )
         .gte("created_at", filters.from)
         .lte("created_at", filters.to + "T23:59:59")
@@ -164,6 +170,7 @@ export default function BIComercial() {
       if (filters.status !== "all") qb = qb.eq("status", filters.status as any);
       const effectiveBu = companyCode ?? (filters.bu !== "all" ? filters.bu : null);
       if (effectiveBu) qb = qb.eq("business_unit", effectiveBu);
+      if (filters.area !== "all") qb = qb.eq("responsible_sector", filters.area);
       if (filters.serviceType !== "all") qb = qb.eq("service_type", filters.serviceType);
       const { data, error } = await qb;
       if (error) throw error;
@@ -272,25 +279,46 @@ export default function BIComercial() {
 
   // ----- Monthly series -----
   const monthly = useMemo(() => {
-    const map = new Map<string, { k: string; criadas: number; aceitas: number; valorProp: number; valorAceito: number }>();
+    const map = new Map<string, { k: string; [key: string]: any }>();
+    const buCodes = Array.from(new Set(rows.map(r => r.business_unit).filter(Boolean)));
+
     for (const r of rows) {
       const k = monthKey(new Date(r.created_at));
-      if (!map.has(k)) map.set(k, { k, criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0 });
+      if (!map.has(k)) {
+        const entry: any = { k, criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0 };
+        buCodes.forEach(code => {
+          entry[`criadas_${code}`] = 0;
+          entry[`valorAceito_${code}`] = 0;
+        });
+        map.set(k, entry);
+      }
       const b = map.get(k)!;
       b.criadas++;
       b.valorProp += Number(r.total_amount ?? 0);
+      if (r.business_unit) b[`criadas_${r.business_unit}`]++;
+
       if (ACCEPTED.includes(r.status) || r.accepted_at) {
         const ka = r.accepted_at ? monthKey(new Date(r.accepted_at)) : k;
-        if (!map.has(ka)) map.set(ka, { k: ka, criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0 });
+        if (!map.has(ka)) {
+          const entry: any = { k: ka, criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0 };
+          buCodes.forEach(code => {
+            entry[`criadas_${code}`] = 0;
+            entry[`valorAceito_${code}`] = 0;
+          });
+          map.set(ka, entry);
+        }
         const ba = map.get(ka)!;
         ba.aceitas++;
         ba.valorAceito += Number(r.total_amount ?? 0);
+        if (r.business_unit) ba[`valorAceito_${r.business_unit}`] += Number(r.total_amount ?? 0);
       }
     }
     return Array.from(map.values())
       .sort((a, b) => a.k.localeCompare(b.k))
       .map((b) => ({
         month: monthLabel(b.k),
+        ...b,
+        Resultado: b.valorAceito, // Para compatibilidade se necessário
         Criadas: b.criadas,
         Aceitas: b.aceitas,
         "Valor proposto": b.valorProp,
@@ -371,6 +399,50 @@ export default function BIComercial() {
   const receitaPorServico = useMemo(() => {
     return rankingServicos.map((s) => ({ name: s.name, value: s.aceito })).filter((x) => x.value > 0).slice(0, 8);
   }, [rankingServicos]);
+
+  const statsPorEmpresa = useMemo(() => {
+    const m = new Map<string, { criadas: number; aceitas: number; valorProp: number; valorAceito: number; enviadas: number }>();
+    for (const r of rows) {
+      const k = r.business_unit ?? "Não informada";
+      if (!m.has(k)) m.set(k, { criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0, enviadas: 0 });
+      const b = m.get(k)!;
+      b.criadas++;
+      b.valorProp += Number(r.total_amount ?? 0);
+      if (r.sent_at || SENT_OR_LATER.includes(r.status)) b.enviadas++;
+      if (ACCEPTED.includes(r.status) || r.accepted_at) {
+        b.aceitas++;
+        b.valorAceito += Number(r.total_amount ?? 0);
+      }
+    }
+    return Array.from(m.entries()).map(([name, v]) => ({
+      name,
+      ...v,
+      conversao: v.enviadas > 0 ? v.aceitas / v.enviadas : 0,
+      ticket: v.aceitas > 0 ? v.valorAceito / v.aceitas : 0,
+    })).sort((a, b) => b.valorAceito - a.valorAceito);
+  }, [rows]);
+
+  const statsPorArea = useMemo(() => {
+    const m = new Map<string, { criadas: number; aceitas: number; valorProp: number; valorAceito: number; enviadas: number }>();
+    for (const r of rows) {
+      const k = findArea(r.business_unit as CompanyCode, r.responsible_sector)?.label ?? "Não informada";
+      if (!m.has(k)) m.set(k, { criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0, enviadas: 0 });
+      const b = m.get(k)!;
+      b.criadas++;
+      b.valorProp += Number(r.total_amount ?? 0);
+      if (r.sent_at || SENT_OR_LATER.includes(r.status)) b.enviadas++;
+      if (ACCEPTED.includes(r.status) || r.accepted_at) {
+        b.aceitas++;
+        b.valorAceito += Number(r.total_amount ?? 0);
+      }
+    }
+    return Array.from(m.entries()).map(([name, v]) => ({
+      name,
+      ...v,
+      conversao: v.enviadas > 0 ? v.aceitas / v.enviadas : 0,
+      ticket: v.aceitas > 0 ? v.valorAceito / v.aceitas : 0,
+    })).sort((a, b) => b.valorAceito - a.valorAceito);
+  }, [rows]);
 
   // Heatmap simples: volume por dia da semana
   const heatmap = useMemo(() => {
@@ -614,6 +686,18 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
+            <Label className="text-xs">Área principal</Label>
+            <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {getAreasFor(filters.bu === "all" ? null : (filters.bu as CompanyCode)).map((a) => (
+                  <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
             <Label className="text-xs">Tipo de serviço</Label>
             <Select value={filters.serviceType} onValueChange={(v) => setFilters({ ...filters, serviceType: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -643,10 +727,113 @@ export default function BIComercial() {
         <Kpi label="Propostas vencidas" value={String(agg.vencidas)} icon={AlertTriangle} tone={agg.vencidas > 0 ? "negative" : undefined} />
         <Kpi label="Melhor vendedor" value={agg.melhorVend?.name ?? "—"} sub={agg.melhorVend ? BRL(agg.melhorVend.valor) : ""} icon={Award} />
         <Kpi label="Principal serviço" value={agg.principalServ?.name ?? "—"} sub={agg.principalServ ? BRL(agg.principalServ.valor) : ""} />
+
+        {/* Multi-company KPIs */}
+        <Card className="col-span-full mt-4 bg-muted/20">
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Activity className="h-4 w-4" /> Detalhamento por Empresa e Área
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="py-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Empresa</h4>
+                <div className="grid gap-2">
+                  {statsPorEmpresa.slice(0, 5).map((s) => (
+                    <div key={s.name} className="flex items-center justify-between text-sm">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{s.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">{BRL(s.valorAceito)}</div>
+                        <div className="text-[10px] text-muted-foreground">Ticket: {BRL(s.ticket)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Área</h4>
+                <div className="grid gap-2">
+                  {statsPorArea.slice(0, 5).map((s) => (
+                    <div key={s.name} className="flex items-center justify-between text-sm">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{s.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">{BRL(s.valorAceito)}</div>
+                        <div className="text-[10px] text-muted-foreground">Ticket: {BRL(s.ticket)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Gráficos */}
       <div className="grid gap-4 lg:grid-cols-2">
+        <ChartCard title="Participação das Empresas (Valor Aceito)">
+          {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={statsPorEmpresa} dataKey="valorAceito" nameKey="name" innerRadius={55} outerRadius={100}>
+                  {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Participação das Áreas (Valor Aceito)">
+          {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={statsPorArea} dataKey="valorAceito" nameKey="name" innerRadius={55} outerRadius={100}>
+                  {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Conversão por Empresa">
+          {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={statsPorEmpresa}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis dataKey="name" fontSize={11} />
+                <YAxis fontSize={11} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip formatter={(v: any) => PCT(Number(v))} />
+                <Bar dataKey="conversao" fill={COLORS[2]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Conversão por Área">
+          {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={statsPorArea}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis dataKey="name" fontSize={11} />
+                <YAxis fontSize={11} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip formatter={(v: any) => PCT(Number(v))} />
+                <Bar dataKey="conversao" fill={COLORS[2]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
         <ChartCard title="Funil comercial">
           {isLoading ? <Skeleton className="h-[280px]" /> : funnel.every((f) => f.value === 0) ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
@@ -734,8 +921,32 @@ export default function BIComercial() {
                 <XAxis type="number" fontSize={11} />
                 <YAxis type="category" dataKey="name" width={120} fontSize={11} />
                 <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="aceito" fill={COLORS[2]} />
+                <Bar dataKey="valorAceito" fill={COLORS[2]} />
               </BarChart>
+            </ResponsiveContainer>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Evolução Mensal (Valor Aceito por Empresa)">
+          {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={monthly}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis dataKey="month" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <Legend />
+                {Array.from(new Set(rows.map(r => r.business_unit).filter(Boolean))).map((code, i) => (
+                  <Line 
+                    key={code!} 
+                    type="monotone" 
+                    dataKey={`valorAceito_${code}`} 
+                    name={code!} 
+                    stroke={COLORS[i % COLORS.length]} 
+                    strokeWidth={2} 
+                  />
+                ))}
+              </LineChart>
             </ResponsiveContainer>
           )}
         </ChartCard>
