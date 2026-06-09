@@ -675,6 +675,18 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
+            <Label className="text-xs">Área Principal</Label>
+            <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {getAreasFor(filters.bu === "all" ? null : (filters.bu as CompanyCode)).map((a) => (
+                  <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
             <Label className="text-xs">Banco / Conta</Label>
             <Select value={filters.bankId} onValueChange={(v) => setFilters({ ...filters, bankId: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
