@@ -563,6 +563,9 @@ function Conciliacao() {
       feUpdate.paid_amount = Number((paidPrev + appliedAmount).toFixed(2));
       feUpdate.open_amount = Number(Math.max(0, openPrev - appliedAmount).toFixed(2));
       feUpdate.payment_status = nextStatus;
+
+      // Proteção: Garante que o valor da baixa seja positivo para evitar erro no banco
+      const finalPaymentAmount = Math.max(0.01, appliedAmount);
       if (nextStatus === "pago" || !fe.paid_at) {
         feUpdate.paid_at = stmt.transaction_date;
       }
