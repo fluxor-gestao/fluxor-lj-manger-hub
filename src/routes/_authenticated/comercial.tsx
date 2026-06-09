@@ -695,7 +695,9 @@ function Comercial() {
                     <Label>Empresa responsável *</Label>
                     <Select
                       value={devisForm.business_unit}
-                      onValueChange={(v) => setDevisForm({ ...devisForm, business_unit: v as CompanyCode })}
+                      onValueChange={(v) =>
+                        setDevisForm({ ...devisForm, business_unit: v as CompanyCode, responsible_sector: "" })
+                      }
                     >
                       <SelectTrigger><SelectValue placeholder="Selecionar empresa do Grupo Lundgaard Jensen" /></SelectTrigger>
                       <SelectContent>
@@ -708,6 +710,22 @@ function Comercial() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="md:col-span-2">
+                    <Label>Área principal *</Label>
+                    <Select
+                      value={devisForm.responsible_sector}
+                      onValueChange={(v) => setDevisForm({ ...devisForm, responsible_sector: v })}
+                      disabled={!isCompanyCode(devisForm.business_unit)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={isCompanyCode(devisForm.business_unit) ? "Selecionar área" : "Selecione a empresa primeiro"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAreasFor(isCompanyCode(devisForm.business_unit) ? (devisForm.business_unit as CompanyCode) : null).map((a) => (
+                          <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   <div className="md:col-span-2">
                     <Label>Cliente *</Label>
                     <Select value={devisForm.client_id} onValueChange={(v) => setDevisForm({ ...devisForm, client_id: v })}>
