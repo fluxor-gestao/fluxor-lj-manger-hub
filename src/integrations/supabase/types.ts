@@ -734,6 +734,7 @@ export type Database = {
           payment_method_id: string | null
           payment_status: string | null
           reference_code: string | null
+          responsible_sector: string | null
           source_file_name: string | null
           source_sheet_name: string | null
           source_type: Database["public"]["Enums"]["source_type"]
@@ -781,6 +782,7 @@ export type Database = {
           payment_method_id?: string | null
           payment_status?: string | null
           reference_code?: string | null
+          responsible_sector?: string | null
           source_file_name?: string | null
           source_sheet_name?: string | null
           source_type?: Database["public"]["Enums"]["source_type"]
@@ -828,6 +830,7 @@ export type Database = {
           payment_method_id?: string | null
           payment_status?: string | null
           reference_code?: string | null
+          responsible_sector?: string | null
           source_file_name?: string | null
           source_sheet_name?: string | null
           source_type?: Database["public"]["Enums"]["source_type"]
