@@ -24,6 +24,8 @@ import { FxTicker } from "@/components/financeiro/FxTicker";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { Pagination } from "@/components/Pagination";
 import { rangeFor } from "@/lib/pagination";
+import { useCompany } from "@/contexts/CompanyContext";
+import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 
 const PAGE_SIZE = 50;
 
@@ -92,6 +94,7 @@ function Financeiro() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { filterCode: companyCode } = useCompany();
 
   // ---------- Filtros ----------
   const [search, setSearch] = useState("");
@@ -130,14 +133,14 @@ function Financeiro() {
 
   const filterParams = useMemo(() => ({
     competence: competence || null,
-    business: businessFilter || null,
+    business: companyCode ?? (businessFilter || null),
     search: search.trim() || null,
     bank: bankFilter !== "all" ? bankFilter : null,
     type: typeFilter !== "all" ? typeFilter : null,
     status: statusFilter !== "all" ? statusFilter : null,
     origin: originFilter !== "all" ? originFilter : null,
     realized: realizedParam,
-  }), [competence, businessFilter, search, bankFilter, typeFilter, statusFilter, originFilter, realizedParam]);
+  }), [competence, businessFilter, search, bankFilter, typeFilter, statusFilter, originFilter, realizedParam, companyCode]);
 
   // ---------- Dados — lista paginada ----------
   const entriesQuery = useQuery({
