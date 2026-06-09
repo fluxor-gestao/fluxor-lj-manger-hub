@@ -545,6 +545,7 @@ export default function BIComercial() {
   // ----- render -----
   return (
     <div className="space-y-6">
+      <ActiveCompanyBanner />
       {/* Filtros */}
       <Card>
         <CardHeader className="pb-3">
