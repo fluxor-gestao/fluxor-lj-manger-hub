@@ -33,6 +33,8 @@ import { Pagination } from "@/components/Pagination";
 import { rangeFor } from "@/lib/pagination";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
+import { CompanyBadge } from "@/components/CompanyBadge";
+import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
 
 const DEVIS_PAGE_SIZE = 20;
 const CLIENTS_PAGE_SIZE = 50;
@@ -67,6 +69,7 @@ type DevisForm = {
   devis_number: string;
   service_type: string;
   source_language: string;
+  business_unit: CompanyCode | "";
 };
 
 const emptyDevis: DevisForm = {
@@ -83,6 +86,7 @@ const emptyDevis: DevisForm = {
   devis_number: "",
   service_type: "",
   source_language: "pt",
+  business_unit: "",
 };
 
 function Comercial() {
