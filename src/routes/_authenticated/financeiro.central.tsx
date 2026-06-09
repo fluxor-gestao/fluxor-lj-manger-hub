@@ -325,6 +325,7 @@ function Financeiro() {
           <p className="text-muted-foreground mt-1">
             Esteira: Comercial → Previsão → Conciliação → Realizado
           </p>
+          <ActiveCompanyBanner className="mt-2" />
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Button variant="outline" onClick={() => window.history.back()}>
