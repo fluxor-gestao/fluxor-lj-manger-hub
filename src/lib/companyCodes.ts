@@ -8,7 +8,7 @@
 export type CompanyCode = "DE" | "CO" | "AM" | "IM" | "GE";
 
 export const COMPANY_LIST: { code: CompanyCode; name: string; short: string }[] = [
-  { code: "DE", name: "Lundgaard Jensen — Advocatício", short: "Advocatício" },
+  { code: "DE", name: "Lundgaard Jensen — Advocacia", short: "Advocacia" },
   { code: "CO", name: "Lundgaard Jensen — Contábil", short: "Contábil" },
   { code: "AM", name: "Lundgaard Jensen — Ambiental", short: "Ambiental" },
   { code: "IM", name: "Lundgaard Jensen — Imobiliária", short: "Imobiliária" },
