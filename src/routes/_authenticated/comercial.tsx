@@ -121,8 +121,10 @@ function Comercial() {
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
 
   // Reset paginação quando filtros mudam
-  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterStart, filterEnd]);
+  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterArea, filterStart, filterEnd]);
   useEffect(() => { setClientsPage(0); }, [clientsSearch]);
+  // Reseta área quando empresa muda nos filtros
+  useEffect(() => { setFilterArea("all"); }, [filterCompany, companyCode]);
 
   // Lookup de clientes (colunas mínimas, usado em selects e clientsById)
   const { data: clients = [] } = useQuery({
