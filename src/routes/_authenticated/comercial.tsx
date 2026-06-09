@@ -871,6 +871,7 @@ function Comercial() {
                   <TableRow>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Empresa</TableHead>
+                    <TableHead>Área</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Valor Total</TableHead>
                     <TableHead className="text-right">Entrada</TableHead>
