@@ -345,6 +345,9 @@ function Comercial() {
       const down = form.down_payment_amount === "" ? total * 0.5 : Number(form.down_payment_amount) || 0;
       const client = clientsById[form.client_id];
       const title = form.title || (client ? `Devis ${client.name}` : "Novo Devis");
+      if (!isCompanyCode(form.business_unit)) {
+        throw new Error("Selecione a empresa responsável.");
+      }
       const { error } = await supabase.from("devis").insert({
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
@@ -363,6 +366,7 @@ function Comercial() {
         scope_description: aiAccepted.scope_description || null,
         proposal_structure: aiAccepted.proposal_structure || null,
         source_language: form.source_language || "pt",
+        business_unit: form.business_unit,
       });
       if (error) throw error;
     },
@@ -422,7 +426,7 @@ function Comercial() {
     setCodePreviewOpen(true);
   };
 
-  const handleCodeConfirmed = ({ devis_number, service_type }: { prefix: ServicePrefix; devis_number: string; service_type: string }) => {
+  const handleCodeConfirmed = ({ prefix, devis_number, service_type }: { prefix: ServicePrefix; devis_number: string; service_type: string }) => {
     if (!pendingAta) return;
     const { client_id, payload } = pendingAta;
     const total = payload.devis.total_amount || 0;
@@ -441,6 +445,7 @@ function Comercial() {
       devis_number,
       service_type,
       source_language: payload.detected_language || "pt",
+      business_unit: prefix as CompanyCode,
     });
     setAiAccepted({
       service_type: payload.devis.service_type || service_type,
