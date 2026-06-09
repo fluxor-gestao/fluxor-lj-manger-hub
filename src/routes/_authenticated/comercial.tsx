@@ -72,6 +72,7 @@ type DevisForm = {
   service_type: string;
   source_language: string;
   business_unit: CompanyCode | "";
+  responsible_sector: string;
 };
 
 const emptyDevis: DevisForm = {
@@ -89,6 +90,7 @@ const emptyDevis: DevisForm = {
   service_type: "",
   source_language: "pt",
   business_unit: "",
+  responsible_sector: "",
 };
 
 function Comercial() {
