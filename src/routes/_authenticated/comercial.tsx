@@ -820,6 +820,7 @@ function Comercial() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Cliente</TableHead>
+                    <TableHead>Empresa</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Valor Total</TableHead>
                     <TableHead className="text-right">Entrada</TableHead>
@@ -830,14 +831,15 @@ function Comercial() {
                 </TableHeader>
                 <TableBody>
                   {devisListQuery.isLoading && !devisListQuery.data ? (
-                    <TableRow><TableCell colSpan={7}><LoadingState /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8}><LoadingState /></TableCell></TableRow>
                   ) : devisListQuery.isError ? (
-                    <TableRow><TableCell colSpan={7}><ErrorState onRetry={() => devisListQuery.refetch()} /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8}><ErrorState onRetry={() => devisListQuery.refetch()} /></TableCell></TableRow>
                   ) : devisListRows.length === 0 ? (
-                    <TableRow><TableCell colSpan={7}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
                   ) : devisListRows.map((d: any) => (
                     <TableRow key={d.id} className="cursor-pointer" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
                       <TableCell className="font-medium">{clientsById[d.client_id]?.name || "—"}</TableCell>
+                      <TableCell><CompanyBadge code={d.business_unit} /></TableCell>
                       <TableCell><Badge variant="outline" className={devisStatusColors[d.status] || ""}>{statusLabels[d.status] || d.status}</Badge></TableCell>
                       <TableCell className="text-right">{fmtBRL(d.total_amount)}</TableCell>
                       <TableCell className="text-right">{fmtBRL(d.down_payment_amount)}</TableCell>
