@@ -58,6 +58,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
+import { useCompany } from "@/contexts/CompanyContext";
+import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 
 // ------------ helpers ------------
@@ -140,6 +142,7 @@ const defaultFilters: Filters = {
 
 export default function BIFinanceiro() {
   const cats = useFinanceiroCatalogs();
+  const { filterCode: companyCode } = useCompany();
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [tabFocus, setTabFocus] = useState<string | null>(null);
 
@@ -173,7 +176,7 @@ export default function BIFinanceiro() {
   });
 
   const q = useQuery({
-    queryKey: ["bi-fin", filters],
+    queryKey: ["bi-fin", filters, companyCode],
     queryFn: async () => {
       let qb = supabase
         .from("financial_entries")
@@ -186,7 +189,8 @@ export default function BIFinanceiro() {
       if (filters.competence !== "all") qb = qb.eq("competence_month", filters.competence);
       if (filters.clientId !== "all") qb = qb.eq("client_id", filters.clientId);
       if (filters.supplierId !== "all") qb = qb.eq("supplier_id", filters.supplierId);
-      if (filters.bu !== "all") qb = qb.eq("business_unit", filters.bu);
+      const effectiveBu = companyCode ?? (filters.bu !== "all" ? filters.bu : null);
+      if (effectiveBu) qb = qb.eq("business_unit", effectiveBu);
       if (filters.bankId !== "all") qb = qb.eq("bank_account_id", filters.bankId);
       if (filters.paymentStatus !== "all") qb = qb.eq("payment_status", filters.paymentStatus);
       if (filters.categoryId !== "all") qb = qb.eq("category_id", filters.categoryId);
@@ -595,6 +599,7 @@ export default function BIFinanceiro() {
   // ---------- render ----------
   return (
     <div className="space-y-6">
+      <ActiveCompanyBanner />
       {/* Filters */}
       <Card>
         <CardHeader className="pb-3">

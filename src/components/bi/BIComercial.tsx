@@ -56,6 +56,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
+import { useCompany } from "@/contexts/CompanyContext";
+import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { STATUS_LABELS, ALL_STATUSES } from "@/lib/devisStatus";
 
@@ -132,6 +134,7 @@ const SENT_OR_LATER = [...ACCEPTED, ...REJECTED, ...NEGOTIATION];
 
 export default function BIComercial() {
   const cats = useFinanceiroCatalogs();
+  const { filterCode: companyCode } = useCompany();
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [tabFocus, setTabFocus] = useState<string>("criticas");
 
@@ -146,7 +149,7 @@ export default function BIComercial() {
   });
 
   const q = useQuery({
-    queryKey: ["bi-com", filters],
+    queryKey: ["bi-com", filters, companyCode],
     queryFn: async () => {
       let qb = supabase
         .from("devis")
@@ -159,7 +162,8 @@ export default function BIComercial() {
       if (filters.responsible !== "all") qb = qb.eq("commercial_responsible", filters.responsible);
       if (filters.clientId !== "all") qb = qb.eq("client_id", filters.clientId);
       if (filters.status !== "all") qb = qb.eq("status", filters.status as any);
-      if (filters.bu !== "all") qb = qb.eq("business_unit", filters.bu);
+      const effectiveBu = companyCode ?? (filters.bu !== "all" ? filters.bu : null);
+      if (effectiveBu) qb = qb.eq("business_unit", effectiveBu);
       if (filters.serviceType !== "all") qb = qb.eq("service_type", filters.serviceType);
       const { data, error } = await qb;
       if (error) throw error;
@@ -541,6 +545,7 @@ export default function BIComercial() {
   // ----- render -----
   return (
     <div className="space-y-6">
+      <ActiveCompanyBanner />
       {/* Filtros */}
       <Card>
         <CardHeader className="pb-3">

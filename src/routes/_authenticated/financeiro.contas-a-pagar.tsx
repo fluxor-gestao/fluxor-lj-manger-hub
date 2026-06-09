@@ -36,6 +36,8 @@ import {
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { RegisterPaymentDialog, type PayableEntry } from "@/components/financeiro/RegisterPaymentDialog";
+import { useCompany } from "@/contexts/CompanyContext";
+import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 
 type Coverage = "coberto" | "apertado" | "sem";
 const COVERAGE_LABEL: Record<Coverage, string> = {
@@ -132,6 +134,7 @@ function ContasAPagarPage() {
   const navigate = useNavigate();
   const { suppliers } = useFinanceiroCatalogs();
   const queryClient = useQueryClient();
+  const { filterCode: companyCode } = useCompany();
 
   // Pagamento
   const [payRow, setPayRow] = useState<Row | null>(null);
@@ -160,14 +163,16 @@ function ContasAPagarPage() {
   const [onlyOpen, setOnlyOpen] = useState(true);
 
   const q = useQuery({
-    queryKey: ["contas-a-pagar", "v2"],
+    queryKey: ["contas-a-pagar", "v2", companyCode],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let qb = supabase
         .from("financial_entries")
         .select(COLS)
         .eq("entry_type", "despesa" as any)
         .order("due_date", { ascending: true, nullsFirst: false })
         .limit(1000);
+      if (companyCode) qb = qb.eq("business_unit", companyCode);
+      const { data, error } = await qb;
       if (error) throw error;
       return (data ?? []) as unknown as Row[];
     },
@@ -317,6 +322,7 @@ function ContasAPagarPage() {
             <p className="text-sm text-muted-foreground">
               Controle de fornecedores, vencimentos e pagamentos
             </p>
+            <ActiveCompanyBanner className="mt-2" />
           </div>
         </div>
         <div className="flex gap-2">

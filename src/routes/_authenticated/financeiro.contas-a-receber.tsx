@@ -26,6 +26,8 @@ import {
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { CobrancaDetailSheet, type CobrancaRow } from "@/components/financeiro/CobrancaDetailSheet";
+import { useCompany } from "@/contexts/CompanyContext";
+import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-receber")({
   component: ContasAReceberPage,
@@ -94,6 +96,7 @@ function ContasAReceberPage() {
   const navigate = useNavigate();
   const { clients } = useFinanceiroCatalogs();
   const queryClient = useQueryClient();
+  const { filterCode: companyCode } = useCompany();
 
   // Filtros
   const [search, setSearch] = useState("");
@@ -122,14 +125,16 @@ function ContasAReceberPage() {
   });
 
   const q = useQuery({
-    queryKey: ["contas-a-receber", "v2"],
+    queryKey: ["contas-a-receber", "v2", companyCode],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let qb = supabase
         .from("financial_entries")
         .select(COLS)
         .eq("entry_type", "receita" as any)
         .order("due_date", { ascending: true, nullsFirst: false })
         .limit(1000);
+      if (companyCode) qb = qb.eq("business_unit", companyCode);
+      const { data, error } = await qb;
       if (error) throw error;
       return (data ?? []) as unknown as Row[];
     },
@@ -225,6 +230,7 @@ function ContasAReceberPage() {
             <p className="text-sm text-muted-foreground">
               Controle de recebíveis, cobranças e inadimplência
             </p>
+            <ActiveCompanyBanner className="mt-2" />
           </div>
         </div>
         <div className="flex gap-2">

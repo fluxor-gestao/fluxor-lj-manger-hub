@@ -31,6 +31,8 @@ import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { Pagination } from "@/components/Pagination";
 import { rangeFor } from "@/lib/pagination";
+import { useCompany } from "@/contexts/CompanyContext";
+import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 
 const DEVIS_PAGE_SIZE = 20;
 const CLIENTS_PAGE_SIZE = 50;
@@ -87,6 +89,7 @@ function Comercial() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { filterCode: companyCode, isConsolidated } = useCompany();
 
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [clientForm, setClientForm] = useState<ClientForm>(emptyClient);
@@ -127,13 +130,15 @@ function Comercial() {
 
   // Resumo leve de devis (alimenta indicadores + Kanban)
   const { data: devisSummary = [] } = useQuery({
-    queryKey: ["devis", "summary"],
+    queryKey: ["devis", "summary", companyCode],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let qb = supabase
         .from("devis")
         .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible")
         .order("created_at", { ascending: false })
         .range(0, SUMMARY_HARD_CAP - 1);
+      if (companyCode) qb = qb.eq("business_unit", companyCode);
+      const { data, error } = await qb;
       if (error) throw error;
       return data ?? [];
     },
@@ -143,7 +148,7 @@ function Comercial() {
   const startISO = filterStart ? format(filterStart, "yyyy-MM-dd") : null;
   const endISO = filterEnd ? format(filterEnd, "yyyy-MM-dd") : null;
   const devisListQuery = useQuery({
-    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO }],
+    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: companyCode }],
     queryFn: async () => {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
@@ -155,6 +160,7 @@ function Comercial() {
       if (filterClient !== "all") q = q.eq("client_id", filterClient);
       if (startISO) q = q.gte("meeting_date", startISO);
       if (endISO) q = q.lte("meeting_date", endISO);
+      if (companyCode) q = q.eq("business_unit", companyCode);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -464,6 +470,7 @@ function Comercial() {
         <div>
           <h1 className="text-3xl font-bold font-display">Devis</h1>
           <p className="text-muted-foreground mt-1">Gestão comercial — clientes e propostas</p>
+          <ActiveCompanyBanner className="mt-2" />
         </div>
         <div className="flex gap-2 sm:self-start">
           <Button variant="ghost" size="icon" asChild title="Central de Ajuda — Comercial">
