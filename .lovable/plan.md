@@ -1,89 +1,65 @@
-# Seletor Global de Empresa (Multiempresa)
+# Área Principal (Centro de Resultado) por Devis
 
 ## Objetivo
-Adicionar um seletor "Empresa Ativa" no topo do sistema que define o escopo de dados exibido em Financeiro, Comercial, Operação e BI. Permite visão **Consolidado** ou por uma das cinco empresas do Grupo Lundgaard Jensen.
+Cada Devis passa a ter, além da **Empresa Responsável**, uma **Área Principal** obrigatória, escolhida a partir do catálogo da empresa selecionada. Visível na listagem, no detalhe, nos filtros e preparada para reutilização em Operação, Financeiro e BI.
 
-## Empresas
-| Código | Nome |
+## Catálogo de áreas (front-end, fixo)
+Novo arquivo `src/lib/businessAreas.ts` com mapa `CompanyCode → Area[]`:
+
+| Empresa | Áreas |
 |---|---|
-| `AD` | Lundgaard Jensen — Advocatício |
-| `CO` | Lundgaard Jensen — Contábil |
-| `AM` | Lundgaard Jensen — Ambiental |
-| `IM` | Lundgaard Jensen — Imobiliária |
-| `GE` | Lundgaard Jensen — Gestão |
-| `__all__` | Consolidado (padrão) |
+| `DE` Advocatício | Migratório, Civil, Contencioso, Consultivo |
+| `AM` Ambiental | Topografia, Licenciamento, Regularização |
+| `CO` Contábil | Fiscal, Contábil, Departamento Pessoal |
+| `IM` Imobiliária | Venda de Imóveis, Regularização Imobiliária, Administração de Imóveis |
+| `GE` Gestão | Consultoria, BPO Financeiro, Planejamento |
 
-Os códigos reaproveitam os mesmos prefixos já usados na numeração de Devis (`AM`, `CO`, `IM`, `GE`) e adicionam `AD` para Advocatício.
+Cada área = `{ slug: string; label: string }` (ex.: `migratorio` / "Migratório"). Helpers: `getAreasFor(code)`, `findArea(code, slug)`, `AREA_BADGE_CLASS` (paleta neutra com tonalidade derivada da empresa).
+
+## Armazenamento (sem migração)
+Reutiliza a coluna existente `devis.responsible_sector` (texto livre hoje) para gravar o **slug** da área. Vantagens:
+- zero migração SQL nesta etapa;
+- já é lida por Operação (`services.responsible_sector` é copiada do Devis no trigger `devis_accepted_create_service`);
+- listagem/detalhe atuais continuam compatíveis (a UI renderiza o `label` a partir do slug).
+
+Migração SQL e tabela própria de áreas ficam **fora do escopo** desta etapa (preparação apenas estrutural).
 
 ## Mudanças
 
-### 1. Contexto global (`src/contexts/CompanyContext.tsx` — novo)
-- Provider com `activeCompany: CompanyCode | "__all__"`, `setActiveCompany`, `companies` (lista fixa), `isConsolidated`.
-- Persistência em `localStorage` (`lj.activeCompany`). Default = `__all__`.
-- Hook `useCompany()`.
-- Adicionado dentro de `AuthProvider` em `src/routes/__root.tsx` para ficar disponível em toda árvore autenticada.
+### 1. Novo: `src/lib/businessAreas.ts`
+Catálogo + helpers + tipo `AreaSlug`.
 
-### 2. Seletor no header (`src/components/AppLayout.tsx`)
-- Adicionar `<CompanySelector />` à direita do `SidebarTrigger`.
-- Componente novo `src/components/CompanySelector.tsx`: `Select` (shadcn) com badge "Consolidado" colorido quando ativo, ícone `Building2`. Mostra nome completo no trigger.
-- Visível em todas as telas autenticadas → "exibir claramente a empresa ativa".
+### 2. Novo: `src/components/AreaBadge.tsx`
+Badge compacta `Building → Área` (ícone `Layers`) usando classes neutras; aceita `companyCode` + `areaSlug` e cai para "—" quando ausente.
 
-### 3. Integração com as telas
-Adicionar filtro `business_unit` (texto) nas queries existentes, condicionalmente quando `!isConsolidated`. **Incluir `activeCompany` na `queryKey`** para refetch automático ao trocar empresa.
+### 3. `src/routes/_authenticated/comercial.tsx` (criar Devis)
+- Substituir o input livre de "Setor responsável" por um `<Select>` populado por `getAreasFor(form.business_unit)`.
+- Desabilitado enquanto `business_unit` não estiver selecionada; resetar `responsible_sector` quando a empresa muda.
+- Validação: bloquear `createDevis` quando `responsible_sector` vazio (mensagem "Selecione a área principal").
+- Listagem: nova coluna **Área** (após "Empresa") com `<AreaBadge>`.
+- Filtros: novo `filterArea` (`"all" | slug`), dependente de `filterCompany`/`companyCode`; aplica `q.eq("responsible_sector", slug)` na query paginada e no filtro client-side.
+- Pré-preenchimento via ATA (`handleCodeConfirmed`): se `payload.devis.responsible_sector` casar com um slug válido da empresa, manter; senão, deixar vazio e exigir seleção manual.
 
-- **Financeiro**
-  - `src/routes/_authenticated/financeiro.central.tsx` — adicionar `.eq("business_unit", code)` (já existe filtro manual `business`, sobrepor quando empresa ativa).
-  - `src/routes/_authenticated/financeiro.contas-a-pagar.tsx`, `financeiro.contas-a-receber.tsx`, `financeiro.rapport.tsx` — mesmo filtro em `financial_entries.business_unit`.
-- **Comercial** (`comercial.tsx`)
-  - `devis`: `.eq("business_unit", code)`.
-  - `clients`: filtrar via `clients.business_unit_id` casando com `business_units.code = activeCompany` (subquery/in) — se a tabela `business_units` estiver vazia, ignorar filtro de clientes (consolidado de fato) e filtrar só devis. *Sem migrações de dados nesta etapa.*
-- **Operação** (`operacao.tsx`)
-  - `services.business_unit = code`.
-- **BI** (`BIComercial.tsx`, `BIFinanceiro.tsx`)
-  - Pré-selecionar `filters.bu = code` quando empresa ativa; ocultar/desabilitar o seletor interno de BU (redundante) e mostrar chip "Filtrado por: <empresa>".
-  - `BIOperacao` (se existir endpoint) — passar `business_unit` como filtro.
+### 4. `src/routes/_authenticated/comercial_.devis.$id.tsx` (detalhe/edição)
+- Header: exibir `<AreaBadge>` ao lado do `<CompanyBadge>`.
+- Bloco "Escopo": trocar o `<Input>` de "Setor responsável" por `<Select>` com as áreas da empresa atual; bloquear save quando vazio.
+- Em modo leitura: mostrar o `label` (não o slug).
+- Reset de área ao trocar empresa em edição.
 
-### 4. Defaults em criação
-Quando uma empresa específica está ativa, pré-preencher `business_unit` nos diálogos:
-- `NovoLancamentoDialog`, `NovoProcessoDialog`, criação de Devis (`DevisCodePreviewDialog`).
-- Não bloquear edição — usuário pode trocar.
+### 5. `src/components/operacao/OperacaoFilters.tsx` + `operacao.tsx`
+- O filtro existente "Setor" passa a usar `getAreasFor(companyCode)` quando uma empresa está ativa; em modo Consolidado, mostra a união de áreas com prefixo da empresa (`Advocatício · Civil`). Renderização do badge no Kanban/Lista usa `<AreaBadge>`.
+- Sem mudança no schema de `services`.
 
-### 5. Indicador visual
-- Header: nome curto da empresa (ex.: "Advocatício") + badge "Consolidado" quando aplicável.
-- Em páginas-chave (Financeiro, Comercial, Operação, BI), exibir uma pequena barra "Visualizando: <Empresa>" abaixo do título da página.
+### 6. Preparação para Financeiro/BI (somente estrutura)
+- Exportar `AREA_SLUGS_BY_COMPANY` em `businessAreas.ts` para reutilização futura nos selects de `NovoLancamentoDialog` e nos filtros de `BIComercial`/`BIFinanceiro`.
+- **Nenhuma alteração** nesses módulos nesta etapa.
 
 ## Fora do escopo
-- Sem migrações SQL (códigos vivem no front; `business_unit` continua texto livre nas tabelas).
-- Sem alterar RLS, regras de negócio, numeração de Devis, ou geração de faturas.
-- Sem multi-tenant real (não isola por `tenant_id`); apenas filtro de visualização.
-- Sem alterar telas de admin/ajuda.
+- Migração SQL / tabela `business_areas` / FKs.
+- Rateio entre áreas.
+- Filtros de área em Financeiro/BI (apenas estrutura preparada).
+- Edição do catálogo via UI admin.
 
-## Detalhes técnicos
-```ts
-// src/contexts/CompanyContext.tsx
-export type CompanyCode = "AD" | "CO" | "AM" | "IM" | "GE";
-export const COMPANIES: { code: CompanyCode; name: string; short: string }[] = [
-  { code: "AD", name: "Lundgaard Jensen — Advocatício", short: "Advocatício" },
-  { code: "CO", name: "Lundgaard Jensen — Contábil",   short: "Contábil"   },
-  { code: "AM", name: "Lundgaard Jensen — Ambiental",  short: "Ambiental"  },
-  { code: "IM", name: "Lundgaard Jensen — Imobiliária",short: "Imobiliária"},
-  { code: "GE", name: "Lundgaard Jensen — Gestão",     short: "Gestão"     },
-];
-```
-
-Padrão de uso em queries:
-```ts
-const { activeCompany, isConsolidated } = useCompany();
-useQuery({
-  queryKey: ["devis-list", filters, activeCompany],
-  queryFn: async () => {
-    let q = supabase.from("devis").select(...);
-    if (!isConsolidated) q = q.eq("business_unit", activeCompany);
-    return q;
-  },
-});
-```
-
-## Arquivos afetados
-- **Novos**: `src/contexts/CompanyContext.tsx`, `src/components/CompanySelector.tsx`, `src/components/ActiveCompanyBanner.tsx`.
-- **Editados**: `src/routes/__root.tsx`, `src/components/AppLayout.tsx`, `comercial.tsx`, `operacao.tsx`, `financeiro.central.tsx`, `financeiro.contas-a-pagar.tsx`, `financeiro.contas-a-receber.tsx`, `financeiro.rapport.tsx`, `BIComercial.tsx`, `BIFinanceiro.tsx`, `NovoLancamentoDialog.tsx`, `NovoProcessoDialog.tsx`, `DevisCodePreviewDialog.tsx`.
+## Arquivos
+- **Novos**: `src/lib/businessAreas.ts`, `src/components/AreaBadge.tsx`.
+- **Editados**: `src/routes/_authenticated/comercial.tsx`, `src/routes/_authenticated/comercial_.devis.$id.tsx`, `src/components/operacao/OperacaoFilters.tsx`, `src/components/operacao/OperacaoKanban.tsx` e `OperacaoLista.tsx` (apenas para usar `<AreaBadge>` onde hoje mostra `responsible_sector` cru).

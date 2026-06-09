@@ -29,6 +29,8 @@ import { createRoot } from "react-dom/client";
 import { Send } from "lucide-react";
 import { CompanyBadge } from "@/components/CompanyBadge";
 import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
+import { AreaBadge } from "@/components/AreaBadge";
+import { getAreasFor, isValidAreaForCompany } from "@/lib/businessAreas";
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
@@ -132,6 +134,9 @@ function DevisDetail() {
       }
       if (!isCompanyCode(form.business_unit)) {
         throw new Error("Selecione a empresa responsável.");
+      }
+      if (!isValidAreaForCompany(form.business_unit, form.responsible_sector)) {
+        throw new Error("Selecione a área principal.");
       }
       const payload = {
         client_id: form.client_id || null,
@@ -332,6 +337,7 @@ function DevisDetail() {
               <span>Detalhes do devis</span>
               {(devis?.devis_number ?? "") && <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{(devis?.devis_number ?? "")}</span>}
               <CompanyBadge code={(devis as any)?.business_unit} />
+              <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
             </p>
           </div>
         </div>
@@ -456,7 +462,7 @@ function DevisDetail() {
             {editing ? (
               <Select
                 value={form.business_unit ?? ""}
-                onValueChange={(v) => setForm({ ...form, business_unit: v as CompanyCode })}
+                onValueChange={(v) => setForm({ ...form, business_unit: v as CompanyCode, responsible_sector: "" })}
               >
                 <SelectTrigger><SelectValue placeholder="Selecionar empresa" /></SelectTrigger>
                 <SelectContent>
@@ -622,7 +628,23 @@ function DevisDetail() {
           {editing && (
             <>
               <div className="md:col-span-2"><Label>Tipo de serviço</Label><Input value={form.service_type ?? ""} onChange={(e) => setForm({ ...form, service_type: e.target.value })} /></div>
-              <div className="md:col-span-2"><Label>Setor responsável</Label><Input value={form.responsible_sector ?? ""} onChange={(e) => setForm({ ...form, responsible_sector: e.target.value })} /></div>
+              <div className="md:col-span-2">
+                <Label>Área principal *</Label>
+                <Select
+                  value={form.responsible_sector ?? ""}
+                  onValueChange={(v) => setForm({ ...form, responsible_sector: v })}
+                  disabled={!isCompanyCode(form.business_unit)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={isCompanyCode(form.business_unit) ? "Selecionar área" : "Selecione a empresa primeiro"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAreasFor(isCompanyCode(form.business_unit) ? (form.business_unit as CompanyCode) : null).map((a) => (
+                      <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="md:col-span-2"><Label>Descrição do escopo</Label><Textarea rows={5} value={form.scope_description ?? ""} onChange={(e) => setForm({ ...form, scope_description: e.target.value })} /></div>
               <div className="md:col-span-2"><Label>Estrutura da proposta</Label><Textarea rows={8} value={form.proposal_structure ?? ""} onChange={(e) => setForm({ ...form, proposal_structure: e.target.value })} /></div>
             </>
@@ -632,7 +654,7 @@ function DevisDetail() {
           {!editing && (devis.service_type || devis.responsible_sector || devis.scope_description || devis.proposal_structure) && (
             <>
               {devis.service_type && <div className="md:col-span-2"><Label>Tipo de serviço</Label><p className="font-medium mt-1">{view("service_type", devis.service_type)}</p></div>}
-              {devis.responsible_sector && <div className="md:col-span-2"><Label>Setor responsável</Label><p className="font-medium mt-1">{view("responsible_sector", devis.responsible_sector)}</p></div>}
+              {devis.responsible_sector && <div className="md:col-span-2"><Label>Área principal</Label><div className="mt-1"><AreaBadge companyCode={(devis as any).business_unit} areaSlug={devis.responsible_sector} /></div></div>}
               {devis.scope_description && <div className="md:col-span-2"><Label>Descrição do escopo</Label><p className="mt-1 whitespace-pre-wrap text-muted-foreground">{view("scope_description", devis.scope_description)}</p></div>}
               {devis.proposal_structure && <div className="md:col-span-2"><Label>Estrutura da proposta</Label><p className="mt-1 whitespace-pre-wrap text-muted-foreground">{view("proposal_structure", devis.proposal_structure)}</p></div>}
             </>

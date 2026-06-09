@@ -35,6 +35,8 @@ import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { CompanyBadge } from "@/components/CompanyBadge";
 import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
+import { getAreasFor, isValidAreaForCompany } from "@/lib/businessAreas";
+import { AreaBadge } from "@/components/AreaBadge";
 
 const DEVIS_PAGE_SIZE = 20;
 const CLIENTS_PAGE_SIZE = 50;
@@ -70,6 +72,7 @@ type DevisForm = {
   service_type: string;
   source_language: string;
   business_unit: CompanyCode | "";
+  responsible_sector: string;
 };
 
 const emptyDevis: DevisForm = {
@@ -87,6 +90,7 @@ const emptyDevis: DevisForm = {
   service_type: "",
   source_language: "pt",
   business_unit: "",
+  responsible_sector: "",
 };
 
 function Comercial() {
@@ -104,6 +108,7 @@ function Comercial() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterClient, setFilterClient] = useState<string>("all");
   const [filterCompany, setFilterCompany] = useState<string>("all");
+  const [filterArea, setFilterArea] = useState<string>("all");
   const [filterStart, setFilterStart] = useState<Date | undefined>();
   const [filterEnd, setFilterEnd] = useState<Date | undefined>();
   const [view, setView] = useState<"list" | "kanban">("list");
@@ -116,8 +121,10 @@ function Comercial() {
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
 
   // Reset paginação quando filtros mudam
-  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterStart, filterEnd]);
+  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterArea, filterStart, filterEnd]);
   useEffect(() => { setClientsPage(0); }, [clientsSearch]);
+  // Reseta área quando empresa muda nos filtros
+  useEffect(() => { setFilterArea("all"); }, [filterCompany, companyCode]);
 
   // Lookup de clientes (colunas mínimas, usado em selects e clientsById)
   const { data: clients = [] } = useQuery({
@@ -154,12 +161,12 @@ function Comercial() {
   const endISO = filterEnd ? format(filterEnd, "yyyy-MM-dd") : null;
   const effectiveCompany = companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null);
   const devisListQuery = useQuery({
-    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany }],
+    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany, area: filterArea }],
     queryFn: async () => {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible", { count: "exact" })
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, responsible_sector, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to);
       if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
@@ -167,6 +174,7 @@ function Comercial() {
       if (startISO) q = q.gte("meeting_date", startISO);
       if (endISO) q = q.lte("meeting_date", endISO);
       if (effectiveCompany) q = q.eq("business_unit", effectiveCompany);
+      if (filterArea !== "all") q = q.eq("responsible_sector", filterArea);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -285,11 +293,12 @@ function Comercial() {
     return devisSummary.filter((d: any) => {
       if (filterClient !== "all" && d.client_id !== filterClient) return false;
       if (filterCompany !== "all" && d.business_unit !== filterCompany) return false;
+      if (filterArea !== "all" && d.responsible_sector !== filterArea) return false;
       if (filterStart && d.meeting_date && parseISO(d.meeting_date) < filterStart) return false;
       if (filterEnd && d.meeting_date && parseISO(d.meeting_date) > filterEnd) return false;
       return true;
     });
-  }, [devisSummary, filterClient, filterCompany, filterStart, filterEnd]);
+  }, [devisSummary, filterClient, filterCompany, filterArea, filterStart, filterEnd]);
 
   // List usa a query paginada (filtros já server-side)
   const devisListRows = devisListQuery.data?.rows ?? [];
@@ -351,6 +360,9 @@ function Comercial() {
       if (!isCompanyCode(form.business_unit)) {
         throw new Error("Selecione a empresa responsável.");
       }
+      if (!isValidAreaForCompany(form.business_unit, form.responsible_sector)) {
+        throw new Error("Selecione a área principal.");
+      }
       const { error } = await supabase.from("devis").insert({
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
@@ -365,7 +377,7 @@ function Comercial() {
         created_by: user?.id,
         devis_number: form.devis_number || null,
         service_type: form.service_type || aiAccepted.service_type || null,
-        responsible_sector: aiAccepted.responsible_sector || null,
+        responsible_sector: form.responsible_sector,
         scope_description: aiAccepted.scope_description || null,
         proposal_structure: aiAccepted.proposal_structure || null,
         source_language: form.source_language || "pt",
@@ -449,6 +461,9 @@ function Comercial() {
       service_type,
       source_language: payload.detected_language || "pt",
       business_unit: prefix as CompanyCode,
+      responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
+        ? (payload.devis.responsible_sector as string)
+        : "",
     });
     setAiAccepted({
       service_type: payload.devis.service_type || service_type,
@@ -559,7 +574,7 @@ function Comercial() {
             <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
               <Filter className="h-4 w-4" /> Filtros
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
               <div>
                 <Label className="text-xs">Status {view === "kanban" && <span className="text-[10px]">(desativado no Kanban)</span>}</Label>
                 <Select value={filterStatus} onValueChange={setFilterStatus} disabled={view === "kanban"}>
@@ -581,6 +596,22 @@ function Comercial() {
                         <span className="font-mono text-[10px] mr-2">{c.code}</span>
                         {c.short}
                       </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Área principal</Label>
+                <Select
+                  value={filterArea}
+                  onValueChange={setFilterArea}
+                  disabled={!(companyCode ?? (filterCompany !== "all" ? filterCompany : null))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {getAreasFor((companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null))).map((a) => (
+                      <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -624,9 +655,9 @@ function Comercial() {
                 </Popover>
               </div>
             </div>
-            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterStart || filterEnd) && (
+            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterArea !== "all" || filterStart || filterEnd) && (
               <div className="mt-3">
-                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterArea("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
                   Limpar filtros
                 </Button>
               </div>
@@ -664,7 +695,9 @@ function Comercial() {
                     <Label>Empresa responsável *</Label>
                     <Select
                       value={devisForm.business_unit}
-                      onValueChange={(v) => setDevisForm({ ...devisForm, business_unit: v as CompanyCode })}
+                      onValueChange={(v) =>
+                        setDevisForm({ ...devisForm, business_unit: v as CompanyCode, responsible_sector: "" })
+                      }
                     >
                       <SelectTrigger><SelectValue placeholder="Selecionar empresa do Grupo Lundgaard Jensen" /></SelectTrigger>
                       <SelectContent>
@@ -673,6 +706,23 @@ function Comercial() {
                             <span className="font-mono text-[10px] mr-2">{c.code}</span>
                             {c.name}
                           </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Área principal *</Label>
+                    <Select
+                      value={devisForm.responsible_sector}
+                      onValueChange={(v) => setDevisForm({ ...devisForm, responsible_sector: v })}
+                      disabled={!isCompanyCode(devisForm.business_unit)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={isCompanyCode(devisForm.business_unit) ? "Selecionar área" : "Selecione a empresa primeiro"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAreasFor(isCompanyCode(devisForm.business_unit) ? (devisForm.business_unit as CompanyCode) : null).map((a) => (
+                          <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -775,7 +825,7 @@ function Comercial() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || !isCompanyCode(devisForm.business_unit) || createDevis.isPending}>Salvar</Button>
+                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || !isCompanyCode(devisForm.business_unit) || !isValidAreaForCompany(devisForm.business_unit, devisForm.responsible_sector) || createDevis.isPending}>Salvar</Button>
                 </DialogFooter>
               </DialogContent>
               </Dialog>
@@ -821,6 +871,7 @@ function Comercial() {
                   <TableRow>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Empresa</TableHead>
+                    <TableHead>Área</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Valor Total</TableHead>
                     <TableHead className="text-right">Entrada</TableHead>
@@ -831,15 +882,16 @@ function Comercial() {
                 </TableHeader>
                 <TableBody>
                   {devisListQuery.isLoading && !devisListQuery.data ? (
-                    <TableRow><TableCell colSpan={8}><LoadingState /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9}><LoadingState /></TableCell></TableRow>
                   ) : devisListQuery.isError ? (
-                    <TableRow><TableCell colSpan={8}><ErrorState onRetry={() => devisListQuery.refetch()} /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9}><ErrorState onRetry={() => devisListQuery.refetch()} /></TableCell></TableRow>
                   ) : devisListRows.length === 0 ? (
-                    <TableRow><TableCell colSpan={8}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
                   ) : devisListRows.map((d: any) => (
                     <TableRow key={d.id} className="cursor-pointer" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
                       <TableCell className="font-medium">{clientsById[d.client_id]?.name || "—"}</TableCell>
                       <TableCell><CompanyBadge code={d.business_unit} /></TableCell>
+                      <TableCell><AreaBadge companyCode={d.business_unit} areaSlug={d.responsible_sector} /></TableCell>
                       <TableCell><Badge variant="outline" className={devisStatusColors[d.status] || ""}>{statusLabels[d.status] || d.status}</Badge></TableCell>
                       <TableCell className="text-right">{fmtBRL(d.total_amount)}</TableCell>
                       <TableCell className="text-right">{fmtBRL(d.down_payment_amount)}</TableCell>
