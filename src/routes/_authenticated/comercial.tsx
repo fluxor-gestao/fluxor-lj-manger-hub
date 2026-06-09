@@ -642,11 +642,41 @@ function Comercial() {
               <Button variant="outline" onClick={() => setUploadAtaOpen(true)}>
                 <Upload className="h-4 w-4 mr-2" /> Upload de Relatório / Ata
               </Button>
-              <Dialog open={devisDialogOpen} onOpenChange={(o) => { setDevisDialogOpen(o); if (!o) { setDevisForm(emptyDevis); setAiSuggestions(null); setAiAccepted({}); } }}>
+              <Dialog
+                open={devisDialogOpen}
+                onOpenChange={(o) => {
+                  setDevisDialogOpen(o);
+                  if (o) {
+                    // Pré-preenche a empresa com a seleção global, se houver
+                    setDevisForm((f) => ({ ...f, business_unit: f.business_unit || (companyCode ?? "") }));
+                  } else {
+                    setDevisForm(emptyDevis);
+                    setAiSuggestions(null);
+                    setAiAccepted({});
+                  }
+                }}
+              >
                 <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Novo Devis</Button></DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>Novo Devis</DialogTitle></DialogHeader>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <Label>Empresa responsável *</Label>
+                    <Select
+                      value={devisForm.business_unit}
+                      onValueChange={(v) => setDevisForm({ ...devisForm, business_unit: v as CompanyCode })}
+                    >
+                      <SelectTrigger><SelectValue placeholder="Selecionar empresa do Grupo Lundgaard Jensen" /></SelectTrigger>
+                      <SelectContent>
+                        {COMPANY_LIST.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            <span className="font-mono text-[10px] mr-2">{c.code}</span>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="md:col-span-2">
                     <Label>Cliente *</Label>
                     <Select value={devisForm.client_id} onValueChange={(v) => setDevisForm({ ...devisForm, client_id: v })}>
