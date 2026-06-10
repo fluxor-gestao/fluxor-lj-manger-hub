@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { useIsFetching } from "@tanstack/react-query";
-import { Progress } from "@/components/ui/progress";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function PageProgress() {
