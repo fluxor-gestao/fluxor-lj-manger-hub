@@ -328,7 +328,7 @@ function Financeiro() {
           <ActiveCompanyBanner className="mt-2" />
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <Button variant="outline" onClick={() => window.history.back()}>
+          <Button variant="outline" onClick={() => navigate({ to: "/financeiro" })}>
             <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
           </Button>
           <div className="flex gap-2">
