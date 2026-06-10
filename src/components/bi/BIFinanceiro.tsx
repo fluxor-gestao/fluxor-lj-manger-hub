@@ -716,11 +716,11 @@ export default function BIFinanceiro() {
             <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
-            <Label className="text-xs">Até</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Até</Label>
             <Input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           </div>
           <div>
-            <Label className="text-xs">Competência</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Competência</Label>
             <Input
               placeholder="YYYY-MM ou Todas"
               value={filters.competence === "all" ? "" : filters.competence}
@@ -728,7 +728,7 @@ export default function BIFinanceiro() {
             />
           </div>
           <div>
-            <Label className="text-xs">Cliente</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Cliente</Label>
             <Select value={filters.clientId} onValueChange={(v) => setFilters({ ...filters, clientId: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -738,7 +738,7 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Fornecedor</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Fornecedor</Label>
             <Select value={filters.supplierId} onValueChange={(v) => setFilters({ ...filters, supplierId: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -748,7 +748,7 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Unidade de negócio</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Unidade de negócio</Label>
             <Select value={filters.bu} onValueChange={(v) => setFilters({ ...filters, bu: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -760,7 +760,7 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Área Principal</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Área Principal</Label>
             <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -772,7 +772,7 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Banco / Conta</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Banco / Conta</Label>
             <Select value={filters.bankId} onValueChange={(v) => setFilters({ ...filters, bankId: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -782,7 +782,7 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Status de pagamento</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Status de pagamento</Label>
             <Select value={filters.paymentStatus} onValueChange={(v) => setFilters({ ...filters, paymentStatus: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -795,7 +795,7 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Categoria</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Categoria</Label>
             <Select value={filters.categoryId} onValueChange={(v) => setFilters({ ...filters, categoryId: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -805,7 +805,7 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Origem</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Origem</Label>
             <Select value={filters.origin} onValueChange={(v) => setFilters({ ...filters, origin: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -1075,7 +1075,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1099,7 +1099,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1186,7 +1186,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px', paddingLeft: '20px' }} />
+                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px', paddingLeft: '20px', color: '#94A3B8', textTransform: 'uppercase' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1284,7 +1284,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend />
+                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1316,16 +1316,18 @@ export default function BIFinanceiro() {
                 </TableHeader>
                 <TableBody>
                   {contasReceberCriticas.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Sem contas a receber críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem contas a receber críticas</TableCell></TableRow>
                   )}
                   {contasReceberCriticas.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>{r.cliente}</TableCell>
-                      <TableCell>{r.vencimento}</TableCell>
-                      <TableCell className="text-right">{BRL(r.valor)}</TableCell>
-                      <TableCell className="text-right">{r.dias > 0 ? <Badge variant="destructive">{r.dias}d</Badge> : r.dias}</TableCell>
-                      <TableCell><Badge variant="outline">{r.status}</Badge></TableCell>
-                      <TableCell>{r.acao}</TableCell>
+                    <TableRow key={r.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group/row">
+                      <TableCell className="font-bold text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
+                      <TableCell className="text-white/70 text-xs">{r.vencimento}</TableCell>
+                      <TableCell className="text-right font-bold text-white">{BRL(r.valor)}</TableCell>
+                      <TableCell className="text-right">
+                        {r.dias > 0 ? <Badge variant="destructive" className="animate-pulse">{r.dias}d</Badge> : <span className="text-white/50">{r.dias}</span>}
+                      </TableCell>
+                      <TableCell><Badge variant="outline" className="border-white/20 text-white/90 font-medium">{r.status}</Badge></TableCell>
+                      <TableCell className="text-white font-medium text-xs bg-white/5">{r.acao}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1340,17 +1342,17 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Fornecedor</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="text-right">Dias atraso</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Prioridade</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Fornecedor</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Vencimento</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Dias atraso</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Prioridade</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {contasPagarCriticas.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Sem contas a pagar críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem contas a pagar críticas</TableCell></TableRow>
                   )}
                   {contasPagarCriticas.map((r) => (
                     <TableRow key={r.id}>
@@ -1378,17 +1380,17 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Conta</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Origem</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Data</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Descrição</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conta</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Origem</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendentesConciliacao.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Tudo conciliado</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Tudo conciliado</TableCell></TableRow>
                   )}
                   {pendentesConciliacao.map((r) => (
                     <TableRow key={r.id}>
@@ -1413,17 +1415,17 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead className="text-right">Receita</TableHead>
-                    <TableHead className="text-right">Recebida</TableHead>
-                    <TableHead className="text-right">Em aberto</TableHead>
-                    <TableHead className="text-right">Vencido</TableHead>
-                    <TableHead className="text-right">Taxa pag.</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Receita</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Recebida</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Em aberto</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Vencido</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Taxa pag.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {topClientes.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
                   )}
                   {topClientes
                     .sort((a, b) => b.receita - a.receita)
@@ -1456,18 +1458,18 @@ export default function BIFinanceiro() {
         <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pt-6">
 
           {insights.length === 0 && (
-            <p className="text-sm text-muted-foreground">Sem alertas relevantes no período.</p>
+            <p className="text-sm text-white/40">Sem alertas relevantes no período.</p>
           )}
           {insights.map((ins, i) => (
             <div key={i} className="rounded-lg border p-3 space-y-1">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">{ins.titulo}</p>
+                <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{ins.titulo}</p>
                 <Badge variant={ins.severidade === "alta" ? "destructive" : ins.severidade === "media" ? "default" : "secondary"}>
                   {ins.severidade}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground">{ins.descricao}</p>
-              <p className="text-xs"><span className="text-muted-foreground">Ação sugerida: </span>{ins.acao}</p>
+              <p className="text-xs text-white/40">{ins.descricao}</p>
+              <p className="text-xs"><span className="text-white/40">Ação sugerida: </span>{ins.acao}</p>
             </div>
           ))}
         </CardContent>
@@ -1496,11 +1498,11 @@ function Kpi({
     <Card>
       <CardContent className="p-4 space-y-1">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="text-xs text-white/40">{label}</p>
           {Icon && <Icon className={`h-4 w-4 ${toneClass}`} />}
         </div>
         <p className={`text-lg font-semibold leading-tight ${toneClass}`} title={value}>{value}</p>
-        {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+        {sub && <p className="text-xs text-white/40">{sub}</p>}
       </CardContent>
     </Card>
   );

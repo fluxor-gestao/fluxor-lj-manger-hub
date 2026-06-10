@@ -58,9 +58,9 @@ function BI() {
   if (!roleLoading && visibleDashboards.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
-        <ShieldAlert className="h-12 w-12 text-muted-foreground" />
+        <ShieldAlert className="h-12 w-12 text-white/40" />
         <h1 className="text-xl font-semibold">Sem dashboards disponíveis</h1>
-        <p className="max-w-sm text-sm text-muted-foreground">
+        <p className="max-w-sm text-sm text-white/40">
           Seu usuário não tem acesso a nenhum dashboard de BI. Fale com um administrador.
         </p>
       </div>
@@ -221,9 +221,9 @@ function BI() {
               ) : (
                 <div className="flex min-h-[400px] items-center justify-center p-12 text-center">
                   <div className="max-w-xs">
-                    <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
+                    <BarChart3 className="mx-auto h-12 w-12 text-white/40/30 mb-4" />
                     <h3 className="text-lg font-semibold">Dashboard em Configuração</h3>
-                    <p className="text-sm text-muted-foreground mt-2">Estamos preparando os indicadores para este painel.</p>
+                    <p className="text-sm text-white/40 mt-2">Estamos preparando os indicadores para este painel.</p>
                   </div>
                 </div>
               )}
@@ -236,7 +236,7 @@ function BI() {
             <LayoutDashboard className="h-8 w-8 text-white/20" />
 
           </div>
-          <p className="max-w-xs text-sm text-muted-foreground">
+          <p className="max-w-xs text-sm text-white/40">
             Selecione um dashboard para visualizar os indicadores.
           </p>
         </div>
