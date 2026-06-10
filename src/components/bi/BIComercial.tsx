@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -35,6 +36,7 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { FileText, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -710,44 +712,162 @@ export default function BIComercial() {
         </CardContent>
       </Card>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <Kpi label="Propostas criadas" value={String(agg.total)} icon={Sparkles} />
-        <Kpi label="Enviadas" value={String(agg.enviadas)} icon={ArrowUpRight} />
-        <Kpi label="Aceitas" value={String(agg.aceitas)} icon={Trophy} tone="positive" />
-        <Kpi label="Recusadas" value={String(agg.recusadas)} icon={ArrowDownRight} tone="negative" />
-        <Kpi label="Em negociação" value={String(agg.emNeg)} icon={Users} />
-        <Kpi label="Taxa de conversão" value={PCT(agg.conversao)} icon={TrendingUp} />
-        <Kpi label="Valor proposto" value={BRL(agg.valorPropTotal)} icon={Target} />
-        <Kpi label="Valor aceito" value={BRL(agg.valorAceitoTotal)} icon={Trophy} tone="positive" />
-        <Kpi label="Ticket médio proposto" value={BRL(agg.ticketProp)} />
-        <Kpi label="Ticket médio aceito" value={BRL(agg.ticketAceito)} />
-        <Kpi label="Tempo médio até aceite" value={`${agg.tempoMedio.toFixed(1)}d`} icon={Clock} />
-        <Kpi label="Propostas paradas" value={String(agg.paradas)} icon={AlertTriangle} tone={agg.paradas > 5 ? "negative" : undefined} />
-        <Kpi label="Propostas vencidas" value={String(agg.vencidas)} icon={AlertTriangle} tone={agg.vencidas > 0 ? "negative" : undefined} />
-        <Kpi label="Melhor vendedor" value={agg.melhorVend?.name ?? "—"} sub={agg.melhorVend ? BRL(agg.melhorVend.valor) : ""} icon={Award} />
-        <Kpi label="Principal serviço" value={agg.principalServ?.name ?? "—"} sub={agg.principalServ ? BRL(agg.principalServ.valor) : ""} />
+      {/* KPIs Modernos */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { 
+            label: "Total de Propostas", 
+            value: agg.total, 
+            sub: "Criadas no período",
+            icon: FileText, 
+            color: "purple", 
+            gradient: "from-purple-500/10 to-purple-600/5",
+            border: "border-purple-500/20"
+          },
+          { 
+            label: "Taxa de Conversão", 
+            value: PCT(agg.conversao), 
+            sub: "vs total enviadas",
+            icon: Target, 
+            color: "blue", 
+            gradient: "from-blue-500/10 to-blue-600/5",
+            border: "border-blue-500/20",
+            trend: agg.conversao > 0.3 ? "pos" : "neutral"
+          },
+          { 
+            label: "Valor Aceito", 
+            value: BRL(agg.valorAceitoTotal), 
+            sub: `${agg.aceitas} propostas fechadas`,
+            icon: Trophy, 
+            color: "emerald", 
+            gradient: "from-emerald-500/10 to-emerald-600/5",
+            border: "border-emerald-500/20"
+          },
+          { 
+            label: "Ticket Médio", 
+            value: BRL(agg.ticketAceito), 
+            sub: "Por proposta aceita",
+            icon: Activity, 
+            color: "indigo", 
+            gradient: "from-indigo-500/10 to-indigo-600/5",
+            border: "border-indigo-500/20"
+          },
+        ].map((kpi, i) => (
+          <Card key={i} className={cn(
+            "group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-0 shadow-sm",
+            kpi.border
+          )}>
+            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", kpi.gradient)} />
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="relative z-10 flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
+              <div className={cn(
+                "p-2 rounded-lg backdrop-blur-md transition-transform group-hover:scale-110",
+                `bg-${kpi.color}-500/20 text-${kpi.color}-600`
+              )}>
+                <kpi.icon className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold tracking-tight">{kpi.value}</span>
+                <div className="flex items-center mt-1">
+                  {kpi.trend === "pos" && <ArrowUpRight className="h-3 w-3 text-emerald-500 mr-1" />}
+                  <span className="text-xs text-muted-foreground">{kpi.sub}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-        {/* Multi-company KPIs */}
-        <Card className="col-span-full mt-4 bg-muted/20">
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Activity className="h-4 w-4" /> Detalhamento por Empresa e Área
-            </CardTitle>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { 
+            label: "Em Negociação", 
+            value: agg.emNeg, 
+            sub: BRL(rows.filter(r => NEGOTIATION.includes(r.status)).reduce((a, b) => a + Number(b.total_amount ?? 0), 0)),
+            icon: Clock, 
+            color: "orange",
+            gradient: "from-orange-500/10 to-orange-600/5",
+            border: "border-orange-500/20"
+          },
+          { 
+            label: "Tempo Médio", 
+            value: `${agg.tempoMedio.toFixed(1)} dias`, 
+            sub: "Ciclo de venda",
+            icon: CalendarRange, 
+            color: "blue",
+            gradient: "from-blue-500/10 to-blue-600/5",
+            border: "border-blue-500/20"
+          },
+          { 
+            label: "Propostas Paradas", 
+            value: agg.paradas, 
+            sub: "Há mais de 14 dias",
+            icon: AlertTriangle, 
+            color: "rose",
+            gradient: "from-rose-500/10 to-rose-600/5",
+            border: "border-rose-500/20",
+            trend: agg.paradas > 5 ? "neg" : "neutral"
+          },
+          { 
+            label: "Vencidas", 
+            value: agg.vencidas, 
+            sub: "Prazo expirado",
+            icon: ShieldAlert, 
+            color: "red",
+            gradient: "from-red-500/10 to-red-600/5",
+            border: "border-red-500/20"
+          },
+        ].map((kpi, i) => (
+          <Card key={i} className={cn(
+            "group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-0 shadow-sm",
+            kpi.border
+          )}>
+            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", kpi.gradient)} />
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="relative z-10 flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
+              <div className={cn(
+                "p-2 rounded-lg backdrop-blur-md transition-transform group-hover:scale-110",
+                `bg-${kpi.color}-500/20 text-${kpi.color}-600`
+              )}>
+                <kpi.icon className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold tracking-tight">{kpi.value}</span>
+                <div className="flex items-center mt-1">
+                  {kpi.trend === "neg" && <ArrowDownRight className="h-3 w-3 text-rose-500 mr-1" />}
+                  <span className="text-xs text-muted-foreground">{kpi.sub}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="border-0 shadow-sm overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+          <CardHeader className="relative z-10 border-b bg-muted/20">
+            <CardTitle className="text-lg font-bold">Resumo por Empresa e Área</CardTitle>
           </CardHeader>
-          <CardContent className="py-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="relative z-10 p-6">
+            <div className="grid gap-8">
               <div className="space-y-3">
                 <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Empresa</h4>
                 <div className="grid gap-2">
                   {statsPorEmpresa.slice(0, 5).map((s) => (
-                    <div key={s.name} className="flex items-center justify-between text-sm">
+                    <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="flex flex-col">
-                        <span className="font-medium">{s.name}</span>
+                        <span className="font-semibold">{s.name}</span>
                         <span className="text-[10px] text-muted-foreground">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold">{BRL(s.valorAceito)}</div>
+                        <div className="font-bold text-primary">{BRL(s.valorAceito)}</div>
                         <div className="text-[10px] text-muted-foreground">Ticket: {BRL(s.ticket)}</div>
                       </div>
                     </div>
@@ -758,13 +878,13 @@ export default function BIComercial() {
                 <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Área</h4>
                 <div className="grid gap-2">
                   {statsPorArea.slice(0, 5).map((s) => (
-                    <div key={s.name} className="flex items-center justify-between text-sm">
+                    <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="flex flex-col">
-                        <span className="font-medium">{s.name}</span>
+                        <span className="font-semibold">{s.name}</span>
                         <span className="text-[10px] text-muted-foreground">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold">{BRL(s.valorAceito)}</div>
+                        <div className="font-bold text-primary">{BRL(s.valorAceito)}</div>
                         <div className="text-[10px] text-muted-foreground">Ticket: {BRL(s.ticket)}</div>
                       </div>
                     </div>

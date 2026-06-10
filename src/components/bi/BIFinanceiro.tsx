@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
   Area,
@@ -29,6 +30,7 @@ import {
   Eraser,
   Filter,
   PieChart as PieIcon,
+  ShieldAlert,
   Target,
   TrendingDown,
   TrendingUp,
@@ -37,6 +39,7 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -785,47 +788,165 @@ export default function BIFinanceiro() {
         </CardContent>
       </Card>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <Kpi label="Receita prevista" value={BRL(agg.receitasPrev)} icon={Target} />
-        <Kpi label="Receita realizada" value={BRL(agg.receitasReal)} icon={ArrowUpRight} tone="positive" />
-        <Kpi label="Despesa prevista" value={BRL(agg.despesasPrev)} icon={Target} />
-        <Kpi label="Despesa realizada" value={BRL(agg.despesasReal)} icon={ArrowDownRight} tone="negative" />
-        <Kpi label="Resultado" value={BRL(agg.resultado)} icon={Wallet} tone={agg.resultado >= 0 ? "positive" : "negative"} />
-        <Kpi label="Em aberto a receber" value={BRL(agg.abertoIn)} icon={Banknote} />
-        <Kpi label="Em aberto a pagar" value={BRL(agg.abertoOut)} icon={Banknote} />
-        <Kpi label="Inadimplência" value={BRL(agg.inadimplencia)} icon={AlertOctagon} tone="negative" />
-        <Kpi label="Contas vencidas" value={String(agg.countVencidos)} icon={AlertTriangle} tone="negative" />
-        <Kpi label="Pend. conciliação" value={String(agg.countConciliacao)} icon={AlertTriangle} />
-        <Kpi label="Taxa de recebimento" value={PCT(agg.taxaReceb)} icon={TrendingUp} />
-        <Kpi label="Taxa de pagamento" value={PCT(agg.taxaPag)} icon={TrendingDown} />
-        <Kpi label="Ticket médio recebido" value={BRL(agg.ticketMedio)} icon={Users} />
-        <Kpi label="Maior cliente em aberto" value={maiorClienteAberto ? maiorClienteAberto.name : "—"} sub={maiorClienteAberto ? BRL(maiorClienteAberto.aberto) : ""} icon={Users} />
-        <Kpi label="Maior fornec. em aberto" value={maiorFornecedorAberto ? maiorFornecedorAberto.name : "—"} sub={maiorFornecedorAberto ? BRL(maiorFornecedorAberto.value) : ""} icon={Building2} />
+      {/* KPIs Modernos Financeiros */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { 
+            label: "Receita Realizada", 
+            value: BRL(agg.receitasReal), 
+            sub: `Previsto: ${BRL(agg.receitasPrev)}`,
+            icon: TrendingUp, 
+            color: "emerald", 
+            gradient: "from-emerald-500/10 to-emerald-600/5",
+            border: "border-emerald-500/20",
+            trend: agg.taxaReceb > 0.8 ? "pos" : "neutral"
+          },
+          { 
+            label: "Despesa Realizada", 
+            value: BRL(agg.despesasReal), 
+            sub: `Previsto: ${BRL(agg.despesasPrev)}`,
+            icon: TrendingDown, 
+            color: "rose", 
+            gradient: "from-rose-500/10 to-rose-600/5",
+            border: "border-rose-500/20"
+          },
+          { 
+            label: "Resultado Líquido", 
+            value: BRL(agg.resultado), 
+            sub: "Saldo do período",
+            icon: Wallet, 
+            color: agg.resultado >= 0 ? "blue" : "red", 
+            gradient: agg.resultado >= 0 ? "from-blue-500/10 to-blue-600/5" : "from-red-500/10 to-red-600/5",
+            border: agg.resultado >= 0 ? "border-blue-500/20" : "border-red-500/20"
+          },
+          { 
+            label: "A Receber (Em Aberto)", 
+            value: BRL(agg.abertoIn), 
+            sub: "Total pendente",
+            icon: Banknote, 
+            color: "indigo", 
+            gradient: "from-indigo-500/10 to-indigo-600/5",
+            border: "border-indigo-500/20"
+          },
+        ].map((kpi, i) => (
+          <Card key={i} className={cn(
+            "group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-0 shadow-sm",
+            kpi.border
+          )}>
+            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", kpi.gradient)} />
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="relative z-10 flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
+              <div className={cn(
+                "p-2 rounded-lg backdrop-blur-md transition-transform group-hover:scale-110",
+                `bg-${kpi.color}-500/20 text-${kpi.color}-600`
+              )}>
+                <kpi.icon className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold tracking-tight">{kpi.value}</span>
+                <div className="flex items-center mt-1">
+                  {kpi.trend === "pos" && <ArrowUpRight className="h-3 w-3 text-emerald-500 mr-1" />}
+                  <span className="text-xs text-muted-foreground">{kpi.sub}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-        {/* Multi-company KPIs */}
-        <Card className="col-span-full mt-4 bg-muted/20">
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Activity className="h-4 w-4" /> Detalhamento por Empresa e Área
-            </CardTitle>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { 
+            label: "Inadimplência (Vencido)", 
+            value: BRL(agg.inadimplencia), 
+            sub: `${agg.countVencidos} contas vencidas`,
+            icon: AlertOctagon, 
+            color: "red",
+            gradient: "from-red-500/10 to-red-600/5",
+            border: "border-red-500/20",
+            trend: agg.inadimplencia > 0 ? "neg" : "neutral"
+          },
+          { 
+            label: "Pend. Conciliação", 
+            value: agg.countConciliacao, 
+            sub: "Movimentações",
+            icon: Activity, 
+            color: "orange",
+            gradient: "from-orange-500/10 to-orange-600/5",
+            border: "border-orange-500/20"
+          },
+          { 
+            label: "Ticket Médio", 
+            value: BRL(agg.ticketMedio), 
+            sub: "Recebimentos",
+            icon: Target, 
+            color: "cyan",
+            gradient: "from-cyan-500/10 to-cyan-600/5",
+            border: "border-cyan-500/20"
+          },
+          { 
+            label: "Taxas (Rec/Pag)", 
+            value: `${PCT(agg.taxaReceb)} / ${PCT(agg.taxaPag)}`, 
+            sub: "Eficiência de caixa",
+            icon: Activity, 
+            color: "blue",
+            gradient: "from-blue-500/10 to-blue-600/5",
+            border: "border-blue-500/20"
+          },
+        ].map((kpi, i) => (
+          <Card key={i} className={cn(
+            "group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-0 shadow-sm",
+            kpi.border
+          )}>
+            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", kpi.gradient)} />
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="relative z-10 flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
+              <div className={cn(
+                "p-2 rounded-lg backdrop-blur-md transition-transform group-hover:scale-110",
+                `bg-${kpi.color}-500/20 text-${kpi.color}-600`
+              )}>
+                <kpi.icon className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="flex flex-col">
+                <span className="text-xl font-bold tracking-tight">{kpi.value}</span>
+                <div className="flex items-center mt-1">
+                  {kpi.trend === "neg" && <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />}
+                  <span className="text-xs text-muted-foreground">{kpi.sub}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="border-0 shadow-sm overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+          <CardHeader className="relative z-10 border-b bg-muted/20">
+            <CardTitle className="text-lg font-bold">Resumo Financeiro Estratégico</CardTitle>
           </CardHeader>
-          <CardContent className="py-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="relative z-10 p-6">
+            <div className="grid gap-8">
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita Realizada e Resultado por Empresa</h4>
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita e Resultado por Empresa</h4>
                 <div className="grid gap-2">
                   {receitaEmpresa.slice(0, 5).map((s) => {
                     const res = resultadoEmpresa.find(r => r.name === s.name)?.value ?? 0;
                     return (
-                      <div key={s.name} className="flex items-center justify-between text-sm">
+                      <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
                         <div className="flex flex-col">
-                          <span className="font-medium">{s.name}</span>
-                          <span className={`text-[10px] ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
+                          <span className="font-semibold">{s.name}</span>
+                          <span className={`text-[10px] font-medium ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold">{BRL(s.value)}</div>
-                          <div className="text-[10px] text-muted-foreground">Participação: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="font-bold text-primary">{BRL(s.value)}</div>
+                          <div className="text-[10px] text-muted-foreground">Part.: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
@@ -833,19 +954,19 @@ export default function BIFinanceiro() {
                 </div>
               </div>
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita Realizada e Resultado por Área</h4>
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita e Resultado por Área</h4>
                 <div className="grid gap-2">
                   {receitaArea.slice(0, 5).map((s) => {
                     const res = resultadoArea.find(r => r.name === s.name)?.value ?? 0;
                     return (
-                      <div key={s.name} className="flex items-center justify-between text-sm">
+                      <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
                         <div className="flex flex-col">
-                          <span className="font-medium">{s.name}</span>
-                          <span className={`text-[10px] ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
+                          <span className="font-semibold">{s.name}</span>
+                          <span className={`text-[10px] font-medium ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold">{BRL(s.value)}</div>
-                          <div className="text-[10px] text-muted-foreground">Participação: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="font-bold text-primary">{BRL(s.value)}</div>
+                          <div className="text-[10px] text-muted-foreground">Part.: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
