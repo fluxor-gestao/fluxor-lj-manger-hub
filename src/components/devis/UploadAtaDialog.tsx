@@ -264,7 +264,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   type="file"
                   accept=".pdf,.docx,.doc,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
                   className="hidden"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  onChange={handleFileChange}
                 />
                 <p className="text-xs text-muted-foreground mt-1">PDF, DOCX ou TXT • até 15 MB</p>
               </div>
@@ -291,15 +291,66 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
             </div>
 
             <DialogFooter>
-              <Button onClick={handleAnalyze} disabled={!file}>
-                <Sparkles className="h-4 w-4 mr-2" /> Analisar com IA
+              <Button onClick={() => setStep(2)} disabled={!file}>
+                Próximo <CheckCircle2 className="h-4 w-4 ml-2" />
               </Button>
             </DialogFooter>
           </div>
         )}
 
-        {/* Step 2: analyzing */}
-        {step === 2 && (
+        {/* Step 2: visual confirmation */}
+        {step === 2 && file && (
+          <div className="space-y-4">
+            <div className="text-center space-y-1">
+              <h3 className="font-medium text-lg">Confirme o documento</h3>
+              <p className="text-sm text-muted-foreground">Verifique se este é o arquivo correto antes de iniciar a análise pela IA.</p>
+            </div>
+
+            <Card className="overflow-hidden border-2 border-primary/20 bg-muted/20">
+              <div className="bg-primary/5 p-3 flex items-center justify-between border-b">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <span className="truncate max-w-[400px]">{file.name}</span>
+                </div>
+                <Badge variant="outline" className="bg-background">
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+                </Badge>
+              </div>
+              
+              <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center overflow-auto relative">
+                {file.type === "application/pdf" && previewUrl ? (
+                  <iframe 
+                    src={`${previewUrl}#toolbar=0`} 
+                    className="w-full h-full border-0"
+                    title="PDF Preview"
+                  />
+                ) : file.type.startsWith("image/") && previewUrl ? (
+                  <img src={previewUrl} alt="Preview" className="max-w-full h-auto" />
+                ) : (
+                  <div className="text-center p-8">
+                    <div className="bg-white rounded-full p-4 inline-flex mb-3 shadow-sm">
+                      <FileText className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium">Visualização não disponível para este formato</p>
+                    <p className="text-xs text-muted-foreground mt-1">{file.type || "Formato desconhecido"}</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <DialogFooter className="flex justify-between items-center sm:justify-between">
+              <Button variant="ghost" onClick={() => setStep(1)} className="text-muted-foreground">
+                <X className="h-4 w-4 mr-2" /> Trocar arquivo
+              </Button>
+              <Button onClick={() => { setStep(3); handleAnalyze(); }} className="bg-primary hover:bg-primary/90">
+                <Sparkles className="h-4 w-4 mr-2" /> Confirmar e Analisar com IA
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+
+        {/* Step 3: analyzing */}
+        {step === 3 && (
           <div className="py-12 flex flex-col items-center gap-3 text-muted-foreground">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
             <p className="font-medium">Analisando documento...</p>
@@ -307,8 +358,8 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </div>
         )}
 
-        {/* Step 3: review */}
-        {step === 3 && payload && (
+        {/* Step 4: review */}
+        {step === 4 && payload && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-xs">
               <Badge variant="outline">Idioma detectado: {LANG_LABEL[payload.detected_language] || payload.detected_language}</Badge>
