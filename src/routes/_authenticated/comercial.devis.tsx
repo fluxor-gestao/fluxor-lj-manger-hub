@@ -940,6 +940,7 @@ function Comercial() {
                     <TableHead>Área</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Valor Total</TableHead>
+                    <TableHead>Precificação</TableHead>
                     <TableHead className="text-right">Entrada</TableHead>
                     <TableHead>Data Reunião</TableHead>
                     <TableHead>Responsável</TableHead>
@@ -960,6 +961,13 @@ function Comercial() {
                       <TableCell><AreaBadge companyCode={d.business_unit} areaSlug={d.responsible_sector} /></TableCell>
                       <TableCell><Badge variant="outline" className={devisStatusColors[d.status] || ""}>{statusLabels[d.status] || d.status}</Badge></TableCell>
                       <TableCell className="text-right">{fmtBRL(d.total_amount)}</TableCell>
+                      <TableCell>
+                        {d.pricing_status && d.pricing_status !== "sem_precificacao" && (
+                          <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 whitespace-nowrap", PRICING_STATUS_COLORS[d.pricing_status])}>
+                            {PRICING_STATUS_LABELS[d.pricing_status]}
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">{fmtBRL(d.down_payment_amount)}</TableCell>
                       <TableCell>{d.meeting_date ? format(parseISO(d.meeting_date), "dd/MM/yyyy") : "—"}</TableCell>
                       <TableCell>{profilesById[d.commercial_responsible]?.full_name || profilesById[d.commercial_responsible]?.email || "—"}</TableCell>
