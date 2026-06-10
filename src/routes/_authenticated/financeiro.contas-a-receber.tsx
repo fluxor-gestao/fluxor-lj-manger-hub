@@ -106,6 +106,7 @@ function ContasAReceberPage() {
   const [search, setSearch] = useState("");
   const [clientFilter, setClientFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [stepFilter, setStepFilter] = useState<string>("all");
   const [dueFrom, setDueFrom] = useState<string>("");
   const [dueTo, setDueTo] = useState<string>("");
   const [onlyOverdue, setOnlyOverdue] = useState(false);
@@ -158,6 +159,31 @@ function ContasAReceberPage() {
       if (clientFilter !== "all" && r.client_id !== clientFilter) return false;
       if (dueFrom && (!r.due_date || r.due_date < dueFrom)) return false;
       if (dueTo && (!r.due_date || r.due_date > dueTo)) return false;
+      
+      // Filtro por etapa
+      if (stepFilter !== "all") {
+        const paid = Number(r.paid_amount ?? 0);
+        const hasInvoice = !!r.document_reference;
+        const isSent = r.notes?.includes("Cobrança enviada por e-mail");
+        const hasReminders = r.notes?.includes("[Sistema] Lembrete enviado em");
+        const st = statusOf(r);
+
+        if (stepFilter === "created") {
+          // Todas são criadas, mas podemos filtrar as que estão APENAS criadas (sem fatura)
+          if (hasInvoice) return false;
+        } else if (stepFilter === "invoice") {
+          if (!hasInvoice) return false;
+        } else if (stepFilter === "sent") {
+          if (!isSent) return false;
+        } else if (stepFilter === "reminder") {
+          if (!hasReminders) return false;
+        } else if (stepFilter === "paid") {
+          if (paid <= 0) return false;
+        } else if (stepFilter === "vencida") {
+          if (st !== "vencido") return false;
+        }
+      }
+
       if (s) {
         const hay = `${r.movement_description ?? ""} ${r.counterparty_name ?? ""} ${r.client?.name ?? ""} ${r.devis_number ?? ""}`.toLowerCase();
         if (!hay.includes(s)) return false;
@@ -211,7 +237,7 @@ function ContasAReceberPage() {
   }, [filtered]);
 
   const clearFilters = () => {
-    setSearch(""); setClientFilter("all"); setStatusFilter("all");
+    setSearch(""); setClientFilter("all"); setStatusFilter("all"); setStepFilter("all");
     setDueFrom(""); setDueTo(""); setOnlyOverdue(false); setOnlyOpen(true);
   };
 
@@ -344,6 +370,18 @@ function ContasAReceberPage() {
                 <SelectItem value="parcial">Parcial</SelectItem>
                 <SelectItem value="vencido">Vencido</SelectItem>
                 <SelectItem value="pago">Pago</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={stepFilter} onValueChange={setStepFilter}>
+              <SelectTrigger><SelectValue placeholder="Etapa" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as etapas</SelectItem>
+                <SelectItem value="created">Apenas criadas (sem fatura)</SelectItem>
+                <SelectItem value="invoice">Fatura gerada</SelectItem>
+                <SelectItem value="sent">E-mail enviado</SelectItem>
+                <SelectItem value="reminder">Lembrete enviado</SelectItem>
+                <SelectItem value="paid">Pagamento registrado</SelectItem>
+                <SelectItem value="vencida">Vencida</SelectItem>
               </SelectContent>
             </Select>
             <Input type="date" value={dueFrom} onChange={(e) => setDueFrom(e.target.value)} placeholder="Vencimento inicial" />
