@@ -22,7 +22,6 @@ function MapaAprovacao() {
       </div>
       
       <EmptyState 
-        icon={ClipboardCheck}
         title="Mapa de Aprovação em breve" 
         description="Este módulo está sendo planejado e estará disponível em breve." 
       />

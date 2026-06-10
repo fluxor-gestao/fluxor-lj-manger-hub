@@ -1,0 +1,281 @@
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/DataStates";
+
+export const Route = createFileRoute("/_authenticated/comercial/precificacao")({
+  component: Precificacao,
+});
+
+type ServicePrice = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  price: number;
+  market_price: number | null;
+  last_market_update: string | null;
+};
+
+function Precificacao() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingService, setEditingService] = useState<Partial<ServicePrice> | null>(null);
+  const [isAiSearching, setIsAiSearching] = useState(false);
+
+  const { data: services = [], isLoading } = useQuery({
+    queryKey: ["service_prices"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_prices")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data as ServicePrice[];
+    },
+  });
+
+  const saveService = useMutation({
+    mutationFn: async (service: Partial<ServicePrice>) => {
+      if (service.id) {
+        const { error } = await supabase
+          .from("service_prices")
+          .update({
+            name: service.name,
+            description: service.description,
+            category: service.category,
+            price: service.price,
+          })
+          .eq("id", service.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("service_prices")
+          .insert([service]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Serviço salvo!");
+      queryClient.invalidateQueries({ queryKey: ["service_prices"] });
+      setIsDialogOpen(false);
+      setEditingService(null);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteService = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("service_prices")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Serviço excluído!");
+      queryClient.invalidateQueries({ queryKey: ["service_prices"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const handleAiMarketSearch = async (serviceName: string) => {
+    setIsAiSearching(true);
+    try {
+      // Usaremos o Lovable AI Gateway para simular uma busca de mercado
+      const response = await supabase.functions.invoke("ai-market-search", {
+        body: { serviceName }
+      });
+      
+      if (response.error) throw new Error(response.error.message);
+      
+      const { marketPrice, source } = response.data;
+      
+      toast.success(`Preço de mercado encontrado: R$ ${marketPrice}`, {
+        description: `Fonte: ${source}`,
+      });
+      
+      // Poderíamos atualizar o serviço aqui se tivéssemos o ID
+    } catch (e: any) {
+      toast.error("Erro na busca de mercado: " + e.message);
+    } finally {
+      setIsAiSearching(false);
+    }
+  };
+
+  const filteredServices = services.filter(s => 
+    s.name.toLowerCase().includes(search.toLowerCase()) || 
+    s.category.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold font-display">Tabela de Preços</h1>
+          <p className="text-muted-foreground mt-1">Gestão de precificação e análise de mercado</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate({ to: "/comercial" })}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setEditingService(null)}>
+                <Plus className="h-4 w-4 mr-2" /> Novo Serviço
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingService?.id ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nome do Serviço</Label>
+                  <Input 
+                    id="name" 
+                    value={editingService?.name || ""} 
+                    onChange={e => setEditingService(prev => ({ ...prev, name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category">Categoria</Label>
+                  <Input 
+                    id="category" 
+                    value={editingService?.category || ""} 
+                    onChange={e => setEditingService(prev => ({ ...prev, category: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price">Preço (R$)</Label>
+                  <Input 
+                    id="price" 
+                    type="number"
+                    value={editingService?.price || ""} 
+                    onChange={e => setEditingService(prev => ({ ...prev, price: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição</Label>
+                  <Textarea 
+                    id="description" 
+                    value={editingService?.description || ""} 
+                    onChange={e => setEditingService(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => saveService.mutate(editingService!)}>Salvar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      <Card className="p-4">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Buscar serviços ou categorias..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button variant="outline" className="gap-2">
+            <Globe className="h-4 w-4" /> Busca Global de Mercado
+          </Button>
+        </div>
+
+        {isLoading ? (
+          <LoadingState />
+        ) : filteredServices.length === 0 ? (
+          <EmptyState title="Nenhum serviço encontrado" description="Cadastre novos serviços ou ajuste sua busca." />
+        ) : (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Serviço</TableHead>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead className="text-right">Preço de Tabela</TableHead>
+                  <TableHead className="text-right">Preço de Mercado (IA)</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredServices.map((service) => (
+                  <TableRow key={service.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{service.name}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">{service.description}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{service.category}</TableCell>
+                    <TableCell className="text-right font-mono">
+                      {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(service.price)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="font-mono text-emerald-600">
+                          {service.market_price 
+                            ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(service.market_price) 
+                            : "—"}
+                        </span>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="h-8 w-8 text-primary"
+                          onClick={() => handleAiMarketSearch(service.name)}
+                          disabled={isAiSearching}
+                        >
+                          <Sparkles className={cn("h-4 w-4", isAiSearching && "animate-spin")} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button 
+                          size="icon" 
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingService(service);
+                            setIsDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="text-destructive"
+                          onClick={() => deleteService.mutate(service.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}

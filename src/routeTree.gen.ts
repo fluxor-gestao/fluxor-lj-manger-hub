@@ -24,6 +24,7 @@ import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAjudaRouteImport } from './routes/_authenticated/ajuda'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedFinanceiroIndexRouteImport } from './routes/_authenticated/financeiro.index'
+import { Route as AuthenticatedComercialIndexRouteImport } from './routes/_authenticated/comercial.index'
 import { Route as PropostaAceiteTokenRouteImport } from './routes/proposta.aceite.$token'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicBiOperacaoRouteImport } from './routes/api/public/bi-operacao'
@@ -37,6 +38,8 @@ import { Route as AuthenticatedFinanceiroRapportRouteImport } from './routes/_au
 import { Route as AuthenticatedFinanceiroContasAReceberRouteImport } from './routes/_authenticated/financeiro.contas-a-receber'
 import { Route as AuthenticatedFinanceiroContasAPagarRouteImport } from './routes/_authenticated/financeiro.contas-a-pagar'
 import { Route as AuthenticatedFinanceiroCentralRouteImport } from './routes/_authenticated/financeiro.central'
+import { Route as AuthenticatedComercialPrecificacaoRouteImport } from './routes/_authenticated/comercial.precificacao'
+import { Route as AuthenticatedComercialMapaAprovacaoRouteImport } from './routes/_authenticated/comercial.mapa-aprovacao'
 import { Route as AuthenticatedComercialDevisRouteImport } from './routes/_authenticated/comercial.devis'
 import { Route as AuthenticatedAjudaComercialRouteImport } from './routes/_authenticated/ajuda_.comercial'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin_.api-keys'
@@ -121,6 +124,12 @@ const AuthenticatedFinanceiroIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedFinanceiroRoute,
   } as any)
+const AuthenticatedComercialIndexRoute =
+  AuthenticatedComercialIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedComercialRoute,
+  } as any)
 const PropostaAceiteTokenRoute = PropostaAceiteTokenRouteImport.update({
   id: '/proposta/aceite/$token',
   path: '/proposta/aceite/$token',
@@ -192,6 +201,18 @@ const AuthenticatedFinanceiroCentralRoute =
     path: '/central',
     getParentRoute: () => AuthenticatedFinanceiroRoute,
   } as any)
+const AuthenticatedComercialPrecificacaoRoute =
+  AuthenticatedComercialPrecificacaoRouteImport.update({
+    id: '/precificacao',
+    path: '/precificacao',
+    getParentRoute: () => AuthenticatedComercialRoute,
+  } as any)
+const AuthenticatedComercialMapaAprovacaoRoute =
+  AuthenticatedComercialMapaAprovacaoRouteImport.update({
+    id: '/mapa-aprovacao',
+    path: '/mapa-aprovacao',
+    getParentRoute: () => AuthenticatedComercialRoute,
+  } as any)
 const AuthenticatedComercialDevisRoute =
   AuthenticatedComercialDevisRouteImport.update({
     id: '/devis',
@@ -252,6 +273,8 @@ export interface FileRoutesByFullPath {
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
   '/comercial/devis': typeof AuthenticatedComercialDevisRoute
+  '/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
+  '/comercial/precificacao': typeof AuthenticatedComercialPrecificacaoRoute
   '/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -265,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
+  '/comercial/': typeof AuthenticatedComercialIndexRoute
   '/financeiro/': typeof AuthenticatedFinanceiroIndexRoute
   '/comercial/devis/$id': typeof AuthenticatedComercialDevisIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -278,7 +302,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/ajuda': typeof AuthenticatedAjudaRoute
   '/bi': typeof AuthenticatedBiRoute
-  '/comercial': typeof AuthenticatedComercialRouteWithChildren
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/hub': typeof AuthenticatedHubRoute
@@ -287,6 +310,8 @@ export interface FileRoutesByTo {
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
   '/comercial/devis': typeof AuthenticatedComercialDevisRoute
+  '/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
+  '/comercial/precificacao': typeof AuthenticatedComercialPrecificacaoRoute
   '/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -300,6 +325,7 @@ export interface FileRoutesByTo {
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
+  '/comercial': typeof AuthenticatedComercialIndexRoute
   '/financeiro': typeof AuthenticatedFinanceiroIndexRoute
   '/comercial/devis/$id': typeof AuthenticatedComercialDevisIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -325,6 +351,8 @@ export interface FileRoutesById {
   '/_authenticated/admin_/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/_authenticated/ajuda_/comercial': typeof AuthenticatedAjudaComercialRoute
   '/_authenticated/comercial/devis': typeof AuthenticatedComercialDevisRoute
+  '/_authenticated/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
+  '/_authenticated/comercial/precificacao': typeof AuthenticatedComercialPrecificacaoRoute
   '/_authenticated/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/_authenticated/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/_authenticated/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -338,6 +366,7 @@ export interface FileRoutesById {
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
+  '/_authenticated/comercial/': typeof AuthenticatedComercialIndexRoute
   '/_authenticated/financeiro/': typeof AuthenticatedFinanceiroIndexRoute
   '/_authenticated/comercial_/devis/$id': typeof AuthenticatedComercialDevisIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -363,6 +392,8 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/ajuda/comercial'
     | '/comercial/devis'
+    | '/comercial/mapa-aprovacao'
+    | '/comercial/precificacao'
     | '/financeiro/central'
     | '/financeiro/contas-a-pagar'
     | '/financeiro/contas-a-receber'
@@ -376,6 +407,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-operacao'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
+    | '/comercial/'
     | '/financeiro/'
     | '/comercial/devis/$id'
     | '/lovable/email/queue/process'
@@ -389,7 +421,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ajuda'
     | '/bi'
-    | '/comercial'
     | '/conciliacao'
     | '/gestao'
     | '/hub'
@@ -398,6 +429,8 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/ajuda/comercial'
     | '/comercial/devis'
+    | '/comercial/mapa-aprovacao'
+    | '/comercial/precificacao'
     | '/financeiro/central'
     | '/financeiro/contas-a-pagar'
     | '/financeiro/contas-a-receber'
@@ -411,6 +444,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-operacao'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
+    | '/comercial'
     | '/financeiro'
     | '/comercial/devis/$id'
     | '/lovable/email/queue/process'
@@ -435,6 +469,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin_/api-keys'
     | '/_authenticated/ajuda_/comercial'
     | '/_authenticated/comercial/devis'
+    | '/_authenticated/comercial/mapa-aprovacao'
+    | '/_authenticated/comercial/precificacao'
     | '/_authenticated/financeiro/central'
     | '/_authenticated/financeiro/contas-a-pagar'
     | '/_authenticated/financeiro/contas-a-receber'
@@ -448,6 +484,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-operacao'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
+    | '/_authenticated/comercial/'
     | '/_authenticated/financeiro/'
     | '/_authenticated/comercial_/devis/$id'
     | '/lovable/email/queue/process'
@@ -582,6 +619,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceiroIndexRouteImport
       parentRoute: typeof AuthenticatedFinanceiroRoute
     }
+    '/_authenticated/comercial/': {
+      id: '/_authenticated/comercial/'
+      path: '/'
+      fullPath: '/comercial/'
+      preLoaderRoute: typeof AuthenticatedComercialIndexRouteImport
+      parentRoute: typeof AuthenticatedComercialRoute
+    }
     '/proposta/aceite/$token': {
       id: '/proposta/aceite/$token'
       path: '/proposta/aceite/$token'
@@ -673,6 +717,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceiroCentralRouteImport
       parentRoute: typeof AuthenticatedFinanceiroRoute
     }
+    '/_authenticated/comercial/precificacao': {
+      id: '/_authenticated/comercial/precificacao'
+      path: '/precificacao'
+      fullPath: '/comercial/precificacao'
+      preLoaderRoute: typeof AuthenticatedComercialPrecificacaoRouteImport
+      parentRoute: typeof AuthenticatedComercialRoute
+    }
+    '/_authenticated/comercial/mapa-aprovacao': {
+      id: '/_authenticated/comercial/mapa-aprovacao'
+      path: '/mapa-aprovacao'
+      fullPath: '/comercial/mapa-aprovacao'
+      preLoaderRoute: typeof AuthenticatedComercialMapaAprovacaoRouteImport
+      parentRoute: typeof AuthenticatedComercialRoute
+    }
     '/_authenticated/comercial/devis': {
       id: '/_authenticated/comercial/devis'
       path: '/devis'
@@ -727,11 +785,19 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedComercialRouteChildren {
   AuthenticatedComercialDevisRoute: typeof AuthenticatedComercialDevisRoute
+  AuthenticatedComercialMapaAprovacaoRoute: typeof AuthenticatedComercialMapaAprovacaoRoute
+  AuthenticatedComercialPrecificacaoRoute: typeof AuthenticatedComercialPrecificacaoRoute
+  AuthenticatedComercialIndexRoute: typeof AuthenticatedComercialIndexRoute
 }
 
 const AuthenticatedComercialRouteChildren: AuthenticatedComercialRouteChildren =
   {
     AuthenticatedComercialDevisRoute: AuthenticatedComercialDevisRoute,
+    AuthenticatedComercialMapaAprovacaoRoute:
+      AuthenticatedComercialMapaAprovacaoRoute,
+    AuthenticatedComercialPrecificacaoRoute:
+      AuthenticatedComercialPrecificacaoRoute,
+    AuthenticatedComercialIndexRoute: AuthenticatedComercialIndexRoute,
   }
 
 const AuthenticatedComercialRouteWithChildren =
