@@ -1054,16 +1054,16 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Resultado por Empresa">
-          {isLoading ? <Skeleton className="h-[260px]" /> : resultadoEmpresa.length === 0 ? <Empty /> : (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={resultadoEmpresa}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="value">
+          {isLoading ? <Skeleton className="h-[280px]" /> : resultadoEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={resultadoEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                   {resultadoEmpresa.map((entry, i) => (
-                    <Cell key={i} fill={entry.value >= 0 ? CHART_COLORS[2] : CHART_COLORS[4]} />
+                    <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} />
                   ))}
                 </Bar>
               </BarChart>
