@@ -992,7 +992,7 @@ export default function BIComercial() {
                   {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1261,15 +1261,15 @@ export default function BIComercial() {
                       "hover:bg-white/[0.04]"
                     )}>
                       <TableCell className="font-medium text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
-                      <TableCell className="max-w-[220px] truncate">{r.numero}</TableCell>
-                      <TableCell><Badge variant="outline">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
-                      <TableCell className="text-right">{BRL(r.valor)}</TableCell>
-                      <TableCell>{r.criada}</TableCell>
-                      <TableCell>{r.atualizada}</TableCell>
-                      <TableCell className="text-right">
-                        {r.diasParada > 14 ? <Badge variant="destructive">{r.diasParada}d</Badge> : `${r.diasParada}d`}
+                      <TableCell className="max-w-[220px] truncate text-white/90">{r.numero}</TableCell>
+                      <TableCell><Badge variant="outline" className="border-white/20 text-white/90">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
+                      <TableCell className="text-right text-white font-bold">{BRL(r.valor)}</TableCell>
+                      <TableCell className="text-white/70 text-xs">{r.criada}</TableCell>
+                      <TableCell className="text-white/70 text-xs">{r.atualizada}</TableCell>
+                      <TableCell className="text-right text-white/90">
+                        {r.diasParada > 14 ? <Badge variant="destructive" className="animate-pulse">{r.diasParada}d</Badge> : `${r.diasParada}d`}
                       </TableCell>
-                      <TableCell>{r.acao}</TableCell>
+                      <TableCell className="text-white/90 text-xs">{r.acao}</TableCell>
                       <TableCell>
                         <Button asChild size="sm" variant="ghost">
                           <Link to="/comercial/devis/$id" params={{ id: r.id }}>
@@ -1291,11 +1291,11 @@ export default function BIComercial() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead className="text-right">Qtd</TableHead>
-                    <TableHead className="text-right">Valor proposto</TableHead>
-                    <TableHead className="text-right">Valor aceito</TableHead>
-                    <TableHead className="text-right">Conversão</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Qtd</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor proposto</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor aceito</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conversão</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1304,11 +1304,11 @@ export default function BIComercial() {
                   )}
                   {[...rankingClientes].sort((a, b) => b.aceito - a.aceito).slice(0, 20).map((c, i) => (
                     <TableRow key={i}>
-                      <TableCell>{c.name}</TableCell>
-                      <TableCell className="text-right">{c.qtd}</TableCell>
-                      <TableCell className="text-right">{BRL(c.proposto)}</TableCell>
-                      <TableCell className="text-right">{BRL(c.aceito)}</TableCell>
-                      <TableCell className="text-right">{PCT(c.conversao)}</TableCell>
+                      <TableCell className="text-white/90 font-medium">{c.name}</TableCell>
+                      <TableCell className="text-right text-white/70">{c.qtd}</TableCell>
+                      <TableCell className="text-right text-white/90">{BRL(c.proposto)}</TableCell>
+                      <TableCell className="text-right text-white font-bold">{BRL(c.aceito)}</TableCell>
+                      <TableCell className="text-right text-white/90">{PCT(c.conversao)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1323,11 +1323,11 @@ export default function BIComercial() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Serviço</TableHead>
-                    <TableHead className="text-right">Qtd</TableHead>
-                    <TableHead className="text-right">Valor proposto</TableHead>
-                    <TableHead className="text-right">Valor aceito</TableHead>
-                    <TableHead className="text-right">Conversão</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Serviço</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Qtd</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor proposto</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor aceito</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conversão</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1356,12 +1356,12 @@ export default function BIComercial() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Responsável</TableHead>
-                    <TableHead className="text-right">Criadas</TableHead>
-                    <TableHead className="text-right">Aceitas</TableHead>
-                    <TableHead className="text-right">Valor aceito</TableHead>
-                    <TableHead className="text-right">Conversão</TableHead>
-                    <TableHead className="text-right">Ticket médio</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Responsável</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Criadas</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Aceitas</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor aceito</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conversão</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Ticket médio</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
