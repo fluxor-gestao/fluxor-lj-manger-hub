@@ -933,35 +933,35 @@ export default function BIComercial() {
           <CardContent className="relative z-10 p-6">
 
             <div className="grid gap-8">
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Empresa</h4>
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Por Empresa</h4>
                 <div className="grid gap-2">
                   {statsPorEmpresa.slice(0, 5).map((s) => (
-                    <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex flex-col">
-                        <span className="font-semibold">{s.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
+                    <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-primary">{BRL(s.valorAceito)}</div>
-                        <div className="text-[10px] text-muted-foreground">Ticket: {BRL(s.ticket)}</div>
+                        <div className="font-bold text-white">{BRL(s.valorAceito)}</div>
+                        <div className="text-[10px] font-medium text-[#94A3B8]">Ticket: {BRL(s.ticket)}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Área</h4>
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Por Área</h4>
                 <div className="grid gap-2">
                   {statsPorArea.slice(0, 5).map((s) => (
-                    <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex flex-col">
-                        <span className="font-semibold">{s.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
+                    <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-primary">{BRL(s.valorAceito)}</div>
-                        <div className="text-[10px] text-muted-foreground">Ticket: {BRL(s.ticket)}</div>
+                        <div className="font-bold text-white">{BRL(s.valorAceito)}</div>
+                        <div className="text-[10px] font-medium text-[#94A3B8]">Ticket: {BRL(s.ticket)}</div>
                       </div>
                     </div>
                   ))}
