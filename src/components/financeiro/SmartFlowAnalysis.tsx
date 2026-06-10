@@ -18,6 +18,7 @@ export type FlowTransaction = {
   id: string;
   date: string;
   description: string;
+  interpretedDescription?: string;
   amount: number;
   type: "entrada" | "saida";
   accountName: string;
@@ -143,11 +144,14 @@ export function SmartFlowAnalysis({ transactions, language = "pt" }: Props) {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-xs font-bold truncate" title={step.description}>{step.description}</p>
-                      <Badge variant="outline" className="text-[9px] px-1 h-4 font-mono truncate max-w-[100px]">
-                        {step.accountName}
-                      </Badge>
+                    <div className="flex flex-col mb-1">
+                      <p className="text-[9px] text-muted-foreground italic truncate leading-none mb-1" title={step.description}>{step.description}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold truncate text-primary">{step.interpretedDescription || step.description}</p>
+                        <Badge variant="outline" className="text-[9px] px-1 h-4 font-mono truncate max-w-[100px]">
+                          {step.accountName}
+                        </Badge>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-[10px] text-muted-foreground">
