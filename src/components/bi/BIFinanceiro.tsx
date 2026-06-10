@@ -1107,13 +1107,13 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[280px]" /> : resultadoEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={resultadoEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
-                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                   {resultadoEmpresa.map((entry, i) => (
-                    <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} />
+                    <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} fillOpacity={0.8} />
                   ))}
                 </Bar>
               </BarChart>
