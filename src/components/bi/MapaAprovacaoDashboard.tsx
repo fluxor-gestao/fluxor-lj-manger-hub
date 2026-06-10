@@ -86,6 +86,7 @@ type DevisData = {
     latitude: number | null;
     longitude: number | null;
     company: string | null;
+    location_status: string | null;
   };
   areas: { area_slug: string }[];
 };
