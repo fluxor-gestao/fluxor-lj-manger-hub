@@ -339,7 +339,7 @@ export default function RapportPage() {
       // 1. Update local state
       setStatements(prev => prev.map(s => ({
         ...s,
-        transactions: s.transactions.map(t => t.id === tx.id ? { ...t, categoryId: newCategoryId, suggestedCategory: cats.categories.find(c => c.id === newCategoryId)?.name || t.suggestedCategory, confidence: 1 } : t)
+        transactions: s.transactions.map(t => t.id === tx.id ? { ...t, categoryId: newCategoryId, suggestedCategory: cats.categories.find(c => c.id === newCategoryId)?.name || t.suggestedCategory, confidence: 1 } : t) as any
       })));
 
       // 2. Persist to learning table
