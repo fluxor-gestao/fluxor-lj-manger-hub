@@ -95,16 +95,16 @@ const CHART_COLORS = [
 const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-background/95 backdrop-blur-md border border-border/50 p-4 shadow-2xl rounded-xl">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{label}</p>
-        <div className="space-y-1.5">
+      <div className="bg-[#111827]/90 backdrop-blur-xl border border-white/10 p-4 shadow-2xl rounded-xl">
+        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-3">{label}</p>
+        <div className="space-y-2">
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-8">
+            <div key={index} className="flex items-center justify-between gap-10">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span className="text-sm font-medium text-foreground/80">{entry.name}</span>
+                <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
+                <span className="text-xs font-bold text-white/70">{entry.name}</span>
               </div>
-              <span className="text-sm font-bold text-foreground">
+              <span className="text-xs font-black text-white">
                 {formatter ? formatter(entry.value) : entry.value}
               </span>
             </div>
@@ -115,6 +115,7 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   }
   return null;
 };
+
 
 type Row = {
   id: string;
@@ -812,142 +813,178 @@ export default function BIFinanceiro() {
       </Card>
 
       {/* KPIs Modernos Financeiros */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 
         {[
           { 
-            label: "Receita Realizada", 
+            label: "RECEITA REALIZADA", 
             value: BRL(agg.receitasReal), 
-            sub: `Previsto: ${BRL(agg.receitasPrev)}`,
+            sub: `vs ${BRL(agg.receitasPrev)} previsto`,
             icon: TrendingUp, 
             color: "emerald", 
-            gradient: "from-emerald-500/10 to-emerald-600/5",
-            border: "border-emerald-500/20",
-            trend: agg.taxaReceb > 0.8 ? "pos" : "neutral"
+            trend: agg.taxaReceb > 0.8 ? "pos" : "neutral",
+            trendValue: PCT(agg.taxaReceb)
           },
           { 
-            label: "Despesa Realizada", 
+            label: "DESPESA REALIZADA", 
             value: BRL(agg.despesasReal), 
-            sub: `Previsto: ${BRL(agg.despesasPrev)}`,
+            sub: `vs ${BRL(agg.despesasPrev)} previsto`,
             icon: TrendingDown, 
-            color: "rose", 
-            gradient: "from-rose-500/10 to-rose-600/5",
-            border: "border-rose-500/20"
+            color: "rose",
+            trend: "neg",
+            trendValue: PCT(agg.taxaPag)
           },
           { 
-            label: "Resultado Líquido", 
+            label: "RESULTADO LÍQUIDO", 
             value: BRL(agg.resultado), 
-            sub: "Saldo do período",
+            sub: "Saldo consolidado",
             icon: Wallet, 
-            color: agg.resultado >= 0 ? "blue" : "red", 
-            gradient: agg.resultado >= 0 ? "from-blue-500/10 to-blue-600/5" : "from-red-500/10 to-red-600/5",
-            border: agg.resultado >= 0 ? "border-blue-500/20" : "border-red-500/20"
+            color: agg.resultado >= 0 ? "sky" : "red",
+            trend: agg.resultado >= 0 ? "pos" : "neg",
+            trendValue: ""
           },
           { 
-            label: "A Receber (Em Aberto)", 
+            label: "A RECEBER", 
             value: BRL(agg.abertoIn), 
-            sub: "Total pendente",
+            sub: "Fluxo pendente",
             icon: Banknote, 
-            color: "indigo", 
-            gradient: "from-indigo-500/10 to-indigo-600/5",
-            border: "border-indigo-500/20"
+            color: "indigo",
+            trend: "neutral",
+            trendValue: ""
           },
         ].map((kpi, i) => (
-          <Card key={i} className={cn(
-            "group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-white/5 shadow-lg bg-background/40 backdrop-blur-sm",
-            kpi.border
-          )}>
-            {/* Glossy Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
-            {/* Dynamic Background Glow */}
+          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+            {/* Ambient Glow */}
             <div className={cn(
-              "absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl transition-all duration-700 group-hover:scale-150 group-hover:opacity-30 opacity-20",
-              `bg-${kpi.color}-500`
+              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              kpi.color === "emerald" ? "bg-emerald-500" : 
+              kpi.color === "rose" ? "bg-rose-500" : 
+              kpi.color === "sky" ? "bg-sky-500" : 
+              kpi.color === "indigo" ? "bg-indigo-500" : "bg-white"
             )} />
 
-            <CardHeader className="relative z-10 flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
-                {kpi.label}
-              </CardTitle>
-              <div className={cn(
-                "p-2.5 rounded-xl backdrop-blur-xl border transition-all duration-500 group-hover:rotate-6 group-hover:scale-110 shadow-lg",
-                `bg-${kpi.color}-500/10 border-${kpi.color}-500/20 text-${kpi.color}-500`
-              )}>
-                <kpi.icon className="h-5 w-5 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative z-10 pt-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-3xl font-black tracking-tighter transition-all duration-500 group-hover:tracking-tight group-hover:scale-[1.02] origin-left">
-                  {kpi.value}
-                </span>
-                <div className="flex items-center mt-2 px-2 py-1 rounded-full bg-black/5 dark:bg-white/5 w-fit border border-white/5">
-                  {kpi.trend === "pos" ? (
-                    <ArrowUpRight className="h-3 w-3 text-emerald-500 mr-1 animate-bounce" />
-                  ) : kpi.trend === "neg" ? (
-                    <ArrowDownRight className="h-3 w-3 text-rose-500 mr-1 animate-bounce" />
-                  ) : (
-                    <Activity className="h-3 w-3 text-muted-foreground mr-1" />
-                  )}
-                  <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground whitespace-nowrap">
-                    {kpi.sub}
+            <CardContent className="p-6 relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                    {kpi.label}
                   </span>
+                  <div className={cn(
+                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
+                    kpi.color === "emerald" ? "group-hover:bg-emerald-500/20 group-hover:border-emerald-500/20 group-hover:text-emerald-400" :
+                    kpi.color === "rose" ? "group-hover:bg-rose-500/20 group-hover:border-rose-500/20 group-hover:text-rose-400" :
+                    kpi.color === "sky" ? "group-hover:bg-sky-500/20 group-hover:border-sky-500/20 group-hover:text-sky-400" :
+                    kpi.color === "indigo" ? "group-hover:bg-indigo-500/20 group-hover:border-indigo-500/20 group-hover:text-indigo-400" : ""
+                  )}>
+                    <kpi.icon className="h-4 w-4" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                    {kpi.value}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    {kpi.trend !== "neutral" && (
+                      <div className={cn(
+                        "flex items-center text-[11px] font-bold px-1.5 py-0.5 rounded-md",
+                        kpi.trend === "pos" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                      )}>
+                        {kpi.trend === "pos" ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
+                        {kpi.trendValue}
+                      </div>
+                    )}
+                    <span className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                      {kpi.sub}
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>
-            
-            {/* Bottom Accent Line */}
-            <div className={cn(
-              "absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-current transition-all duration-700 opacity-50",
-              `text-${kpi.color}-500`
-            )} />
           </Card>
         ))}
       </div>
 
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { 
-            label: "Inadimplência (Vencido)", 
+            label: "INADIMPLÊNCIA", 
             value: BRL(agg.inadimplencia), 
-            sub: `${agg.countVencidos} contas vencidas`,
+            sub: `${agg.countVencidos} contas em atraso`,
             icon: AlertOctagon, 
             color: "red",
-            gradient: "from-red-500/10 to-red-600/5",
-            border: "border-red-500/20",
-            trend: agg.inadimplencia > 0 ? "neg" : "neutral"
+            trend: agg.inadimplencia > 0 ? "neg" : "neutral",
+            trendValue: ""
           },
           { 
-            label: "Pend. Conciliação", 
+            label: "CONCILIAÇÃO", 
             value: agg.countConciliacao, 
-            sub: "Movimentações",
+            sub: "Pendências no extrato",
             icon: Activity, 
             color: "orange",
-            gradient: "from-orange-500/10 to-orange-600/5",
-            border: "border-orange-500/20"
+            trend: "neutral",
+            trendValue: ""
           },
           { 
-            label: "Ticket Médio", 
+            label: "TICKET MÉDIO", 
             value: BRL(agg.ticketMedio), 
-            sub: "Recebimentos",
+            sub: "Valor por recebimento",
             icon: Target, 
             color: "cyan",
-            gradient: "from-cyan-500/10 to-cyan-600/5",
-            border: "border-cyan-500/20"
+            trend: "neutral",
+            trendValue: ""
           },
           { 
-            label: "Taxas (Rec/Pag)", 
-            value: `${PCT(agg.taxaReceb)} / ${PCT(agg.taxaPag)}`, 
-            sub: "Eficiência de caixa",
-            icon: Activity, 
-            color: "blue",
-            gradient: "from-blue-500/10 to-blue-600/5",
-            border: "border-blue-500/20"
+            label: "EFICIÊNCIA", 
+            value: PCT(agg.taxaReceb), 
+            sub: `${PCT(agg.taxaPag)} de pagamentos`,
+            icon: Sparkles, 
+            color: "violet",
+            trend: "pos",
+            trendValue: ""
           },
         ].map((kpi, i) => (
-          <Card key={i} className={cn(
-            "group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-white/5 shadow-lg bg-background/40 backdrop-blur-sm",
+          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+            <div className={cn(
+              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              kpi.color === "red" ? "bg-red-500" : 
+              kpi.color === "orange" ? "bg-orange-500" : 
+              kpi.color === "cyan" ? "bg-cyan-500" : 
+              kpi.color === "violet" ? "bg-violet-500" : "bg-white"
+            )} />
+
+            <CardContent className="p-6 relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                    {kpi.label}
+                  </span>
+                  <div className={cn(
+                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
+                    kpi.color === "red" ? "group-hover:bg-red-500/20 group-hover:border-red-500/20 group-hover:text-red-400" :
+                    kpi.color === "orange" ? "group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-400" :
+                    kpi.color === "cyan" ? "group-hover:bg-cyan-500/20 group-hover:border-cyan-500/20 group-hover:text-cyan-400" :
+                    kpi.color === "violet" ? "group-hover:bg-violet-500/20 group-hover:border-violet-500/20 group-hover:text-violet-400" : ""
+                  )}>
+                    <kpi.icon className="h-4 w-4" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                    {kpi.value}
+                  </h2>
+                  <p className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                    {kpi.sub}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
             kpi.border
           )}>
             <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -1486,14 +1523,17 @@ function Kpi({
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm">{title}</CardTitle>
+    <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
+      <CardHeader className="pb-4 border-b border-white/5">
+        <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">
+          {title}
+        </CardTitle>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="pt-6">{children}</CardContent>
     </Card>
   );
 }
+
 
 function Empty() {
   return (
