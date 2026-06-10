@@ -1144,13 +1144,13 @@ export default function BIFinanceiro() {
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                <Line type="monotone" dataKey="Receita" stroke="#10B981" strokeWidth={3} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-                <Line type="monotone" dataKey="Despesa" stroke="#EF4444" strokeWidth={3} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-                <Line type="monotone" dataKey="Resultado" stroke="#38bdf8" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ stroke: 'rgba(255,255,255,0.05)', strokeWidth: 1 }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94A3B8' }} />
+                <Line type="monotone" dataKey="Receita" stroke="#10B981" strokeWidth={4} dot={{ r: 4, fill: '#10B981', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                <Line type="monotone" dataKey="Despesa" stroke="#EF4444" strokeWidth={4} dot={{ r: 4, fill: '#EF4444', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                <Line type="monotone" dataKey="Resultado" stroke="#0EA5E9" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
