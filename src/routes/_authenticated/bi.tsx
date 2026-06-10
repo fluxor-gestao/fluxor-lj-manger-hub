@@ -61,37 +61,26 @@ function BI() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold font-display tracking-tight">Business Intelligence</h1>
-          <p className="text-muted-foreground mt-1">
-            {selectedDashboard 
-              ? `Visualizando indicadores de ${activeDashboard?.title}` 
-              : "Selecione um painel para visualizar os indicadores estratégicos."}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {selectedDashboard && (
-            <Button 
-              variant="outline" 
-              onClick={() => setSelectedDashboard(null)}
-              className="bg-background/50 backdrop-blur-sm border-primary/20 hover:bg-primary/10 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" /> Voltar aos Painéis
-            </Button>
+          {!selectedDashboard && (
+            <p className="text-muted-foreground mt-1">
+              Selecione um painel para visualizar os indicadores estratégicos.
+            </p>
           )}
-          <Button variant="ghost" onClick={() => window.history.back()} className="sm:self-start opacity-70 hover:opacity-100">
-            Sair
-          </Button>
         </div>
+        <Button variant="ghost" onClick={() => window.history.back()} className="sm:self-start opacity-70 hover:opacity-100">
+          Sair
+        </Button>
       </div>
 
       <div 
         className={cn(
-          "grid gap-6 transition-all duration-500 ease-in-out",
+          "grid gap-4 transition-all duration-300 ease-in-out",
           selectedDashboard 
-            ? "grid-cols-3 md:grid-cols-3 opacity-90 scale-[0.98] -translate-y-2" 
-            : "grid-cols-1 md:grid-cols-3"
+            ? "grid-cols-3 md:grid-cols-3" 
+            : "grid-cols-1 md:grid-cols-3 py-8"
         )}
       >
         {visibleDashboards.map((dashboard) => {
@@ -105,53 +94,60 @@ function BI() {
               tabIndex={0}
               onClick={() => setSelectedDashboard(dashboard.id)}
               className={cn(
-                "group relative overflow-hidden cursor-pointer border-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1",
+                "group relative overflow-hidden cursor-pointer border-0 shadow-lg transition-all duration-300 ease-out",
                 isActive 
-                  ? "ring-2 ring-primary ring-offset-4 ring-offset-background" 
-                  : "grayscale-[0.2] hover:grayscale-0",
+                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background z-20" 
+                  : "grayscale-[0.3] hover:grayscale-0 opacity-80 hover:opacity-100",
                 selectedDashboard 
-                  ? "min-h-[80px] p-4" 
-                  : "min-h-[220px] p-8"
+                  ? "min-h-[60px] p-3" 
+                  : "min-h-[280px] p-8 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2"
               )}
             >
-              {/* Decorative background gradient */}
               <div className={cn(
                 "absolute inset-0 bg-gradient-to-br transition-opacity duration-300",
                 dashboard.gradient,
                 selectedDashboard ? "opacity-90" : "opacity-100"
               )} />
               
-              {/* Glassmorphism effect overlay */}
               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
               <div className={cn(
-                "relative z-10 flex h-full items-start justify-between",
-                selectedDashboard ? "flex-row items-center gap-3" : "flex-col"
+                "relative z-10 flex h-full transition-all duration-300",
+                selectedDashboard ? "flex-row items-center gap-3" : "flex-col items-start"
               )}>
                 <div className={cn(
-                  "rounded-2xl bg-white/20 p-3 backdrop-blur-md transition-all duration-300 group-hover:scale-110",
-                  selectedDashboard ? "p-2" : "p-4"
+                  "rounded-xl bg-white/20 p-3 backdrop-blur-md transition-all duration-300 group-hover:scale-105",
+                  selectedDashboard ? "p-1.5" : "p-4"
                 )}>
                   <Icon 
                     className={cn(
-                      "text-white drop-shadow-md",
-                      selectedDashboard ? "h-6 w-6" : "h-10 w-10"
+                      "text-white drop-shadow-sm",
+                      selectedDashboard ? "h-5 w-5" : "h-10 w-10"
                     )} 
-                    strokeWidth={1.5} 
+                    strokeWidth={selectedDashboard ? 2 : 1.5} 
                   />
                 </div>
                 
-                <div className={selectedDashboard ? "flex-1" : "mt-4"}>
+                <div className={cn(
+                  "transition-all duration-300",
+                  selectedDashboard ? "flex-1" : "mt-6 w-full"
+                )}>
                   <h3 className={cn(
-                    "font-display font-bold text-white tracking-wide transition-all duration-300",
+                    "font-display font-bold text-white tracking-wide",
                     selectedDashboard ? "text-sm" : "text-2xl"
                   )}>
                     {dashboard.title.replace("Dashboard ", "")}
                   </h3>
                   {!selectedDashboard && (
-                    <p className="text-white/80 text-sm mt-2 font-medium">
-                      Clique para expandir indicadores
-                    </p>
+                    <>
+                      <p className="text-white/80 text-sm mt-2 line-clamp-2">
+                        Acesse métricas de {dashboard.title.toLowerCase()} em tempo real.
+                      </p>
+                      <div className="mt-8 flex items-center text-sm font-semibold text-white">
+                        <span>Abrir Dashboard</span>
+                        <ArrowLeft className="ml-2 h-4 w-4 rotate-180 transition-transform group-hover:translate-x-1" />
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -161,24 +157,23 @@ function BI() {
       </div>
 
       {activeDashboard ? (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
-          <Card className="overflow-hidden border-0 shadow-2xl bg-background/50 backdrop-blur-sm border-t border-primary/10">
-            <CardHeader className="border-b bg-muted/20 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={cn("p-2 rounded-lg bg-gradient-to-br text-white shadow-sm", activeDashboard.gradient)}>
-                    <BarChart3 className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl font-bold font-display">{activeDashboard.title}</CardTitle>
-                    <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5 font-semibold">Live Data Feed</p>
-                  </div>
+        <div className="animate-in fade-in slide-in-from-top-2 duration-300 ease-out">
+          <Card className="overflow-hidden border-0 shadow-2xl bg-background/50 backdrop-blur-sm">
+            <CardHeader className="border-b bg-muted/20 px-6 py-3 flex flex-row items-center justify-between space-y-0">
+              <div className="flex items-center gap-3">
+                <div className={cn("p-1.5 rounded-lg bg-gradient-to-br text-white shadow-sm", activeDashboard.gradient)}>
+                  <BarChart3 className="h-4 w-4" />
                 </div>
-                <div className="flex gap-2">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-tighter">Conectado</span>
-                </div>
+                <CardTitle className="text-lg font-bold font-display">{activeDashboard.title}</CardTitle>
               </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setSelectedDashboard(null)}
+                className="h-8 px-3 bg-background/50 hover:bg-primary/10 transition-colors border-primary/20"
+              >
+                <ArrowLeft className="h-3.5 w-3.5 mr-2" /> Voltar
+              </Button>
             </CardHeader>
             <CardContent className="p-0">
               {activeDashboard.id === "financeiro" ? (
@@ -193,15 +188,11 @@ function BI() {
                   allowFullScreen
                 />
               ) : (
-                <div className="flex min-h-[420px] items-center justify-center bg-background/50 p-12">
-                  <div className="text-center max-w-md animate-in zoom-in duration-300">
-                    <div className="mb-6 inline-flex p-4 rounded-full bg-muted/50">
-                      <BarChart3 className="h-12 w-12 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-xl font-bold">Painel em Desenvolvimento</h3>
-                    <p className="mt-2 text-muted-foreground leading-relaxed">
-                      Este dashboard está sendo configurado e em breve exibirá todos os indicadores em tempo real.
-                    </p>
+                <div className="flex min-h-[400px] items-center justify-center p-12 text-center">
+                  <div className="max-w-xs">
+                    <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
+                    <h3 className="text-lg font-semibold">Dashboard em Configuração</h3>
+                    <p className="text-sm text-muted-foreground mt-2">Estamos preparando os indicadores para este painel.</p>
                   </div>
                 </div>
               )}
@@ -209,13 +200,12 @@ function BI() {
           </Card>
         </div>
       ) : (
-        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-muted-foreground/10 bg-muted/5 p-12 text-center animate-in fade-in duration-700">
-          <div className="mb-4 rounded-full bg-background p-6 shadow-sm ring-1 ring-border">
-            <LayoutDashboard className="h-10 w-10 text-muted-foreground/40" />
+        <div className="flex min-h-[200px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-muted-foreground/10 bg-muted/5 p-12 text-center animate-in fade-in duration-500">
+          <div className="mb-4 rounded-full bg-background p-4 shadow-sm ring-1 ring-border">
+            <LayoutDashboard className="h-8 w-8 text-muted-foreground/40" />
           </div>
-          <h2 className="text-xl font-semibold text-foreground/70">Pronto para começar?</h2>
-          <p className="mt-2 max-w-xs text-sm text-muted-foreground leading-relaxed">
-            Selecione um dashboard acima para visualizar os indicadores e gráficos detalhados da sua operação.
+          <p className="max-w-xs text-sm text-muted-foreground">
+            Selecione um dashboard para visualizar os indicadores.
           </p>
         </div>
       )}
