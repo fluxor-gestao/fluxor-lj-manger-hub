@@ -30,6 +30,7 @@ import {
   Eraser,
   Filter,
   PieChart as PieIcon,
+  ShieldAlert,
   Target,
   TrendingDown,
   TrendingUp,
