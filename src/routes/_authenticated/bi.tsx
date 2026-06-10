@@ -60,32 +60,52 @@ function BI() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold font-display tracking-tight">Business Intelligence</h1>
-          {!selectedDashboard && (
-            <p className="text-muted-foreground mt-1">
-              Selecione um painel para visualizar os indicadores estratégicos.
-            </p>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          {selectedDashboard && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setSelectedDashboard(null)}
+              className="h-8 px-2 bg-background/50 hover:bg-primary/5 border-primary/10 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
+            </Button>
           )}
+          <div>
+            <h1 className={cn(
+              "font-bold font-display tracking-tight transition-all duration-300",
+              selectedDashboard ? "text-xl" : "text-3xl"
+            )}>
+              {selectedDashboard ? activeDashboard?.title : "Business Intelligence"}
+            </h1>
+            {!selectedDashboard && (
+              <p className="text-muted-foreground text-sm mt-1">
+                Selecione um painel para visualizar os indicadores estratégicos.
+              </p>
+            )}
+          </div>
         </div>
-        <Button variant="ghost" onClick={() => window.history.back()} className="sm:self-start opacity-70 hover:opacity-100">
-          Sair
-        </Button>
+        {!selectedDashboard && (
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="opacity-70 hover:opacity-100">
+            Sair
+          </Button>
+        )}
       </div>
 
       <div 
         className={cn(
-          "grid gap-4 transition-all duration-300 ease-in-out",
+          "grid gap-3 transition-all duration-300 ease-in-out",
           selectedDashboard 
-            ? "grid-cols-3 md:grid-cols-3" 
-            : "grid-cols-1 md:grid-cols-3 py-8"
+            ? "grid-cols-3 md:grid-cols-3 mb-2" 
+            : "grid-cols-1 md:grid-cols-3 py-6"
         )}
       >
         {visibleDashboards.map((dashboard) => {
           const Icon = dashboard.icon;
           const isActive = selectedDashboard === dashboard.id;
+
           
           const getDesc = (id: string) => {
             if (id === "comercial") return "Acompanhe propostas, vendas e performance comercial.";
