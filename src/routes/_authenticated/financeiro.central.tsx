@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate, createFileRoute } from "@tanstack/react-router";
+import { useNavigate, createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -67,10 +67,12 @@ type Entry = {
   original_amount: number | null;
   total_brl: number | null;
   fx_status: string | null;
+  devis_id: string | null;
+  devis_number: string | null;
 };
 
 const ENTRY_COLUMNS =
-  "id, entry_date, competence_month, business_unit, movement_account, movement_description, counterparty_name, amount_in, amount_out, entry_type, source_type, conciliation_status, document_reference, bank_account_id, transfer_pair_id, currency, exchange_rate, original_amount, total_brl, fx_status";
+  "id, entry_date, competence_month, business_unit, movement_account, movement_description, counterparty_name, amount_in, amount_out, entry_type, source_type, conciliation_status, document_reference, bank_account_id, transfer_pair_id, currency, exchange_rate, original_amount, total_brl, fx_status, devis_id, devis_number";
 
 type BankAccount = {
   id: string;
@@ -105,6 +107,7 @@ function Financeiro() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [originFilter, setOriginFilter] = useState<string>("all");
   const [realizedFilter, setRealizedFilter] = useState<string>("all");
+  const [devisFilter, setDevisFilter] = useState<string>("all");
 
   const [tab, setTab] = useState<"consolidado" | "receber" | "pagar" | "realizados" | "fluxo" | "analitico">(
     "consolidado",
@@ -116,7 +119,7 @@ function Financeiro() {
   // Reset página ao mudar filtros / tab
   useEffect(() => {
     setPage(0);
-  }, [search, competence, businessFilter, bankFilter, typeFilter, statusFilter, originFilter, realizedFilter, tab]);
+  }, [search, competence, businessFilter, bankFilter, typeFilter, statusFilter, originFilter, realizedFilter, tab, devisFilter]);
 
   // ---------- Dialog Novo Lançamento ----------
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -140,7 +143,8 @@ function Financeiro() {
     status: statusFilter !== "all" ? statusFilter : null,
     origin: originFilter !== "all" ? originFilter : null,
     realized: realizedParam,
-  }), [competence, businessFilter, search, bankFilter, typeFilter, statusFilter, originFilter, realizedParam, companyCode]);
+    devis: devisFilter !== "all" ? devisFilter : null,
+  }), [competence, businessFilter, search, bankFilter, typeFilter, statusFilter, originFilter, realizedParam, companyCode, devisFilter]);
 
   // ---------- Dados — lista paginada ----------
   const entriesQuery = useQuery({
@@ -161,8 +165,14 @@ function Financeiro() {
       if (filterParams.search) {
         const s = filterParams.search.replace(/[%,]/g, "");
         q = q.or(
-          `movement_description.ilike.%${s}%,counterparty_name.ilike.%${s}%`,
+          `movement_description.ilike.%${s}%,counterparty_name.ilike.%${s}%,devis_number.ilike.%${s}%`,
         );
+      }
+      // Devis
+      if (filterParams.devis === "with_devis") {
+        q = q.not("devis_id", "is", null);
+      } else if (filterParams.devis === "without_devis") {
+        q = q.is("devis_id", null);
       }
       // Origem
       if (filterParams.origin === "transferência") {
@@ -379,7 +389,7 @@ function Financeiro() {
             <div className="relative sm:col-span-2 xl:col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar descrição ou fornecedor..."
+                placeholder="Buscar descrição, cliente ou Devis..."
                 className="pl-9"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -416,11 +426,19 @@ function Financeiro() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos status</SelectItem>
+                <SelectItem value="all">Todos os status</SelectItem>
                 <SelectItem value="pendente">Pendente</SelectItem>
                 <SelectItem value="conciliado">Conciliado</SelectItem>
                 <SelectItem value="divergente">Divergente</SelectItem>
                 <SelectItem value="ignorado">Ignorado</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={devisFilter} onValueChange={setDevisFilter}>
+              <SelectTrigger><SelectValue placeholder="Vínculo Devis" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos (Devis)</SelectItem>
+                <SelectItem value="with_devis">Com Devis</SelectItem>
+                <SelectItem value="without_devis">Sem Devis</SelectItem>
               </SelectContent>
             </Select>
             <Select value={originFilter} onValueChange={setOriginFilter}>
@@ -688,6 +706,7 @@ function EntriesTable({
         <TableHeader>
           <TableRow className="bg-muted/40">
             <TableHead className="font-semibold">Data</TableHead>
+            <TableHead className="font-semibold">Devis</TableHead>
             <TableHead className="font-semibold">Negócio</TableHead>
             {!hideBank && <TableHead className="font-semibold">Banco/Conta</TableHead>}
             <TableHead className="font-semibold">Tipo</TableHead>
@@ -706,6 +725,20 @@ function EntriesTable({
             return (
               <TableRow key={e.id} className="even:bg-muted/20 hover:bg-muted/40">
                 <TableCell className="py-1.5 whitespace-nowrap text-xs tabular-nums">{e.entry_date}</TableCell>
+                <TableCell className="py-1.5">
+                  {e.devis_id ? (
+                    <Link
+                      to={`/comercial/devis/${e.devis_id}`}
+                      className="inline-flex"
+                    >
+                      <Badge variant="outline" className="cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors font-mono text-[10px]">
+                        {e.devis_number || "Ver Devis"}
+                      </Badge>
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">—</span>
+                  )}
+                </TableCell>
                 <TableCell className="py-1.5">{e.business_unit ?? "—"}</TableCell>
                 {!hideBank && (
                   <TableCell className="py-1.5 text-xs">{bankLabel(e.bank_account_id)}</TableCell>

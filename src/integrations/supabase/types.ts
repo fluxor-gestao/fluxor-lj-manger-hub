@@ -837,6 +837,8 @@ export type Database = {
           counterparty_name: string | null
           created_at: string
           currency: string
+          devis_id: string | null
+          devis_number: string | null
           document_reference: string | null
           due_date: string | null
           entry_date: string
@@ -885,6 +887,8 @@ export type Database = {
           counterparty_name?: string | null
           created_at?: string
           currency?: string
+          devis_id?: string | null
+          devis_number?: string | null
           document_reference?: string | null
           due_date?: string | null
           entry_date: string
@@ -933,6 +937,8 @@ export type Database = {
           counterparty_name?: string | null
           created_at?: string
           currency?: string
+          devis_id?: string | null
+          devis_number?: string | null
           document_reference?: string | null
           due_date?: string | null
           entry_date?: string
@@ -992,6 +998,13 @@ export type Database = {
             columns: ["cost_center_id"]
             isOneToOne: false
             referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
             referencedColumns: ["id"]
           },
           {
