@@ -589,9 +589,7 @@ function RapportPage() {
   const [clientId, setClientId] = useState<string>("");
   const [month, setMonth] = useState<string>(monthKey(now));
   const [language, setLanguage] = useState<Lang>("pt");
-  const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<"idle" | "processing" | "ready">("idle");
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [statements, setStatements] = useState<{ id: string; file: File; accountType: string; status: "idle" | "processing" | "ready"; transactions: Transaction[] }[]>([]);
   const [generated, setGenerated] = useState(false);
   const [openingBalance, setOpeningBalance] = useState(0);
 
