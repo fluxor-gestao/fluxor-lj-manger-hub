@@ -281,23 +281,23 @@ export default function RapportPage() {
         
         if (s.accountType.includes("Cobrança")) {
           txs = [
-            { id: `in-${s.id}-1`, date: baseDate, description: "LIQUIDAÇÃO BOLETOS LOTE 442", type: "entrada", amount: amount, suggestedCategory: "Receita" },
-            { id: `out-${s.id}-1`, date: baseDate, description: "TRANSFERENCIA PARA CONTA CORRENTE", type: "saida", amount: amount, suggestedCategory: "Transferência" },
+            { id: `in-${s.id}-1`, date: baseDate, description: "LIQUIDAÇÃO BOLETOS LOTE 442", interpretedDescription: "Recebimento de Boletos", type: "entrada", amount: amount, suggestedCategory: "Receita" },
+            { id: `out-${s.id}-1`, date: baseDate, description: "TRANSFERENCIA PARA CONTA CORRENTE", interpretedDescription: "Transferência entre contas", type: "saida", amount: amount, suggestedCategory: "Transferência" },
           ];
         } else if (s.accountType.includes("Corrente")) {
           txs = [
-            { id: `in-${s.id}-1`, date: baseDate, description: "PIX RECEBIDO - CONTA COBRANÇA", type: "entrada", amount: amount, suggestedCategory: "Transferência" },
-            { id: `out-${s.id}-1`, date: `${month}-11`, description: "TED PARA CONTA OPERACIONAL", type: "saida", amount: amount - 2000, suggestedCategory: "Transferência" },
-            { id: `out-${s.id}-2`, date: `${month}-12`, description: "APLICAÇÃO CDB LIQUIDEZ DIARIA", type: "saida", amount: 2000, suggestedCategory: "Investimento" },
+            { id: `in-${s.id}-1`, date: baseDate, description: "PIX RECEBIDO - CONTA COBRANÇA", interpretedDescription: "Recebimento PIX", type: "entrada", amount: amount, suggestedCategory: "Transferência" },
+            { id: `out-${s.id}-1`, date: `${month}-11`, description: "TED PARA CONTA OPERACIONAL", interpretedDescription: "Transferência TED", type: "saida", amount: amount - 2000, suggestedCategory: "Transferência" },
+            { id: `out-${s.id}-2`, date: `${month}-12`, description: "APLICAÇÃO CDB LIQUIDEZ DIARIA", interpretedDescription: "Aplicação Financeira", type: "saida", amount: 2000, suggestedCategory: "Investimento" },
           ];
         } else if (s.accountType.includes("Operacional")) {
           txs = [
-            { id: `in-${s.id}-1`, date: `${month}-11`, description: "TED RECEBIDA - MATRIZ", type: "entrada", amount: amount - 2000, suggestedCategory: "Transferência" },
-            { id: `out-${s.id}-1`, date: `${month}-15`, description: "PAGAMENTO FOLHA - MAIO", type: "saida", amount: amount - 5000, suggestedCategory: "Pessoal" },
+            { id: `in-${s.id}-1`, date: `${month}-11`, description: "TED RECEBIDA - MATRIZ", interpretedDescription: "Recebimento TED", type: "entrada", amount: amount - 2000, suggestedCategory: "Transferência" },
+            { id: `out-${s.id}-1`, date: `${month}-15`, description: "PAGAMENTO FOLHA - MAIO", interpretedDescription: "Pagamento de Salários", type: "saida", amount: amount - 5000, suggestedCategory: "Pessoal" },
           ];
         } else {
           txs = [
-            { id: `in-${s.id}-1`, date: `${month}-05`, description: "DEPOSITO IDENTIFICADO", type: "entrada", amount: 1000, suggestedCategory: "Outros" },
+            { id: `in-${s.id}-1`, date: `${month}-05`, description: "DEPOSITO IDENTIFICADO", interpretedDescription: "Depósito em Conta", type: "entrada", amount: 1000, suggestedCategory: "Outros" },
           ];
         }
 
