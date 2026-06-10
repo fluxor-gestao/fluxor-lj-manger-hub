@@ -914,6 +914,15 @@ function Comercial() {
             }}
           />
 
+          <BulkClientLocationEnrichment 
+            open={bulkEnrichmentOpen}
+            onOpenChange={setBulkEnrichmentOpen}
+            onComplete={() => {
+              clientsListQuery.refetch();
+              queryClient.invalidateQueries({ queryKey: ["clients"] });
+            }}
+          />
+
           <DevisCodePreviewDialog
             open={codePreviewOpen}
             onOpenChange={(o) => {
