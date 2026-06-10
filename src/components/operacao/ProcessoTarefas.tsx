@@ -144,15 +144,17 @@ export function ProcessoTarefas() {
         <div className="space-y-2">
           {tasks.map((t) => (
             <Card key={t.id}>
-              <CardContent className="py-3 flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{t.title}</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {t.assignee || "Sem responsável"} · {t.due_date || "sem prazo"}
-                  </p>
+              <CardContent className="py-4 flex items-start gap-4">
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{t.title}</p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1"><User className="h-3 w-3" /> {t.assignee || "Sem responsável"}</span>
+                    <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {t.due_date ? new Date(t.due_date).toLocaleDateString("pt-BR") : "Sem prazo"}</span>
+                  </div>
                 </div>
-                <Badge variant="outline" className={prioCls[t.priority]}>{t.priority}</Badge>
-                <Badge variant="outline" className={statusCls[t.status]}>{statusLabel[t.status]}</Badge>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant="outline" className={cn("text-[10px] px-2 py-0", prioCls[t.priority])}>{t.priority}</Badge>
+                  <Badge variant="outline" className={cn("text-[10px] px-2 py-0", statusCls[t.status])}>{statusLabel[t.status]}</Badge>
                 <Button variant="ghost" size="icon" className="h-8 w-8"
                   onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
