@@ -327,7 +327,7 @@ export default function RapportPage() {
         return { ...s, status: "ready" as const, transactions: enrichedTxs as Transaction[] };
       }));
 
-      setStatements(processedStatements);
+      setStatements(processedStatements as any);
       setIsProcessing(false);
       setGenerated(true);
       toast.success(t.processed);
