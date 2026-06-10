@@ -137,7 +137,7 @@ export function ProcessoDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-4xl lg:max-w-[50vw] overflow-y-auto">
         <SheetHeader className="space-y-2">
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1 min-w-0">
