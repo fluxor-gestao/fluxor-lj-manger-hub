@@ -1522,10 +1522,12 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 function Empty() {
   return (
-    <div className="flex h-[260px] items-center justify-center text-sm text-white/20">
+    <div className="flex h-[280px] items-center justify-center text-sm text-[#94A3B8]">
       <div className="text-center">
-        <CalendarRange className="mx-auto mb-2 h-6 w-6 opacity-50" />
-        <p className="font-bold uppercase tracking-widest text-[10px]">Sem dados para o período</p>
+        <div className="bg-white/5 p-4 rounded-full mb-4 inline-block ring-1 ring-white/10">
+          <CalendarRange className="h-6 w-6 text-white/30" />
+        </div>
+        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-[#94A3B8]">Sem dados para o período selecionado</p>
       </div>
     </div>
   );
