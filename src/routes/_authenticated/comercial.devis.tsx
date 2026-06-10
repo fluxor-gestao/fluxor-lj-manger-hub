@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useParams, Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PRICING_STATUS_COLORS, PRICING_STATUS_LABELS } from "@/components/devis/DevisPricingManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
@@ -120,6 +121,7 @@ function Comercial() {
   const [filterAreas, setFilterAreas] = useState<string[]>([]);
   const [filterStart, setFilterStart] = useState<Date | undefined>();
   const [filterEnd, setFilterEnd] = useState<Date | undefined>();
+  const [filterPricing, setFilterPricing] = useState<string>("all");
   const [view, setView] = useState<"list" | "kanban">("list");
   const [devisPage, setDevisPage] = useState(0);
   const [clientsPage, setClientsPage] = useState(0);
@@ -130,7 +132,7 @@ function Comercial() {
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
 
   // Reset paginação quando filtros mudam
-  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterAreas, filterStart, filterEnd]);
+  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterAreas, filterStart, filterEnd, filterPricing]);
   useEffect(() => { setClientsPage(0); }, [clientsSearch]);
   // Reseta área quando empresa muda nos filtros
   useEffect(() => { setFilterAreas([]); }, [filterCompany, companyCode]);
@@ -156,7 +158,7 @@ function Comercial() {
     queryFn: async () => {
       const qb = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)") as any;
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, pricing_status, devis_service_areas(area_slug)") as any;
       
       let q = qb.order("created_at", { ascending: false }).range(0, SUMMARY_HARD_CAP - 1);
 
@@ -172,12 +174,12 @@ function Comercial() {
   const endISO = filterEnd ? format(filterEnd, "yyyy-MM-dd") : null;
   const effectiveCompany = companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null);
   const devisListQuery = useQuery({
-    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany, areas: filterAreas }],
+    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany, areas: filterAreas, pricing: filterPricing }],
     queryFn: async () => {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, responsible_sector, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)", { count: "exact" })
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, responsible_sector, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible, pricing_status, devis_service_areas(area_slug)", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to);
       if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
@@ -189,6 +191,8 @@ function Comercial() {
         // Filtra por devis que possuem PELO MENOS UMA das áreas selecionadas
         q = q.filter("devis_service_areas.area_slug", "in", `(${filterAreas.join(",")})`);
       }
+      if (filterPricing !== "all") q = q.eq("pricing_status", filterPricing);
+      if (filterPricing !== "all") q = q.eq("pricing_status", filterPricing);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -307,6 +311,8 @@ function Comercial() {
   const kanbanDevis = useMemo(() => {
     return devisSummary.filter((d: any) => {
       if (filterClient !== "all" && d.client_id !== filterClient) return false;
+      if (filterPricing !== "all" && d.pricing_status !== filterPricing) return false;
+      if (filterPricing !== "all" && d.pricing_status !== filterPricing) return false;
       if (filterCompany !== "all" && d.business_unit !== filterCompany) return false;
       if (filterAreas.length > 0) {
         const itemAreas = (d.devis_service_areas || []).map((a: any) => a.area_slug);
@@ -614,7 +620,7 @@ function Comercial() {
             <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
               <Filter className="h-4 w-4" /> Filtros
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
               <div>
                 <Label className="text-xs">Status {view === "kanban" && <span className="text-[10px]">(desativado no Kanban)</span>}</Label>
                 <Select value={filterStatus} onValueChange={setFilterStatus} disabled={view === "kanban"}>
@@ -650,11 +656,38 @@ function Comercial() {
                 />
               </div>
               <div>
+                <Label className="text-xs">Precificação</Label>
+                <Select value={filterPricing} onValueChange={setFilterPricing}>
+                  <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {Object.entries(PRICING_STATUS_LABELS).map(([val, label]) => (
+                      <SelectItem key={val} value={val}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label className="text-xs">Cliente</Label>
                 <Select value={filterClient} onValueChange={setFilterClient}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Precificação</Label>
+                <Select value={filterPricing} onValueChange={setFilterPricing}>
+                  <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {Object.entries(PRICING_STATUS_LABELS).map(([val, label]) => (
+                      <SelectItem key={val} value={val}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
                     {clients.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -688,9 +721,9 @@ function Comercial() {
                 </Popover>
               </div>
             </div>
-            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterAreas.length > 0 || filterStart || filterEnd) && (
+            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterAreas.length > 0 || filterStart || filterEnd || filterPricing !== "all") && (
               <div className="mt-3">
-                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterAreas([]); setFilterStart(undefined); setFilterEnd(undefined); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterAreas([]); setFilterStart(undefined); setFilterEnd(undefined); setFilterPricing("all"); }}>
                   Limpar filtros
                 </Button>
               </div>
@@ -907,6 +940,7 @@ function Comercial() {
                     <TableHead>Área</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Valor Total</TableHead>
+                    <TableHead>Precificação</TableHead>
                     <TableHead className="text-right">Entrada</TableHead>
                     <TableHead>Data Reunião</TableHead>
                     <TableHead>Responsável</TableHead>
@@ -927,6 +961,13 @@ function Comercial() {
                       <TableCell><AreaBadge companyCode={d.business_unit} areaSlug={d.responsible_sector} /></TableCell>
                       <TableCell><Badge variant="outline" className={devisStatusColors[d.status] || ""}>{statusLabels[d.status] || d.status}</Badge></TableCell>
                       <TableCell className="text-right">{fmtBRL(d.total_amount)}</TableCell>
+                      <TableCell>
+                        {d.pricing_status && d.pricing_status !== "sem_precificacao" && (
+                          <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 whitespace-nowrap", PRICING_STATUS_COLORS[d.pricing_status])}>
+                            {PRICING_STATUS_LABELS[d.pricing_status]}
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">{fmtBRL(d.down_payment_amount)}</TableCell>
                       <TableCell>{d.meeting_date ? format(parseISO(d.meeting_date), "dd/MM/yyyy") : "—"}</TableCell>
                       <TableCell>{profilesById[d.commercial_responsible]?.full_name || profilesById[d.commercial_responsible]?.email || "—"}</TableCell>

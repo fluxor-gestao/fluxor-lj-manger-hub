@@ -24,6 +24,7 @@ import DevisPdfTemplate from "@/components/devis/DevisPdfTemplate";
 import SendDevisDialog from "@/components/devis/SendDevisDialog";
 import { exportDevisPdfFromContainer } from "@/lib/exportDevisPdf";
 import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
+import { DevisPricingManager } from "@/components/devis/DevisPricingManager";
 import { getMissingClauses, isProposalComplete } from "@/lib/validateProposal";
 import { createRoot } from "react-dom/client";
 import { Send } from "lucide-react";
@@ -730,6 +731,23 @@ function DevisDetail() {
           )}
         </CardContent>
       </Card>
+
+      {/* Precificação */}
+      {!editing && (
+        <DevisPricingManager
+          devisId={devis.id}
+          pricingStatus={devis.pricing_status || "sem_precificacao"}
+          currentTotal={devis.total_amount}
+          onTotalUpdate={(newTotal) => {
+            queryClient.invalidateQueries({ queryKey: ["devis", id] });
+            setForm((f: any) => ({ 
+              ...f, 
+              total_amount: String(newTotal),
+              down_payment_amount: String((newTotal * 0.5).toFixed(2))
+            }));
+          }}
+        />
+      )}
 
       {/* Validação Comercial */}
       <ValidationChecklist
