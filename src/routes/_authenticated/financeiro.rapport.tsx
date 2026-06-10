@@ -313,6 +313,50 @@ export default function RapportPage() {
     }, 2000);
   };
 
+  const handleUpdateClassification = async (tx: Transaction, newCategoryId: string) => {
+    try {
+      // 1. Update local state
+      setStatements(prev => prev.map(s => ({
+        ...s,
+        transactions: s.transactions.map(t => t.id === tx.id ? { ...t, categoryId: newCategoryId, suggestedCategory: cats.categories.find(c => c.id === newCategoryId)?.name || t.suggestedCategory, confidence: 1 } : t)
+      })));
+
+      // 2. Persist to learning table
+      const { data: existing } = await supabase
+        .from("financial_classification_rules")
+        .select("id, occurrence_count")
+        .eq("pattern", tx.description)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("financial_classification_rules")
+          .update({
+            category_id: newCategoryId,
+            occurrence_count: (existing.occurrence_count || 1) + 1,
+            confidence_level: Math.min(0.95, ((existing.occurrence_count || 1) * 0.1) + 0.5),
+            last_used_at: new Date().toISOString()
+          } as any)
+          .eq("id", existing.id);
+      } else {
+        await supabase
+          .from("financial_classification_rules")
+          .insert({
+            pattern: tx.description,
+            category_id: newCategoryId,
+            client_id: clientId || null,
+            occurrence_count: 1,
+            confidence_level: 0.6
+          } as any);
+      }
+
+      toast.success("Aprendizado atualizado!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao salvar classificação.");
+    }
+  };
+
   return (
     <div className="p-4 lg:p-8 max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-500">
       {/* Header */}
