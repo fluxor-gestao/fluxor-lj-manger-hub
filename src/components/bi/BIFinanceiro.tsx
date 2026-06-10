@@ -1090,17 +1090,17 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Evolução: Receita, Despesa, Resultado">
-          {isLoading ? <Skeleton className="h-[260px]" /> : monthly.length === 0 ? <Empty /> : (
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="month" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
-                <Line type="monotone" dataKey="Receita" stroke={CHART_COLORS[2]} strokeWidth={2} />
-                <Line type="monotone" dataKey="Despesa" stroke={CHART_COLORS[4]} strokeWidth={2} />
-                <Line type="monotone" dataKey="Resultado" stroke={CHART_COLORS[0]} strokeWidth={2} />
+          {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="month" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" />
+                <Line type="monotone" dataKey="Receita" stroke="#10B981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Despesa" stroke="#EF4444" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Resultado" stroke="#0EA5E9" strokeWidth={3} strokeDasharray="5 5" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
