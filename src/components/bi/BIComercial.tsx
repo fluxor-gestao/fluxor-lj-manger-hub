@@ -629,8 +629,8 @@ export default function BIComercial() {
               <CardTitle className="text-sm font-bold">Filtros Comerciais</CardTitle>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="xs" className="h-7 text-[10px]" onClick={exportCSV}>Exportar</Button>
-              <Button variant="ghost" size="xs" className="h-7 text-[10px]" onClick={clearFilters}>
+              <Button variant="outline" size="sm" className="h-7 text-[10px] px-2" onClick={exportCSV}>Exportar</Button>
+              <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={clearFilters}>
                 <Eraser className="h-3.5 w-3.5 mr-1" /> Limpar
               </Button>
             </div>
