@@ -318,8 +318,8 @@ export default function RapportPage() {
               ...tx,
               categoryId: rule.category_id,
               suggestedCategory: cat?.name || tx.suggestedCategory,
-              confidence: rule.confidence_level || undefined
-            };
+              confidence: rule.confidence_level
+            } as any;
           }
           return tx;
         }));
