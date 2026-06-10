@@ -599,6 +599,13 @@ export default function RapportPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {consolidatedTransactions.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="py-12 text-center text-muted-foreground text-xs italic">
+                          Aguardando processamento dos extratos...
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {consolidatedTransactions.map(tx => (
                       <TableRow key={tx.id} className="hover:bg-muted/10 transition-colors">
                         <TableCell>
