@@ -346,6 +346,14 @@ export default function MapaAprovacaoDashboard() {
             {viewMode === 'regions' && regionsStats.map((reg, idx) => {
               const first = filteredDevis.find(d => d.client.city === reg.name && d.client.latitude);
               if (!first || !first.client.latitude) return null;
+              
+              // Find top areas for this region
+              const regionAreas = new Map<string, number>();
+              filteredDevis.filter(d => d.client.city === reg.name).forEach(d => {
+                d.areas.forEach(a => regionAreas.set(a.area_slug, (regionAreas.get(a.area_slug) || 0) + 1));
+              });
+              const topAreas = Array.from(regionAreas.entries()).sort((a, b) => b[1] - a[1]).slice(0, 2);
+
               return (
                 <CircleMarker
                   key={idx}
@@ -354,10 +362,25 @@ export default function MapaAprovacaoDashboard() {
                   pathOptions={{ fillColor: getConversionColor(reg.conversao), fillOpacity: 0.6, color: 'white', weight: 1 }}
                 >
                   <Popup>
-                    <div className="p-1">
-                      <p className="font-bold text-sm">{reg.name}</p>
-                      <p className="text-xs text-muted-foreground">{reg.total} Devis • {PCT(reg.conversao)} Conv.</p>
-                      <p className="text-xs font-bold mt-1 text-emerald-600">{BRL(reg.valor)}</p>
+                    <div className="p-1 min-w-[150px]">
+                      <p className="font-bold text-sm border-b border-black/5 pb-1 mb-1">{reg.name}</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2">
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Total</p>
+                        <p className="text-[10px] text-right font-black">{BRL(reg.valor)}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Conv.</p>
+                        <p className="text-[10px] text-right font-black">{PCT(reg.conversao)}</p>
+                      </div>
+                      {topAreas.length > 0 && (
+                        <div className="space-y-1 mt-2 pt-2 border-t border-black/5">
+                          <p className="text-[9px] uppercase font-black text-muted-foreground tracking-tighter">Áreas Principais</p>
+                          {topAreas.map(([slug, count], i) => (
+                            <div key={i} className="flex justify-between items-center text-[10px]">
+                              <span className="truncate max-w-[100px]">{findArea(first.business_unit as any, slug)?.label || slug}</span>
+                              <span className="font-bold ml-2">{count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </Popup>
                 </CircleMarker>
