@@ -75,6 +75,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/financeiro/rapport")({
