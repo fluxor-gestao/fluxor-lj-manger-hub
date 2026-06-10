@@ -87,6 +87,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
   const [matchMode, setMatchMode] = useState<"existing" | "new">("new");
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [creating, setCreating] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const reset = () => {
     setStep(1);
