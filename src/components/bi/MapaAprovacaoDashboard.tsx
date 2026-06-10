@@ -240,7 +240,7 @@ export default function MapaAprovacaoDashboard() {
               <div className="flex items-center justify-between mb-1">
                 <kpi.icon className={cn("h-4 w-4", kpi.color)} />
               </div>
-              <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{kpi.label}</p>
+              <p className="text-[10px] font-bold text-[#CBD5E1] uppercase tracking-wider">{kpi.label}</p>
               <p className="text-base font-black text-white mt-0.5">{kpi.value}</p>
             </CardContent>
           </Card>
@@ -258,7 +258,7 @@ export default function MapaAprovacaoDashboard() {
               
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase text-white/40 font-bold tracking-widest">Status</Label>
+                  <Label className="text-[10px] uppercase text-[#CBD5E1] font-bold tracking-widest">Status</Label>
                   <Select value={filters.status} onValueChange={(v) => setFilters(f => ({ ...f, status: v }))}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-xs">
                       <SelectValue placeholder="Status" />
@@ -273,7 +273,7 @@ export default function MapaAprovacaoDashboard() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase text-white/40 font-bold tracking-widest">Cidade</Label>
+                  <Label className="text-[10px] uppercase text-[#CBD5E1] font-bold tracking-widest">Cidade</Label>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-white/20" />
                     <Input 
@@ -316,7 +316,7 @@ export default function MapaAprovacaoDashboard() {
               {regionsStats.slice(0, 5).map((reg, idx) => (
                 <div key={idx} className="space-y-1">
                   <div className="flex justify-between text-[11px]">
-                    <span className="text-white/60">{reg.name}</span>
+                    <span className="text-[#E2E8F0]">{reg.name}</span>
                     <span className="text-emerald-400 font-bold">{BRL(reg.valor)}</span>
                   </div>
                   <div className="h-1 bg-white/5 rounded-full overflow-hidden">
@@ -372,14 +372,14 @@ export default function MapaAprovacaoDashboard() {
                     <div className="p-1 min-w-[150px]">
                       <p className="font-bold text-sm border-b border-black/5 pb-1 mb-1">{reg.name}</p>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2">
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Total</p>
+                        <p className="text-[10px] text-[#E2E8F0] uppercase font-bold">Total</p>
                         <p className="text-[10px] text-right font-black">{BRL(reg.valor)}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Conv.</p>
+                        <p className="text-[10px] text-[#E2E8F0] uppercase font-bold">Conv.</p>
                         <p className="text-[10px] text-right font-black">{PCT(reg.conversao)}</p>
                       </div>
                       {topAreas.length > 0 && (
                         <div className="space-y-1 mt-2 pt-2 border-t border-black/5">
-                          <p className="text-[9px] uppercase font-black text-muted-foreground tracking-tighter">Áreas Principais</p>
+                          <p className="text-[9px] uppercase font-black text-[#E2E8F0] tracking-tighter">Áreas Principais</p>
                           {topAreas.map(([slug, count], i) => (
                             <div key={i} className="flex justify-between items-center text-[10px]">
                               <span className="truncate max-w-[100px]">{findArea(first.business_unit as any, slug)?.label || slug}</span>
@@ -401,36 +401,36 @@ export default function MapaAprovacaoDashboard() {
                 <div className="flex justify-between mb-4">
                   <div className="space-y-1">
                     <h3 className="text-lg font-black text-white">{selectedClient.client.name}</h3>
-                    <p className="text-xs text-white/40">{selectedClient.client.city}, {selectedClient.client.country}</p>
+                    <p className="text-xs text-[#CBD5E1]">{selectedClient.client.city}, {selectedClient.client.country}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-white/40" onClick={() => setSelectedClient(null)}>✕</Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-[#CBD5E1]" onClick={() => setSelectedClient(null)}>✕</Button>
                 </div>
                 
                 <div className="space-y-4 flex-1">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
-                      <p className="text-[10px] text-white/40 uppercase font-bold">Valor</p>
+                      <p className="text-[10px] text-[#CBD5E1] uppercase font-bold">Valor</p>
                       <p className="text-xs font-black text-white">{BRL(selectedClient.total_amount || 0)}</p>
                     </div>
                     <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
-                      <p className="text-[10px] text-white/40 uppercase font-bold">Status</p>
+                      <p className="text-[10px] text-[#CBD5E1] uppercase font-bold">Status</p>
                       <p className="text-xs font-black" style={{ color: STATUS_COLORS[selectedClient.status] }}>{STATUS_LABELS[selectedClient.status] || selectedClient.status}</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-[11px]">
-                      <span className="text-white/40">Responsável</span>
+                      <span className="text-[#CBD5E1]">Responsável</span>
                       <span className="text-white/80">{selectedClient.commercial_responsible || '—'}</span>
                     </div>
                     <div className="flex justify-between text-[11px]">
-                      <span className="text-white/40">Data</span>
+                      <span className="text-[#CBD5E1]">Data</span>
                       <span className="text-white/80">{new Date(selectedClient.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
 
                   <div className="space-y-2 pt-2 border-t border-white/5">
-                    <p className="text-[10px] uppercase text-white/40 font-bold">Áreas</p>
+                    <p className="text-[10px] uppercase text-[#CBD5E1] font-bold">Áreas</p>
                     <div className="flex flex-wrap gap-1">
                       {selectedClient.areas.map((a, i) => (
                         <Badge key={i} variant="outline" className="text-[9px] h-4 px-1.5 bg-white/5 border-white/10 text-white/70">

@@ -98,13 +98,13 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-[#0b1526]/95 backdrop-blur-2xl border border-white/10 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-xl ring-1 ring-white/5">
-        <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em] mb-3 border-b border-white/5 pb-2">{label}</p>
+        <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em] mb-3 border-b border-white/10 pb-2">{label}</p>
         <div className="space-y-2.5">
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-12">
               <div className="flex items-center gap-2.5">
-                <div className="w-2 h-2 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
-                <span className="text-xs font-medium text-[#CBD5E1]">{entry.name}</span>
+                <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
+                <span className="text-xs font-semibold text-[#E2E8F0]">{entry.name}</span>
               </div>
               <span className="text-xs font-bold text-white">
                 {formatter ? formatter(entry.value) : entry.value}
@@ -694,7 +694,7 @@ export default function BIFinanceiro() {
             <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
               <Filter className="h-3.5 w-3.5 text-white/70" />
             </div>
-            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">Filtros Estratégicos</CardTitle>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E2E8F0] group-hover:text-white transition-colors">Filtros Estratégicos</CardTitle>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all" onClick={exportCSV}>Exportar</Button>
@@ -712,25 +712,25 @@ export default function BIFinanceiro() {
 
 
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">De</Label>
-            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">De</Label>
+            <Input className="bg-white/5 border-white/10 text-white focus:ring-primary/20" type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Até</Label>
-            <Input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Até</Label>
+            <Input className="bg-white/5 border-white/10 text-white focus:ring-primary/20" type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Competência</Label>
-            <Input
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Competência</Label>
+            <Input className="bg-white/5 border-white/10 text-white focus:ring-primary/20"
               placeholder="YYYY-MM ou Todas"
               value={filters.competence === "all" ? "" : filters.competence}
               onChange={(e) => setFilters({ ...filters, competence: e.target.value || "all" })}
             />
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Cliente</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Cliente</Label>
             <Select value={filters.clientId} onValueChange={(v) => setFilters({ ...filters, clientId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {cats.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -738,9 +738,9 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Fornecedor</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Fornecedor</Label>
             <Select value={filters.supplierId} onValueChange={(v) => setFilters({ ...filters, supplierId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {cats.suppliers.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -748,9 +748,9 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Unidade de negócio</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Unidade de negócio</Label>
             <Select value={filters.bu} onValueChange={(v) => setFilters({ ...filters, bu: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {(businessUnits.data ?? []).map((b) => (
@@ -760,9 +760,9 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Área Principal</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Área Principal</Label>
             <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {getAreasFor(filters.bu === "all" ? null : (filters.bu as CompanyCode)).map((a) => (
@@ -772,9 +772,9 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Banco / Conta</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Banco / Conta</Label>
             <Select value={filters.bankId} onValueChange={(v) => setFilters({ ...filters, bankId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {(banks.data ?? []).map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
@@ -782,9 +782,9 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Status de pagamento</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Status de pagamento</Label>
             <Select value={filters.paymentStatus} onValueChange={(v) => setFilters({ ...filters, paymentStatus: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="em_aberto">Em aberto</SelectItem>
@@ -795,9 +795,9 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Categoria</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Categoria</Label>
             <Select value={filters.categoryId} onValueChange={(v) => setFilters({ ...filters, categoryId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {cats.categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -805,9 +805,9 @@ export default function BIFinanceiro() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Origem</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Origem</Label>
             <Select value={filters.origin} onValueChange={(v) => setFilters({ ...filters, origin: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 <SelectItem value="manual">Manual</SelectItem>
@@ -877,7 +877,7 @@ export default function BIFinanceiro() {
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#F8FAFC] group-hover:text-[#CBD5E1] transition-colors uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
@@ -905,7 +905,7 @@ export default function BIFinanceiro() {
                         {kpi.trendValue}
                       </div>
                     )}
-                    <span className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide">
+                    <span className="text-[11px] font-medium text-[#F8FAFC] uppercase tracking-wide">
                       {kpi.sub}
                     </span>
                   </div>
@@ -968,7 +968,7 @@ export default function BIFinanceiro() {
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                  <span className="text-[10px] font-black tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/60 transition-colors uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
@@ -986,7 +986,7 @@ export default function BIFinanceiro() {
                   <h2 className="text-3xl font-black tracking-tighter text-white">
                     {kpi.value}
                   </h2>
-                  <p className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                  <p className="text-[11px] font-bold text-[#CBD5E1] uppercase tracking-tight">
                     {kpi.sub}
                   </p>
                 </div>
@@ -1001,7 +1001,7 @@ export default function BIFinanceiro() {
         <Card className="border border-white/5 shadow-2xl overflow-hidden relative bg-[#1a2233]/40 backdrop-blur-xl group">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           <CardHeader className="relative z-10 border-b border-white/5 bg-white/[0.02]">
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Resumo Financeiro Estratégico</CardTitle>
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Resumo Financeiro Estratégico</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10 p-6">
 
@@ -1021,7 +1021,7 @@ export default function BIFinanceiro() {
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-white">{BRL(s.value)}</div>
-                          <div className="text-[10px] font-medium text-[#94A3B8]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="text-[10px] font-medium text-[#F8FAFC]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
@@ -1043,7 +1043,7 @@ export default function BIFinanceiro() {
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-white">{BRL(s.value)}</div>
-                          <div className="text-[10px] font-medium text-[#94A3B8]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="text-[10px] font-medium text-[#F8FAFC]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
@@ -1306,17 +1306,17 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader className="bg-[#0b1526]/50">
                   <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {contasReceberCriticas.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem contas a receber críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem contas a receber críticas</TableCell></TableRow>
                   )}
                   {contasReceberCriticas.map((r) => (
                     <TableRow key={r.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group/row">
@@ -1342,17 +1342,17 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Fornecedor</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Vencimento</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Dias atraso</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Prioridade</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Fornecedor</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Vencimento</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Dias atraso</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Prioridade</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {contasPagarCriticas.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem contas a pagar críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem contas a pagar críticas</TableCell></TableRow>
                   )}
                   {contasPagarCriticas.map((r) => (
                     <TableRow key={r.id}>
@@ -1380,17 +1380,17 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Data</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Descrição</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conta</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Origem</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Data</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Descrição</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Conta</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Origem</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendentesConciliacao.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Tudo conciliado</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Tudo conciliado</TableCell></TableRow>
                   )}
                   {pendentesConciliacao.map((r) => (
                     <TableRow key={r.id}>
@@ -1415,17 +1415,17 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Receita</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Recebida</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Em aberto</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Vencido</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Taxa pag.</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Receita</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Recebida</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Em aberto</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Vencido</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Taxa pag.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {topClientes.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem dados</TableCell></TableRow>
                   )}
                   {topClientes
                     .sort((a, b) => b.receita - a.receita)
@@ -1451,14 +1451,14 @@ export default function BIFinanceiro() {
       <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
         <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.02]">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-white/40" />
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Insights Financeiros</CardTitle>
+            <Sparkles className="h-4 w-4 text-[#CBD5E1]" />
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Insights Financeiros</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pt-6">
 
           {insights.length === 0 && (
-            <p className="text-sm text-white/40">Sem alertas relevantes no período.</p>
+            <p className="text-sm text-[#CBD5E1]">Sem alertas relevantes no período.</p>
           )}
           {insights.map((ins, i) => (
             <div key={i} className="rounded-lg border p-3 space-y-1">
@@ -1468,8 +1468,8 @@ export default function BIFinanceiro() {
                   {ins.severidade}
                 </Badge>
               </div>
-              <p className="text-xs text-white/40">{ins.descricao}</p>
-              <p className="text-xs"><span className="text-white/40">Ação sugerida: </span>{ins.acao}</p>
+              <p className="text-xs text-[#CBD5E1]">{ins.descricao}</p>
+              <p className="text-xs"><span className="text-[#CBD5E1]">Ação sugerida: </span><span className="text-[#E2E8F0] font-medium">{ins.acao}</span></p>
             </div>
           ))}
         </CardContent>
@@ -1498,11 +1498,11 @@ function Kpi({
     <Card>
       <CardContent className="p-4 space-y-1">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-white/40">{label}</p>
+          <p className="text-xs text-[#CBD5E1]">{label}</p>
           {Icon && <Icon className={`h-4 w-4 ${toneClass}`} />}
         </div>
         <p className={`text-lg font-semibold leading-tight ${toneClass}`} title={value}>{value}</p>
-        {sub && <p className="text-xs text-white/40">{sub}</p>}
+        {sub && <p className="text-xs text-[#CBD5E1]">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -1512,7 +1512,7 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
   return (
     <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden group hover:border-white/10 transition-all duration-500">
       <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01]">
-        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F8FAFC] group-hover:text-[#CBD5E1] transition-colors">
           {title}
         </CardTitle>
       </CardHeader>
@@ -1524,12 +1524,12 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 function Empty() {
   return (
-    <div className="flex h-[280px] items-center justify-center text-sm text-[#94A3B8]">
+    <div className="flex h-[280px] items-center justify-center text-sm text-[#F8FAFC]">
       <div className="text-center">
         <div className="bg-white/5 p-4 rounded-full mb-4 inline-block ring-1 ring-white/10">
-          <CalendarRange className="h-6 w-6 text-white/30" />
+          <CalendarRange className="h-6 w-6 text-[#CBD5E1]" />
         </div>
-        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-[#94A3B8]">Sem dados para o período selecionado</p>
+        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-[#F8FAFC]">Sem dados para o período selecionado</p>
       </div>
     </div>
   );

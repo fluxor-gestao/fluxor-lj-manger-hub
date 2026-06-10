@@ -94,13 +94,13 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-[#0b1526]/95 backdrop-blur-2xl border border-white/10 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-xl ring-1 ring-white/5">
-        <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em] mb-3 border-b border-white/5 pb-2">{label}</p>
+        <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em] mb-3 border-b border-white/10 pb-2">{label}</p>
         <div className="space-y-2.5">
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-12">
               <div className="flex items-center gap-2.5">
-                <div className="w-2 h-2 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
-                <span className="text-xs font-medium text-[#CBD5E1]">{entry.name}</span>
+                <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
+                <span className="text-xs font-semibold text-[#E2E8F0]">{entry.name}</span>
               </div>
               <span className="text-xs font-bold text-white">
                 {formatter ? formatter(entry.value) : entry.value}
@@ -666,7 +666,7 @@ export default function BIComercial() {
             <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
               <Filter className="h-3.5 w-3.5 text-white/70" />
             </div>
-            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">Filtros Comerciais</CardTitle>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E2E8F0] group-hover:text-white transition-colors">Filtros Comerciais</CardTitle>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all" onClick={exportCSV}>Exportar</Button>
@@ -684,17 +684,17 @@ export default function BIComercial() {
 
 
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">De</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">De</Label>
             <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
-            <Label className="text-xs">Até</Label>
-            <Input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Até</Label>
+            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Responsável</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Responsável</Label>
             <Select value={filters.responsible} onValueChange={(v) => setFilters({ ...filters, responsible: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {responsibles.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
@@ -702,9 +702,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Cliente</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Cliente</Label>
             <Select value={filters.clientId} onValueChange={(v) => setFilters({ ...filters, clientId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {cats.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -712,9 +712,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Status</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Status</Label>
             <Select value={filters.status} onValueChange={(v) => setFilters({ ...filters, status: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {ALL_STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s] ?? s}</SelectItem>)}
@@ -722,9 +722,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Unidade de negócio</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Unidade de negócio</Label>
             <Select value={filters.bu} onValueChange={(v) => setFilters({ ...filters, bu: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {(businessUnits.data ?? []).map((b) => (
@@ -734,9 +734,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Área principal</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Área principal</Label>
             <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {getAreasFor(filters.bu === "all" ? null : (filters.bu as CompanyCode)).map((a) => (
@@ -746,9 +746,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Tipo de serviço</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Tipo de serviço</Label>
             <Select value={filters.serviceType} onValueChange={(v) => setFilters({ ...filters, serviceType: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {serviceTypes.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -1239,14 +1239,14 @@ export default function BIComercial() {
               <Table>
                 <TableHeader className="bg-[#0b1526]/50">
                   <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                     <TableHead className="h-12"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1404,12 +1404,12 @@ export default function BIComercial() {
             <div key={i} className="rounded-lg border p-3 space-y-1">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{ins.titulo}</p>
-                <Badge variant={ins.severidade === "alta" ? "destructive" : ins.severidade === "media" ? "default" : "secondary"}>
+                <Badge variant={ins.severidade === "alta" ? "destructive" : ins.severidade === "media" ? "default" : "secondary"} className="text-white font-bold">
                   {ins.severidade}
                 </Badge>
               </div>
-              <p className="text-xs text-white/40">{ins.descricao}</p>
-              <p className="text-xs"><span className="text-white/40">Ação sugerida: </span>{ins.acao}</p>
+              <p className="text-xs text-[#CBD5E1]">{ins.descricao}</p>
+              <p className="text-xs"><span className="text-[#CBD5E1]">Ação sugerida: </span><span className="text-[#E2E8F0] font-medium">{ins.acao}</span></p>
             </div>
           ))}
         </CardContent>
