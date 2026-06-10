@@ -135,13 +135,16 @@ export default function MapaAprovacaoDashboard() {
   // Geocoding logic
   useEffect(() => {
     const clientsToGeocode = devisList
-      .filter(d => d.client?.city && d.client?.country && d.client.latitude === null)
+      .filter(d => d.client?.city && (d.client?.country || d.client?.address) && d.client.latitude === null)
       .map(d => d.client);
     
-    if (clientsToGeocode.length > 0) {
+    // De-duplicate clients
+    const uniqueClients = Array.from(new Map(clientsToGeocode.map(c => [c.id, c])).values());
+    
+    if (uniqueClients.length > 0) {
       const processGeocoding = async () => {
-        for (const client of clientsToGeocode.slice(0, 5)) {
-          const query = `${client.city}, ${client.country}`;
+        for (const client of uniqueClients.slice(0, 10)) {
+          const query = `${client.city}${client.country ? `, ${client.country}` : ''}`;
           try {
             const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
               headers: { 'User-Agent': 'Lovable-BI-Map/1.0' }
@@ -152,11 +155,14 @@ export default function MapaAprovacaoDashboard() {
               const lon = parseFloat(geoData[0].lon);
               await supabase
                 .from("clients")
-                .update({ latitude: lat, longitude: lon })
+                .update({ latitude: lat, longitude: lon } as any)
                 .eq("id", client.id);
             }
-          } catch (e) { console.error(e); }
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          } catch (e) { 
+            console.error("Geocoding failed for", client.name, e); 
+          }
+          // Nominatim usage policy: 1 request per second
+          await new Promise(resolve => setTimeout(resolve, 1050));
         }
       };
       processGeocoding();
