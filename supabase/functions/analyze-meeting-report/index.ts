@@ -90,6 +90,7 @@ Sua tarefa: extrair (1) idioma detectado, (2) dados do cliente, (3) resumo da re
                   type: "object",
                   properties: {
                     title: { type: "string" }, service_type: { type: "string" }, responsible_sector: { type: "string" },
+                    responsible_sectors: { type: "array", items: { type: "string" }, description: "Lista de áreas/setores identificados na reunião. Use slugs técnicos como: migratorio, civil, fiscal, contabil, topografia, licenciamento, consultoria, bpo_financeiro." },
                     scope_description: { type: "string" }, proposal_structure: { type: "string" },
                     scope_items: {
                       type: "array",
@@ -101,7 +102,7 @@ Sua tarefa: extrair (1) idioma detectado, (2) dados do cliente, (3) resumo da re
                     },
                     total_amount: { type: "number" }, deadline_date: { type: "string" },
                   },
-                  required: ["title", "service_type", "responsible_sector", "scope_description", "proposal_structure", "scope_items", "total_amount", "deadline_date"],
+                  required: ["title", "service_type", "responsible_sector", "responsible_sectors", "scope_description", "proposal_structure", "scope_items", "total_amount", "deadline_date"],
                 },
               },
               required: ["detected_language", "client", "meeting", "devis"],

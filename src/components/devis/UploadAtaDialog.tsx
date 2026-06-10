@@ -8,8 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Eye, Check, X, Info } from "lucide-react";
+import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Eye, Check, X, Info, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { MultiAreaSelector } from "./MultiAreaSelector";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import type { CompanyCode } from "@/lib/companyCodes";
 
 export type AnalyzedClient = {
   name: string;
@@ -26,6 +30,7 @@ export type AnalyzedDevis = {
   title: string;
   service_type: string;
   responsible_sector: string;
+  responsible_sectors: string[];
   scope_description: string;
   proposal_structure: string;
   scope_items: { letter: string; title: string; description: string; amount: number }[];
@@ -88,6 +93,8 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [creating, setCreating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+  const [meetingDate, setMeetingDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
 
   const reset = () => {
     setStep(1);
@@ -180,8 +187,11 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       await new Promise(r => setTimeout(r, 600));
 
       const p = data.payload as AnalyzedPayload;
+      p.meeting.date = format(new Date(), "yyyy-MM-dd"); // Forçar data atual conforme solicitado
       setPayload(p);
       setEditClient(p.client);
+      setMeetingDate(p.meeting.date);
+      setSelectedAreas(p.devis.responsible_sectors || (p.devis.responsible_sector ? [p.devis.responsible_sector] : []));
       
       const docNorm = normalize(p.client.document);
       const emailNorm = (p.client.email || "").toLowerCase().trim();
@@ -243,7 +253,12 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
         return;
       }
 
-      onConfirm({ client_id: clientId, payload });
+      const finalPayload = {
+        ...payload,
+        meeting: { ...payload.meeting, date: meetingDate },
+        devis: { ...payload.devis, responsible_sectors: selectedAreas }
+      };
+      onConfirm({ client_id: clientId, payload: finalPayload });
       handleClose(false);
     } catch (e: any) {
       toast.error(e.message || "Falha ao confirmar");
@@ -442,7 +457,9 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-xs">
               <Badge variant="outline">Idioma detectado: {LANG_LABEL[payload.detected_language] || payload.detected_language}</Badge>
-              {payload.meeting.date && <Badge variant="outline">Reunião: {payload.meeting.date}</Badge>}
+              <Badge variant="outline" className="flex gap-1 items-center">
+                <Calendar className="h-3 w-3" /> Reunião: {format(new Date(meetingDate + "T12:00:00"), "dd/MM/yyyy")}
+              </Badge>
             </div>
 
             {/* Client card */}
@@ -594,8 +611,24 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   <p>{payload.devis.service_type || "—"}</p>
                 </div>
                 <div>
-                  <Label className="text-xs">Setor responsável</Label>
-                  <p>{payload.devis.responsible_sector || "—"}</p>
+                  <Label className="text-xs">Data da Reunião</Label>
+                  <p>{format(new Date(meetingDate + "T12:00:00"), "dd/MM/yyyy")}</p>
+                </div>
+                <div className="md:col-span-2 space-y-2 mt-2">
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs font-semibold flex items-center gap-1.5">
+                      <Sparkles className="h-3 w-3 text-primary" /> Áreas sugeridas pelo relatório
+                    </Label>
+                  </div>
+                  <MultiAreaSelector
+                    companyCode={""} // Será preenchido no contexto global do Devis, mas aqui permitimos seleção livre
+                    selectedAreas={selectedAreas}
+                    onChange={setSelectedAreas}
+                    placeholder="Selecione as áreas identificadas..."
+                  />
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Revise as áreas pré-selecionadas pela IA antes de prosseguir.
+                  </p>
                 </div>
                 <div>
                   <Label className="text-xs">Valor total</Label>
