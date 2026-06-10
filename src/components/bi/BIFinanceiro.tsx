@@ -685,25 +685,29 @@ export default function BIFinanceiro() {
 
   // ---------- render ----------
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       <ActiveCompanyBanner />
       {/* Filters */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="py-2 px-4 border-b bg-muted/10">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Filter className="h-3.5 w-3.5 text-primary" />
-              <CardTitle className="text-sm font-bold">Filtros Financeiros</CardTitle>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-7 text-[10px] px-2" onClick={exportCSV}>Exportar</Button>
-              <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={clearFilters}>
-                <Eraser className="h-3.5 w-3.5 mr-1" /> Limpar
-              </Button>
-            </div>
+      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
+        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.02] flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Filter className="h-3.5 w-3.5 text-white/40" />
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Filtros Avançados</CardTitle>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 border border-white/5" onClick={exportCSV}>Exportar</Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearFilters}
+              className="h-8 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 border border-white/5"
+            >
+              <Eraser className="h-3 w-3 mr-2" /> Limpar
+            </Button>
           </div>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 p-3">
+        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-6">
+
 
           <div>
             <Label className="text-xs">De</Label>
