@@ -383,7 +383,7 @@ function Comercial() {
       if (form.responsible_sectors.length === 0) {
         throw new Error("Selecione pelo menos uma área responsável.");
       }
-      const { data: newDevis, error } = await supabase.from("devis").insert({
+      const insertPayload: any = {
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
         commercial_responsible: form.commercial_responsible || null,
@@ -398,13 +398,15 @@ function Comercial() {
         devis_number: form.devis_number || null,
         service_type: form.service_type || aiAccepted.service_type || null,
         responsible_sector: form.responsible_sectors[0] || null,
-        responsible_sectors: form.responsible_sectors as any,
         scope_description: aiAccepted.scope_description || null,
         proposal_structure: aiAccepted.proposal_structure || null,
         source_language: form.source_language || "pt",
         business_unit: form.business_unit,
-      }).select("id").single();
+      };
+
+      const { data: newDevis, error } = await supabase.from("devis").insert(insertPayload).select("id").single();
       if (error) throw error;
+
 
       // Inserir as múltiplas áreas na tabela de relacionamento
       if (newDevis && form.responsible_sectors.length > 0) {
