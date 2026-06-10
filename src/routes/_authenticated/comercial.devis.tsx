@@ -134,6 +134,7 @@ function Comercial() {
   const [generating, setGenerating] = useState(false);
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
   const [enrichmentOpen, setEnrichmentOpen] = useState(false);
+  const [bulkEnrichmentOpen, setBulkEnrichmentOpen] = useState(false);
   const [selectedClientToEnrich, setSelectedClientToEnrich] = useState<any>(null);
 
   // Reset paginação quando filtros mudam
