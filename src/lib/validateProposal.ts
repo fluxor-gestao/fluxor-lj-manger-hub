@@ -15,7 +15,12 @@ const REQUIRED = [
 
 export function getMissingClauses(text?: string | null): string[] {
   const t = (text || "").toString();
-  return REQUIRED.filter((m) => !t.includes(m));
+  // Se o texto parece conter os cabeçalhos das seções em formato Markdown (## I., ## II., etc),
+  // consideramos válido mesmo sem o ponto final exato em alguns casos de formatação.
+  return REQUIRED.filter((m) => {
+    const pattern = new RegExp(`(##\\s+${m.replace(".", "\\.")}|\\b${m.replace(".", "\\.")}\\s+)`, "i");
+    return !pattern.test(t);
+  });
 }
 
 export function isProposalComplete(text?: string | null): boolean {
