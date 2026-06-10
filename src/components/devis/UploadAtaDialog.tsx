@@ -175,7 +175,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       } else {
         setMatchMode("new");
       }
-      setStep(3);
+      setStep(4);
     } catch (e: any) {
       toast.error(e.message || "Falha ao analisar a ata");
       setStep(1);
