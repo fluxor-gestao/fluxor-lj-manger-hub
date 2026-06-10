@@ -1327,7 +1327,7 @@ export default function BIFinanceiro() {
                         {r.dias > 0 ? <Badge variant="destructive" className="animate-pulse">{r.dias}d</Badge> : <span className="text-white/50">{r.dias}</span>}
                       </TableCell>
                       <TableCell><Badge variant="outline" className="border-white/20 text-white/90 font-medium">{r.status}</Badge></TableCell>
-                      <TableCell className="text-white/90 text-xs">{r.acao}</TableCell>
+                      <TableCell className="text-white font-medium text-xs bg-white/5">{r.acao}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

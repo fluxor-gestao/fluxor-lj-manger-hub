@@ -1269,7 +1269,7 @@ export default function BIComercial() {
                       <TableCell className="text-right text-white/90">
                         {r.diasParada > 14 ? <Badge variant="destructive" className="animate-pulse">{r.diasParada}d</Badge> : `${r.diasParada}d`}
                       </TableCell>
-                      <TableCell className="text-white/90 text-xs">{r.acao}</TableCell>
+                      <TableCell className="text-white font-medium text-xs bg-white/5">{r.acao}</TableCell>
                       <TableCell>
                         <Button asChild size="sm" variant="ghost">
                           <Link to="/comercial/devis/$id" params={{ id: r.id }}>
