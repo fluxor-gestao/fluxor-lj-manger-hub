@@ -1161,14 +1161,14 @@ export default function BIFinanceiro() {
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={monthly}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
                 <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                <Bar dataKey="Receita Prev" fill="#10B981" fillOpacity={0.2} radius={[2, 2, 0, 0]} />
-                <Bar dataKey="Receita" fill="#10B981" fillOpacity={0.8} radius={[2, 2, 0, 0]} />
-                <Bar dataKey="Despesa Prev" fill="#EF4444" fillOpacity={0.2} radius={[2, 2, 0, 0]} />
-                <Bar dataKey="Despesa" fill="#EF4444" fillOpacity={0.8} radius={[2, 2, 0, 0]} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94A3B8' }} />
+                <Bar dataKey="Receita Prev" fill="#10B981" fillOpacity={0.15} radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="Receita" fill="#10B981" fillOpacity={0.9} radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="Despesa Prev" fill="#EF4444" fillOpacity={0.15} radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="Despesa" fill="#EF4444" fillOpacity={0.9} radius={[4, 4, 0, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           )}
