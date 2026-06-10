@@ -343,9 +343,9 @@ export default function RapportPage() {
       })));
 
       // 2. Persist to learning table
-      const { data: existing } = await supabase
+      const { data: existing } = await (supabase
         .from("financial_classification_rules")
-        .select("id, occurrence_count")
+        .select("id, occurrence_count") as any)
         .eq("pattern", tx.description)
         .maybeSingle();
 
