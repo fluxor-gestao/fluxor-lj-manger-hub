@@ -918,12 +918,13 @@ export default function BIComercial() {
 
       <div className="grid gap-3 lg:grid-cols-2">
 
-        <Card className="border-0 shadow-sm overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-          <CardHeader className="relative z-10 border-b bg-muted/20">
-            <CardTitle className="text-lg font-bold">Resumo por Empresa e Área</CardTitle>
+        <Card className="border border-white/5 shadow-2xl overflow-hidden relative bg-[#1a2233]/40 backdrop-blur-xl group">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <CardHeader className="relative z-10 border-b border-white/5 bg-white/[0.02]">
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Resumo por Empresa e Área</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10 p-6">
+
             <div className="grid gap-8">
               <div className="space-y-3">
                 <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Por Empresa</h4>
