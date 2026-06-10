@@ -618,25 +618,26 @@ export default function BIComercial() {
 
   // ----- render -----
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <ActiveCompanyBanner />
       {/* Filtros */}
-      <Card>
-        <CardHeader className="pb-3">
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="py-2 px-4 border-b bg-muted/10">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-primary" />
-              <CardTitle className="text-base">Filtros comerciais</CardTitle>
+              <Filter className="h-3.5 w-3.5 text-primary" />
+              <CardTitle className="text-sm font-bold">Filtros Comerciais</CardTitle>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={exportCSV}>Exportar CSV</Button>
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                <Eraser className="h-4 w-4 mr-1" /> Limpar
+              <Button variant="outline" size="sm" className="h-7 text-[10px] px-2" onClick={exportCSV}>Exportar</Button>
+              <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={clearFilters}>
+                <Eraser className="h-3.5 w-3.5 mr-1" /> Limpar
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 p-3">
+
           <div>
             <Label className="text-xs">De</Label>
             <Input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
@@ -713,7 +714,8 @@ export default function BIComercial() {
       </Card>
 
       {/* KPIs Modernos */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+
         {[
           { 
             label: "Total de Propostas", 
@@ -781,7 +783,7 @@ export default function BIComercial() {
         ))}
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { 
             label: "Em Negociação", 
@@ -849,7 +851,8 @@ export default function BIComercial() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-3 lg:grid-cols-2">
+
         <Card className="border-0 shadow-sm overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
           <CardHeader className="relative z-10 border-b bg-muted/20">
