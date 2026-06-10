@@ -965,11 +965,19 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={statsPorArea} dataKey="valorAceito" nameKey="name" innerRadius={55} outerRadius={100}>
-                  {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <Pie 
+                  data={statsPorArea} 
+                  dataKey="valorAceito" 
+                  nameKey="name" 
+                  innerRadius={60} 
+                  outerRadius={100} 
+                  paddingAngle={5}
+                  stroke="none"
+                >
+                  {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} className="hover:opacity-80 transition-opacity" />)}
                 </Pie>
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           )}
