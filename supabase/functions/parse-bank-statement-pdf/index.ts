@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "Extraia TODAS as transações de um extrato bancário. Datas em ISO (YYYY-MM-DD). Valores em número (positivo crédito, negativo débito)." },
+          { role: "system", content: "Extraia TODAS as transações de um extrato bancário. Datas em ISO (YYYY-MM-DD). Valores em número (positivo crédito, negativo débito). Para cada transação, forneça o campo 'description' original e um novo campo 'interpreted_description' com uma versão simplificada e legível (ex: 'PIX RECEBIDO 123' -> 'Recebimento PIX', 'TRF INTERNA' -> 'Transferência entre contas')." },
           { role: "user", content: userContent },
         ],
         tools: [{
@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
                     properties: {
                       date: { type: "string" },
                       description: { type: "string" },
+                      interpreted_description: { type: "string" },
                       amount: { type: "number" },
                       document: { type: "string" },
                     },

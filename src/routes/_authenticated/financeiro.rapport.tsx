@@ -183,6 +183,7 @@ type Transaction = {
   id: string;
   date: string;
   description: string;
+  interpretedDescription: string;
   type: "entrada" | "saida";
   amount: number;
   suggestedCategory: string;
@@ -234,6 +235,7 @@ export default function RapportPage() {
       id: tx.id,
       date: tx.date,
       description: tx.description,
+      interpretedDescription: tx.interpretedDescription,
       amount: tx.amount,
       type: tx.type,
       accountName: tx.accountName || "N/A"
@@ -523,7 +525,8 @@ export default function RapportPage() {
                     <TableRow>
                       <TableHead className="text-[10px] uppercase font-bold">Conta</TableHead>
                       <TableHead className="text-[10px] uppercase font-bold">Data</TableHead>
-                      <TableHead className="text-[10px] uppercase font-bold">Descrição</TableHead>
+                      <TableHead className="text-[10px] uppercase font-bold">Descrição Original</TableHead>
+                      <TableHead className="text-[10px] uppercase font-bold">Descrição Interpretada</TableHead>
                       <TableHead className="text-[10px] uppercase font-bold text-right">Valor</TableHead>
                       <TableHead className="text-[10px] uppercase font-bold">Categoria</TableHead>
                     </TableRow>
@@ -537,7 +540,8 @@ export default function RapportPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-xs font-medium">{new Date(tx.date).toLocaleDateString("pt-BR")}</TableCell>
-                        <TableCell className="text-xs font-bold">{tx.description}</TableCell>
+                        <TableCell className="text-[10px] text-muted-foreground italic" title={tx.description}>{tx.description}</TableCell>
+                        <TableCell className="text-xs font-bold text-primary">{tx.interpretedDescription}</TableCell>
                         <TableCell className={cn("text-xs font-black text-right", tx.type === "entrada" ? "text-emerald-600" : "text-rose-600")}>
                           {tx.type === "entrada" ? "+" : "−"} {fmtCurrency(tx.amount, language)}
                         </TableCell>
