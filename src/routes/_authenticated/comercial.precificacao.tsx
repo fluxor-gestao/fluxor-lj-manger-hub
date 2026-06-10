@@ -34,9 +34,15 @@ function Precificacao() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Partial<ServicePrice> | null>(null);
   const [isAiSearching, setIsAiSearching] = useState(false);
+
+  const categories = useMemo(() => {
+    const cats = new Set(services.map(s => s.category));
+    return Array.from(cats).sort();
+  }, [services]);
 
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["service_prices"],
