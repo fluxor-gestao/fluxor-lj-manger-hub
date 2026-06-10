@@ -82,6 +82,7 @@ type DevisData = {
     name: string;
     city: string | null;
     country: string | null;
+    address: string | null;
     latitude: number | null;
     longitude: number | null;
     company: string | null;
