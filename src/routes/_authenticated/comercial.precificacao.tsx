@@ -39,11 +39,6 @@ function Precificacao() {
   const [editingService, setEditingService] = useState<Partial<ServicePrice> | null>(null);
   const [isAiSearching, setIsAiSearching] = useState(false);
 
-  const categories = useMemo(() => {
-    const cats = new Set(services.map(s => s.category));
-    return Array.from(cats).sort();
-  }, [services]);
-
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["service_prices"],
     queryFn: async () => {
@@ -55,6 +50,11 @@ function Precificacao() {
       return data as ServicePrice[];
     },
   });
+
+  const categories = useMemo(() => {
+    const cats = new Set(services.map(s => s.category));
+    return Array.from(cats).sort();
+  }, [services]);
 
   const saveService = useMutation({
     mutationFn: async (service: Partial<ServicePrice>) => {
