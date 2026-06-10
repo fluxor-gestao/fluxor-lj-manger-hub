@@ -1302,14 +1302,14 @@ export default function BIFinanceiro() {
           <Card>
             <CardContent className="p-0">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="text-right">Dias atraso</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Próxima ação</TableHead>
+                <TableHeader className="bg-[#0b1526]/50">
+                  <TableRow className="hover:bg-transparent border-white/5">
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
