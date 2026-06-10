@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Calculator, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface DevisPricingManagerProps {
   devisId: string;
