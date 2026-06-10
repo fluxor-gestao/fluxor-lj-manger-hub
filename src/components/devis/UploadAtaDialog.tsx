@@ -8,12 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Eye, Check, X, Info, Calendar } from "lucide-react";
+import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Eye, Check, X, Info, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MultiAreaSelector } from "./MultiAreaSelector";
-import { format } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { CompanyCode } from "@/lib/companyCodes";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 export type AnalyzedClient = {
   name: string;
@@ -187,10 +189,24 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       await new Promise(r => setTimeout(r, 600));
 
       const p = data.payload as AnalyzedPayload;
-      p.meeting.date = format(new Date(), "yyyy-MM-dd"); // Forçar data atual conforme solicitado
+      
+      // Lógica de Data:
+      // 1. Se a IA detectou uma data válida no texto, usa ela.
+      // 2. Caso contrário, usa a data atual (do upload).
+      const todayStr = format(new Date(), "yyyy-MM-dd");
+      let finalDate = todayStr;
+      
+      if (p.meeting.date) {
+        const parsed = parseISO(p.meeting.date);
+        if (isValid(parsed)) {
+          finalDate = p.meeting.date;
+        }
+      }
+      
+      p.meeting.date = finalDate;
       setPayload(p);
       setEditClient(p.client);
-      setMeetingDate(p.meeting.date);
+      setMeetingDate(finalDate);
       setSelectedAreas(p.devis.responsible_sectors || (p.devis.responsible_sector ? [p.devis.responsible_sector] : []));
       
       const docNorm = normalize(p.client.document);
@@ -458,7 +474,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
             <div className="flex items-center gap-2 text-xs">
               <Badge variant="outline">Idioma detectado: {LANG_LABEL[payload.detected_language] || payload.detected_language}</Badge>
               <Badge variant="outline" className="flex gap-1 items-center">
-                <Calendar className="h-3 w-3" /> Reunião: {format(new Date(meetingDate + "T12:00:00"), "dd/MM/yyyy")}
+                <CalendarIcon className="h-3 w-3" /> Reunião: {format(parseISO(meetingDate), "dd/MM/yyyy")}
               </Badge>
             </div>
 
@@ -612,7 +628,23 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                 </div>
                 <div>
                   <Label className="text-xs">Data da Reunião</Label>
-                  <p>{format(new Date(meetingDate + "T12:00:00"), "dd/MM/yyyy")}</p>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-full justify-start font-normal h-8 mt-1">
+                        <CalendarIcon className="mr-2 h-3 w-3" />
+                        {format(parseISO(meetingDate), "dd/MM/yyyy")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={parseISO(meetingDate)}
+                        onSelect={(date) => date && setMeetingDate(format(date, "yyyy-MM-dd"))}
+                        initialFocus
+                        locale={ptBR}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="md:col-span-2 space-y-2 mt-2">
                   <div className="flex items-center gap-2">
