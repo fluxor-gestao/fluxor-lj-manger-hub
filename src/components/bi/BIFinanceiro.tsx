@@ -694,7 +694,7 @@ export default function BIFinanceiro() {
             <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
               <Filter className="h-3.5 w-3.5 text-white/70" />
             </div>
-            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">Filtros Estratégicos</CardTitle>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E2E8F0] group-hover:text-white transition-colors">Filtros Estratégicos</CardTitle>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all" onClick={exportCSV}>Exportar</Button>
