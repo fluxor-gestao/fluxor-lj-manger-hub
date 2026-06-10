@@ -1075,7 +1075,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1099,7 +1099,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1186,7 +1186,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px', paddingLeft: '20px' }} />
+                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px', paddingLeft: '20px', color: '#94A3B8', textTransform: 'uppercase' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1284,7 +1284,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend />
+                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
