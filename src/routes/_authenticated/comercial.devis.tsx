@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useParams, Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PRICING_STATUS_COLORS, PRICING_STATUS_LABELS } from "@/components/devis/DevisPricingManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
@@ -130,7 +131,7 @@ function Comercial() {
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
 
   // Reset paginação quando filtros mudam
-  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterAreas, filterStart, filterEnd]);
+  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterAreas, filterStart, filterEnd, filterPricing]);
   useEffect(() => { setClientsPage(0); }, [clientsSearch]);
   // Reseta área quando empresa muda nos filtros
   useEffect(() => { setFilterAreas([]); }, [filterCompany, companyCode]);
@@ -172,7 +173,7 @@ function Comercial() {
   const endISO = filterEnd ? format(filterEnd, "yyyy-MM-dd") : null;
   const effectiveCompany = companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null);
   const devisListQuery = useQuery({
-    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany, areas: filterAreas }],
+    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany, areas: filterAreas, pricing: filterPricing }],
     queryFn: async () => {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
@@ -189,6 +190,7 @@ function Comercial() {
         // Filtra por devis que possuem PELO MENOS UMA das áreas selecionadas
         q = q.filter("devis_service_areas.area_slug", "in", `(${filterAreas.join(",")})`);
       }
+      if (filterPricing !== "all") q = q.eq("pricing_status", filterPricing);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -307,6 +309,7 @@ function Comercial() {
   const kanbanDevis = useMemo(() => {
     return devisSummary.filter((d: any) => {
       if (filterClient !== "all" && d.client_id !== filterClient) return false;
+      if (filterPricing !== "all" && d.pricing_status !== filterPricing) return false;
       if (filterCompany !== "all" && d.business_unit !== filterCompany) return false;
       if (filterAreas.length > 0) {
         const itemAreas = (d.devis_service_areas || []).map((a: any) => a.area_slug);
@@ -614,7 +617,7 @@ function Comercial() {
             <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
               <Filter className="h-4 w-4" /> Filtros
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
               <div>
                 <Label className="text-xs">Status {view === "kanban" && <span className="text-[10px]">(desativado no Kanban)</span>}</Label>
                 <Select value={filterStatus} onValueChange={setFilterStatus} disabled={view === "kanban"}>
