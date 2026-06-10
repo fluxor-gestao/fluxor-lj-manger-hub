@@ -1403,7 +1403,7 @@ export default function BIComercial() {
           {insights.map((ins, i) => (
             <div key={i} className="rounded-lg border p-3 space-y-1">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">{ins.titulo}</p>
+                <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{ins.titulo}</p>
                 <Badge variant={ins.severidade === "alta" ? "destructive" : ins.severidade === "media" ? "default" : "secondary"}>
                   {ins.severidade}
                 </Badge>
