@@ -416,6 +416,11 @@ function ContasAReceberPage() {
         open={!!detail}
         onOpenChange={(o) => { if (!o) setDetail(null); }}
       />
+      <FaturaPreviewDialog
+        row={faturaRow}
+        open={!!faturaRow}
+        onOpenChange={(o) => { if (!o) setFaturaRow(null); }}
+      />
       <AlertDialog open={!!toDelete} onOpenChange={(o) => { if (!o) setToDelete(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
