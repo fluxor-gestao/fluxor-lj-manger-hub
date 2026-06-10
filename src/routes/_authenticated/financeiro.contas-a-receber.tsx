@@ -61,11 +61,13 @@ type Row = {
   document_reference: string | null;
   notes: string | null;
   client_id: string | null;
+  devis_id: string | null;
+  devis_number: string | null;
   client: { name: string } | null;
 };
 
 const COLS =
-  "id, due_date, entry_date, competence_month, movement_description, counterparty_name, amount_in, total_brl, paid_amount, open_amount, payment_status, document_reference, notes, client_id, client:clients(name)";
+  "id, due_date, entry_date, competence_month, movement_description, counterparty_name, amount_in, total_brl, paid_amount, open_amount, payment_status, document_reference, notes, client_id, devis_id, devis_number, client:clients(name)";
 
 type Status = "pago" | "parcial" | "vencido" | "aberto";
 
@@ -156,7 +158,7 @@ function ContasAReceberPage() {
       if (dueFrom && (!r.due_date || r.due_date < dueFrom)) return false;
       if (dueTo && (!r.due_date || r.due_date > dueTo)) return false;
       if (s) {
-        const hay = `${r.movement_description ?? ""} ${r.counterparty_name ?? ""} ${r.client?.name ?? ""}`.toLowerCase();
+        const hay = `${r.movement_description ?? ""} ${r.counterparty_name ?? ""} ${r.client?.name ?? ""} ${r.devis_number ?? ""}`.toLowerCase();
         if (!hay.includes(s)) return false;
       }
       void t;
@@ -345,8 +347,20 @@ function ContasAReceberPage() {
                 return (
                   <TableRow key={r.id} className="even:bg-muted/20 hover:bg-muted/40">
                     <TableCell className="py-2 font-medium">{cliente}</TableCell>
-                    <TableCell className="py-2 max-w-[280px] truncate" title={r.movement_description ?? ""}>
-                      {r.movement_description ?? "—"}
+                    <TableCell className="py-2">
+                      <button
+                        onClick={() => setDetail(r as CobrancaRow)}
+                        className="text-left hover:text-primary transition-colors group flex flex-col items-start gap-1"
+                      >
+                        <span className="max-w-[280px] truncate font-medium group-hover:underline" title={r.movement_description ?? ""}>
+                          {r.movement_description ?? "—"}
+                        </span>
+                        {r.devis_number && (
+                          <Badge variant="secondary" className="text-[10px] py-0 px-1 font-mono">
+                            {r.devis_number}
+                          </Badge>
+                        )}
+                      </button>
                     </TableCell>
                     <TableCell className="py-2 whitespace-nowrap text-xs tabular-nums">
                       {fmtDateBR(r.due_date)}
