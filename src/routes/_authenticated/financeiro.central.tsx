@@ -447,13 +447,43 @@ function Financeiro() {
 
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="w-full">
-        <TabsList className="h-auto flex-wrap justify-start gap-1 bg-muted/60 p-1">
-          <TabsTrigger value="consolidado" className="gap-1.5"><LayoutGrid className="h-3.5 w-3.5" />Consolidado</TabsTrigger>
-          <TabsTrigger value="receber" className="gap-1.5"><ArrowDownCircle className="h-3.5 w-3.5" />Contas a Receber</TabsTrigger>
-          <TabsTrigger value="pagar" className="gap-1.5"><ArrowUpCircle className="h-3.5 w-3.5" />Contas a Pagar</TabsTrigger>
-          <TabsTrigger value="realizados" className="gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" />Realizados</TabsTrigger>
-          <TabsTrigger value="fluxo" className="gap-1.5"><Banknote className="h-3.5 w-3.5" />Fluxo Bancário</TabsTrigger>
-          <TabsTrigger value="analitico" className="gap-1.5"><BarChart3 className="h-3.5 w-3.5" />Receitas × Despesas</TabsTrigger>
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger 
+            value="consolidado" 
+            className="gap-2 py-2.5 px-4 rounded-xl border border-transparent data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:border-primary/20 data-[state=active]:shadow-sm transition-all duration-200 hover:bg-muted/50"
+          >
+            <LayoutGrid className="h-4 w-4" />Consolidado
+          </TabsTrigger>
+          <TabsTrigger 
+            value="receber" 
+            className="gap-2 py-2.5 px-4 rounded-xl border border-transparent data-[state=active]:bg-white data-[state=active]:text-success data-[state=active]:border-success/20 data-[state=active]:shadow-sm transition-all duration-200 hover:bg-muted/50"
+          >
+            <ArrowDownCircle className="h-4 w-4" />Contas a Receber
+          </TabsTrigger>
+          <TabsTrigger 
+            value="pagar" 
+            className="gap-2 py-2.5 px-4 rounded-xl border border-transparent data-[state=active]:bg-white data-[state=active]:text-destructive data-[state=active]:border-destructive/20 data-[state=active]:shadow-sm transition-all duration-200 hover:bg-muted/50"
+          >
+            <ArrowUpCircle className="h-4 w-4" />Contas a Pagar
+          </TabsTrigger>
+          <TabsTrigger 
+            value="realizados" 
+            className="gap-2 py-2.5 px-4 rounded-xl border border-transparent data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:border-blue-200 data-[state=active]:shadow-sm transition-all duration-200 hover:bg-muted/50"
+          >
+            <CheckCircle2 className="h-4 w-4" />Realizados
+          </TabsTrigger>
+          <TabsTrigger 
+            value="fluxo" 
+            className="gap-2 py-2.5 px-4 rounded-xl border border-transparent data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:border-amber-200 data-[state=active]:shadow-sm transition-all duration-200 hover:bg-muted/50"
+          >
+            <Banknote className="h-4 w-4" />Fluxo Bancário
+          </TabsTrigger>
+          <TabsTrigger 
+            value="analitico" 
+            className="gap-2 py-2.5 px-4 rounded-xl border border-transparent data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:border-indigo-200 data-[state=active]:shadow-sm transition-all duration-200 hover:bg-muted/50"
+          >
+            <BarChart3 className="h-4 w-4" />Receitas × Despesas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="consolidado" className="mt-4 space-y-2">
