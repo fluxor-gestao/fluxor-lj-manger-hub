@@ -147,7 +147,18 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
   const handleAnalyze = async () => {
     if (!file) return;
     setAnalyzing(true);
-    setStep( step === 1 ? 2 : step ); // Adjusting logic for flow
+    setProgress(5);
+    
+    // Simulação de progresso enquanto a IA trabalha
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 92) return prev;
+        // Sobe mais rápido no início, mais devagar no final
+        const increment = prev < 40 ? 8 : prev < 70 ? 3 : 1;
+        return prev + increment;
+      });
+    }, 600);
+
     try {
       const b64 = await fileToBase64(file);
       const { data, error } = await supabase.functions.invoke("analyze-meeting-report", {
@@ -158,12 +169,20 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           language_hint: langHint,
         },
       });
+      
+      clearInterval(interval);
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      setProgress(100);
+      
+      // Pequeno delay para o usuário ver o 100%
+      await new Promise(r => setTimeout(r, 600));
+
       const p = data.payload as AnalyzedPayload;
       setPayload(p);
       setEditClient(p.client);
-      // Pre-select match
+      
       const docNorm = normalize(p.client.document);
       const emailNorm = (p.client.email || "").toLowerCase().trim();
       const exact = clients.find(
@@ -179,6 +198,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       }
       setStep(4);
     } catch (e: any) {
+      clearInterval(interval);
       toast.error(e.message || "Falha ao analisar a ata");
       setStep(1);
     } finally {
