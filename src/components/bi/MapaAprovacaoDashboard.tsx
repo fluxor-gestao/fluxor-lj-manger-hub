@@ -97,7 +97,8 @@ export default function MapaAprovacaoDashboard() {
   const [filters, setFilters] = useState({
     status: "all",
     city: "",
-    country: "all"
+    country: "all",
+    locationStatus: "all"
   });
 
   const { data: devisList = [], isLoading } = useQuery({
@@ -115,7 +116,7 @@ export default function MapaAprovacaoDashboard() {
           business_unit, 
           responsible_sector,
           created_at,
-          client:clients(id, name, city, country, address, latitude, longitude, company),
+          client:clients(id, name, city, country, address, latitude, longitude, company, location_status),
           areas:devis_service_areas(area_slug)
         `);
 
@@ -174,9 +175,18 @@ export default function MapaAprovacaoDashboard() {
     return devisList.filter(d => {
       if (filters.city && !d.client.city?.toLowerCase().includes(filters.city.toLowerCase())) return false;
       if (filters.country !== "all" && d.client.country !== filters.country) return false;
+      if (filters.locationStatus !== "all" && d.client.location_status !== filters.locationStatus) return false;
       return true;
     });
   }, [devisList, filters]);
+
+  const stats = useMemo(() => {
+    const totalClients = new Set(devisList.map(d => d.client.id)).size;
+    const locatedClients = new Set(devisList.filter(d => d.client.location_status === 'localizada').map(d => d.client.id)).size;
+    const pendingClients = totalClients - locatedClients;
+
+    return { totalClients, locatedClients, pendingClients };
+  }, [devisList]);
 
   const kpis = useMemo(() => {
     const total = filteredDevis.length;
@@ -186,10 +196,10 @@ export default function MapaAprovacaoDashboard() {
     const ticketMedio = aceitos > 0 ? valorAceito / aceitos : 0;
 
     return [
-      { label: "Clientes Mapeados", value: new Set(filteredDevis.map(d => d.client.id)).size, icon: Users, color: "text-blue-400" },
+      { label: "Clientes Mapeados", value: stats.locatedClients, icon: Users, color: "text-blue-400" },
+      { label: "Sem Localização", value: stats.pendingClients, icon: AlertCircle, color: "text-rose-400" },
       { label: "Devis Enviados", value: total, icon: FileText, color: "text-indigo-400" },
       { label: "Devis Aceitos", value: aceitos, icon: CheckCircle2, color: "text-emerald-400" },
-      { label: "Taxa Conversão", value: PCT(taxa), icon: TrendingUp, color: "text-violet-400" },
       { label: "Total Aceito", value: BRL(valorAceito), icon: DollarSign, color: "text-amber-400" },
       { label: "Ticket Médio", value: BRL(ticketMedio), icon: Target, color: "text-rose-400" },
     ];
@@ -268,6 +278,20 @@ export default function MapaAprovacaoDashboard() {
                       <SelectItem value="aceita">Aceitos</SelectItem>
                       <SelectItem value="enviada_ao_cliente">Enviados</SelectItem>
                       <SelectItem value="rejeitada">Recusados</SelectItem>
+                      </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase text-[#CBD5E1] font-bold tracking-widest">Localização</Label>
+                  <Select value={filters.locationStatus} onValueChange={(v) => setFilters(f => ({ ...f, locationStatus: v }))}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-xs">
+                      <SelectValue placeholder="Localização" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a2233] border-white/10 text-white">
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="localizada">Localizada</SelectItem>
+                      <SelectItem value="pendente">Pendente</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
