@@ -660,19 +660,21 @@ export default function BIComercial() {
     <div className="space-y-6">
       <ActiveCompanyBanner />
       {/* Filtros */}
-      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
-        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.02] flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Filter className="h-3.5 w-3.5 text-white/40" />
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Filtros Comerciais</CardTitle>
+      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group hover:border-white/10 transition-all duration-500">
+        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01] flex flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+              <Filter className="h-3.5 w-3.5 text-white/70" />
+            </div>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">Filtros Comerciais</CardTitle>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 border border-white/5" onClick={exportCSV}>Exportar</Button>
+            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all" onClick={exportCSV}>Exportar</Button>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={clearFilters}
-              className="h-8 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 border border-white/5"
+              className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all"
             >
               <Eraser className="h-3 w-3 mr-2" /> Limpar
             </Button>
