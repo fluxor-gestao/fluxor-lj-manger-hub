@@ -1033,14 +1033,14 @@ export default function BIComercial() {
         <ChartCard title="Propostas criadas vs aceitas por mês">
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="month" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="Criadas" stroke={COLORS[0]} strokeWidth={2} />
-                <Line type="monotone" dataKey="Aceitas" stroke={COLORS[2]} strokeWidth={2} />
+              <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="month" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend iconType="circle" />
+                <Line type="monotone" dataKey="Criadas" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Aceitas" stroke="#10B981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
