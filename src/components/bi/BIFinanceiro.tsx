@@ -968,7 +968,7 @@ export default function BIFinanceiro() {
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                  <span className="text-[10px] font-black tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/60 transition-colors uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
@@ -1001,7 +1001,7 @@ export default function BIFinanceiro() {
         <Card className="border border-white/5 shadow-2xl overflow-hidden relative bg-[#1a2233]/40 backdrop-blur-xl group">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           <CardHeader className="relative z-10 border-b border-white/5 bg-white/[0.02]">
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Resumo Financeiro Estratégico</CardTitle>
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Resumo Financeiro Estratégico</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10 p-6">
 
@@ -1316,7 +1316,7 @@ export default function BIFinanceiro() {
                 </TableHeader>
                 <TableBody>
                   {contasReceberCriticas.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem contas a receber críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem contas a receber críticas</TableCell></TableRow>
                   )}
                   {contasReceberCriticas.map((r) => (
                     <TableRow key={r.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group/row">
@@ -1352,7 +1352,7 @@ export default function BIFinanceiro() {
                 </TableHeader>
                 <TableBody>
                   {contasPagarCriticas.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem contas a pagar críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem contas a pagar críticas</TableCell></TableRow>
                   )}
                   {contasPagarCriticas.map((r) => (
                     <TableRow key={r.id}>
@@ -1390,7 +1390,7 @@ export default function BIFinanceiro() {
                 </TableHeader>
                 <TableBody>
                   {pendentesConciliacao.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Tudo conciliado</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Tudo conciliado</TableCell></TableRow>
                   )}
                   {pendentesConciliacao.map((r) => (
                     <TableRow key={r.id}>
@@ -1425,7 +1425,7 @@ export default function BIFinanceiro() {
                 </TableHeader>
                 <TableBody>
                   {topClientes.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem dados</TableCell></TableRow>
                   )}
                   {topClientes
                     .sort((a, b) => b.receita - a.receita)
@@ -1451,14 +1451,14 @@ export default function BIFinanceiro() {
       <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
         <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.02]">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-white/40" />
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Insights Financeiros</CardTitle>
+            <Sparkles className="h-4 w-4 text-[#CBD5E1]" />
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Insights Financeiros</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pt-6">
 
           {insights.length === 0 && (
-            <p className="text-sm text-white/40">Sem alertas relevantes no período.</p>
+            <p className="text-sm text-[#CBD5E1]">Sem alertas relevantes no período.</p>
           )}
           {insights.map((ins, i) => (
             <div key={i} className="rounded-lg border p-3 space-y-1">
@@ -1468,8 +1468,8 @@ export default function BIFinanceiro() {
                   {ins.severidade}
                 </Badge>
               </div>
-              <p className="text-xs text-white/40">{ins.descricao}</p>
-              <p className="text-xs"><span className="text-white/40">Ação sugerida: </span>{ins.acao}</p>
+              <p className="text-xs text-[#CBD5E1]">{ins.descricao}</p>
+              <p className="text-xs"><span className="text-[#CBD5E1]">Ação sugerida: </span><span className="text-[#E2E8F0] font-medium">{ins.acao}</span></p>
             </div>
           ))}
         </CardContent>
@@ -1498,11 +1498,11 @@ function Kpi({
     <Card>
       <CardContent className="p-4 space-y-1">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-white/40">{label}</p>
+          <p className="text-xs text-[#CBD5E1]">{label}</p>
           {Icon && <Icon className={`h-4 w-4 ${toneClass}`} />}
         </div>
         <p className={`text-lg font-semibold leading-tight ${toneClass}`} title={value}>{value}</p>
-        {sub && <p className="text-xs text-white/40">{sub}</p>}
+        {sub && <p className="text-xs text-[#CBD5E1]">{sub}</p>}
       </CardContent>
     </Card>
   );

@@ -1404,12 +1404,12 @@ export default function BIComercial() {
             <div key={i} className="rounded-lg border p-3 space-y-1">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{ins.titulo}</p>
-                <Badge variant={ins.severidade === "alta" ? "destructive" : ins.severidade === "media" ? "default" : "secondary"}>
+                <Badge variant={ins.severidade === "alta" ? "destructive" : ins.severidade === "media" ? "default" : "secondary"} className="text-white font-bold">
                   {ins.severidade}
                 </Badge>
               </div>
-              <p className="text-xs text-white/40">{ins.descricao}</p>
-              <p className="text-xs"><span className="text-white/40">Ação sugerida: </span>{ins.acao}</p>
+              <p className="text-xs text-[#CBD5E1]">{ins.descricao}</p>
+              <p className="text-xs"><span className="text-[#CBD5E1]">Ação sugerida: </span><span className="text-[#E2E8F0] font-medium">{ins.acao}</span></p>
             </div>
           ))}
         </CardContent>
