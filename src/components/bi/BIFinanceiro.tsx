@@ -1291,11 +1291,11 @@ export default function BIFinanceiro() {
 
       {/* Tables */}
       <Tabs value={tabFocus?.startsWith("categoria") ? "receber" : tabFocus ?? "receber"} onValueChange={(v) => setTabFocus(v)}>
-        <TabsList>
-          <TabsTrigger value="receber">Receber críticas</TabsTrigger>
-          <TabsTrigger value="pagar">Pagar críticas</TabsTrigger>
-          <TabsTrigger value="conciliacao">Pend. conciliação</TabsTrigger>
-          <TabsTrigger value="ranking">Ranking clientes</TabsTrigger>
+        <TabsList className="bg-[#1a2233]/40 border border-white/5 p-1 h-12 backdrop-blur-xl mb-6">
+          <TabsTrigger value="receber" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Receber críticas</TabsTrigger>
+          <TabsTrigger value="pagar" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Pagar críticas</TabsTrigger>
+          <TabsTrigger value="conciliacao" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Pend. conciliação</TabsTrigger>
+          <TabsTrigger value="ranking" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Ranking clientes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="receber">
