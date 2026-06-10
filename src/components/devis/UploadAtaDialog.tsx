@@ -319,11 +319,21 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
               
               <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center overflow-auto relative">
                 {file.type === "application/pdf" && previewUrl ? (
-                  <iframe 
-                    src={`${previewUrl}#toolbar=0`} 
-                    className="w-full h-full border-0"
-                    title="PDF Preview"
-                  />
+                  <object
+                    data={previewUrl}
+                    type="application/pdf"
+                    className="w-full h-full"
+                  >
+                    <div className="text-center p-8">
+                      <div className="bg-white rounded-full p-4 inline-flex mb-3 shadow-sm">
+                        <FileText className="h-10 w-10 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm font-medium">Visualização não disponível</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Seu navegador bloqueou a visualização direta. Você pode prosseguir com a análise normalmente.
+                      </p>
+                    </div>
+                  </object>
                 ) : file.type.startsWith("image/") && previewUrl ? (
                   <img src={previewUrl} alt="Preview" className="max-w-full h-auto" />
                 ) : (
