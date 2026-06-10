@@ -825,6 +825,7 @@ export type Database = {
           amount_in: number | null
           amount_out: number | null
           amount_signed: number | null
+          area_slug: string | null
           bank_account_id: string | null
           business_unit: string | null
           category_id: string | null
@@ -875,6 +876,7 @@ export type Database = {
           amount_in?: number | null
           amount_out?: number | null
           amount_signed?: number | null
+          area_slug?: string | null
           bank_account_id?: string | null
           business_unit?: string | null
           category_id?: string | null
@@ -925,6 +927,7 @@ export type Database = {
           amount_in?: number | null
           amount_out?: number | null
           amount_signed?: number | null
+          area_slug?: string | null
           bank_account_id?: string | null
           business_unit?: string | null
           category_id?: string | null
