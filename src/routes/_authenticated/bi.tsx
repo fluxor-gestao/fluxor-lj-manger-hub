@@ -183,6 +183,7 @@ function BI() {
             );
           })}
         </div>
+      </div>
 
       {activeDashboard ? (
         <div className="animate-in fade-in slide-in-from-top-2 duration-300 ease-out space-y-4">
