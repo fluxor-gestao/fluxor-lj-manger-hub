@@ -1436,15 +1436,15 @@ export default function BIFinanceiro() {
       </Tabs>
 
       {/* Insights */}
-      <Card>
-        <CardHeader>
+      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
+        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.02]">
           <div className="flex items-center gap-2">
-            <PieIcon className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base">Insights Financeiros</CardTitle>
+            <Sparkles className="h-4 w-4 text-white/40" />
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Insights Financeiros</CardTitle>
           </div>
-          <CardDescription>Sinais calculados a partir dos filtros atuais.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pt-6">
+
           {insights.length === 0 && (
             <p className="text-sm text-muted-foreground">Sem alertas relevantes no período.</p>
           )}
