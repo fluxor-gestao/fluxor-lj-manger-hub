@@ -86,6 +86,13 @@ function BI() {
         {visibleDashboards.map((dashboard) => {
           const Icon = dashboard.icon;
           const isActive = selectedDashboard === dashboard.id;
+          
+          const getDesc = (id: string) => {
+            if (id === "comercial") return "Acompanhe propostas, vendas e performance comercial.";
+            if (id === "financeiro") return "Controle receitas, despesas, resultados e fluxo financeiro.";
+            if (id === "operacao") return "Acompanhe processos, produtividade e execução operacional.";
+            return "Visualize indicadores e métricas estratégicas.";
+          };
 
           return (
             <Card
@@ -94,63 +101,74 @@ function BI() {
               tabIndex={0}
               onClick={() => setSelectedDashboard(dashboard.id)}
               className={cn(
-                "group relative overflow-hidden cursor-pointer border-0 shadow-lg transition-all duration-300 ease-out",
+                "group relative overflow-hidden cursor-pointer border-0 transition-all duration-500 ease-out",
                 isActive 
-                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background z-20" 
-                  : "grayscale-[0.3] hover:grayscale-0 opacity-80 hover:opacity-100",
+                  ? "ring-2 ring-primary ring-offset-4 ring-offset-background z-20 shadow-2xl" 
+                  : "shadow-lg hover:shadow-2xl hover:-translate-y-2",
                 selectedDashboard 
-                  ? "min-h-[60px] p-3" 
-                  : "min-h-[280px] p-8 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2"
+                  ? "min-h-[70px] p-3" 
+                  : "min-h-[320px] p-10 flex flex-col justify-between"
               )}
             >
+              {/* Premium Gradient Background */}
               <div className={cn(
-                "absolute inset-0 bg-gradient-to-br transition-opacity duration-300",
+                "absolute inset-0 bg-gradient-to-br transition-all duration-500",
                 dashboard.gradient,
                 selectedDashboard ? "opacity-90" : "opacity-100"
               )} />
               
-              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              {/* Glass/Glow Effects */}
+              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl transition-transform duration-700 group-hover:scale-150" />
 
               <div className={cn(
-                "relative z-10 flex h-full transition-all duration-300",
-                selectedDashboard ? "flex-row items-center gap-3" : "flex-col items-start"
+                "relative z-10 flex h-full transition-all duration-500",
+                selectedDashboard ? "flex-row items-center gap-4" : "flex-col items-start"
               )}>
                 <div className={cn(
-                  "rounded-xl bg-white/20 p-3 backdrop-blur-md transition-all duration-300 group-hover:scale-105",
-                  selectedDashboard ? "p-1.5" : "p-4"
+                  "rounded-2xl bg-white/20 backdrop-blur-xl border border-white/20 shadow-xl transition-all duration-500 group-hover:rotate-3 group-hover:scale-110",
+                  selectedDashboard ? "p-2" : "p-6"
                 )}>
                   <Icon 
                     className={cn(
-                      "text-white drop-shadow-sm",
-                      selectedDashboard ? "h-5 w-5" : "h-10 w-10"
+                      "text-white drop-shadow-2xl",
+                      selectedDashboard ? "h-6 w-6" : "h-14 w-14"
                     )} 
-                    strokeWidth={selectedDashboard ? 2 : 1.5} 
+                    strokeWidth={1.5} 
                   />
                 </div>
                 
                 <div className={cn(
-                  "transition-all duration-300",
-                  selectedDashboard ? "flex-1" : "mt-6 w-full"
+                  "transition-all duration-500",
+                  selectedDashboard ? "flex-1" : "mt-8 w-full"
                 )}>
                   <h3 className={cn(
-                    "font-display font-bold text-white tracking-wide",
-                    selectedDashboard ? "text-sm" : "text-2xl"
+                    "font-display font-black text-white tracking-tight drop-shadow-sm",
+                    selectedDashboard ? "text-base" : "text-3xl"
                   )}>
                     {dashboard.title.replace("Dashboard ", "")}
                   </h3>
+                  
                   {!selectedDashboard && (
-                    <>
-                      <p className="text-white/80 text-sm mt-2 line-clamp-2">
-                        Acesse métricas de {dashboard.title.toLowerCase()} em tempo real.
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
+                      <p className="text-white/90 text-lg mt-3 leading-relaxed font-medium max-w-[280px]">
+                        {getDesc(dashboard.id)}
                       </p>
-                      <div className="mt-8 flex items-center text-sm font-semibold text-white">
-                        <span>Abrir Dashboard</span>
-                        <ArrowLeft className="ml-2 h-4 w-4 rotate-180 transition-transform group-hover:translate-x-1" />
-                      </div>
-                    </>
+                      
+                      <Button 
+                        variant="secondary" 
+                        className="mt-10 bg-white/95 text-foreground hover:bg-white hover:scale-105 transition-all shadow-xl border-0 font-bold group/btn"
+                      >
+                        Abrir Dashboard
+                        <ArrowLeft className="ml-2 h-4 w-4 rotate-180 transition-transform group-hover/btn:translate-x-1" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
+
+              {/* Decorative Border Glow */}
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Card>
           );
         })}
