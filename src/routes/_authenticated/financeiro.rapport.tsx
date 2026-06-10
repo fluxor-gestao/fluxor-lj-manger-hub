@@ -279,7 +279,7 @@ export default function RapportPage() {
       const baseDate = `${month}-10`;
       const amount = 15000 + Math.random() * 5000;
 
-      const processedStatements = statements.map(s => {
+      const processedStatements = await Promise.all(statements.map(async s => {
         let txs: Transaction[] = [];
         
         if (s.accountType.includes("Cobrança")) {
@@ -304,8 +304,28 @@ export default function RapportPage() {
           ];
         }
 
-        return { ...s, status: "ready" as const, transactions: txs };
-      });
+        // Apply learned rules to each transaction
+        const enrichedTxs = await Promise.all(txs.map(async tx => {
+          const { data: rule } = await supabase
+            .from("financial_classification_rules")
+            .select("category_id, confidence_level")
+            .eq("pattern", tx.description)
+            .maybeSingle();
+
+          if (rule) {
+            const cat = cats.categories.find(c => c.id === rule.category_id);
+            return {
+              ...tx,
+              categoryId: rule.category_id,
+              suggestedCategory: cat?.name || tx.suggestedCategory,
+              confidence: rule.confidence_level
+            };
+          }
+          return tx;
+        }));
+
+        return { ...s, status: "ready" as const, transactions: enrichedTxs };
+      }));
 
       setStatements(processedStatements);
       setIsProcessing(false);
