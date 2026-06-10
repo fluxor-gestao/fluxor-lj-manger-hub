@@ -76,6 +76,15 @@ export default function DevisCodePreviewDialog({
     };
   }, [open, prefix]);
 
+  useEffect(() => {
+    if (!code || !manualSequence) return;
+    const ym = new Date().toISOString().slice(0, 10).replace(/-/g, "").slice(0, 6);
+    const newCode = prefix + ym + manualSequence.padStart(3, "0");
+    if (newCode !== code) {
+      setCode(newCode);
+    }
+  }, [manualSequence, prefix, code]);
+
   const handleConfirm = () => {
     if (!code) return;
     onConfirm({
