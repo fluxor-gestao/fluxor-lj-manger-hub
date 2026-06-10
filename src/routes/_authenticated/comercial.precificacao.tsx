@@ -128,10 +128,12 @@ function Precificacao() {
     }
   };
 
-  const filteredServices = services.filter(s => 
-    s.name.toLowerCase().includes(search.toLowerCase()) || 
-    s.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredServices = services.filter(s => {
+    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) || 
+                         s.description?.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = filterCategory === "all" || s.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="space-y-6">
