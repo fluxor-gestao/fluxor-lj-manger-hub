@@ -91,6 +91,8 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
   const reset = () => {
     setStep(1);
     setFile(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
     setLangHint("auto");
     setAnalyzing(false);
     setPayload(null);
