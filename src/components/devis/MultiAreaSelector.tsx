@@ -3,11 +3,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AreaBadge } from "@/components/AreaBadge";
 import { getAreasFor } from "@/lib/businessAreas";
 import type { CompanyCode } from "@/lib/companyCodes";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
 
 interface MultiAreaSelectorProps {
   companyCode: CompanyCode | "";
@@ -24,7 +27,37 @@ export function MultiAreaSelector({
   placeholder = "Selecionar áreas...",
   className,
 }: MultiAreaSelectorProps) {
-  const areas = getAreasFor(companyCode as CompanyCode);
+  // 1. Áreas fixas do arquivo lib
+  const legacyAreas = getAreasFor(companyCode as CompanyCode);
+
+  // 2. Áreas dinâmicas do banco de dados (apenas ativas)
+  const { data: dbAreas = [], isLoading } = useQuery({
+    queryKey: ["business-areas", "active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_areas")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true })
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  // 3. Mescla as áreas (priorizando DB e evitando duplicatas por slug)
+  const allAreas = useMemo(() => {
+    const combined = [...dbAreas.map(a => ({ slug: a.slug, label: a.name }))];
+    
+    // Adiciona áreas legadas que ainda não estão no DB (opcional, para transição suave)
+    legacyAreas.forEach(la => {
+      if (!combined.some(ca => ca.slug === la.slug)) {
+        combined.push(la);
+      }
+    });
+    
+    return combined;
+  }, [dbAreas, legacyAreas]);
 
   const toggleArea = (slug: string) => {
     if (selectedAreas.includes(slug)) {
@@ -45,7 +78,7 @@ export function MultiAreaSelector({
           )}
           disabled={!companyCode}
         >
-          <div className="flex flex-wrap gap-1 items-center overflow-hidden">
+          <div className="flex flex-wrap gap-1 items-center overflow-hidden text-left">
             {selectedAreas.length > 0 ? (
               selectedAreas.map((slug) => (
                 <AreaBadge 
@@ -59,30 +92,31 @@ export function MultiAreaSelector({
               <span className="text-muted-foreground">{placeholder}</span>
             )}
           </div>
-          <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin opacity-50 ml-2" /> : <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-        <div className="p-2 space-y-2">
-          {areas.length === 0 ? (
+        <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
+          {allAreas.length === 0 ? (
             <div className="text-sm text-muted-foreground p-2 text-center">
-              Selecione uma empresa primeiro.
+              Nenhuma área disponível.
             </div>
           ) : (
-            areas.map((area) => (
+            allAreas.map((area) => (
               <div
                 key={area.slug}
-                className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md cursor-pointer"
+                className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md cursor-pointer group"
                 onClick={() => toggleArea(area.slug)}
               >
                 <Checkbox
                   id={`area-${area.slug}`}
                   checked={selectedAreas.includes(area.slug)}
                   onCheckedChange={() => toggleArea(area.slug)}
+                  className="pointer-events-none"
                 />
                 <Label
                   htmlFor={`area-${area.slug}`}
-                  className="flex-1 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="flex-1 cursor-pointer text-sm font-medium leading-none group-hover:text-primary transition-colors"
                 >
                   {area.label}
                 </Label>
@@ -91,11 +125,11 @@ export function MultiAreaSelector({
           )}
         </div>
         {selectedAreas.length > 0 && (
-          <div className="border-t p-2">
+          <div className="border-t p-2 bg-muted/20">
             <Button
               variant="ghost"
               size="sm"
-              className="w-full text-xs h-8"
+              className="w-full text-xs h-8 text-muted-foreground hover:text-destructive"
               onClick={() => onChange([])}
             >
               <X className="h-3 w-3 mr-2" />
