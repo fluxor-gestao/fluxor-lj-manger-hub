@@ -30,7 +30,13 @@ REGRA CRÍTICA DE IDIOMA (OBRIGATÓRIA):
 - Não traduza nomes próprios, valores monetários, datas, números ou siglas.
 
 Sua tarefa: extrair (1) idioma detectado, (2) dados do cliente, (3) resumo da reunião,
-(4) estrutura inicial da proposta comercial — respeitando estritamente a regra de idioma acima.`;
+(4) estrutura inicial da proposta comercial — respeitando estritamente a regra de idioma acima.
+
+REGRAS DE DATA:
+- Tente extrair a data real da reunião do conteúdo do relatório/ata.
+- Se encontrar uma data clara e específica (ex: "reunião realizada em 15/05/2026"), use-a no campo meeting.date (formato YYYY-MM-DD).
+- Se NÃO encontrar uma data explícita no texto, deixe o campo meeting.date vazio.
+- Priorize sempre a data que o texto menciona como sendo o momento da reunião.`;
 
     const userContent: any[] = [
       { type: "text", text: `Analise esta ata${file_name ? ` (${file_name})` : ""}. ${langInstr}` },
