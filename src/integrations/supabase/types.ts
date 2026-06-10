@@ -414,6 +414,8 @@ export type Database = {
           meeting_summary: string | null
           notes: string | null
           payment_terms_secondary: string | null
+          pricing_status: string | null
+          pricing_total: number | null
           proposal_structure: string | null
           proposal_structure_secondary: string | null
           reference_number: string | null
@@ -463,6 +465,8 @@ export type Database = {
           meeting_summary?: string | null
           notes?: string | null
           payment_terms_secondary?: string | null
+          pricing_status?: string | null
+          pricing_total?: number | null
           proposal_structure?: string | null
           proposal_structure_secondary?: string | null
           reference_number?: string | null
@@ -512,6 +516,8 @@ export type Database = {
           meeting_summary?: string | null
           notes?: string | null
           payment_terms_secondary?: string | null
+          pricing_status?: string | null
+          pricing_total?: number | null
           proposal_structure?: string | null
           proposal_structure_secondary?: string | null
           reference_number?: string | null
@@ -544,6 +550,60 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devis_pricing_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          devis_id: string
+          id: string
+          name: string
+          quantity: number | null
+          service_price_id: string | null
+          total_price: number
+          unit_price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          devis_id: string
+          id?: string
+          name: string
+          quantity?: number | null
+          service_price_id?: string | null
+          total_price: number
+          unit_price: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          devis_id?: string
+          id?: string
+          name?: string
+          quantity?: number | null
+          service_price_id?: string | null
+          total_price?: number
+          unit_price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_pricing_items_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devis_pricing_items_service_price_id_fkey"
+            columns: ["service_price_id"]
+            isOneToOne: false
+            referencedRelation: "service_prices"
             referencedColumns: ["id"]
           },
         ]
