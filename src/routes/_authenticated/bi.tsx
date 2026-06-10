@@ -41,13 +41,7 @@ function BI() {
   const visibleDashboards = dashboards.filter((d) => canAccessBiDashboard(d.id, hasRole));
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardId | null>(null);
 
-  // Se o usuário só tem acesso a 1 dashboard, abrir direto
-  useEffect(() => {
-    if (!roleLoading && visibleDashboards.length === 1 && !selectedDashboard) {
-      setSelectedDashboard(visibleDashboards[0].id);
-    }
-  }, [roleLoading, visibleDashboards, selectedDashboard]);
-
+  // Removida a auto-seleção conforme solicitado
   const activeDashboard =
     selectedDashboard && canAccessBiDashboard(selectedDashboard, hasRole)
       ? dashboards.find((dashboard) => dashboard.id === selectedDashboard)
