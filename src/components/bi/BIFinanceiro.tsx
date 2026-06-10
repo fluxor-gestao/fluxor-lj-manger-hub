@@ -1113,13 +1113,13 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : resultadoArea.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={resultadoArea}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="value">
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={30}>
                   {resultadoArea.map((entry, i) => (
-                    <Cell key={i} fill={entry.value >= 0 ? CHART_COLORS[2] : CHART_COLORS[4]} />
+                    <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} fillOpacity={0.8} />
                   ))}
                 </Bar>
               </BarChart>
@@ -1131,14 +1131,14 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="month" fontSize={11} axisLine={false} tickLine={false} />
-                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" />
-                <Line type="monotone" dataKey="Receita" stroke="#10B981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="Despesa" stroke="#EF4444" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="Resultado" stroke="#0EA5E9" strokeWidth={3} strokeDasharray="5 5" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                <Line type="monotone" dataKey="Receita" stroke="#10B981" strokeWidth={3} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                <Line type="monotone" dataKey="Despesa" stroke="#EF4444" strokeWidth={3} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                <Line type="monotone" dataKey="Resultado" stroke="#38bdf8" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -1148,15 +1148,15 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="month" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
-                <Bar dataKey="Receita Prev" fill={CHART_COLORS[1]} />
-                <Bar dataKey="Receita" fill={CHART_COLORS[2]} />
-                <Bar dataKey="Despesa Prev" fill={CHART_COLORS[3]} />
-                <Bar dataKey="Despesa" fill={CHART_COLORS[4]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                <Bar dataKey="Receita Prev" fill="#10B981" fillOpacity={0.2} radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Receita" fill="#10B981" fillOpacity={0.8} radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Despesa Prev" fill="#EF4444" fillOpacity={0.2} radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Despesa" fill="#EF4444" fillOpacity={0.8} radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1166,13 +1166,13 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : despesaCategorias.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={despesaCategorias} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} onClick={(d: any) => setTabFocus(`categoria:${d.name}`)}>
+                <Pie data={despesaCategorias} dataKey="value" nameKey="name" innerRadius={60} outerRadius={80} paddingAngle={5} onClick={(d: any) => setTabFocus(`categoria:${d.name}`)}>
                   {despesaCategorias.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} stroke="none" />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px', paddingLeft: '20px' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1182,15 +1182,22 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : cashflow.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={cashflow}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="month" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Area type="monotone" dataKey="Acumulado" fill={CHART_COLORS[0]} stroke={CHART_COLORS[0]} fillOpacity={0.3} />
+                <defs>
+                  <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#38bdf8" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Area type="monotone" dataKey="Acumulado" stroke="#38bdf8" strokeWidth={3} fillOpacity={1} fill="url(#colorAcc)" />
               </AreaChart>
             </ResponsiveContainer>
           )}
         </ChartCard>
+
 
         <ChartCard title="Top 10 clientes por receita">
           {isLoading ? <Skeleton className="h-[260px]" /> : top10ClientesReceita.length === 0 ? <Empty /> : (
