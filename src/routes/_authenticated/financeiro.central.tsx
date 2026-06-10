@@ -441,14 +441,6 @@ function Financeiro() {
                 <SelectItem value="without_devis">Sem Devis</SelectItem>
               </SelectContent>
             </Select>
-              <SelectContent>
-                <SelectItem value="all">Todos status</SelectItem>
-                <SelectItem value="pendente">Pendente</SelectItem>
-                <SelectItem value="conciliado">Conciliado</SelectItem>
-                <SelectItem value="divergente">Divergente</SelectItem>
-                <SelectItem value="ignorado">Ignorado</SelectItem>
-              </SelectContent>
-            </Select>
             <Select value={originFilter} onValueChange={setOriginFilter}>
               <SelectTrigger><SelectValue placeholder="Origem" /></SelectTrigger>
               <SelectContent>
