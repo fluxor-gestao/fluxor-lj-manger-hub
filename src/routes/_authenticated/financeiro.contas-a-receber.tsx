@@ -29,6 +29,7 @@ import { CobrancaDetailSheet, type CobrancaRow } from "@/components/financeiro/C
 import { FaturaPreviewDialog } from "@/components/financeiro/FaturaPreviewDialog";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-receber")({
   component: ContasAReceberPage,
