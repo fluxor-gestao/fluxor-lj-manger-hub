@@ -753,139 +753,169 @@ export default function BIComercial() {
       </Card>
 
       {/* KPIs Modernos */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 
         {[
           { 
-            label: "Total de Propostas", 
+            label: "PROPOSTAS TOTAIS", 
             value: agg.total, 
-            sub: "Criadas no período",
+            sub: "Volume no período",
             icon: FileText, 
             color: "purple", 
-            gradient: "from-purple-500/10 to-purple-600/5",
-            border: "border-purple-500/20"
+            trend: "neutral",
+            trendValue: ""
           },
           { 
-            label: "Taxa de Conversão", 
+            label: "CONVERSÃO MÉDIA", 
             value: PCT(agg.conversao), 
             sub: "vs total enviadas",
             icon: Target, 
-            color: "blue", 
-            gradient: "from-blue-500/10 to-blue-600/5",
-            border: "border-blue-500/20",
-            trend: agg.conversao > 0.3 ? "pos" : "neutral"
+            color: "sky", 
+            trend: agg.conversao > 0.3 ? "pos" : "neutral",
+            trendValue: "Ideal > 30%"
           },
           { 
-            label: "Valor Aceito", 
+            label: "VALOR ACEITO", 
             value: BRL(agg.valorAceitoTotal), 
-            sub: `${agg.aceitas} propostas fechadas`,
+            sub: `${agg.aceitas} fechadas`,
             icon: Trophy, 
             color: "emerald", 
-            gradient: "from-emerald-500/10 to-emerald-600/5",
-            border: "border-emerald-500/20"
+            trend: "pos",
+            trendValue: ""
           },
           { 
-            label: "Ticket Médio", 
+            label: "TICKET MÉDIO", 
             value: BRL(agg.ticketAceito), 
             sub: "Por proposta aceita",
             icon: Activity, 
-            color: "indigo", 
-            gradient: "from-indigo-500/10 to-indigo-600/5",
-            border: "border-indigo-500/20"
+            color: "indigo",
+            trend: "neutral",
+            trendValue: ""
           },
         ].map((kpi, i) => (
-          <Card key={i} className={cn(
-            "group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-white/5 shadow-lg bg-background/40 backdrop-blur-sm",
-            kpi.border
-          )}>
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
             <div className={cn(
-              "absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl transition-all duration-700 group-hover:scale-150 group-hover:opacity-30 opacity-20",
-              `bg-${kpi.color}-500`
+              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              kpi.color === "purple" ? "bg-purple-500" : 
+              kpi.color === "sky" ? "bg-sky-500" : 
+              kpi.color === "emerald" ? "bg-emerald-500" : 
+              kpi.color === "indigo" ? "bg-indigo-500" : "bg-white"
             )} />
 
-            <CardHeader className="relative z-10 flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
-                {kpi.label}
-              </CardTitle>
-              <div className={cn(
-                "p-2.5 rounded-xl backdrop-blur-xl border transition-all duration-500 group-hover:rotate-6 group-hover:scale-110 shadow-lg",
-                `bg-${kpi.color}-500/10 border-${kpi.color}-500/20 text-${kpi.color}-500`
-              )}>
-                <kpi.icon className="h-5 w-5 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative z-10 pt-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-3xl font-black tracking-tighter transition-all duration-500 group-hover:tracking-tight group-hover:scale-[1.02] origin-left text-foreground">
-                  {kpi.value}
-                </span>
-                <div className="flex items-center mt-2 px-2 py-1 rounded-full bg-black/5 dark:bg-white/5 w-fit border border-white/5">
-                  {kpi.trend === "pos" ? (
-                    <ArrowUpRight className="h-3 w-3 text-emerald-500 mr-1 animate-bounce" />
-                  ) : kpi.trend === "neg" ? (
-                    <ArrowDownRight className="h-3 w-3 text-rose-500 mr-1 animate-bounce" />
-                  ) : (
-                    <Activity className="h-3 w-3 text-muted-foreground mr-1" />
-                  )}
-                  <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground whitespace-nowrap">
-                    {kpi.sub}
+            <CardContent className="p-6 relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                    {kpi.label}
                   </span>
+                  <div className={cn(
+                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
+                    kpi.color === "purple" ? "group-hover:bg-purple-500/20 group-hover:border-purple-500/20 group-hover:text-purple-400" :
+                    kpi.color === "sky" ? "group-hover:bg-sky-500/20 group-hover:border-sky-500/20 group-hover:text-sky-400" :
+                    kpi.color === "emerald" ? "group-hover:bg-emerald-500/20 group-hover:border-emerald-500/20 group-hover:text-emerald-400" :
+                    kpi.color === "indigo" ? "group-hover:bg-indigo-500/20 group-hover:border-indigo-500/20 group-hover:text-indigo-400" : ""
+                  )}>
+                    <kpi.icon className="h-4 w-4" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                    {kpi.value}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    {kpi.trend !== "neutral" && (
+                      <div className={cn(
+                        "flex items-center text-[11px] font-bold px-1.5 py-0.5 rounded-md",
+                        kpi.trend === "pos" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                      )}>
+                        {kpi.trend === "pos" ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
+                        {kpi.trendValue}
+                      </div>
+                    )}
+                    <span className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                      {kpi.sub}
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>
-            <div className={cn(
-              "absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-current transition-all duration-700 opacity-50",
-              `text-${kpi.color}-500`
-            )} />
           </Card>
         ))}
       </div>
 
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { 
-            label: "Em Negociação", 
+            label: "EM NEGOCIAÇÃO", 
             value: agg.emNeg, 
             sub: BRL(rows.filter(r => NEGOTIATION.includes(r.status)).reduce((a, b) => a + Number(b.total_amount ?? 0), 0)),
             icon: Clock, 
-            color: "orange",
-            gradient: "from-orange-500/10 to-orange-600/5",
-            border: "border-orange-500/20"
+            color: "orange"
           },
           { 
-            label: "Tempo Médio", 
-            value: `${agg.tempoMedio.toFixed(1)} dias`, 
-            sub: "Ciclo de venda",
+            label: "TEMPO MÉDIO", 
+            value: `${agg.tempoMedio.toFixed(1)} d`, 
+            sub: "Ciclo de conversão",
             icon: CalendarRange, 
-            color: "blue",
-            gradient: "from-blue-500/10 to-blue-600/5",
-            border: "border-blue-500/20"
+            color: "blue"
           },
           { 
-            label: "Propostas Paradas", 
+            label: "PROP. PARADAS", 
             value: agg.paradas, 
-            sub: "Há mais de 14 dias",
+            sub: "Sem interações > 14d",
             icon: AlertTriangle, 
-            color: "rose",
-            gradient: "from-rose-500/10 to-rose-600/5",
-            border: "border-rose-500/20",
-            trend: agg.paradas > 5 ? "neg" : "neutral"
+            color: "rose"
           },
           { 
-            label: "Vencidas", 
+            label: "VENCIDAS", 
             value: agg.vencidas, 
-            sub: "Prazo expirado",
+            sub: "Atraso no fechamento",
             icon: ShieldAlert, 
-            color: "red",
-            gradient: "from-red-500/10 to-red-600/5",
-            border: "border-red-500/20"
+            color: "red"
           },
         ].map((kpi, i) => (
-          <Card key={i} className={cn(
-            "group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-white/5 shadow-lg bg-background/40 backdrop-blur-sm",
-            kpi.border
-          )}>
+          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+            <div className={cn(
+              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              kpi.color === "orange" ? "bg-orange-500" : 
+              kpi.color === "blue" ? "bg-blue-500" : 
+              kpi.color === "rose" ? "bg-rose-500" : 
+              kpi.color === "red" ? "bg-red-500" : "bg-white"
+            )} />
+
+            <CardContent className="p-6 relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                    {kpi.label}
+                  </span>
+                  <div className={cn(
+                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
+                    kpi.color === "orange" ? "group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-400" :
+                    kpi.color === "blue" ? "group-hover:bg-blue-500/20 group-hover:border-blue-500/20 group-hover:text-blue-400" :
+                    kpi.color === "rose" ? "group-hover:bg-rose-500/20 group-hover:border-rose-500/20 group-hover:text-rose-400" :
+                    kpi.color === "red" ? "group-hover:bg-red-500/20 group-hover:border-red-500/20 group-hover:text-red-400" : ""
+                  )}>
+                    <kpi.icon className="h-4 w-4" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                    {kpi.value}
+                  </h2>
+                  <p className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                    {kpi.sub}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
             <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className={cn(
               "absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl transition-all duration-700 group-hover:scale-150 group-hover:opacity-30 opacity-20",
@@ -1430,12 +1460,15 @@ function Kpi({
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card>
-      <CardHeader className="pb-2"><CardTitle className="text-sm">{title}</CardTitle></CardHeader>
-      <CardContent>{children}</CardContent>
+    <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
+      <CardHeader className="pb-4 border-b border-white/5">
+        <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6">{children}</CardContent>
     </Card>
   );
 }
+
 
 function Empty() {
   return (
