@@ -195,29 +195,13 @@ function BI() {
       </div>
 
       {activeDashboard ? (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-300 ease-out">
+        <div className="animate-in fade-in slide-in-from-top-2 duration-300 ease-out space-y-4">
           <Card className="overflow-hidden border-0 shadow-2xl bg-background/50 backdrop-blur-sm">
-            <CardHeader className="border-b bg-muted/20 px-6 py-3 flex flex-row items-center justify-between space-y-0">
-              <div className="flex items-center gap-3">
-                <div className={cn("p-1.5 rounded-lg bg-gradient-to-br text-white shadow-sm", activeDashboard.gradient)}>
-                  <BarChart3 className="h-4 w-4" />
-                </div>
-                <CardTitle className="text-lg font-bold font-display">{activeDashboard.title}</CardTitle>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setSelectedDashboard(null)}
-                className="h-8 px-3 bg-background/50 hover:bg-primary/10 transition-colors border-primary/20"
-              >
-                <ArrowLeft className="h-3.5 w-3.5 mr-2" /> Voltar
-              </Button>
-            </CardHeader>
             <CardContent className="p-0">
               {activeDashboard.id === "financeiro" ? (
-                <div className="p-6"><BIFinanceiro /></div>
+                <div className="p-2"><BIFinanceiro /></div>
               ) : activeDashboard.id === "comercial" ? (
-                <div className="p-6"><BIComercial /></div>
+                <div className="p-2"><BIComercial /></div>
               ) : activeDashboard.embedUrl ? (
                 <iframe
                   title={activeDashboard.title}
