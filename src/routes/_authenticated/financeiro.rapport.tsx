@@ -22,7 +22,10 @@ import {
   Tag,
   Layers,
   Trash2,
+  Workflow,
+  PlusCircle,
 } from "lucide-react";
+import { SmartFlowAnalysis, type FlowTransaction } from "@/components/financeiro/SmartFlowAnalysis";
 import { toast } from "sonner";
 import {
   Bar,
