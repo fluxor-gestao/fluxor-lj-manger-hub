@@ -980,10 +980,10 @@ export default function BIComercial() {
                   paddingAngle={5}
                   stroke="none"
                 >
-                  {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} className="hover:opacity-80 transition-opacity" />)}
+                  {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1002,10 +1002,10 @@ export default function BIComercial() {
                   paddingAngle={5}
                   stroke="none"
                 >
-                  {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} className="hover:opacity-80 transition-opacity" />)}
+                  {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1015,11 +1015,11 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={statsPorEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
-                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-                <Tooltip content={<CustomTooltip formatter={PCT} />} />
-                <Bar dataKey="conversao" fill="#8B5CF6" radius={[6, 6, 0, 0]} barSize={40} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip content={<CustomTooltip formatter={PCT} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Bar dataKey="conversao" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={30} fillOpacity={0.8} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1029,11 +1029,11 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={statsPorArea} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
-                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-                <Tooltip content={<CustomTooltip formatter={PCT} />} />
-                <Bar dataKey="conversao" fill="#10B981" radius={[6, 6, 0, 0]} barSize={40} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip content={<CustomTooltip formatter={PCT} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Bar dataKey="conversao" fill="#10B981" radius={[4, 4, 0, 0]} barSize={30} fillOpacity={0.8} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1046,12 +1046,12 @@ export default function BIComercial() {
                 const stage = ev?.activePayload?.[0]?.payload?.stage;
                 if (stage) setTabFocus("criticas");
               }}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis type="number" fontSize={11} />
-                <YAxis type="category" dataKey="stage" width={110} fontSize={11} />
-                <Tooltip />
-                <Bar dataKey="value">
-                  {funnel.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis type="category" dataKey="stage" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+                  {funnel.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -1062,13 +1062,13 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="month" fontSize={11} axisLine={false} tickLine={false} />
-                <YAxis fontSize={11} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" />
-                <Line type="monotone" dataKey="Criadas" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="Aceitas" stroke="#10B981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <Line type="monotone" dataKey="Criadas" stroke="#8B5CF6" strokeWidth={3} dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="Aceitas" stroke="#10B981" strokeWidth={3} dot={false} activeDot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -1078,13 +1078,13 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="month" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
-                <Bar dataKey="Valor proposto" fill={COLORS[1]} />
-                <Bar dataKey="Valor aceito" fill={COLORS[2]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <Bar dataKey="Valor proposto" fill="#8B5CF6" fillOpacity={0.2} radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Valor aceito" fill="#10B981" fillOpacity={0.8} radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1094,15 +1094,16 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statusDist.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={statusDist} dataKey="value" nameKey="name" innerRadius={55} outerRadius={100}>
-                  {statusDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <Pie data={statusDist} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100} stroke="none">
+                  {statusDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
         </ChartCard>
+
 
         <ChartCard title="Top 10 clientes por valor proposto">
           {isLoading ? <Skeleton className="h-[280px]" /> : top10ClientesProp.length === 0 ? <Empty /> : (
