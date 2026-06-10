@@ -33,6 +33,7 @@ type AISuggestions = BaseAISuggestions & {
 import UploadAtaDialog, { type ConfirmedAtaResult } from "@/components/devis/UploadAtaDialog";
 import DevisCodePreviewDialog, { inferServicePrefix, type ServicePrefix } from "@/components/devis/DevisCodePreviewDialog";
 import ClientLocationEnrichment from "@/components/clients/ClientLocationEnrichment";
+import BulkClientLocationEnrichment from "@/components/clients/BulkClientLocationEnrichment";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { Pagination } from "@/components/Pagination";
@@ -133,6 +134,7 @@ function Comercial() {
   const [generating, setGenerating] = useState(false);
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
   const [enrichmentOpen, setEnrichmentOpen] = useState(false);
+  const [bulkEnrichmentOpen, setBulkEnrichmentOpen] = useState(false);
   const [selectedClientToEnrich, setSelectedClientToEnrich] = useState<any>(null);
 
   // Reset paginação quando filtros mudam
@@ -912,6 +914,15 @@ function Comercial() {
             }}
           />
 
+          <BulkClientLocationEnrichment 
+            open={bulkEnrichmentOpen}
+            onOpenChange={setBulkEnrichmentOpen}
+            onComplete={() => {
+              clientsListQuery.refetch();
+              queryClient.invalidateQueries({ queryKey: ["clients"] });
+            }}
+          />
+
           <DevisCodePreviewDialog
             open={codePreviewOpen}
             onOpenChange={(o) => {
@@ -1111,6 +1122,10 @@ function Comercial() {
                 input.click();
               }}>
                 <Upload className="h-4 w-4 mr-2" /> Upload de base
+              </Button>
+
+              <Button variant="outline" onClick={() => setBulkEnrichmentOpen(true)}>
+                <MapPin className="h-4 w-4 mr-2" /> Atualizar localizações pendentes
               </Button>
 
               <Dialog open={clientDialogOpen} onOpenChange={(o) => { setClientDialogOpen(o); if (!o) setClientForm(emptyClient); }}>
