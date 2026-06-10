@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Hash, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, Hash, FileText, ArrowRight } from "lucide-react";
 
 export type ServicePrefix = "DE" | "AM" | "CO" | "IM" | "GE";
 
@@ -46,6 +47,8 @@ export default function DevisCodePreviewDialog({
   const [prefix, setPrefix] = useState<ServicePrefix>(initialPrefix);
   const [code, setCode] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [manualSequence, setManualSequence] = useState<string>("");
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (open) setPrefix(initialPrefix);
@@ -57,15 +60,30 @@ export default function DevisCodePreviewDialog({
     setLoading(true);
     (async () => {
       const { data, error } = await supabase.rpc("next_devis_number", { _prefix: prefix });
-      if (!cancelled) {
-        setCode(error ? "" : (data as string));
-        setLoading(false);
-      }
+        if (!cancelled) {
+          const fetchedCode = error ? "" : (data as string);
+          setCode(fetchedCode);
+          // Extrair a sequência numérica do final (últimos 3 dígitos)
+          if (fetchedCode) {
+            const seq = fetchedCode.slice(-3);
+            setManualSequence(seq);
+          }
+          setLoading(false);
+        }
     })();
     return () => {
       cancelled = true;
     };
   }, [open, prefix]);
+
+  useEffect(() => {
+    if (!code || !manualSequence) return;
+    const ym = new Date().toISOString().slice(0, 10).replace(/-/g, "").slice(0, 6);
+    const newCode = prefix + ym + manualSequence.padStart(3, "0");
+    if (newCode !== code) {
+      setCode(newCode);
+    }
+  }, [manualSequence, prefix, code]);
 
   const handleConfirm = () => {
     if (!code) return;
@@ -116,10 +134,29 @@ export default function DevisCodePreviewDialog({
             </RadioGroup>
           </div>
 
-          <div className="rounded-md border bg-muted/30 p-4 text-center space-y-1">
+          <div className="rounded-md border bg-muted/30 p-4 text-center space-y-3">
             <div className="text-xs text-muted-foreground">Código previsto</div>
-            <div className="text-2xl font-bold font-display tracking-wider tabular-nums">
-              {loading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : code || "—"}
+            <div className="flex flex-col items-center justify-center gap-2">
+              <div className="text-2xl font-bold font-display tracking-wider tabular-nums">
+                {loading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : code || "—"}
+              </div>
+              
+              {!loading && (
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-dashed w-full justify-center">
+                  <Label htmlFor="sequence" className="text-[10px] text-muted-foreground whitespace-nowrap">
+                    A partir de:
+                  </Label>
+                  <Input
+                    id="sequence"
+                    type="number"
+                    min="1"
+                    max="999"
+                    value={manualSequence}
+                    onChange={(e) => setManualSequence(e.target.value.slice(0, 3))}
+                    className="h-7 w-20 text-center text-xs font-bold"
+                  />
+                </div>
+              )}
             </div>
             <Badge variant="outline" className="text-[10px]">
               {PREFIX_LABEL[prefix]} · {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
