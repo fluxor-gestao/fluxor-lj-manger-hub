@@ -47,7 +47,7 @@ type DashboardId = (typeof dashboards)[number]["id"];
 
 function BI() {
   const { hasRole, roleLoading } = useAuth();
-  const visibleDashboards = dashboards.filter((d) => canAccessBiDashboard(d.id, hasRole));
+  const visibleDashboards = useMemo(() => dashboards.filter((d) => canAccessBiDashboard(d.id, hasRole)), [hasRole]);
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardId | null>(null);
 
   const activeDashboard =
