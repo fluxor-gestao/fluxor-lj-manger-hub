@@ -521,11 +521,30 @@ const toneStyles: Record<Tone, { icon: string; bar: string; ring: string }> = {
 };
 
 function KpiCard({
-  icon, label, value, hint, tone = "muted",
-}: { icon: React.ReactNode; label: string; value: string; hint?: string; tone?: Tone }) {
+  icon, label, value, hint, tone = "muted", onClick, active
+}: { 
+  icon: React.ReactNode; 
+  label: string; 
+  value: string; 
+  hint?: string; 
+  tone?: Tone;
+  onClick?: () => void;
+  active?: boolean;
+}) {
   const t = toneStyles[tone];
   return (
-    <Card className={`relative overflow-hidden transition-shadow hover:shadow-md ${t.ring}`}>
+    <Card 
+      className={cn(
+        "relative overflow-hidden transition-all hover:shadow-md cursor-pointer",
+        t.ring,
+        active && "ring-2 ring-offset-2",
+        active && tone === "primary" && "ring-primary border-primary",
+        active && tone === "success" && "ring-success border-success",
+        active && tone === "warning" && "ring-warning border-warning",
+        active && tone === "danger" && "ring-destructive border-destructive"
+      )}
+      onClick={onClick}
+    >
       <span className={`absolute left-0 top-0 h-full w-1 ${t.bar}`} aria-hidden />
       <CardContent className="pt-5 pb-4 pl-5">
         <div className="flex items-center justify-between mb-2">
