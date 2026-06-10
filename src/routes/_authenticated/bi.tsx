@@ -186,7 +186,7 @@ function BI() {
       </div>
 
       {activeDashboard ? (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-300 ease-out space-y-4">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out space-y-6">
           <Card className="overflow-hidden border-0 shadow-2xl bg-background/50 backdrop-blur-sm">
             <CardContent className="p-0">
               {activeDashboard.id === "financeiro" ? (
