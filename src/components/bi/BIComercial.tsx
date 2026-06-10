@@ -1216,7 +1216,7 @@ export default function BIComercial() {
                     title={`${h.qtd} propostas`}
                   />
                   <p className="text-xs font-medium">{h.dia}</p>
-                  <p className="text-xs text-muted-foreground">{h.qtd}</p>
+                  <p className="text-xs text-white/40">{h.qtd}</p>
                 </div>
               ))}
             </div>
@@ -1252,7 +1252,7 @@ export default function BIComercial() {
                 </TableHeader>
                 <TableBody>
                   {criticas.length === 0 && (
-                    <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-6">Sem propostas críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9} className="text-center text-white/40 py-6">Sem propostas críticas</TableCell></TableRow>
                   )}
                   {criticas.map((r, i) => (
                     <TableRow key={r.id} className={cn(
@@ -1300,7 +1300,7 @@ export default function BIComercial() {
                 </TableHeader>
                 <TableBody>
                   {rankingClientes.length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
                   )}
                   {[...rankingClientes].sort((a, b) => b.aceito - a.aceito).slice(0, 20).map((c, i) => (
                     <TableRow key={i}>
@@ -1332,7 +1332,7 @@ export default function BIComercial() {
                 </TableHeader>
                 <TableBody>
                   {rankingServicos.length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
                   )}
                   {rankingServicos.map((s, i) => (
                     <TableRow key={i}>
@@ -1366,7 +1366,7 @@ export default function BIComercial() {
                 </TableHeader>
                 <TableBody>
                   {perfResponsaveis.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
                   )}
                   {perfResponsaveis.map((p, i) => (
                     <TableRow
@@ -1399,7 +1399,7 @@ export default function BIComercial() {
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pt-6">
 
-          {insights.length === 0 && <p className="text-sm text-muted-foreground">Sem alertas relevantes no período.</p>}
+          {insights.length === 0 && <p className="text-sm text-white/40">Sem alertas relevantes no período.</p>}
           {insights.map((ins, i) => (
             <div key={i} className="rounded-lg border p-3 space-y-1">
               <div className="flex items-center justify-between">
@@ -1408,8 +1408,8 @@ export default function BIComercial() {
                   {ins.severidade}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground">{ins.descricao}</p>
-              <p className="text-xs"><span className="text-muted-foreground">Ação sugerida: </span>{ins.acao}</p>
+              <p className="text-xs text-white/40">{ins.descricao}</p>
+              <p className="text-xs"><span className="text-white/40">Ação sugerida: </span>{ins.acao}</p>
             </div>
           ))}
         </CardContent>
@@ -1427,11 +1427,11 @@ function Kpi({
     <Card>
       <CardContent className="p-4 space-y-1">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="text-xs text-white/40">{label}</p>
           {Icon && <Icon className={`h-4 w-4 ${toneClass}`} />}
         </div>
         <p className={`text-lg font-semibold leading-tight ${toneClass}`} title={value}>{value}</p>
-        {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+        {sub && <p className="text-xs text-white/40">{sub}</p>}
       </CardContent>
     </Card>
   );
