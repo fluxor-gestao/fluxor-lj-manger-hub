@@ -80,15 +80,39 @@ const daysBetween = (a: string, b: string) =>
   Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
 
 const COLORS = [
-  "hsl(var(--primary))",
-  "hsl(217 91% 60%)",
-  "hsl(142 71% 45%)",
-  "hsl(38 92% 50%)",
-  "hsl(0 84% 60%)",
-  "hsl(280 65% 60%)",
-  "hsl(190 90% 50%)",
-  "hsl(24 95% 53%)",
+  "#8B5CF6", // Violet
+  "#0EA5E9", // Sky
+  "#10B981", // Emerald
+  "#F59E0B", // Amber
+  "#EF4444", // Red
+  "#EC4899", // Pink
+  "#6366F1", // Indigo
+  "#14B8A6", // Teal
 ];
+
+const CustomTooltip = ({ active, payload, label, formatter }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background/95 backdrop-blur-md border border-border/50 p-4 shadow-2xl rounded-xl">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{label}</p>
+        <div className="space-y-1.5">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-8">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                <span className="text-sm font-medium text-foreground/80">{entry.name}</span>
+              </div>
+              <span className="text-sm font-bold text-foreground">
+                {formatter ? formatter(entry.value) : entry.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 type Devis = {
   id: string;
@@ -919,11 +943,19 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={statsPorEmpresa} dataKey="valorAceito" nameKey="name" innerRadius={55} outerRadius={100}>
-                  {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <Pie 
+                  data={statsPorEmpresa} 
+                  dataKey="valorAceito" 
+                  nameKey="name" 
+                  innerRadius={60} 
+                  outerRadius={100} 
+                  paddingAngle={5}
+                  stroke="none"
+                >
+                  {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} className="hover:opacity-80 transition-opacity" />)}
                 </Pie>
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -933,11 +965,19 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={statsPorArea} dataKey="valorAceito" nameKey="name" innerRadius={55} outerRadius={100}>
-                  {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <Pie 
+                  data={statsPorArea} 
+                  dataKey="valorAceito" 
+                  nameKey="name" 
+                  innerRadius={60} 
+                  outerRadius={100} 
+                  paddingAngle={5}
+                  stroke="none"
+                >
+                  {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} className="hover:opacity-80 transition-opacity" />)}
                 </Pie>
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -946,12 +986,12 @@ export default function BIComercial() {
         <ChartCard title="Conversão por Empresa">
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={statsPorEmpresa}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" fontSize={11} />
-                <YAxis fontSize={11} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-                <Tooltip formatter={(v: any) => PCT(Number(v))} />
-                <Bar dataKey="conversao" fill={COLORS[2]} />
+              <BarChart data={statsPorEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip content={<CustomTooltip formatter={PCT} />} />
+                <Bar dataKey="conversao" fill="#8B5CF6" radius={[6, 6, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -960,12 +1000,12 @@ export default function BIComercial() {
         <ChartCard title="Conversão por Área">
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={statsPorArea}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" fontSize={11} />
-                <YAxis fontSize={11} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-                <Tooltip formatter={(v: any) => PCT(Number(v))} />
-                <Bar dataKey="conversao" fill={COLORS[2]} />
+              <BarChart data={statsPorArea} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip content={<CustomTooltip formatter={PCT} />} />
+                <Bar dataKey="conversao" fill="#10B981" radius={[6, 6, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -993,14 +1033,14 @@ export default function BIComercial() {
         <ChartCard title="Propostas criadas vs aceitas por mês">
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="month" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="Criadas" stroke={COLORS[0]} strokeWidth={2} />
-                <Line type="monotone" dataKey="Aceitas" stroke={COLORS[2]} strokeWidth={2} />
+              <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="month" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend iconType="circle" />
+                <Line type="monotone" dataKey="Criadas" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Aceitas" stroke="#10B981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           )}

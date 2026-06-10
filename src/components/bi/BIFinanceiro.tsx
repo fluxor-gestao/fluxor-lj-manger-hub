@@ -82,15 +82,39 @@ const daysBetween = (a: string, b: string) =>
   Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
 
 const CHART_COLORS = [
-  "hsl(var(--primary))",
-  "hsl(217 91% 60%)",
-  "hsl(142 71% 45%)",
-  "hsl(38 92% 50%)",
-  "hsl(0 84% 60%)",
-  "hsl(280 65% 60%)",
-  "hsl(190 90% 50%)",
-  "hsl(24 95% 53%)",
+  "#10B981", // Emerald
+  "#0EA5E9", // Sky
+  "#8B5CF6", // Violet
+  "#F59E0B", // Amber
+  "#EF4444", // Red
+  "#EC4899", // Pink
+  "#6366F1", // Indigo
+  "#14B8A6", // Teal
 ];
+
+const CustomTooltip = ({ active, payload, label, formatter }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background/95 backdrop-blur-md border border-border/50 p-4 shadow-2xl rounded-xl">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{label}</p>
+        <div className="space-y-1.5">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-8">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                <span className="text-sm font-medium text-foreground/80">{entry.name}</span>
+              </div>
+              <span className="text-sm font-bold text-foreground">
+                {formatter ? formatter(entry.value) : entry.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 type Row = {
   id: string;
@@ -982,48 +1006,64 @@ export default function BIFinanceiro() {
       {/* Charts */}
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title="Participação das Empresas (Faturamento)">
-          {isLoading ? <Skeleton className="h-[260px]" /> : receitaEmpresa.length === 0 ? <Empty /> : (
-            <ResponsiveContainer width="100%" height={260}>
+          {isLoading ? <Skeleton className="h-[280px]" /> : receitaEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={receitaEmpresa} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90}>
+                <Pie 
+                  data={receitaEmpresa} 
+                  dataKey="value" 
+                  nameKey="name" 
+                  innerRadius={60} 
+                  outerRadius={100} 
+                  paddingAngle={5}
+                  stroke="none"
+                >
                   {receitaEmpresa.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} className="hover:opacity-80 transition-opacity" />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           )}
         </ChartCard>
 
         <ChartCard title="Participação das Áreas (Faturamento)">
-          {isLoading ? <Skeleton className="h-[260px]" /> : receitaArea.length === 0 ? <Empty /> : (
-            <ResponsiveContainer width="100%" height={260}>
+          {isLoading ? <Skeleton className="h-[280px]" /> : receitaArea.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={receitaArea} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90}>
+                <Pie 
+                  data={receitaArea} 
+                  dataKey="value" 
+                  nameKey="name" 
+                  innerRadius={60} 
+                  outerRadius={100} 
+                  paddingAngle={5}
+                  stroke="none"
+                >
                   {receitaArea.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} className="hover:opacity-80 transition-opacity" />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           )}
         </ChartCard>
 
         <ChartCard title="Resultado por Empresa">
-          {isLoading ? <Skeleton className="h-[260px]" /> : resultadoEmpresa.length === 0 ? <Empty /> : (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={resultadoEmpresa}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="value">
+          {isLoading ? <Skeleton className="h-[280px]" /> : resultadoEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={resultadoEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                   {resultadoEmpresa.map((entry, i) => (
-                    <Cell key={i} fill={entry.value >= 0 ? CHART_COLORS[2] : CHART_COLORS[4]} />
+                    <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} />
                   ))}
                 </Bar>
               </BarChart>
@@ -1050,17 +1090,17 @@ export default function BIFinanceiro() {
         </ChartCard>
 
         <ChartCard title="Evolução: Receita, Despesa, Resultado">
-          {isLoading ? <Skeleton className="h-[260px]" /> : monthly.length === 0 ? <Empty /> : (
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="month" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
-                <Line type="monotone" dataKey="Receita" stroke={CHART_COLORS[2]} strokeWidth={2} />
-                <Line type="monotone" dataKey="Despesa" stroke={CHART_COLORS[4]} strokeWidth={2} />
-                <Line type="monotone" dataKey="Resultado" stroke={CHART_COLORS[0]} strokeWidth={2} />
+          {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="month" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" />
+                <Line type="monotone" dataKey="Receita" stroke="#10B981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Despesa" stroke="#EF4444" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Resultado" stroke="#0EA5E9" strokeWidth={3} strokeDasharray="5 5" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
