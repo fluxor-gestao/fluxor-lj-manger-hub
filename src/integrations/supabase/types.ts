@@ -263,12 +263,16 @@ export type Database = {
           email: string | null
           id: string
           latitude: number | null
+          location_status: string | null
+          location_updated_at: string | null
           longitude: number | null
           name: string
           notes: string | null
           phone: string | null
+          state: string | null
           type: string
           updated_at: string
+          zip_code: string | null
         }
         Insert: {
           active?: boolean
@@ -282,12 +286,16 @@ export type Database = {
           email?: string | null
           id?: string
           latitude?: number | null
+          location_status?: string | null
+          location_updated_at?: string | null
           longitude?: number | null
           name: string
           notes?: string | null
           phone?: string | null
+          state?: string | null
           type?: string
           updated_at?: string
+          zip_code?: string | null
         }
         Update: {
           active?: boolean
@@ -301,12 +309,16 @@ export type Database = {
           email?: string | null
           id?: string
           latitude?: number | null
+          location_status?: string | null
+          location_updated_at?: string | null
           longitude?: number | null
           name?: string
           notes?: string | null
           phone?: string | null
+          state?: string | null
           type?: string
           updated_at?: string
+          zip_code?: string | null
         }
         Relationships: [
           {

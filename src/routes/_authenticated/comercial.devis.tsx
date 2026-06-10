@@ -32,6 +32,7 @@ type AISuggestions = BaseAISuggestions & {
 };
 import UploadAtaDialog, { type ConfirmedAtaResult } from "@/components/devis/UploadAtaDialog";
 import DevisCodePreviewDialog, { inferServicePrefix, type ServicePrefix } from "@/components/devis/DevisCodePreviewDialog";
+import ClientLocationEnrichment from "@/components/clients/ClientLocationEnrichment";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { Pagination } from "@/components/Pagination";
@@ -43,6 +44,7 @@ import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCode
 import { getAreasFor, isValidAreaForCompany, Area } from "@/lib/businessAreas";
 import { AreaBadge } from "@/components/AreaBadge";
 import { MultiAreaSelector } from "@/components/devis/MultiAreaSelector";
+import { MapPin } from "lucide-react";
 
 const DEVIS_PAGE_SIZE = 20;
 const CLIENTS_PAGE_SIZE = 50;
@@ -130,6 +132,8 @@ function Comercial() {
   const [aiAccepted, setAiAccepted] = useState<Partial<AISuggestions>>({});
   const [generating, setGenerating] = useState(false);
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
+  const [enrichmentOpen, setEnrichmentOpen] = useState(false);
+  const [selectedClientToEnrich, setSelectedClientToEnrich] = useState<any>(null);
 
   // Reset paginação quando filtros mudam
   useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterAreas, filterStart, filterEnd, filterPricing]);
@@ -537,6 +541,11 @@ function Comercial() {
     setClientDialogOpen(true);
   };
 
+  const openEnrichment = (c: any) => {
+    setSelectedClientToEnrich(c);
+    setEnrichmentOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -890,6 +899,19 @@ function Comercial() {
             onConfirm={handleAtaConfirm}
           />
 
+          <ClientLocationEnrichment 
+            open={enrichmentOpen}
+            onOpenChange={setEnrichmentOpen}
+            clientId={selectedClientToEnrich?.id}
+            clientName={selectedClientToEnrich?.name}
+            clientCompany={selectedClientToEnrich?.company}
+            clientDocument={selectedClientToEnrich?.document}
+            onEnriched={() => {
+              clientsListQuery.refetch();
+              queryClient.invalidateQueries({ queryKey: ["clients"] });
+            }}
+          />
+
           <DevisCodePreviewDialog
             open={codePreviewOpen}
             onOpenChange={(o) => {
@@ -1174,6 +1196,15 @@ function Comercial() {
 
                      <TableCell>
                       <div className="flex items-center gap-1">
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          onClick={() => openEnrichment(c)}
+                          title="Enriquecer localização"
+                          className={c.location_status === 'localizada' ? 'text-primary' : 'text-muted-foreground'}
+                        >
+                          <MapPin className="h-4 w-4" />
+                        </Button>
                         <Button size="icon" variant="ghost" onClick={() => openEditClient(c)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
