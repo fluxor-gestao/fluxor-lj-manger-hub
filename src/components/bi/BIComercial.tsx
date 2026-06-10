@@ -80,15 +80,39 @@ const daysBetween = (a: string, b: string) =>
   Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
 
 const COLORS = [
-  "hsl(var(--primary))",
-  "hsl(217 91% 60%)",
-  "hsl(142 71% 45%)",
-  "hsl(38 92% 50%)",
-  "hsl(0 84% 60%)",
-  "hsl(280 65% 60%)",
-  "hsl(190 90% 50%)",
-  "hsl(24 95% 53%)",
+  "#8B5CF6", // Violet
+  "#0EA5E9", // Sky
+  "#10B981", // Emerald
+  "#F59E0B", // Amber
+  "#EF4444", // Red
+  "#EC4899", // Pink
+  "#6366F1", // Indigo
+  "#14B8A6", // Teal
 ];
+
+const CustomTooltip = ({ active, payload, label, formatter }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background/95 backdrop-blur-md border border-border/50 p-4 shadow-2xl rounded-xl">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{label}</p>
+        <div className="space-y-1.5">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-8">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                <span className="text-sm font-medium text-foreground/80">{entry.name}</span>
+              </div>
+              <span className="text-sm font-bold text-foreground">
+                {formatter ? formatter(entry.value) : entry.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 type Devis = {
   id: string;
