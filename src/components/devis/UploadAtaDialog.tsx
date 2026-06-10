@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Eye, Check, X } from "lucide-react";
+import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Eye, Check, X, Info } from "lucide-react";
 import { toast } from "sonner";
 
 export type AnalyzedClient = {
@@ -351,10 +351,46 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
 
         {/* Step 3: analyzing */}
         {step === 3 && (
-          <div className="py-12 flex flex-col items-center gap-3 text-muted-foreground">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="font-medium">Analisando documento...</p>
-            <p className="text-xs">Detectando idioma, extraindo cliente e estruturando proposta.</p>
+          <div className="py-12 flex flex-col items-center gap-6">
+            <div className="relative">
+              <div className="h-24 w-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+              <Sparkles className="h-8 w-8 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+            </div>
+            
+            <div className="text-center space-y-2">
+              <h3 className="font-semibold text-lg text-primary animate-pulse">Inteligência Artificial em ação</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                Estamos lendo seu documento para extrair automaticamente o cliente, resumo da reunião e estruturar a proposta comercial.
+              </p>
+            </div>
+
+            <div className="w-full max-w-sm space-y-4">
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-primary animate-progress-indeterminate" />
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <CheckCircle2 className="h-3 w-3 text-green-500" /> Processando arquivo base
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-2 delay-300 duration-500">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Detectando idioma e contexto
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground opacity-50">
+                  <FileText className="h-3 w-3" /> Extraindo dados do cliente
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground opacity-50">
+                  <Sparkles className="h-3 w-3" /> Gerando estrutura da proposta
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg flex gap-3 max-w-md">
+              <Info className="h-5 w-5 text-blue-500 shrink-0" />
+              <p className="text-xs text-blue-700 leading-relaxed">
+                Este processo pode levar de 15 a 45 segundos dependendo do tamanho e complexidade do documento enviado.
+              </p>
+            </div>
           </div>
         )}
 
