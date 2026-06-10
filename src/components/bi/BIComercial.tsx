@@ -688,8 +688,8 @@ export default function BIComercial() {
             <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
-            <Label className="text-xs">Até</Label>
-            <Input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Até</Label>
+            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           </div>
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Responsável</Label>

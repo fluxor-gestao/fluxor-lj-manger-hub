@@ -44,7 +44,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input className="bg-white/5 border-white/10 text-white focus:ring-primary/20" } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -713,15 +713,15 @@ export default function BIFinanceiro() {
 
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">De</Label>
-            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
+            <Input className="bg-white/5 border-white/10 text-white focus:ring-primary/20" type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Até</Label>
-            <Input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
+            <Input className="bg-white/5 border-white/10 text-white focus:ring-primary/20" type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           </div>
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Competência</Label>
-            <Input
+            <Input className="bg-white/5 border-white/10 text-white focus:ring-primary/20"
               placeholder="YYYY-MM ou Todas"
               value={filters.competence === "all" ? "" : filters.competence}
               onChange={(e) => setFilters({ ...filters, competence: e.target.value || "all" })}
@@ -730,7 +730,7 @@ export default function BIFinanceiro() {
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Cliente</Label>
             <Select value={filters.clientId} onValueChange={(v) => setFilters({ ...filters, clientId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20">
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {cats.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -740,7 +740,7 @@ export default function BIFinanceiro() {
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Fornecedor</Label>
             <Select value={filters.supplierId} onValueChange={(v) => setFilters({ ...filters, supplierId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20">
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {cats.suppliers.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -750,7 +750,7 @@ export default function BIFinanceiro() {
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Unidade de negócio</Label>
             <Select value={filters.bu} onValueChange={(v) => setFilters({ ...filters, bu: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20">
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {(businessUnits.data ?? []).map((b) => (
@@ -762,7 +762,7 @@ export default function BIFinanceiro() {
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Área Principal</Label>
             <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20">
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {getAreasFor(filters.bu === "all" ? null : (filters.bu as CompanyCode)).map((a) => (
@@ -774,7 +774,7 @@ export default function BIFinanceiro() {
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Banco / Conta</Label>
             <Select value={filters.bankId} onValueChange={(v) => setFilters({ ...filters, bankId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20">
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {(banks.data ?? []).map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
@@ -784,7 +784,7 @@ export default function BIFinanceiro() {
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Status de pagamento</Label>
             <Select value={filters.paymentStatus} onValueChange={(v) => setFilters({ ...filters, paymentStatus: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20">
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="em_aberto">Em aberto</SelectItem>
@@ -797,7 +797,7 @@ export default function BIFinanceiro() {
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Categoria</Label>
             <Select value={filters.categoryId} onValueChange={(v) => setFilters({ ...filters, categoryId: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20">
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {cats.categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -807,7 +807,7 @@ export default function BIFinanceiro() {
           <div>
             <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Origem</Label>
             <Select value={filters.origin} onValueChange={(v) => setFilters({ ...filters, origin: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20">
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 <SelectItem value="manual">Manual</SelectItem>
