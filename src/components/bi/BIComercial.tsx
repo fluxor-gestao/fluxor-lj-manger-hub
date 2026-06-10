@@ -108,6 +108,7 @@ type Devis = {
   rejected_at: string | null;
   meeting_date: string | null;
   deadline_date: string | null;
+  devis_service_areas?: { area_slug: string }[];
 };
 
 type Filters = {
@@ -162,7 +163,7 @@ export default function BIComercial() {
       let qb = supabase
         .from("devis")
         .select(
-          "id, devis_number, title, status, total_amount, business_unit, responsible_sector, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date"
+          "id, devis_number, title, status, total_amount, business_unit, responsible_sector, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date, devis_service_areas(area_slug)"
         )
         .gte("created_at", filters.from)
         .lte("created_at", filters.to + "T23:59:59")
@@ -427,15 +428,28 @@ export default function BIComercial() {
   const statsPorArea = useMemo(() => {
     const m = new Map<string, { criadas: number; aceitas: number; valorProp: number; valorAceito: number; enviadas: number }>();
     for (const r of rows) {
-      const k = findArea(r.business_unit as CompanyCode, r.responsible_sector)?.label ?? "Não informada";
-      if (!m.has(k)) m.set(k, { criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0, enviadas: 0 });
-      const b = m.get(k)!;
-      b.criadas++;
-      b.valorProp += Number(r.total_amount ?? 0);
-      if (r.sent_at || SENT_OR_LATER.includes(r.status)) b.enviadas++;
-      if (ACCEPTED.includes(r.status) || r.accepted_at) {
-        b.aceitas++;
-        b.valorAceito += Number(r.total_amount ?? 0);
+      const areas = r.devis_service_areas?.length 
+        ? r.devis_service_areas.map(a => a.area_slug)
+        : [r.responsible_sector].filter(Boolean);
+      
+      const areasToProcess = areas.length > 0 ? areas : ["Não informada"];
+      const areaCount = areasToProcess.length;
+      
+      for (const areaSlug of areasToProcess) {
+        const areaInfo = findArea(r.business_unit as CompanyCode, areaSlug);
+        const k = areaInfo?.label ?? (areaSlug === "Não informada" ? "Não informada" : areaSlug);
+        
+        if (!m.has(k)) m.set(k, { criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0, enviadas: 0 });
+        const b = m.get(k)!;
+        
+        // Rateio proporcional simples
+        b.criadas += 1 / areaCount;
+        b.valorProp += (Number(r.total_amount ?? 0)) / areaCount;
+        if (r.sent_at || SENT_OR_LATER.includes(r.status)) b.enviadas += 1 / areaCount;
+        if (ACCEPTED.includes(r.status) || r.accepted_at) {
+          b.aceitas += 1 / areaCount;
+          b.valorAceito += (Number(r.total_amount ?? 0)) / areaCount;
+        }
       }
     }
     return Array.from(m.entries()).map(([name, v]) => ({
