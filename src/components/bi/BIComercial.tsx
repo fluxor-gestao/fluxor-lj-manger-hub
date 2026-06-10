@@ -1235,17 +1235,17 @@ export default function BIComercial() {
           <Card>
             <CardContent className="p-0">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Proposta</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Criada</TableHead>
-                    <TableHead>Atualizada</TableHead>
-                    <TableHead className="text-right">Parada</TableHead>
-                    <TableHead>Próxima ação</TableHead>
-                    <TableHead></TableHead>
+                <TableHeader className="bg-[#0b1526]/50">
+                  <TableRow className="hover:bg-transparent border-white/5">
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
+                    <TableHead className="h-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
