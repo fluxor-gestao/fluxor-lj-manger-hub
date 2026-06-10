@@ -58,47 +58,81 @@ export function ProcessoTarefas() {
   };
 
   return (
-    <div className="space-y-3">
-      <Card>
-        <CardContent className="py-3 grid gap-2 md:grid-cols-[1fr_180px_140px_140px_140px_auto] items-end">
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Tarefa</Label>
-            <Input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="Descreva a tarefa" />
+    <div className="space-y-4">
+      <Card className="bg-muted/30">
+        <CardContent className="py-4 space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2 space-y-1.5">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <Tag className="h-4 w-4" /> Tarefa *
+              </Label>
+              <Textarea 
+                value={draft.title} 
+                onChange={(e) => setDraft({ ...draft, title: e.target.value })} 
+                placeholder="Descreva a tarefa detalhadamente..."
+                className="min-h-[100px] resize-y bg-background"
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <User className="h-4 w-4" /> Responsável
+              </Label>
+              <Input 
+                value={draft.assignee} 
+                onChange={(e) => setDraft({ ...draft, assignee: e.target.value })} 
+                placeholder="Nome do responsável"
+                className="bg-background"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <Calendar className="h-4 w-4" /> Prazo
+              </Label>
+              <Input 
+                type="date" 
+                value={draft.due_date} 
+                onChange={(e) => setDraft({ ...draft, due_date: e.target.value })} 
+                className="bg-background"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <Tag className="h-4 w-4" /> Status
+              </Label>
+              <Select value={draft.status} onValueChange={(v) => setDraft({ ...draft, status: v as TaskStatus })}>
+                <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(["aberta", "em_andamento", "concluida"] as TaskStatus[]).map((s) => (
+                    <SelectItem key={s} value={s}>{statusLabel[s]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" /> Prioridade
+              </Label>
+              <Select value={draft.priority} onValueChange={(v) => setDraft({ ...draft, priority: v as Prio })}>
+                <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="baixa">Baixa</SelectItem>
+                  <SelectItem value="media">Média</SelectItem>
+                  <SelectItem value="alta">Alta</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Responsável</Label>
-            <Input value={draft.assignee} onChange={(e) => setDraft({ ...draft, assignee: e.target.value })} />
+
+          <div className="flex justify-end pt-2">
+            <Button onClick={add} disabled={!draft.title.trim()} className="px-8">
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Tarefa
+            </Button>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Prazo</Label>
-            <Input type="date" value={draft.due_date} onChange={(e) => setDraft({ ...draft, due_date: e.target.value })} />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Status</Label>
-            <Select value={draft.status} onValueChange={(v) => setDraft({ ...draft, status: v as TaskStatus })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {(["aberta", "em_andamento", "concluida"] as TaskStatus[]).map((s) => (
-                  <SelectItem key={s} value={s}>{statusLabel[s]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Prioridade</Label>
-            <Select value={draft.priority} onValueChange={(v) => setDraft({ ...draft, priority: v as Prio })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="baixa">Baixa</SelectItem>
-                <SelectItem value="media">Média</SelectItem>
-                <SelectItem value="alta">Alta</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button onClick={add} disabled={!draft.title.trim()}>
-            <Plus className="h-4 w-4" />
-            Adicionar
-          </Button>
         </CardContent>
       </Card>
 
