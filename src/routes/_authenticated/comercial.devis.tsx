@@ -1124,6 +1124,10 @@ function Comercial() {
                 <Upload className="h-4 w-4 mr-2" /> Upload de base
               </Button>
 
+              <Button variant="outline" onClick={() => setBulkEnrichmentOpen(true)}>
+                <MapPin className="h-4 w-4 mr-2" /> Atualizar localizações pendentes
+              </Button>
+
               <Dialog open={clientDialogOpen} onOpenChange={(o) => { setClientDialogOpen(o); if (!o) setClientForm(emptyClient); }}>
                 <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Novo Cliente</Button></DialogTrigger>
                 <DialogContent>
