@@ -851,7 +851,8 @@ export default function BIComercial() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-3 lg:grid-cols-2">
+
         <Card className="border-0 shadow-sm overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
           <CardHeader className="relative z-10 border-b bg-muted/20">
