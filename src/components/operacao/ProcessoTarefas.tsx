@@ -155,7 +155,8 @@ export function ProcessoTarefas() {
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant="outline" className={cn("text-[10px] px-2 py-0", prioCls[t.priority])}>{t.priority}</Badge>
                   <Badge variant="outline" className={cn("text-[10px] px-2 py-0", statusCls[t.status])}>{statusLabel[t.status]}</Badge>
-                <Button variant="ghost" size="icon" className="h-8 w-8"
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0"
                   onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
