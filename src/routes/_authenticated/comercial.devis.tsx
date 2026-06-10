@@ -35,8 +35,9 @@ import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { CompanyBadge } from "@/components/CompanyBadge";
 import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
-import { getAreasFor, isValidAreaForCompany } from "@/lib/businessAreas";
+import { getAreasFor, isValidAreaForCompany, Area } from "@/lib/businessAreas";
 import { AreaBadge } from "@/components/AreaBadge";
+import { MultiAreaSelector } from "@/components/devis/MultiAreaSelector";
 
 const DEVIS_PAGE_SIZE = 20;
 const CLIENTS_PAGE_SIZE = 50;
@@ -75,6 +76,7 @@ type DevisForm = {
   source_language: string;
   business_unit: CompanyCode | "";
   responsible_sector: string;
+  responsible_sectors: string[];
 };
 
 const emptyDevis: DevisForm = {
@@ -93,6 +95,7 @@ const emptyDevis: DevisForm = {
   source_language: "pt",
   business_unit: "",
   responsible_sector: "",
+  responsible_sectors: [],
 };
 
 function Comercial() {
@@ -110,7 +113,7 @@ function Comercial() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterClient, setFilterClient] = useState<string>("all");
   const [filterCompany, setFilterCompany] = useState<string>("all");
-  const [filterArea, setFilterArea] = useState<string>("all");
+  const [filterAreas, setFilterAreas] = useState<string[]>([]);
   const [filterStart, setFilterStart] = useState<Date | undefined>();
   const [filterEnd, setFilterEnd] = useState<Date | undefined>();
   const [view, setView] = useState<"list" | "kanban">("list");
@@ -123,10 +126,10 @@ function Comercial() {
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
 
   // Reset paginação quando filtros mudam
-  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterArea, filterStart, filterEnd]);
+  useEffect(() => { setDevisPage(0); }, [filterStatus, filterClient, filterCompany, filterAreas, filterStart, filterEnd]);
   useEffect(() => { setClientsPage(0); }, [clientsSearch]);
   // Reseta área quando empresa muda nos filtros
-  useEffect(() => { setFilterArea("all"); }, [filterCompany, companyCode]);
+  useEffect(() => { setFilterAreas([]); }, [filterCompany, companyCode]);
 
   // Lookup de clientes (colunas mínimas, usado em selects e clientsById)
   const { data: clients = [] } = useQuery({
@@ -149,7 +152,7 @@ function Comercial() {
     queryFn: async () => {
       let qb = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible")
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)")
         .order("created_at", { ascending: false })
         .range(0, SUMMARY_HARD_CAP - 1);
       if (companyCode) qb = qb.eq("business_unit", companyCode);
@@ -164,12 +167,12 @@ function Comercial() {
   const endISO = filterEnd ? format(filterEnd, "yyyy-MM-dd") : null;
   const effectiveCompany = companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null);
   const devisListQuery = useQuery({
-    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany, area: filterArea }],
+    queryKey: ["devis", "list", { page: devisPage, status: filterStatus, client: filterClient, start: startISO, end: endISO, company: effectiveCompany, areas: filterAreas }],
     queryFn: async () => {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, responsible_sector, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible", { count: "exact" })
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, responsible_sector, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to);
       if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
@@ -177,7 +180,10 @@ function Comercial() {
       if (startISO) q = q.gte("meeting_date", startISO);
       if (endISO) q = q.lte("meeting_date", endISO);
       if (effectiveCompany) q = q.eq("business_unit", effectiveCompany);
-      if (filterArea !== "all") q = q.eq("responsible_sector", filterArea);
+      if (filterAreas.length > 0) {
+        // Filtra por devis que possuem PELO MENOS UMA das áreas selecionadas
+        q = q.filter("devis_service_areas.area_slug", "in", `(${filterAreas.join(",")})`);
+      }
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -366,10 +372,10 @@ function Comercial() {
       if (!isCompanyCode(form.business_unit)) {
         throw new Error("Selecione a empresa responsável.");
       }
-      if (!isValidAreaForCompany(form.business_unit, form.responsible_sector)) {
-        throw new Error("Selecione a área principal.");
+      if (form.responsible_sectors.length === 0) {
+        throw new Error("Selecione pelo menos uma área responsável.");
       }
-      const { error } = await supabase.from("devis").insert({
+      const { data: newDevis, error } = await supabase.from("devis").insert({
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
         commercial_responsible: form.commercial_responsible || null,
@@ -383,13 +389,24 @@ function Comercial() {
         created_by: user?.id,
         devis_number: form.devis_number || null,
         service_type: form.service_type || aiAccepted.service_type || null,
-        responsible_sector: form.responsible_sector,
+        responsible_sector: form.responsible_sectors[0] || null, // Mantém compatibilidade legada com a primeira área
+        responsible_sectors: form.responsible_sectors, // Nova coluna jsonb se existir, ou apenas para referência interna
         scope_description: aiAccepted.scope_description || null,
         proposal_structure: aiAccepted.proposal_structure || null,
         source_language: form.source_language || "pt",
         business_unit: form.business_unit,
-      });
+      }).select("id").single();
       if (error) throw error;
+
+      // Inserir as múltiplas áreas na tabela de relacionamento
+      if (newDevis && form.responsible_sectors.length > 0) {
+        const areaPayload = form.responsible_sectors.map(slug => ({
+          devis_id: newDevis.id,
+          area_slug: slug
+        }));
+        const { error: areaError } = await supabase.from("devis_service_areas").insert(areaPayload);
+        if (areaError) throw areaError;
+      }
     },
     onSuccess: () => {
       toast.success("Devis criado!");
@@ -421,6 +438,7 @@ function Comercial() {
       setAiSuggestions({
         service_type: p.service_type ?? "",
         responsible_sector: p.responsible_sector ?? "",
+        responsible_sectors: p.responsible_sector ? [p.responsible_sector] : [],
         scope_description: p.scope_description ?? "",
         proposal_structure: p.proposal_structure ?? "",
       });
