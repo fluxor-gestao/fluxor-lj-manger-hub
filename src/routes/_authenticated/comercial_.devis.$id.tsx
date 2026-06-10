@@ -534,17 +534,28 @@ function DevisDetail() {
             ) : <div className="mt-1"><CompanyBadge code={(devis as any)?.business_unit} /></div>}
           </div>
 
-          {/* Status — read-only (controlado pelo Kanban Comercial) */}
+          {/* Áreas Responsáveis */}
           <div>
-            <Label>Status</Label>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge variant="outline" className={devisStatusColors[(devis?.status ?? "")] || ""}>
-                {statusLabels[(devis?.status ?? "")] || (devis?.status ?? "")}
-              </Badge>
-              <span className="text-[10px] text-muted-foreground">
-                Atualizado pelo Kanban Comercial
-              </span>
-            </div>
+            <Label>Área(s) Responsável(is) *</Label>
+            {editing ? (
+              <div className="mt-1">
+                <MultiAreaSelector
+                  companyCode={form.business_unit}
+                  selectedAreas={selectedAreas}
+                  onChange={setSelectedAreas}
+                />
+              </div>
+            ) : (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {devis.devis_service_areas?.length > 0 ? (
+                  devis.devis_service_areas.map((a: any) => (
+                    <AreaBadge key={a.area_slug} companyCode={(devis as any)?.business_unit} areaSlug={a.area_slug} />
+                  ))
+                ) : (
+                  <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
+                )}
+              </div>
+            )}
           </div>
 
           {/* Data Reunião */}

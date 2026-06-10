@@ -330,7 +330,16 @@ export default function DevisPdfTemplate({
           color: "#1f2937",
         }}
       >
-        <span>{BRAND_LINE}</span>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <span>{BRAND_LINE}</span>
+          <div style={{ display: "flex", gap: "4px" }}>
+            {devis.devis_service_areas?.map((a: any) => (
+              <span key={a.area_slug} style={{ fontSize: "8px", background: "#f3f4f6", padding: "1px 4px", borderRadius: "2px" }}>
+                {a.area_slug.toUpperCase()}
+              </span>
+            ))}
+          </div>
+        </div>
         <span style={{ fontWeight: 600, letterSpacing: "0.5px" }}>{devisNumber}</span>
       </div>
       <div style={{ borderTop: `1px solid ${GOLD}` }} />
