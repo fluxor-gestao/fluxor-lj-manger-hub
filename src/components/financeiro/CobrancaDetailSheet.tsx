@@ -279,7 +279,19 @@ export function CobrancaDetailSheet({
           <Button variant="outline" onClick={() => setFaturaOpen(true)}>
             <FileText className="h-4 w-4 mr-2" /> Gerar fatura
           </Button>
-          <Button variant="outline" onClick={() => placeholder("Enviar cobrança")}>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              if (!row.document_reference) {
+                toast.error("Gere a fatura antes de enviar a cobrança.", {
+                  description: "Clique em 'Gerar fatura' primeiro."
+                });
+                setFaturaOpen(true);
+                return;
+              }
+              setFaturaOpen(true);
+            }}
+          >
             <Send className="h-4 w-4 mr-2" /> Enviar cobrança
           </Button>
           <Button variant="outline" onClick={() => placeholder("Reenviar lembrete")}>

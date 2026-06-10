@@ -26,6 +26,7 @@ import {
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { CobrancaDetailSheet, type CobrancaRow } from "@/components/financeiro/CobrancaDetailSheet";
+import { FaturaPreviewDialog } from "@/components/financeiro/FaturaPreviewDialog";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 
@@ -109,6 +110,7 @@ function ContasAReceberPage() {
 
   // Detalhe da cobrança
   const [detail, setDetail] = useState<CobrancaRow | null>(null);
+  const [faturaRow, setFaturaRow] = useState<CobrancaRow | null>(null);
   const [toDelete, setToDelete] = useState<Row | null>(null);
 
   const deleteMutation = useMutation({
@@ -368,10 +370,17 @@ function ContasAReceberPage() {
                           <DropdownMenuItem onClick={() => setDetail(r as CobrancaRow)}>
                             <Eye className="h-4 w-4 mr-2" /> Ver detalhes
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => act("Gerar cobrança", r)}>
-                            <FileText className="h-4 w-4 mr-2" /> Gerar cobrança
+                          <DropdownMenuItem onClick={() => setFaturaRow(r as CobrancaRow)}>
+                            <FileText className="h-4 w-4 mr-2" /> Gerar fatura
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => act("Enviar cobrança", r)}>
+                          <DropdownMenuItem onClick={() => {
+                            if (!r.document_reference) {
+                              toast.error("Gere a fatura antes de enviar a cobrança.");
+                              setFaturaRow(r as CobrancaRow);
+                              return;
+                            }
+                            setFaturaRow(r as CobrancaRow);
+                          }}>
                             <Send className="h-4 w-4 mr-2" /> Enviar cobrança
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
