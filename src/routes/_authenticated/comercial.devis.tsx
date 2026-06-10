@@ -156,7 +156,7 @@ function Comercial() {
     queryFn: async () => {
       let qb = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)") as any)
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)") as any
         .order("created_at", { ascending: false })
         .range(0, SUMMARY_HARD_CAP - 1);
       if (companyCode) qb = qb.eq("business_unit", companyCode);
