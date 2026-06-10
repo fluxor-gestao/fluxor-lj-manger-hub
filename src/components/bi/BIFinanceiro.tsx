@@ -1004,40 +1004,44 @@ export default function BIFinanceiro() {
           <CardContent className="relative z-10 p-6">
 
             <div className="grid gap-8">
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita e Resultado por Empresa</h4>
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Receita e Resultado por Empresa</h4>
                 <div className="grid gap-2">
                   {receitaEmpresa.slice(0, 5).map((s) => {
                     const res = resultadoEmpresa.find(r => r.name === s.name)?.value ?? 0;
                     return (
-                      <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{s.name}</span>
-                          <span className={`text-[10px] font-medium ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
+                      <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${res >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                            {res >= 0 ? "+" : ""}{BRL(res)}
+                          </span>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-primary">{BRL(s.value)}</div>
-                          <div className="text-[10px] text-muted-foreground">Part.: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="font-bold text-white">{BRL(s.value)}</div>
+                          <div className="text-[10px] font-medium text-[#94A3B8]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita e Resultado por Área</h4>
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Receita e Resultado por Área</h4>
                 <div className="grid gap-2">
                   {receitaArea.slice(0, 5).map((s) => {
                     const res = resultadoArea.find(r => r.name === s.name)?.value ?? 0;
                     return (
-                      <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{s.name}</span>
-                          <span className={`text-[10px] font-medium ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
+                      <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${res >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                            {res >= 0 ? "+" : ""}{BRL(res)}
+                          </span>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-primary">{BRL(s.value)}</div>
-                          <div className="text-[10px] text-muted-foreground">Part.: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="font-bold text-white">{BRL(s.value)}</div>
+                          <div className="text-[10px] font-medium text-[#94A3B8]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
