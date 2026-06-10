@@ -37,6 +37,7 @@ import { Route as AuthenticatedFinanceiroRapportRouteImport } from './routes/_au
 import { Route as AuthenticatedFinanceiroContasAReceberRouteImport } from './routes/_authenticated/financeiro.contas-a-receber'
 import { Route as AuthenticatedFinanceiroContasAPagarRouteImport } from './routes/_authenticated/financeiro.contas-a-pagar'
 import { Route as AuthenticatedFinanceiroCentralRouteImport } from './routes/_authenticated/financeiro.central'
+import { Route as AuthenticatedComercialDevisRouteImport } from './routes/_authenticated/comercial.devis'
 import { Route as AuthenticatedAjudaComercialRouteImport } from './routes/_authenticated/ajuda_.comercial'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin_.api-keys'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -191,6 +192,12 @@ const AuthenticatedFinanceiroCentralRoute =
     path: '/central',
     getParentRoute: () => AuthenticatedFinanceiroRoute,
   } as any)
+const AuthenticatedComercialDevisRoute =
+  AuthenticatedComercialDevisRouteImport.update({
+    id: '/devis',
+    path: '/devis',
+    getParentRoute: () => AuthenticatedComercialRoute,
+  } as any)
 const AuthenticatedAjudaComercialRoute =
   AuthenticatedAjudaComercialRouteImport.update({
     id: '/ajuda_/comercial',
@@ -235,7 +242,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/ajuda': typeof AuthenticatedAjudaRoute
   '/bi': typeof AuthenticatedBiRoute
-  '/comercial': typeof AuthenticatedComercialRoute
+  '/comercial': typeof AuthenticatedComercialRouteWithChildren
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
   '/gestao': typeof AuthenticatedGestaoRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -270,7 +278,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/ajuda': typeof AuthenticatedAjudaRoute
   '/bi': typeof AuthenticatedBiRoute
-  '/comercial': typeof AuthenticatedComercialRoute
+  '/comercial': typeof AuthenticatedComercialRouteWithChildren
   '/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/hub': typeof AuthenticatedHubRoute
@@ -278,6 +286,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -306,7 +315,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/ajuda': typeof AuthenticatedAjudaRoute
   '/_authenticated/bi': typeof AuthenticatedBiRoute
-  '/_authenticated/comercial': typeof AuthenticatedComercialRoute
+  '/_authenticated/comercial': typeof AuthenticatedComercialRouteWithChildren
   '/_authenticated/conciliacao': typeof AuthenticatedConciliacaoRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
@@ -315,6 +324,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin_/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/_authenticated/ajuda_/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/_authenticated/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/_authenticated/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/_authenticated/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/_authenticated/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/api-keys'
     | '/ajuda/comercial'
+    | '/comercial/devis'
     | '/financeiro/central'
     | '/financeiro/contas-a-pagar'
     | '/financeiro/contas-a-receber'
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/api-keys'
     | '/ajuda/comercial'
+    | '/comercial/devis'
     | '/financeiro/central'
     | '/financeiro/contas-a-pagar'
     | '/financeiro/contas-a-receber'
@@ -422,6 +434,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/_authenticated/admin_/api-keys'
     | '/_authenticated/ajuda_/comercial'
+    | '/_authenticated/comercial/devis'
     | '/_authenticated/financeiro/central'
     | '/_authenticated/financeiro/contas-a-pagar'
     | '/_authenticated/financeiro/contas-a-receber'
@@ -660,6 +673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceiroCentralRouteImport
       parentRoute: typeof AuthenticatedFinanceiroRoute
     }
+    '/_authenticated/comercial/devis': {
+      id: '/_authenticated/comercial/devis'
+      path: '/devis'
+      fullPath: '/comercial/devis'
+      preLoaderRoute: typeof AuthenticatedComercialDevisRouteImport
+      parentRoute: typeof AuthenticatedComercialRoute
+    }
     '/_authenticated/ajuda_/comercial': {
       id: '/_authenticated/ajuda_/comercial'
       path: '/ajuda/comercial'
@@ -705,6 +725,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedComercialRouteChildren {
+  AuthenticatedComercialDevisRoute: typeof AuthenticatedComercialDevisRoute
+}
+
+const AuthenticatedComercialRouteChildren: AuthenticatedComercialRouteChildren =
+  {
+    AuthenticatedComercialDevisRoute: AuthenticatedComercialDevisRoute,
+  }
+
+const AuthenticatedComercialRouteWithChildren =
+  AuthenticatedComercialRoute._addFileChildren(
+    AuthenticatedComercialRouteChildren,
+  )
+
 interface AuthenticatedFinanceiroRouteChildren {
   AuthenticatedFinanceiroCentralRoute: typeof AuthenticatedFinanceiroCentralRoute
   AuthenticatedFinanceiroContasAPagarRoute: typeof AuthenticatedFinanceiroContasAPagarRoute
@@ -733,7 +767,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAjudaRoute: typeof AuthenticatedAjudaRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRoute
-  AuthenticatedComercialRoute: typeof AuthenticatedComercialRoute
+  AuthenticatedComercialRoute: typeof AuthenticatedComercialRouteWithChildren
   AuthenticatedConciliacaoRoute: typeof AuthenticatedConciliacaoRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRouteWithChildren
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
@@ -748,7 +782,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAjudaRoute: AuthenticatedAjudaRoute,
   AuthenticatedBiRoute: AuthenticatedBiRoute,
-  AuthenticatedComercialRoute: AuthenticatedComercialRoute,
+  AuthenticatedComercialRoute: AuthenticatedComercialRouteWithChildren,
   AuthenticatedConciliacaoRoute: AuthenticatedConciliacaoRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRouteWithChildren,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
@@ -785,3 +819,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
