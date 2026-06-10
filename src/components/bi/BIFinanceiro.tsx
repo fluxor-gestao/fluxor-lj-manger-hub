@@ -1006,16 +1006,24 @@ export default function BIFinanceiro() {
       {/* Charts */}
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title="Participação das Empresas (Faturamento)">
-          {isLoading ? <Skeleton className="h-[260px]" /> : receitaEmpresa.length === 0 ? <Empty /> : (
-            <ResponsiveContainer width="100%" height={260}>
+          {isLoading ? <Skeleton className="h-[280px]" /> : receitaEmpresa.length === 0 ? <Empty /> : (
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={receitaEmpresa} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90}>
+                <Pie 
+                  data={receitaEmpresa} 
+                  dataKey="value" 
+                  nameKey="name" 
+                  innerRadius={60} 
+                  outerRadius={100} 
+                  paddingAngle={5}
+                  stroke="none"
+                >
                   {receitaEmpresa.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} className="hover:opacity-80 transition-opacity" />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           )}
