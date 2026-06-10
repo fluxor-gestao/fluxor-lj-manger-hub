@@ -1076,6 +1076,42 @@ export type Database = {
         }
         Relationships: []
       }
+      service_prices: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          last_market_update: string | null
+          market_price: number | null
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_market_update?: string | null
+          market_price?: number | null
+          name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_market_update?: string | null
+          market_price?: number | null
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           actual_end_date: string | null
