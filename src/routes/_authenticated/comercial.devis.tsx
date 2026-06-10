@@ -121,6 +121,7 @@ function Comercial() {
   const [filterAreas, setFilterAreas] = useState<string[]>([]);
   const [filterStart, setFilterStart] = useState<Date | undefined>();
   const [filterEnd, setFilterEnd] = useState<Date | undefined>();
+  const [filterPricing, setFilterPricing] = useState<string>("all");
   const [view, setView] = useState<"list" | "kanban">("list");
   const [devisPage, setDevisPage] = useState(0);
   const [clientsPage, setClientsPage] = useState(0);
@@ -651,6 +652,18 @@ function Comercial() {
                   onChange={setFilterAreas}
                   placeholder="Todas as áreas"
                 />
+              </div>
+              <div>
+                <Label className="text-xs">Precificação</Label>
+                <Select value={filterPricing} onValueChange={setFilterPricing}>
+                  <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {Object.entries(PRICING_STATUS_LABELS).map(([val, label]) => (
+                      <SelectItem key={val} value={val}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-xs">Cliente</Label>
