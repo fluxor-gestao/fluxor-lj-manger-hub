@@ -24,7 +24,11 @@ import { cn } from "@/lib/utils";
 import { ALL_STATUSES, STATUS_LABELS as statusLabels, STATUS_BADGE_CLASSES as devisStatusColors } from "@/lib/devisStatus";
 import DevisKanban from "@/components/devis/DevisKanban";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import AISuggestionsBlock, { type AISuggestions } from "@/components/devis/AISuggestionsBlock";
+import AISuggestionsBlock, { type AISuggestions as BaseAISuggestions } from "@/components/devis/AISuggestionsBlock";
+
+type AISuggestions = BaseAISuggestions & {
+  responsible_sectors?: string[];
+};
 import UploadAtaDialog, { type ConfirmedAtaResult } from "@/components/devis/UploadAtaDialog";
 import DevisCodePreviewDialog, { inferServicePrefix, type ServicePrefix } from "@/components/devis/DevisCodePreviewDialog";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
@@ -152,7 +156,7 @@ function Comercial() {
     queryFn: async () => {
       let qb = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)")
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)") as any)
         .order("created_at", { ascending: false })
         .range(0, SUMMARY_HARD_CAP - 1);
       if (companyCode) qb = qb.eq("business_unit", companyCode);
@@ -491,6 +495,9 @@ function Comercial() {
       responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
         ? (payload.devis.responsible_sector as string)
         : "",
+      responsible_sectors: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
+        ? [payload.devis.responsible_sector as string]
+        : [],
     });
     setAiAccepted({
       service_type: payload.devis.service_type || service_type,
