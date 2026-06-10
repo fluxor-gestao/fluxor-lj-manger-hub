@@ -841,6 +841,57 @@ export type Database = {
           },
         ]
       }
+      financial_classification_rules: {
+        Row: {
+          category_id: string
+          client_id: string | null
+          confidence_level: number | null
+          created_at: string | null
+          id: string
+          last_used_at: string | null
+          occurrence_count: number | null
+          pattern: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id: string
+          client_id?: string | null
+          confidence_level?: number | null
+          created_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          occurrence_count?: number | null
+          pattern: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string
+          client_id?: string | null
+          confidence_level?: number | null
+          created_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          occurrence_count?: number | null
+          pattern?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_classification_rules_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_classification_rules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_entries: {
         Row: {
           amount_in: number | null

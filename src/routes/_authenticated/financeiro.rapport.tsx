@@ -75,6 +75,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/financeiro/rapport")({
@@ -187,6 +188,8 @@ type Transaction = {
   type: "entrada" | "saida";
   amount: number;
   suggestedCategory: string;
+  categoryId?: string;
+  confidence?: number;
   note?: string;
   accountName?: string;
 };
@@ -264,7 +267,7 @@ export default function RapportPage() {
     setStatements(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s));
   };
 
-  const handleProcessAll = () => {
+  const handleProcessAll = async () => {
     if (!clientId) return toast.error(t.selectClient);
     if (statements.some(s => !s.file)) return toast.error("Por favor, carregue os arquivos de todas as contas.");
 
@@ -272,11 +275,11 @@ export default function RapportPage() {
     setGenerated(false);
 
     // Mock processing multi-statements with correlated patterns
-    setTimeout(() => {
+    setTimeout(async () => {
       const baseDate = `${month}-10`;
       const amount = 15000 + Math.random() * 5000;
 
-      const processedStatements = statements.map(s => {
+      const processedStatements = await Promise.all(statements.map(async s => {
         let txs: Transaction[] = [];
         
         if (s.accountType.includes("Cobrança")) {
@@ -301,14 +304,78 @@ export default function RapportPage() {
           ];
         }
 
-        return { ...s, status: "ready" as const, transactions: txs };
-      });
+        // Apply learned rules to each transaction
+        const enrichedTxs = await Promise.all(txs.map(async tx => {
+          const { data: rule } = await (supabase
+            .from("financial_classification_rules")
+            .select("category_id, confidence_level") as any)
+            .eq("pattern", tx.description)
+            .maybeSingle();
 
-      setStatements(processedStatements);
+          if (rule) {
+            const cat = cats.categories.find(c => c.id === rule.category_id);
+            return {
+              ...tx,
+              categoryId: rule.category_id,
+              suggestedCategory: cat?.name || tx.suggestedCategory,
+              confidence: rule.confidence_level
+            } as any;
+          }
+          return tx;
+        }));
+
+        return { ...s, status: "ready" as const, transactions: enrichedTxs as Transaction[] };
+      }));
+
+      setStatements(processedStatements as any);
       setIsProcessing(false);
       setGenerated(true);
       toast.success(t.processed);
     }, 2000);
+  };
+
+  const handleUpdateClassification = async (tx: Transaction, newCategoryId: string) => {
+    try {
+      // 1. Update local state
+      setStatements(prev => prev.map(s => ({
+        ...s,
+        transactions: s.transactions.map(t => t.id === tx.id ? { ...t, categoryId: newCategoryId, suggestedCategory: cats.categories.find(c => c.id === newCategoryId)?.name || t.suggestedCategory, confidence: 1 } : t) as any
+      })));
+
+      // 2. Persist to learning table
+      const { data: existing } = await (supabase
+        .from("financial_classification_rules")
+        .select("id, occurrence_count") as any)
+        .eq("pattern", tx.description)
+        .maybeSingle();
+
+      if (existing) {
+        await (supabase
+          .from("financial_classification_rules")
+          .update({
+            category_id: newCategoryId,
+            occurrence_count: (existing.occurrence_count || 1) + 1,
+            confidence_level: Math.min(0.95, ((existing.occurrence_count || 1) * 0.1) + 0.5),
+            last_used_at: new Date().toISOString()
+          } as any) as any)
+          .eq("id", existing.id);
+      } else {
+        await (supabase
+          .from("financial_classification_rules")
+          .insert({
+            pattern: tx.description,
+            category_id: newCategoryId,
+            client_id: clientId || null,
+            occurrence_count: 1,
+            confidence_level: 0.6
+          } as any) as any);
+      }
+
+      toast.success("Aprendizado atualizado!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao salvar classificação.");
+    }
   };
 
   return (
@@ -532,6 +599,13 @@ export default function RapportPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {consolidatedTransactions.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="py-12 text-center text-muted-foreground text-xs italic">
+                          Aguardando processamento dos extratos...
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {consolidatedTransactions.map(tx => (
                       <TableRow key={tx.id} className="hover:bg-muted/10 transition-colors">
                         <TableCell>
@@ -546,7 +620,29 @@ export default function RapportPage() {
                           {tx.type === "entrada" ? "+" : "−"} {fmtCurrency(tx.amount, language)}
                         </TableCell>
                         <TableCell>
-                           <Badge variant="outline" className="text-[9px] uppercase">{tx.suggestedCategory}</Badge>
+                           <div className="flex items-center gap-2">
+                             <Select 
+                               value={tx.categoryId || ""} 
+                               onValueChange={(v) => handleUpdateClassification(tx, v)}
+                             >
+                               <SelectTrigger className="h-7 text-[10px] uppercase font-bold border-none shadow-none bg-muted/20 hover:bg-muted/40 transition-colors w-auto">
+                                 <SelectValue placeholder={tx.suggestedCategory} />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 {cats.categories.map(cat => (
+                                   <SelectItem key={cat.id} value={cat.id} className="text-[10px] uppercase">{cat.name}</SelectItem>
+                                 ))}
+                               </SelectContent>
+                             </Select>
+                             {tx.confidence && tx.confidence > 0 && tx.confidence < 1 && (
+                               <Badge variant="outline" className={cn(
+                                 "text-[8px] h-4 px-1",
+                                 tx.confidence > 0.8 ? "text-emerald-600 border-emerald-200 bg-emerald-50" : "text-amber-600 border-amber-200 bg-amber-50"
+                               )}>
+                                 {(tx.confidence * 100).toFixed(0)}% confiança
+                               </Badge>
+                             )}
+                           </div>
                         </TableCell>
                       </TableRow>
                     ))}
