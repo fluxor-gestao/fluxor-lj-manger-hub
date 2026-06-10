@@ -154,13 +154,14 @@ function Comercial() {
   const { data: devisSummary = [] } = useQuery({
     queryKey: ["devis", "summary", companyCode],
     queryFn: async () => {
-      let qb = supabase
+      const qb = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)") as any
-        .order("created_at", { ascending: false })
-        .range(0, SUMMARY_HARD_CAP - 1);
-      if (companyCode) qb = qb.eq("business_unit", companyCode);
-      const { data, error } = await qb;
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, devis_service_areas(area_slug)") as any;
+      
+      let q = qb.order("created_at", { ascending: false }).range(0, SUMMARY_HARD_CAP - 1);
+
+      if (companyCode) q = q.eq("business_unit", companyCode);
+      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
