@@ -1506,13 +1506,13 @@ function Kpi({
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
-      <CardHeader className="pb-4 border-b border-white/5">
-        <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">
+    <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden group hover:border-white/10 transition-all duration-500">
+      <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01]">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-6">{children}</CardContent>
+      <CardContent className="pt-8">{children}</CardContent>
     </Card>
   );
 }
