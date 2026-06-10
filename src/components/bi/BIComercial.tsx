@@ -1341,8 +1341,9 @@ export default function BIComercial() {
         </TabsContent>
 
         <TabsContent value="responsaveis">
-          <Card>
-            <CardContent className="p-0">
+          <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden">
+            <CardContent className="p-0 overflow-x-auto">
+
               <Table>
                 <TableHeader>
                   <TableRow>
