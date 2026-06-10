@@ -12,10 +12,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe } from "lucide-react";
 import { LoadingState, EmptyState } from "@/components/DataStates";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/comercial/precificacao")({
   component: Precificacao,
 });
+
 
 type ServicePrice = {
   id: string;
@@ -49,21 +51,25 @@ function Precificacao() {
 
   const saveService = useMutation({
     mutationFn: async (service: Partial<ServicePrice>) => {
+      if (!service.name) throw new Error("O nome do serviço é obrigatório.");
+      
+      const payload = {
+        name: service.name,
+        description: service.description || null,
+        category: service.category || "Geral",
+        price: service.price || 0,
+      };
+
       if (service.id) {
         const { error } = await supabase
           .from("service_prices")
-          .update({
-            name: service.name,
-            description: service.description,
-            category: service.category,
-            price: service.price,
-          })
+          .update(payload)
           .eq("id", service.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("service_prices")
-          .insert([service]);
+          .insert([payload]);
         if (error) throw error;
       }
     },
