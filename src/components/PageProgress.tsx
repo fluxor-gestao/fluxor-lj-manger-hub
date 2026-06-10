@@ -11,6 +11,8 @@ export function PageProgress() {
   const [progress, setProgress] = React.useState(0);
   const [visible, setVisible] = React.useState(false);
   
+  // routerState.status indicates page navigation
+  // isFetching > 0 indicates background data fetching
   const isLoading = routerState.status === "pending" || isFetching > 0;
 
   React.useEffect(() => {
@@ -18,22 +20,32 @@ export function PageProgress() {
 
     if (isLoading) {
       setVisible(true);
-      setProgress(10); // Start with 10%
+      // If it was already finished, reset to start
+      setProgress((prev) => (prev === 100 ? 10 : Math.max(prev, 10)));
 
       timer = setInterval(() => {
         setProgress((prev) => {
-          if (prev >= 95) return prev; // Stay at 95% until finished
-          const increment = Math.random() * 10;
-          return Math.min(prev + increment, 95);
+          if (prev >= 98) return prev; // Stay almost at the end until finished
+          
+          // Random increments to simulate progress
+          const increment = Math.random() * 5;
+          const next = prev + increment;
+          
+          return next > 98 ? 98 : next;
         });
-      }, 300);
+      }, 400);
     } else {
+      // Complete the progress
       setProgress(100);
+      
+      // Hide after a short delay
       const timeout = setTimeout(() => {
         setVisible(false);
-        // Small delay to let the user see the 100% completion before resetting
-        setTimeout(() => setProgress(0), 200);
-      }, 300);
+        // Reset progress after fade out
+        const resetTimeout = setTimeout(() => setProgress(0), 300);
+        return () => clearTimeout(resetTimeout);
+      }, 800);
+      
       return () => clearTimeout(timeout);
     }
 
