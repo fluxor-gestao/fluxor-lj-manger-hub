@@ -187,6 +187,8 @@ type Transaction = {
   type: "entrada" | "saida";
   amount: number;
   suggestedCategory: string;
+  categoryId?: string;
+  confidence?: number;
   note?: string;
   accountName?: string;
 };
