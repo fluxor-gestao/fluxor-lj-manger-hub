@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -7,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Copy, Send, Download, X, CreditCard, Building2 } from "lucide-react";
+import { Copy, Send, Download, X, CreditCard, Building2, Loader2 } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import type { CobrancaRow } from "./CobrancaDetailSheet";
 
@@ -49,6 +51,8 @@ export function FaturaPreviewDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const queryClient = useQueryClient();
+  const [isSending, setIsSending] = useState(false);
   const cliente = row?.client?.name || row?.counterparty_name || "Cliente";
   const total = Number(row?.total_brl ?? row?.amount_in ?? 0);
   const paid = Number(row?.paid_amount ?? 0);
@@ -87,6 +91,57 @@ export function FaturaPreviewDialog({
   };
 
   const invoiceNumber = `FAT-${row.id.slice(0, 8).toUpperCase()}`;
+
+  const sendInvoice = async () => {
+    if (!row) return;
+    
+    // Buscar o e-mail do cliente se não estiver disponível
+    let targetEmail = (row as any).client?.email;
+    
+    if (!targetEmail && row.client_id) {
+      const { data: clientData } = await supabase
+        .from("clients")
+        .select("email")
+        .eq("id", row.client_id)
+        .single();
+      targetEmail = clientData?.email;
+    }
+
+    if (!targetEmail) {
+      toast.error("E-mail do cliente não encontrado", {
+        description: "Configure o e-mail no cadastro do cliente antes de enviar."
+      });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-invoice-email", {
+        body: {
+          entry_id: row.id,
+          to: targetEmail,
+          subject: `Cobrança disponível - ${invoiceNumber}`,
+          message_text: message,
+          invoice_number: invoiceNumber,
+          open_amount: fmt(open_),
+          due_date: fmtDateBR(row.due_date),
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Cobrança enviada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["contas-a-receber"] });
+      onOpenChange(false);
+    } catch (err: any) {
+      console.error("Error sending invoice:", err);
+      toast.error("Erro ao enviar cobrança", {
+        description: err.message || "Ocorreu um erro inesperado."
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -217,9 +272,15 @@ export function FaturaPreviewDialog({
               </Button>
               <Button
                 className="w-full justify-start"
-                onClick={() => toast.info("Preparar envio — em breve", { description: "Será integrado ao módulo de e-mail." })}
+                onClick={sendInvoice}
+                disabled={isSending}
               >
-                <Send className="h-4 w-4 mr-2" /> Preparar envio
+                {isSending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4 mr-2" />
+                )}
+                {isSending ? "Enviando..." : "Enviar Cobrança"}
               </Button>
               <Button variant="outline" className="w-full justify-start" disabled>
                 <Download className="h-4 w-4 mr-2" /> Baixar PDF · Em breve
