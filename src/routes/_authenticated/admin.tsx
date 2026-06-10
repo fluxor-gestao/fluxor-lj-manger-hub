@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound } from "lucide-react";
+import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -153,6 +153,222 @@ const defaultSystemSettings: SystemSettings = {
   webhooksEnabled: false,
   externalBiEnabled: false,
 };
+
+function BusinessAreasManager() {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [editingArea, setEditingArea] = useState<any>(null);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [displayOrder, setDisplayOrder] = useState("0");
+  const [isActive, setIsActive] = useState(true);
+
+  const { data: areas = [], isLoading } = useQuery({
+    queryKey: ["business-areas"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_areas")
+        .select("*")
+        .order("display_order", { ascending: true })
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: areaUsage = {} } = useQuery({
+    queryKey: ["business-areas-usage"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("devis_service_areas")
+        .select("area_slug");
+      if (error) throw error;
+      
+      const usage: Record<string, number> = {};
+      data?.forEach(d => {
+        usage[d.area_slug] = (usage[d.area_slug] || 0) + 1;
+      });
+      return usage;
+    },
+  });
+
+  const saveArea = useMutation({
+    mutationFn: async () => {
+      const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").replace(/[^\w]/g, "");
+      const payload = {
+        name,
+        slug,
+        description,
+        display_order: parseInt(displayOrder) || 0,
+        is_active: isActive,
+      };
+
+      if (editingArea) {
+        const { error } = await supabase
+          .from("business_areas")
+          .update(payload)
+          .eq("id", editingArea.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("business_areas")
+          .insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success(editingArea ? "Área atualizada!" : "Área criada!");
+      queryClient.invalidateQueries({ queryKey: ["business-areas"] });
+      setOpen(false);
+      resetForm();
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const deleteArea = useMutation({
+    mutationFn: async (id: string) => {
+      const area = areas.find((a: any) => a.id === id);
+      if (area && areaUsage[area.slug]) {
+        throw new Error(`Não é possível excluir a área "${area.name}" pois ela possui ${areaUsage[area.slug]} Devis vinculado(s). Inative-a em vez de excluir.`);
+      }
+      const { error } = await supabase
+        .from("business_areas")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Área removida!");
+      queryClient.invalidateQueries({ queryKey: ["business-areas"] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const resetForm = () => {
+    setEditingArea(null);
+    setName("");
+    setDescription("");
+    setDisplayOrder("0");
+    setIsActive(true);
+  };
+
+  const handleEdit = (area: any) => {
+    setEditingArea(area);
+    setName(area.name);
+    setDescription(area.description || "");
+    setDisplayOrder(String(area.display_order));
+    setIsActive(area.is_active);
+    setOpen(true);
+  };
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <div>
+          <CardTitle>Listagem de Áreas</CardTitle>
+          <CardDescription>Cadastre as áreas/setores que podem ser vinculados aos Devis.</CardDescription>
+        </div>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+          <DialogTrigger asChild>
+            <Button size="sm"><Plus className="h-4 w-4 mr-2" />Nova Área</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingArea ? "Editar Área" : "Nova Área"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Nome da área</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Migratório, TI, Vendas..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Descrição (opcional)</Label>
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Breve descrição da área" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Ordem de exibição</Label>
+                  <Input type="number" value={displayOrder} onChange={(e) => setDisplayOrder(e.target.value)} />
+                </div>
+                <div className="flex items-center space-x-2 pt-8">
+                  <Switch checked={isActive} onCheckedChange={setIsActive} id="area-active" />
+                  <Label htmlFor="area-active">Ativo</Label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+              <Button onClick={() => saveArea.mutate()} disabled={!name || saveArea.isPending}>
+                {saveArea.isPending ? "Salvando..." : "Salvar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[80px]">Ordem</TableHead>
+              <TableHead>Nome</TableHead>
+              <TableHead>Slug (identificador)</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Uso</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando áreas...</TableCell></TableRow>
+            ) : areas.length === 0 ? (
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma área cadastrada.</TableCell></TableRow>
+            ) : (
+              areas.map((area: any) => (
+                <TableRow key={area.id}>
+                  <TableCell className="font-mono text-xs">{area.display_order}</TableCell>
+                  <TableCell className="font-medium">{area.name}</TableCell>
+                  <TableCell className="font-mono text-[10px] text-muted-foreground">{area.slug}</TableCell>
+                  <TableCell>
+                    <Badge variant={area.is_active ? "default" : "secondary"}>
+                      {area.is_active ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="font-mono text-[10px]">
+                      {areaUsage[area.slug] || 0} Devis
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(area)}><Pencil className="h-4 w-4" /></Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir área?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta ação não pode ser desfeita. A área será permanentemente removida.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteArea.mutate(area.id)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">Excluir</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
 
 function Admin() {
   const queryClient = useQueryClient();
@@ -329,6 +545,7 @@ function Admin() {
           <TabsTrigger value="users"><Users className="h-4 w-4 mr-2" />Usuários</TabsTrigger>
           <TabsTrigger value="logs"><ScrollText className="h-4 w-4 mr-2" />Logs</TabsTrigger>
           <TabsTrigger value="settings"><Settings className="h-4 w-4 mr-2" />Opções do Sistema</TabsTrigger>
+          <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -999,6 +1216,10 @@ function Admin() {
               {saveSettings.isPending ? "Salvando..." : "Salvar Opções"}
             </Button>
           </div>
+        </TabsContent>
+
+        <TabsContent value="areas" className="space-y-4">
+          <BusinessAreasManager />
         </TabsContent>
       </Tabs>
     </div>
