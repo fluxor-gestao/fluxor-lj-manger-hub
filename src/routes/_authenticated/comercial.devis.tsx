@@ -392,8 +392,8 @@ function Comercial() {
         created_by: user?.id,
         devis_number: form.devis_number || null,
         service_type: form.service_type || aiAccepted.service_type || null,
-        responsible_sector: form.responsible_sectors[0] || null, // Mantém compatibilidade legada com a primeira área
-        responsible_sectors: form.responsible_sectors, // Nova coluna jsonb se existir, ou apenas para referência interna
+        responsible_sector: form.responsible_sectors[0] || null,
+        responsible_sectors: form.responsible_sectors as any,
         scope_description: aiAccepted.scope_description || null,
         proposal_structure: aiAccepted.proposal_structure || null,
         source_language: form.source_language || "pt",
@@ -441,6 +441,7 @@ function Comercial() {
       setAiSuggestions({
         service_type: p.service_type ?? "",
         responsible_sector: p.responsible_sector ?? "",
+        responsible_sectors: p.responsible_sector ? [p.responsible_sector] : [],
         scope_description: p.scope_description ?? "",
         proposal_structure: p.proposal_structure ?? "",
       });
