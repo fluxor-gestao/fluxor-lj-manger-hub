@@ -593,7 +593,29 @@ export default function RapportPage() {
                           {tx.type === "entrada" ? "+" : "−"} {fmtCurrency(tx.amount, language)}
                         </TableCell>
                         <TableCell>
-                           <Badge variant="outline" className="text-[9px] uppercase">{tx.suggestedCategory}</Badge>
+                           <div className="flex items-center gap-2">
+                             <Select 
+                               value={tx.categoryId || ""} 
+                               onValueChange={(v) => handleUpdateClassification(tx, v)}
+                             >
+                               <SelectTrigger className="h-7 text-[10px] uppercase font-bold border-none shadow-none bg-muted/20 hover:bg-muted/40 transition-colors w-auto">
+                                 <SelectValue placeholder={tx.suggestedCategory} />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 {cats.categories.map(cat => (
+                                   <SelectItem key={cat.id} value={cat.id} className="text-[10px] uppercase">{cat.name}</SelectItem>
+                                 ))}
+                               </SelectContent>
+                             </Select>
+                             {tx.confidence && tx.confidence > 0 && tx.confidence < 1 && (
+                               <Badge variant="outline" className={cn(
+                                 "text-[8px] h-4 px-1",
+                                 tx.confidence > 0.8 ? "text-emerald-600 border-emerald-200 bg-emerald-50" : "text-amber-600 border-amber-200 bg-amber-50"
+                               )}>
+                                 {(tx.confidence * 100).toFixed(0)}% confiança
+                               </Badge>
+                             )}
+                           </div>
                         </TableCell>
                       </TableRow>
                     ))}
