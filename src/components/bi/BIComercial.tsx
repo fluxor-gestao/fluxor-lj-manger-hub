@@ -797,47 +797,50 @@ export default function BIComercial() {
             trendValue: ""
           },
         ].map((kpi, i) => (
-          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
             <div className={cn(
-              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              "absolute -right-8 -top-8 h-32 w-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-30 transition-all duration-700",
               kpi.color === "purple" ? "bg-purple-500" : 
               kpi.color === "sky" ? "bg-sky-500" : 
               kpi.color === "emerald" ? "bg-emerald-500" : 
               kpi.color === "indigo" ? "bg-indigo-500" : "bg-white"
             )} />
 
+            {/* Micro Inner Shadow */}
+            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]" />
+
             <CardContent className="p-6 relative z-10">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
-                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
-                    kpi.color === "purple" ? "group-hover:bg-purple-500/20 group-hover:border-purple-500/20 group-hover:text-purple-400" :
-                    kpi.color === "sky" ? "group-hover:bg-sky-500/20 group-hover:border-sky-500/20 group-hover:text-sky-400" :
-                    kpi.color === "emerald" ? "group-hover:bg-emerald-500/20 group-hover:border-emerald-500/20 group-hover:text-emerald-400" :
-                    kpi.color === "indigo" ? "group-hover:bg-indigo-500/20 group-hover:border-indigo-500/20 group-hover:text-indigo-400" : ""
+                    "p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/50 group-hover:text-white transition-all duration-500 shadow-sm",
+                    kpi.color === "purple" ? "group-hover:bg-purple-500/20 group-hover:border-purple-500/30 group-hover:text-purple-400 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.2)]" :
+                    kpi.color === "sky" ? "group-hover:bg-sky-500/20 group-hover:border-sky-500/30 group-hover:text-sky-400 group-hover:shadow-[0_0_20px_rgba(14,165,233,0.2)]" :
+                    kpi.color === "emerald" ? "group-hover:bg-emerald-500/20 group-hover:border-emerald-500/30 group-hover:text-emerald-400 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]" :
+                    kpi.color === "indigo" ? "group-hover:bg-indigo-500/20 group-hover:border-indigo-500/30 group-hover:text-indigo-400 group-hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]" : ""
                   )}>
-                    <kpi.icon className="h-4 w-4" />
+                    <kpi.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                <div className="space-y-2">
+                  <h2 className="text-4xl font-bold tracking-tight text-white leading-none">
                     {kpi.value}
                   </h2>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {kpi.trend !== "neutral" && (
                       <div className={cn(
-                        "flex items-center text-[11px] font-bold px-1.5 py-0.5 rounded-md",
-                        kpi.trend === "pos" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                        "flex items-center text-[11px] font-bold px-2 py-0.5 rounded-full ring-1 ring-inset",
+                        kpi.trend === "pos" ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20" : "bg-rose-500/10 text-rose-400 ring-rose-500/20"
                       )}>
                         {kpi.trend === "pos" ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
                         {kpi.trendValue}
                       </div>
                     )}
-                    <span className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                    <span className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide">
                       {kpi.sub}
                     </span>
                   </div>
