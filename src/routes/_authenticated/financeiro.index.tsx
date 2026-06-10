@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Wallet, ArrowDownCircle, ArrowUpCircle, BarChart3, type LucideIcon } from "lucide-react";
+import { Wallet, ArrowDownCircle, ArrowUpCircle, BarChart3, ArrowLeftRight, type LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/financeiro/")({
@@ -17,7 +17,7 @@ type SubModule = {
 const subModules: SubModule[] = [
   {
     title: "Central Financeira",
-    description: "Lançamentos, conciliação e fluxo de caixa",
+    description: "Lançamentos e fluxo de caixa",
     route: "/financeiro/central",
     icon: Wallet,
     gradient: "from-blue-500 to-blue-700",
@@ -35,6 +35,13 @@ const subModules: SubModule[] = [
     route: "/financeiro/contas-a-pagar",
     icon: ArrowUpCircle,
     gradient: "from-rose-500 to-rose-700",
+  },
+  {
+    title: "Conciliação",
+    description: "Conferir cobranças e pagamentos",
+    route: "/conciliacao",
+    icon: ArrowLeftRight,
+    gradient: "from-amber-500 to-amber-700",
   },
   {
     title: "Rapport",
