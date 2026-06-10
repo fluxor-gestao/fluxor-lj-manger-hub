@@ -30,6 +30,9 @@ import { cn } from "@/lib/utils";
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
 
+import { PRICING_STATUS_COLORS, PRICING_STATUS_LABELS } from "./DevisPricingManager";
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
+
 // Colunas pós-aceite cuja presença é derivada de dados (não do status do devis)
 const DERIVED_COLUMNS = new Set([
   "aceita",
@@ -136,20 +139,27 @@ function DevisCard({
       </div>
       <div className="font-medium text-sm line-clamp-2">{client?.name || devis.title || "—"}</div>
       {amountNode}
-      {(hasCharge || hasService) && (
-        <div className="flex flex-wrap gap-1">
-          {hasCharge && (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-orange-500/30 bg-orange-500/10 text-orange-600 dark:text-orange-300">
-              💰 Cobrança
-            </Badge>
-          )}
-          {hasService && (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300">
-              🔧 Serviço
-            </Badge>
-          )}
-        </div>
-      )}
+      <div className="flex flex-wrap gap-1">
+        {(hasCharge || hasService) && (
+          <>
+            {hasCharge && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-orange-500/30 bg-orange-500/10 text-orange-600 dark:text-orange-300">
+                💰 Cobrança
+              </Badge>
+            )}
+            {hasService && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300">
+                🔧 Serviço
+              </Badge>
+            )}
+          </>
+        )}
+        {devis.pricing_status && devis.pricing_status !== "sem_precificacao" && (
+          <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", PRICING_STATUS_COLORS[devis.pricing_status])}>
+            🏷️ {PRICING_STATUS_LABELS[devis.pricing_status]}
+          </Badge>
+        )}
+      </div>
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="truncate">
           {responsavel?.full_name || responsavel?.email || "Sem responsável"}
