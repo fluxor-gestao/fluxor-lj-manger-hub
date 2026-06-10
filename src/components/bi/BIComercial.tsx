@@ -986,12 +986,12 @@ export default function BIComercial() {
         <ChartCard title="Conversão por Empresa">
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={statsPorEmpresa}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" fontSize={11} />
-                <YAxis fontSize={11} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-                <Tooltip formatter={(v: any) => PCT(Number(v))} />
-                <Bar dataKey="conversao" fill={COLORS[2]} />
+              <BarChart data={statsPorEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip content={<CustomTooltip formatter={PCT} />} />
+                <Bar dataKey="conversao" fill="#8B5CF6" radius={[6, 6, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           )}
