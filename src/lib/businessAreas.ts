@@ -1,6 +1,7 @@
 // Catálogo de Áreas Principais (Centro de Resultado) por empresa do Grupo
 // Lundgaard Jensen. Os slugs são gravados em devis.responsible_sector e
 // copiados para services.responsible_sector quando o devis é aceito.
+// Agora as áreas também são geridas dinamicamente na tabela 'business_areas'.
 //
 // Mantém o catálogo no front-end (sem migração) para permitir filtros e
 // análises por área em Comercial, Operação, Financeiro e BI.
@@ -47,6 +48,23 @@ export function getAreasFor(code: CompanyCode | null | undefined): Area[] {
   return BUSINESS_AREAS[code] ?? [];
 }
 
+import { supabase } from "@/integrations/supabase/client";
+
+// Busca dinâmica para labels que não estão no catálogo fixo
+let dbAreasCache: Record<string, string> = {};
+const loadDbAreas = async () => {
+  try {
+    const { data } = await supabase.from("business_areas").select("slug, name");
+    if (data) {
+      dbAreasCache = Object.fromEntries(data.map(a => [a.slug, a.name]));
+    }
+  } catch (e) {
+    console.error("Erro ao carregar business_areas dinâmicas", e);
+  }
+};
+// Dispara carga inicial (fire and forget)
+loadDbAreas();
+
 export function findArea(
   code: CompanyCode | null | undefined,
   slug: string | null | undefined,
@@ -62,6 +80,12 @@ export function findArea(
     const hit = list.find((a) => a.slug === slug);
     if (hit) return hit;
   }
+  
+  // Procura no cache dinâmico do banco
+  if (dbAreasCache[slug]) {
+    return { slug, label: dbAreasCache[slug] };
+  }
+
   return null;
 }
 
