@@ -97,16 +97,16 @@ const CHART_COLORS = [
 const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#111827]/90 backdrop-blur-xl border border-white/10 p-4 shadow-2xl rounded-xl">
-        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-3">{label}</p>
-        <div className="space-y-2">
+      <div className="bg-[#0b1526]/95 backdrop-blur-2xl border border-white/10 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-xl ring-1 ring-white/5">
+        <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em] mb-3 border-b border-white/5 pb-2">{label}</p>
+        <div className="space-y-2.5">
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-10">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
-                <span className="text-xs font-bold text-white/70">{entry.name}</span>
+            <div key={index} className="flex items-center justify-between gap-12">
+              <div className="flex items-center gap-2.5">
+                <div className="w-2 h-2 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
+                <span className="text-xs font-medium text-[#CBD5E1]">{entry.name}</span>
               </div>
-              <span className="text-xs font-black text-white">
+              <span className="text-xs font-bold text-white">
                 {formatter ? formatter(entry.value) : entry.value}
               </span>
             </div>
@@ -688,19 +688,21 @@ export default function BIFinanceiro() {
     <div className="space-y-6">
       <ActiveCompanyBanner />
       {/* Filters */}
-      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
-        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.02] flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Filter className="h-3.5 w-3.5 text-white/40" />
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Filtros Avançados</CardTitle>
+      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group hover:border-white/10 transition-all duration-500">
+        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01] flex flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+              <Filter className="h-3.5 w-3.5 text-white/70" />
+            </div>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">Filtros Estratégicos</CardTitle>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 border border-white/5" onClick={exportCSV}>Exportar</Button>
+            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all" onClick={exportCSV}>Exportar</Button>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={clearFilters}
-              className="h-8 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 border border-white/5"
+              className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all"
             >
               <Eraser className="h-3 w-3 mr-2" /> Limpar
             </Button>
@@ -710,8 +712,8 @@ export default function BIFinanceiro() {
 
 
           <div>
-            <Label className="text-xs">De</Label>
-            <Input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">De</Label>
+            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
             <Label className="text-xs">Até</Label>
@@ -859,48 +861,51 @@ export default function BIFinanceiro() {
             trendValue: ""
           },
         ].map((kpi, i) => (
-          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
             {/* Ambient Glow */}
             <div className={cn(
-              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              "absolute -right-8 -top-8 h-32 w-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-30 transition-all duration-700",
               kpi.color === "emerald" ? "bg-emerald-500" : 
               kpi.color === "rose" ? "bg-rose-500" : 
               kpi.color === "sky" ? "bg-sky-500" : 
               kpi.color === "indigo" ? "bg-indigo-500" : "bg-white"
             )} />
 
+            {/* Micro Inner Shadow */}
+            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]" />
+
             <CardContent className="p-6 relative z-10">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
-                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
-                    kpi.color === "emerald" ? "group-hover:bg-emerald-500/20 group-hover:border-emerald-500/20 group-hover:text-emerald-400" :
-                    kpi.color === "rose" ? "group-hover:bg-rose-500/20 group-hover:border-rose-500/20 group-hover:text-rose-400" :
-                    kpi.color === "sky" ? "group-hover:bg-sky-500/20 group-hover:border-sky-500/20 group-hover:text-sky-400" :
-                    kpi.color === "indigo" ? "group-hover:bg-indigo-500/20 group-hover:border-indigo-500/20 group-hover:text-indigo-400" : ""
+                    "p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/50 group-hover:text-white transition-all duration-500 shadow-sm",
+                    kpi.color === "emerald" ? "group-hover:bg-emerald-500/20 group-hover:border-emerald-500/30 group-hover:text-emerald-400 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]" :
+                    kpi.color === "rose" ? "group-hover:bg-rose-500/20 group-hover:border-rose-500/30 group-hover:text-rose-400 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]" :
+                    kpi.color === "sky" ? "group-hover:bg-sky-500/20 group-hover:border-sky-500/30 group-hover:text-sky-400 group-hover:shadow-[0_0_20px_rgba(14,165,233,0.2)]" :
+                    kpi.color === "indigo" ? "group-hover:bg-indigo-500/20 group-hover:border-indigo-500/30 group-hover:text-indigo-400 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.2)]" : ""
                   )}>
-                    <kpi.icon className="h-4 w-4" />
+                    <kpi.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                <div className="space-y-2">
+                  <h2 className="text-4xl font-bold tracking-tight text-white leading-none">
                     {kpi.value}
                   </h2>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {kpi.trend !== "neutral" && (
                       <div className={cn(
-                        "flex items-center text-[11px] font-bold px-1.5 py-0.5 rounded-md",
-                        kpi.trend === "pos" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                        "flex items-center text-[11px] font-bold px-2 py-0.5 rounded-full ring-1 ring-inset",
+                        kpi.trend === "pos" ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20" : "bg-rose-500/10 text-rose-400 ring-rose-500/20"
                       )}>
                         {kpi.trend === "pos" ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
                         {kpi.trendValue}
                       </div>
                     )}
-                    <span className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                    <span className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide">
                       {kpi.sub}
                     </span>
                   </div>
@@ -1001,40 +1006,44 @@ export default function BIFinanceiro() {
           <CardContent className="relative z-10 p-6">
 
             <div className="grid gap-8">
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita e Resultado por Empresa</h4>
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Receita e Resultado por Empresa</h4>
                 <div className="grid gap-2">
                   {receitaEmpresa.slice(0, 5).map((s) => {
                     const res = resultadoEmpresa.find(r => r.name === s.name)?.value ?? 0;
                     return (
-                      <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{s.name}</span>
-                          <span className={`text-[10px] font-medium ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
+                      <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${res >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                            {res >= 0 ? "+" : ""}{BRL(res)}
+                          </span>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-primary">{BRL(s.value)}</div>
-                          <div className="text-[10px] text-muted-foreground">Part.: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="font-bold text-white">{BRL(s.value)}</div>
+                          <div className="text-[10px] font-medium text-[#94A3B8]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase text-muted-foreground border-b pb-1">Receita e Resultado por Área</h4>
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Receita e Resultado por Área</h4>
                 <div className="grid gap-2">
                   {receitaArea.slice(0, 5).map((s) => {
                     const res = resultadoArea.find(r => r.name === s.name)?.value ?? 0;
                     return (
-                      <div key={s.name} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{s.name}</span>
-                          <span className={`text-[10px] font-medium ${res >= 0 ? "text-emerald-600" : "text-rose-600"}`}>Resultado: {BRL(res)}</span>
+                      <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${res >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                            {res >= 0 ? "+" : ""}{BRL(res)}
+                          </span>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-primary">{BRL(s.value)}</div>
-                          <div className="text-[10px] text-muted-foreground">Part.: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="font-bold text-white">{BRL(s.value)}</div>
+                          <div className="text-[10px] font-medium text-[#94A3B8]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
@@ -1100,13 +1109,13 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[280px]" /> : resultadoEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={resultadoEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} />
-                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                   {resultadoEmpresa.map((entry, i) => (
-                    <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} />
+                    <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} fillOpacity={0.8} />
                   ))}
                 </Bar>
               </BarChart>
@@ -1137,13 +1146,13 @@ export default function BIFinanceiro() {
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                <Line type="monotone" dataKey="Receita" stroke="#10B981" strokeWidth={3} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-                <Line type="monotone" dataKey="Despesa" stroke="#EF4444" strokeWidth={3} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-                <Line type="monotone" dataKey="Resultado" stroke="#38bdf8" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ stroke: 'rgba(255,255,255,0.05)', strokeWidth: 1 }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94A3B8' }} />
+                <Line type="monotone" dataKey="Receita" stroke="#10B981" strokeWidth={4} dot={{ r: 4, fill: '#10B981', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                <Line type="monotone" dataKey="Despesa" stroke="#EF4444" strokeWidth={4} dot={{ r: 4, fill: '#EF4444', strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                <Line type="monotone" dataKey="Resultado" stroke="#0EA5E9" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -1154,14 +1163,14 @@ export default function BIFinanceiro() {
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={monthly}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
                 <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                <Bar dataKey="Receita Prev" fill="#10B981" fillOpacity={0.2} radius={[2, 2, 0, 0]} />
-                <Bar dataKey="Receita" fill="#10B981" fillOpacity={0.8} radius={[2, 2, 0, 0]} />
-                <Bar dataKey="Despesa Prev" fill="#EF4444" fillOpacity={0.2} radius={[2, 2, 0, 0]} />
-                <Bar dataKey="Despesa" fill="#EF4444" fillOpacity={0.8} radius={[2, 2, 0, 0]} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94A3B8' }} />
+                <Bar dataKey="Receita Prev" fill="#10B981" fillOpacity={0.15} radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="Receita" fill="#10B981" fillOpacity={0.9} radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="Despesa Prev" fill="#EF4444" fillOpacity={0.15} radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="Despesa" fill="#EF4444" fillOpacity={0.9} radius={[4, 4, 0, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1284,25 +1293,25 @@ export default function BIFinanceiro() {
 
       {/* Tables */}
       <Tabs value={tabFocus?.startsWith("categoria") ? "receber" : tabFocus ?? "receber"} onValueChange={(v) => setTabFocus(v)}>
-        <TabsList>
-          <TabsTrigger value="receber">Receber críticas</TabsTrigger>
-          <TabsTrigger value="pagar">Pagar críticas</TabsTrigger>
-          <TabsTrigger value="conciliacao">Pend. conciliação</TabsTrigger>
-          <TabsTrigger value="ranking">Ranking clientes</TabsTrigger>
+        <TabsList className="bg-[#1a2233]/40 border border-white/5 p-1 h-12 backdrop-blur-xl mb-6">
+          <TabsTrigger value="receber" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Receber críticas</TabsTrigger>
+          <TabsTrigger value="pagar" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Pagar críticas</TabsTrigger>
+          <TabsTrigger value="conciliacao" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Pend. conciliação</TabsTrigger>
+          <TabsTrigger value="ranking" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Ranking clientes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="receber">
           <Card>
             <CardContent className="p-0">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="text-right">Dias atraso</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Próxima ação</TableHead>
+                <TableHeader className="bg-[#0b1526]/50">
+                  <TableRow className="hover:bg-transparent border-white/5">
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1499,13 +1508,13 @@ function Kpi({
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
-      <CardHeader className="pb-4 border-b border-white/5">
-        <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">
+    <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden group hover:border-white/10 transition-all duration-500">
+      <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01]">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-6">{children}</CardContent>
+      <CardContent className="pt-8">{children}</CardContent>
     </Card>
   );
 }
@@ -1513,10 +1522,12 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 function Empty() {
   return (
-    <div className="flex h-[260px] items-center justify-center text-sm text-white/20">
+    <div className="flex h-[280px] items-center justify-center text-sm text-[#94A3B8]">
       <div className="text-center">
-        <CalendarRange className="mx-auto mb-2 h-6 w-6 opacity-50" />
-        <p className="font-bold uppercase tracking-widest text-[10px]">Sem dados para o período</p>
+        <div className="bg-white/5 p-4 rounded-full mb-4 inline-block ring-1 ring-white/10">
+          <CalendarRange className="h-6 w-6 text-white/30" />
+        </div>
+        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-[#94A3B8]">Sem dados para o período selecionado</p>
       </div>
     </div>
   );
