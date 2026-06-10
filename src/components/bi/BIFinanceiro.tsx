@@ -98,13 +98,13 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-[#0b1526]/95 backdrop-blur-2xl border border-white/10 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-xl ring-1 ring-white/5">
-        <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em] mb-3 border-b border-white/5 pb-2">{label}</p>
+        <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em] mb-3 border-b border-white/10 pb-2">{label}</p>
         <div className="space-y-2.5">
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-12">
               <div className="flex items-center gap-2.5">
-                <div className="w-2 h-2 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
-                <span className="text-xs font-medium text-[#CBD5E1]">{entry.name}</span>
+                <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
+                <span className="text-xs font-semibold text-[#E2E8F0]">{entry.name}</span>
               </div>
               <span className="text-xs font-bold text-white">
                 {formatter ? formatter(entry.value) : entry.value}
