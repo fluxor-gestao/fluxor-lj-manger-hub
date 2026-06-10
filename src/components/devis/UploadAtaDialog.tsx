@@ -77,8 +77,9 @@ function normalize(s: string) {
 }
 
 export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm }: Props) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [langHint, setLangHint] = useState<string>("auto");
   const [analyzing, setAnalyzing] = useState(false);
   const [payload, setPayload] = useState<AnalyzedPayload | null>(null);
