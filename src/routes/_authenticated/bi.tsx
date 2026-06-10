@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BarChart3, BriefcaseBusiness, DollarSign, ShieldAlert, ShoppingCart } from "lucide-react";
+import { ArrowLeft, BarChart3, BriefcaseBusiness, DollarSign, LayoutDashboard, ShieldAlert, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { canAccessBiDashboard } from "@/lib/access";
 import BIFinanceiro from "@/components/bi/BIFinanceiro";
 import BIComercial from "@/components/bi/BIComercial";
+import { cn } from "@/lib/utils";
 
 const dashboards = [
   {
