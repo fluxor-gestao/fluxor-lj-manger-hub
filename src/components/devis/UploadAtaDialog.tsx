@@ -187,8 +187,11 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       await new Promise(r => setTimeout(r, 600));
 
       const p = data.payload as AnalyzedPayload;
+      p.meeting.date = format(new Date(), "yyyy-MM-dd"); // Forçar data atual conforme solicitado
       setPayload(p);
       setEditClient(p.client);
+      setMeetingDate(p.meeting.date);
+      setSelectedAreas(p.devis.responsible_sectors || (p.devis.responsible_sector ? [p.devis.responsible_sector] : []));
       
       const docNorm = normalize(p.client.document);
       const emailNorm = (p.client.email || "").toLowerCase().trim();
