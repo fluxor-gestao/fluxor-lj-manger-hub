@@ -515,6 +515,35 @@ export type Database = {
           },
         ]
       }
+      devis_service_areas: {
+        Row: {
+          area_slug: string
+          created_at: string | null
+          devis_id: string
+          id: string
+        }
+        Insert: {
+          area_slug: string
+          created_at?: string | null
+          devis_id: string
+          id?: string
+        }
+        Update: {
+          area_slug?: string
+          created_at?: string | null
+          devis_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_service_areas_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
