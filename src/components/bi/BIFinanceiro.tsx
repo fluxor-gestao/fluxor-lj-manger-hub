@@ -1319,13 +1319,15 @@ export default function BIFinanceiro() {
                     <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Sem contas a receber críticas</TableCell></TableRow>
                   )}
                   {contasReceberCriticas.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>{r.cliente}</TableCell>
-                      <TableCell>{r.vencimento}</TableCell>
-                      <TableCell className="text-right">{BRL(r.valor)}</TableCell>
-                      <TableCell className="text-right">{r.dias > 0 ? <Badge variant="destructive">{r.dias}d</Badge> : r.dias}</TableCell>
-                      <TableCell><Badge variant="outline">{r.status}</Badge></TableCell>
-                      <TableCell>{r.acao}</TableCell>
+                    <TableRow key={r.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group/row">
+                      <TableCell className="font-bold text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
+                      <TableCell className="text-white/70 text-xs">{r.vencimento}</TableCell>
+                      <TableCell className="text-right font-bold text-white">{BRL(r.valor)}</TableCell>
+                      <TableCell className="text-right">
+                        {r.dias > 0 ? <Badge variant="destructive" className="animate-pulse">{r.dias}d</Badge> : <span className="text-white/50">{r.dias}</span>}
+                      </TableCell>
+                      <TableCell><Badge variant="outline" className="border-white/20 text-white/90 font-medium">{r.status}</Badge></TableCell>
+                      <TableCell className="text-white/90 text-xs">{r.acao}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
