@@ -29,6 +29,7 @@ import { CobrancaDetailSheet, type CobrancaRow } from "@/components/financeiro/C
 import { FaturaPreviewDialog } from "@/components/financeiro/FaturaPreviewDialog";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-receber")({
   component: ContasAReceberPage,
@@ -249,10 +250,61 @@ function ContasAReceberPage() {
 
       {/* KPI cards */}
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
-        <KpiCard tone="primary" icon={<Wallet className="h-4 w-4" />} label="Total em aberto" value={fmt(metrics.totalAberto)} />
-        <KpiCard tone="danger" icon={<AlertTriangle className="h-4 w-4" />} label="Vencidos" value={fmt(metrics.vencidoVal)} hint={`${metrics.vencidoQtd} cobrança(s)`} />
-        <KpiCard tone="warning" icon={<CalendarClock className="h-4 w-4" />} label="A vencer (7 dias)" value={fmt(metrics.a7Val)} hint={`${metrics.a7Qtd} cobrança(s)`} />
-        <KpiCard tone="success" icon={<CheckCircle2 className="h-4 w-4" />} label="Recebidos no mês" value={fmt(metrics.recebidoMes)} />
+        <KpiCard 
+          tone="primary" 
+          icon={<Wallet className="h-4 w-4" />} 
+          label="Total em aberto" 
+          value={fmt(metrics.totalAberto)} 
+          onClick={() => {
+            clearFilters();
+            setOnlyOpen(true);
+            document.getElementById('cobrancas-table')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          active={onlyOpen && !onlyOverdue && !dueTo}
+        />
+        <KpiCard 
+          tone="danger" 
+          icon={<AlertTriangle className="h-4 w-4" />} 
+          label="Vencidos" 
+          value={fmt(metrics.vencidoVal)} 
+          hint={`${metrics.vencidoQtd} cobrança(s)`} 
+          onClick={() => {
+            clearFilters();
+            setOnlyOverdue(true);
+            document.getElementById('cobrancas-table')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          active={onlyOverdue}
+        />
+        <KpiCard 
+          tone="warning" 
+          icon={<CalendarClock className="h-4 w-4" />} 
+          label="A vencer (7 dias)" 
+          value={fmt(metrics.a7Val)} 
+          hint={`${metrics.a7Qtd} cobrança(s)`} 
+          onClick={() => {
+            clearFilters();
+            const t = today();
+            const in7 = addDays(t, 7);
+            setDueFrom(t);
+            setDueTo(in7);
+            setOnlyOpen(true);
+            document.getElementById('cobrancas-table')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          active={!!dueTo && !onlyOverdue}
+        />
+        <KpiCard 
+          tone="success" 
+          icon={<CheckCircle2 className="h-4 w-4" />} 
+          label="Recebidos no mês" 
+          value={fmt(metrics.recebidoMes)} 
+          onClick={() => {
+            clearFilters();
+            setOnlyOpen(false);
+            setStatusFilter("pago");
+            document.getElementById('cobrancas-table')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          active={statusFilter === "pago"}
+        />
         <KpiCard tone="muted" icon={<ListChecks className="h-4 w-4" />} label="Cobranças pendentes" value={String(metrics.pendentesQtd)} />
       </div>
 
@@ -323,7 +375,7 @@ function ContasAReceberPage() {
           <EmptyState title="Nenhuma cobrança encontrada" description="Ajuste os filtros para visualizar os recebíveis." />
         </CardContent></Card>
       ) : (
-        <Card className="overflow-hidden">
+        <Card id="cobrancas-table" className="overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
@@ -345,7 +397,7 @@ function ContasAReceberPage() {
                 const st = statusOf(r);
                 const cliente = r.client?.name || r.counterparty_name || "—";
                 return (
-                  <TableRow key={r.id} className="even:bg-muted/20 hover:bg-muted/40">
+                  <TableRow key={r.id} id={`row-${r.id}`} className="even:bg-muted/20 hover:bg-muted/40">
                     <TableCell className="py-2 font-medium">{cliente}</TableCell>
                     <TableCell className="py-2">
                       <button
@@ -470,11 +522,30 @@ const toneStyles: Record<Tone, { icon: string; bar: string; ring: string }> = {
 };
 
 function KpiCard({
-  icon, label, value, hint, tone = "muted",
-}: { icon: React.ReactNode; label: string; value: string; hint?: string; tone?: Tone }) {
+  icon, label, value, hint, tone = "muted", onClick, active
+}: { 
+  icon: React.ReactNode; 
+  label: string; 
+  value: string; 
+  hint?: string; 
+  tone?: Tone;
+  onClick?: () => void;
+  active?: boolean;
+}) {
   const t = toneStyles[tone];
   return (
-    <Card className={`relative overflow-hidden transition-shadow hover:shadow-md ${t.ring}`}>
+    <Card 
+      className={cn(
+        "relative overflow-hidden transition-all hover:shadow-md cursor-pointer",
+        t.ring,
+        active && "ring-2 ring-offset-2",
+        active && tone === "primary" && "ring-primary border-primary",
+        active && tone === "success" && "ring-success border-success",
+        active && tone === "warning" && "ring-warning border-warning",
+        active && tone === "danger" && "ring-destructive border-destructive"
+      )}
+      onClick={onClick}
+    >
       <span className={`absolute left-0 top-0 h-full w-1 ${t.bar}`} aria-hidden />
       <CardContent className="pt-5 pb-4 pl-5">
         <div className="flex items-center justify-between mb-2">
