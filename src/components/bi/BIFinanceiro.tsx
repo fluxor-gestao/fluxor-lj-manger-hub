@@ -947,29 +947,43 @@ export default function BIFinanceiro() {
           },
         ].map((kpi, i) => (
           <Card key={i} className={cn(
-            "group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-0 shadow-sm",
+            "group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-white/5 shadow-lg bg-background/40 backdrop-blur-sm",
             kpi.border
           )}>
-            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", kpi.gradient)} />
-            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className={cn(
+              "absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl transition-all duration-700 group-hover:scale-150 group-hover:opacity-30 opacity-20",
+              `bg-${kpi.color}-500`
+            )} />
+
             <CardHeader className="relative z-10 flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
+              <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
+                {kpi.label}
+              </CardTitle>
               <div className={cn(
-                "p-2 rounded-lg backdrop-blur-md transition-transform group-hover:scale-110",
-                `bg-${kpi.color}-500/20 text-${kpi.color}-600`
+                "p-2.5 rounded-xl backdrop-blur-xl border transition-all duration-500 group-hover:rotate-6 group-hover:scale-110 shadow-lg",
+                `bg-${kpi.color}-500/10 border-${kpi.color}-500/20 text-${kpi.color}-500`
               )}>
-                <kpi.icon className="h-4 w-4" />
+                <kpi.icon className="h-5 w-5" />
               </div>
             </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="flex flex-col">
-                <span className="text-xl font-bold tracking-tight">{kpi.value}</span>
-                <div className="flex items-center mt-1">
-                  {kpi.trend === "neg" && <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />}
-                  <span className="text-xs text-muted-foreground">{kpi.sub}</span>
+            <CardContent className="relative z-10 pt-4">
+              <div className="flex flex-col gap-1">
+                <span className="text-2xl font-black tracking-tighter transition-all duration-500 group-hover:scale-[1.02] origin-left">
+                  {kpi.value}
+                </span>
+                <div className="flex items-center mt-2 px-2 py-1 rounded-full bg-black/5 dark:bg-white/5 w-fit border border-white/5">
+                  {kpi.trend === "neg" && <ArrowDownRight className="h-3 w-3 text-rose-500 mr-1 animate-bounce" />}
+                  <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground whitespace-nowrap">
+                    {kpi.sub}
+                  </span>
                 </div>
               </div>
             </CardContent>
+            <div className={cn(
+              "absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-current transition-all duration-700 opacity-50",
+              `text-${kpi.color}-500`
+            )} />
           </Card>
         ))}
       </div>
