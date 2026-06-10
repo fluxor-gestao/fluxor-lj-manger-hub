@@ -397,22 +397,33 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
             </div>
 
             <div className="w-full max-w-sm space-y-4">
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-primary animate-progress-indeterminate" />
+              <div className="flex justify-between items-end text-xs mb-1">
+                <span className="text-muted-foreground font-medium">Progresso da análise</span>
+                <span className="text-primary font-bold">{progress}%</span>
+              </div>
+              <div className="h-3 w-full bg-muted rounded-full overflow-hidden border border-muted-foreground/10">
+                <div 
+                  className="h-full bg-primary transition-all duration-500 ease-out" 
+                  style={{ width: `${progress}%` }} 
+                />
               </div>
               
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
-                  <CheckCircle2 className="h-3 w-3 text-green-500" /> Processando arquivo base
+              <div className="flex flex-col gap-2 pt-2">
+                <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 10 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                  {progress >= 10 ? <CheckCircle2 className="h-3.3 w-3.3" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground ml-1" />} 
+                  Processando arquivo base
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-2 delay-300 duration-500">
-                  <Loader2 className="h-3 w-3 animate-spin" /> Detectando idioma e contexto
+                <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 35 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                  {progress >= 35 ? <CheckCircle2 className="h-3.3 w-3.3" /> : progress >= 10 ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 ml-1" />} 
+                  Detectando idioma e contexto
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground opacity-50">
-                  <FileText className="h-3 w-3" /> Extraindo dados do cliente
+                <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 65 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                  {progress >= 65 ? <CheckCircle2 className="h-3.3 w-3.3" /> : progress >= 35 ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 ml-1" />} 
+                  Extraindo dados do cliente
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground opacity-50">
-                  <Sparkles className="h-3 w-3" /> Gerando estrutura da proposta
+                <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 90 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                  {progress >= 90 ? <CheckCircle2 className="h-3.3 w-3.3" /> : progress >= 65 ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 ml-1" />} 
+                  Gerando estrutura da proposta
                 </div>
               </div>
             </div>
