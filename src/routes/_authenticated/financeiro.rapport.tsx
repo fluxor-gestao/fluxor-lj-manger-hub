@@ -350,17 +350,17 @@ export default function RapportPage() {
         .maybeSingle();
 
       if (existing) {
-        await supabase
+        await (supabase
           .from("financial_classification_rules")
           .update({
             category_id: newCategoryId,
             occurrence_count: (existing.occurrence_count || 1) + 1,
             confidence_level: Math.min(0.95, ((existing.occurrence_count || 1) * 0.1) + 0.5),
             last_used_at: new Date().toISOString()
-          } as any)
+          } as any) as any)
           .eq("id", existing.id);
       } else {
-        await supabase
+        await (supabase
           .from("financial_classification_rules")
           .insert({
             pattern: tx.description,
@@ -368,7 +368,7 @@ export default function RapportPage() {
             client_id: clientId || null,
             occurrence_count: 1,
             confidence_level: 0.6
-          } as any);
+          } as any) as any);
       }
 
       toast.success("Aprendizado atualizado!");
