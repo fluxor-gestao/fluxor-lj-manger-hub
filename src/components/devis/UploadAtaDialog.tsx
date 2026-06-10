@@ -101,6 +101,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
     setMatchMode("new");
     setSelectedClientId("");
     setCreating(false);
+    setProgress(0);
   };
 
   const handleClose = (o: boolean) => {
