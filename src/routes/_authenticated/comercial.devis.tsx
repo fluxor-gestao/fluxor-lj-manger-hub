@@ -303,12 +303,15 @@ function Comercial() {
     return devisSummary.filter((d: any) => {
       if (filterClient !== "all" && d.client_id !== filterClient) return false;
       if (filterCompany !== "all" && d.business_unit !== filterCompany) return false;
-      if (filterArea !== "all" && d.responsible_sector !== filterArea) return false;
+      if (filterAreas.length > 0) {
+        const itemAreas = (d.devis_service_areas || []).map((a: any) => a.area_slug);
+        if (!filterAreas.some(area => itemAreas.includes(area))) return false;
+      }
       if (filterStart && d.meeting_date && parseISO(d.meeting_date) < filterStart) return false;
       if (filterEnd && d.meeting_date && parseISO(d.meeting_date) > filterEnd) return false;
       return true;
     });
-  }, [devisSummary, filterClient, filterCompany, filterArea, filterStart, filterEnd]);
+  }, [devisSummary, filterClient, filterCompany, filterAreas, filterStart, filterEnd]);
 
   // List usa a query paginada (filtros já server-side)
   const devisListRows = devisListQuery.data?.rows ?? [];
@@ -438,7 +441,6 @@ function Comercial() {
       setAiSuggestions({
         service_type: p.service_type ?? "",
         responsible_sector: p.responsible_sector ?? "",
-        responsible_sectors: p.responsible_sector ? [p.responsible_sector] : [],
         scope_description: p.scope_description ?? "",
         proposal_structure: p.proposal_structure ?? "",
       });
@@ -492,6 +494,7 @@ function Comercial() {
     setAiAccepted({
       service_type: payload.devis.service_type || service_type,
       responsible_sector: payload.devis.responsible_sector || "",
+      responsible_sectors: payload.devis.responsible_sector ? [payload.devis.responsible_sector] : [],
       scope_description: payload.devis.scope_description || "",
       proposal_structure: payload.devis.proposal_structure || "",
     });
@@ -626,21 +629,14 @@ function Comercial() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label className="text-xs">Área principal</Label>
-                <Select
-                  value={filterArea}
-                  onValueChange={setFilterArea}
-                  disabled={!(companyCode ?? (filterCompany !== "all" ? filterCompany : null))}
-                >
-                  <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    {getAreasFor((companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : null))).map((a) => (
-                      <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex flex-col gap-1.5 min-w-[180px]">
+                <Label className="text-xs">Áreas Responsáveis</Label>
+                <MultiAreaSelector
+                  companyCode={companyCode ?? (filterCompany !== "all" ? (filterCompany as CompanyCode) : "")}
+                  selectedAreas={filterAreas}
+                  onChange={setFilterAreas}
+                  placeholder="Todas as áreas"
+                />
               </div>
               <div>
                 <Label className="text-xs">Cliente</Label>
@@ -681,9 +677,9 @@ function Comercial() {
                 </Popover>
               </div>
             </div>
-            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterArea !== "all" || filterStart || filterEnd) && (
+            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterAreas.length > 0 || filterStart || filterEnd) && (
               <div className="mt-3">
-                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterArea("all"); setFilterStart(undefined); setFilterEnd(undefined); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterAreas([]); setFilterStart(undefined); setFilterEnd(undefined); }}>
                   Limpar filtros
                 </Button>
               </div>
@@ -851,7 +847,7 @@ function Comercial() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || !isCompanyCode(devisForm.business_unit) || !isValidAreaForCompany(devisForm.business_unit, devisForm.responsible_sector) || createDevis.isPending}>Salvar</Button>
+                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || !isCompanyCode(devisForm.business_unit) || devisForm.responsible_sectors.length === 0 || createDevis.isPending}>Salvar</Button>
                 </DialogFooter>
               </DialogContent>
               </Dialog>
