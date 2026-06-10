@@ -31,7 +31,9 @@ import {
   Filter,
   PieChart as PieIcon,
   ShieldAlert,
+  Sparkles,
   Target,
+
   TrendingDown,
   TrendingUp,
   Users,
