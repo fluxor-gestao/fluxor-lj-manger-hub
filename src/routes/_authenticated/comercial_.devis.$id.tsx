@@ -41,6 +41,7 @@ function DevisDetail() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<any>(null);
+  const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestions | null>(null);
   const [generating, setGenerating] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
@@ -51,7 +52,7 @@ function DevisDetail() {
   const { data: devis, isLoading } = useQuery({
     queryKey: ["devis", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("devis").select("*").eq("id", id!).maybeSingle();
+      const { data, error } = await supabase.from("devis").select("*, devis_service_areas(area_slug)").eq("id", id!).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -86,10 +87,9 @@ function DevisDetail() {
 
   useEffect(() => {
     if (!devis) return;
-    // Só hidrata o form a partir do devis quando NÃO estiver editando.
-    // Caso contrário, um refetch (window focus, invalidate, etc.) sobrescreveria
-    // alterações locais ainda não salvas (ex.: sugestões da IA recém-aceitas).
     if (editing) return;
+    const areas = (devis.devis_service_areas || []).map((a: any) => a.area_slug);
+    setSelectedAreas(areas);
     setForm({
       ...devis,
       meeting_date: devis.meeting_date ? parseISO(devis.meeting_date) : undefined,
@@ -156,8 +156,8 @@ function DevisDetail() {
       if (!isCompanyCode(form.business_unit)) {
         throw new Error("Selecione a empresa responsável.");
       }
-      if (!isValidAreaForCompany(form.business_unit, form.responsible_sector)) {
-        throw new Error("Selecione a área principal.");
+      if (selectedAreas.length === 0) {
+        throw new Error("Selecione pelo menos uma área responsável.");
       }
       const payload = {
         client_id: form.client_id || null,
@@ -172,7 +172,7 @@ function DevisDetail() {
         notes: form.notes || null,
         title: form.title,
         service_type: form.service_type || null,
-        responsible_sector: form.responsible_sector || null,
+        responsible_sector: selectedAreas[0] || null,
         scope_description: form.scope_description || null,
         proposal_structure: form.proposal_structure || null,
         business_unit: form.business_unit,
@@ -184,6 +184,19 @@ function DevisDetail() {
       };
       const { error } = await supabase.from("devis").update(payload).eq("id", id!);
       if (error) throw error;
+
+      // Atualizar as áreas na tabela de relacionamento
+      const { error: deleteError } = await supabase.from("devis_service_areas").delete().eq("devis_id", id!);
+      if (deleteError) throw deleteError;
+
+      if (selectedAreas.length > 0) {
+        const areaPayload = selectedAreas.map(slug => ({
+          devis_id: id!,
+          area_slug: slug
+        }));
+        const { error: areaError } = await supabase.from("devis_service_areas").insert(areaPayload);
+        if (areaError) throw areaError;
+      }
     },
     onSuccess: () => {
       toast.success("Devis atualizado!");
@@ -358,7 +371,15 @@ function DevisDetail() {
               <span>Detalhes do devis</span>
               {(devis?.devis_number ?? "") && <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{(devis?.devis_number ?? "")}</span>}
               <CompanyBadge code={(devis as any)?.business_unit} />
-              <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
+              <div className="flex flex-wrap gap-1">
+                {devis.devis_service_areas?.length > 0 ? (
+                  devis.devis_service_areas.map((a: any) => (
+                    <AreaBadge key={a.area_slug} companyCode={(devis as any)?.business_unit} areaSlug={a.area_slug} />
+                  ))
+                ) : (
+                  <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
+                )}
+              </div>
             </p>
           </div>
         </div>

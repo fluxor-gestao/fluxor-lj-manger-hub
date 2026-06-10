@@ -117,6 +117,8 @@ function DevisCard({
     amountNode = null;
   }
 
+  const areas = (devis.devis_service_areas || []).map((a: any) => a.area_slug);
+  
   const card = (
     <Card
       onClick={() => !dragging && navigate({ to: "/comercial/devis/$id", params: { id: devis.id } })}
@@ -125,6 +127,13 @@ function DevisCard({
         dragging && "opacity-50",
       )}
     >
+      <div className="flex flex-wrap gap-1 mb-1">
+        {areas.map((slug: string) => (
+          <Badge key={slug} variant="secondary" className="text-[9px] px-1 py-0 h-3.5 bg-muted/50 font-normal">
+            {slug}
+          </Badge>
+        ))}
+      </div>
       <div className="font-medium text-sm line-clamp-2">{client?.name || devis.title || "—"}</div>
       {amountNode}
       {(hasCharge || hasService) && (
@@ -307,6 +316,7 @@ export default function DevisKanban({
       const derived = !!d.accepted_at && !d.rejected_at;
       const hasCharge = (feByDevis[d.id] ?? []).length > 0;
       const hasService = (svcByDevis[d.id] ?? []).length > 0;
+      const devisAreas = (d.devis_service_areas || []).map((a: any) => a.area_slug);
       cols.forEach((col) => {
         if (!map[col]) return;
         map[col].push({
