@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,8 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe } from "lucide-react";
+import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe, Filter } from "lucide-react";
 import { LoadingState, EmptyState } from "@/components/DataStates";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ function Precificacao() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Partial<ServicePrice> | null>(null);
   const [isAiSearching, setIsAiSearching] = useState(false);
@@ -48,6 +50,11 @@ function Precificacao() {
       return data as ServicePrice[];
     },
   });
+
+  const categories = useMemo(() => {
+    const cats = new Set(services.map(s => s.category));
+    return Array.from(cats).sort();
+  }, [services]);
 
   const saveService = useMutation({
     mutationFn: async (service: Partial<ServicePrice>) => {
@@ -121,10 +128,12 @@ function Precificacao() {
     }
   };
 
-  const filteredServices = services.filter(s => 
-    s.name.toLowerCase().includes(search.toLowerCase()) || 
-    s.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredServices = services.filter(s => {
+    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) || 
+                         s.description?.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = filterCategory === "all" || s.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="space-y-6">
@@ -191,19 +200,37 @@ function Precificacao() {
       </div>
 
       <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Buscar serviços ou categorias..." 
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="pl-9"
-            />
+        <div className="space-y-4 mb-6">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Filter className="h-4 w-4" /> Filtros
           </div>
-          <Button variant="outline" className="gap-2">
-            <Globe className="h-4 w-4" /> Busca Global de Mercado
-          </Button>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Buscar por serviço ou descrição..." 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="w-full md:w-64">
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas as categorias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
+                  {categories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" className="gap-2 shrink-0">
+              <Globe className="h-4 w-4" /> Busca de Mercado
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
