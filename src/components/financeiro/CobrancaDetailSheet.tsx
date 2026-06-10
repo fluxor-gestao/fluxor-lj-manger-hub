@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { FaturaPreviewDialog } from "./FaturaPreviewDialog";
+import { LembretePreviewDialog } from "./LembretePreviewDialog";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
@@ -77,6 +78,13 @@ function buildTimeline(r: CobrancaRow): Step[] {
   const st = statusOf(r);
   const paid = Number(r.paid_amount ?? 0);
 
+  // Extrair histórico de lembretes das notas
+  const reminderMatches = r.notes?.match(/\[Sistema\] Lembrete enviado em ([^ ]+ [^ ]+) para/g) || [];
+  const lastReminderDate = reminderMatches.length > 0 
+    ? reminderMatches[reminderMatches.length - 1].match(/em ([^ ]+ [^ ]+)/)?.[1] 
+    : null;
+  const reminderCount = reminderMatches.length;
+
   const created: Step = {
     key: "created", label: "Cobrança criada",
     description: "Recebível registrado no sistema",
@@ -91,7 +99,7 @@ function buildTimeline(r: CobrancaRow): Step[] {
   const sent: Step = {
     key: "sent", label: "E-mail enviado",
     description: "Envio da cobrança ao cliente",
-    icon: Mail, state: "pending",
+    icon: Mail, state: r.notes?.includes("Cobrança enviada por e-mail") ? "done" : "pending",
   };
   const viewed: Step = {
     key: "viewed", label: "Cliente visualizou",
@@ -100,6 +108,14 @@ function buildTimeline(r: CobrancaRow): Step[] {
   };
 
   const reminder: Step = (() => {
+    if (reminderCount > 0) {
+      return {
+        key: "reminder", label: "Lembrete enviado",
+        description: `${reminderCount} lembrete(s) enviado(s)${lastReminderDate ? ` (Último: ${lastReminderDate.split(' ')[0]})` : ""}`,
+        icon: BellRing, state: "done",
+        at: lastReminderDate || undefined,
+      };
+    }
     if (st === "vencido") {
       return {
         key: "reminder", label: "Lembrete sugerido",
@@ -189,8 +205,9 @@ export function CobrancaDetailSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   const steps = useMemo(() => (row ? buildTimeline(row) : []), [row]);
-  const next = useMemo(() => (row ? nextActionOf(row) : null), [row]);
+   const next = useMemo(() => (row ? nextActionOf(row) : null), [row]);
   const [faturaOpen, setFaturaOpen] = useState(false);
+  const [lembreteOpen, setLembreteOpen] = useState(false);
 
   if (!row) return null;
 
@@ -294,7 +311,16 @@ export function CobrancaDetailSheet({
           >
             <Send className="h-4 w-4 mr-2" /> Enviar cobrança
           </Button>
-          <Button variant="outline" onClick={() => placeholder("Reenviar lembrete")}>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              if (!row.document_reference) {
+                toast.error("Gere a fatura antes de enviar lembretes.");
+                return;
+              }
+              setLembreteOpen(true);
+            }}
+          >
             <BellRing className="h-4 w-4 mr-2" /> Reenviar lembrete
           </Button>
           <Button onClick={() => placeholder("Registrar pagamento")}>
@@ -308,6 +334,7 @@ export function CobrancaDetailSheet({
       </SheetContent>
 
       <FaturaPreviewDialog row={row} open={faturaOpen} onOpenChange={setFaturaOpen} />
+      <LembretePreviewDialog row={row} open={lembreteOpen} onOpenChange={setLembreteOpen} />
     </Sheet>
   );
 }
