@@ -783,7 +783,7 @@ export default function BIComercial() {
         ))}
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { 
             label: "Em Negociação", 
