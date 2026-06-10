@@ -436,8 +436,8 @@ export default function BIComercial() {
       const areaCount = areasToProcess.length;
       
       for (const areaSlug of areasToProcess) {
-        const areaInfo = findArea(r.business_unit as CompanyCode, areaSlug);
-        const k = areaInfo?.label ?? (areaSlug === "Não informada" ? "Não informada" : areaSlug);
+        const areaInfo = findArea((r.business_unit as CompanyCode) || null, areaSlug || null);
+        const k = areaInfo?.label ?? (areaSlug === "Não informada" ? "Não informada" : (areaSlug || "—"));
         
         if (!m.has(k)) m.set(k, { criadas: 0, aceitas: 0, valorProp: 0, valorAceito: 0, enviadas: 0 });
         const b = m.get(k)!;
