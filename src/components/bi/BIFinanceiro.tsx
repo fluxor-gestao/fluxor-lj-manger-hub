@@ -1340,12 +1340,12 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Fornecedor</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="text-right">Dias atraso</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Prioridade</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Fornecedor</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Vencimento</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Dias atraso</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Prioridade</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1378,12 +1378,12 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Conta</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Origem</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Data</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Descrição</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conta</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Origem</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1413,12 +1413,12 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead className="text-right">Receita</TableHead>
-                    <TableHead className="text-right">Recebida</TableHead>
-                    <TableHead className="text-right">Em aberto</TableHead>
-                    <TableHead className="text-right">Vencido</TableHead>
-                    <TableHead className="text-right">Taxa pag.</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Receita</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Recebida</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Em aberto</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Vencido</TableHead>
+                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Taxa pag.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
