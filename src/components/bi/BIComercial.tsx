@@ -1252,9 +1252,13 @@ export default function BIComercial() {
                   {criticas.length === 0 && (
                     <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-6">Sem propostas críticas</TableCell></TableRow>
                   )}
-                  {criticas.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>{r.cliente}</TableCell>
+                  {criticas.map((r, i) => (
+                    <TableRow key={r.id} className={cn(
+                      "border-white/5 transition-colors group/row",
+                      i % 2 === 0 ? "bg-white/[0.01]" : "bg-transparent",
+                      "hover:bg-white/[0.04]"
+                    )}>
+                      <TableCell className="font-medium text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
                       <TableCell className="max-w-[220px] truncate">{r.numero}</TableCell>
                       <TableCell><Badge variant="outline">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
                       <TableCell className="text-right">{BRL(r.valor)}</TableCell>
