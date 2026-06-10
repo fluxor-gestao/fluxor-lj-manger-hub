@@ -267,7 +267,7 @@ export default function RapportPage() {
     setStatements(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s));
   };
 
-  const handleProcessAll = () => {
+  const handleProcessAll = async () => {
     if (!clientId) return toast.error(t.selectClient);
     if (statements.some(s => !s.file)) return toast.error("Por favor, carregue os arquivos de todas as contas.");
 
@@ -275,7 +275,7 @@ export default function RapportPage() {
     setGenerated(false);
 
     // Mock processing multi-statements with correlated patterns
-    setTimeout(() => {
+    setTimeout(async () => {
       const baseDate = `${month}-10`;
       const amount = 15000 + Math.random() * 5000;
 
