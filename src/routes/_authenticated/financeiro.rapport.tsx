@@ -318,13 +318,13 @@ export default function RapportPage() {
               ...tx,
               categoryId: rule.category_id,
               suggestedCategory: cat?.name || tx.suggestedCategory,
-              confidence: rule.confidence_level
+              confidence: rule.confidence_level || undefined
             };
           }
           return tx;
         }));
 
-        return { ...s, status: "ready" as const, transactions: enrichedTxs };
+        return { ...s, status: "ready" as const, transactions: enrichedTxs as Transaction[] };
       }));
 
       setStatements(processedStatements);
