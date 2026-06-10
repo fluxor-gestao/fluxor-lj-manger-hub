@@ -1,12 +1,13 @@
 // TODO: persistir em uma tabela futura `operation_tasks` (process_id, title, assignee,
 // due_date, status, priority). Por enquanto a lista vive em estado local.
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, User, Calendar, Tag, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Prio = "baixa" | "media" | "alta";
