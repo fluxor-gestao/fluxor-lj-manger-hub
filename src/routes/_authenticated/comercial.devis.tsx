@@ -33,6 +33,7 @@ type AISuggestions = BaseAISuggestions & {
 import UploadAtaDialog, { type ConfirmedAtaResult } from "@/components/devis/UploadAtaDialog";
 import DevisCodePreviewDialog, { inferServicePrefix, type ServicePrefix } from "@/components/devis/DevisCodePreviewDialog";
 import ClientLocationEnrichment from "@/components/clients/ClientLocationEnrichment";
+import BulkClientLocationEnrichment from "@/components/clients/BulkClientLocationEnrichment";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 import { Pagination } from "@/components/Pagination";
