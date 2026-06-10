@@ -1239,14 +1239,14 @@ export default function BIComercial() {
               <Table>
                 <TableHeader className="bg-[#0b1526]/50">
                   <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                     <TableHead className="h-12"></TableHead>
                   </TableRow>
                 </TableHeader>

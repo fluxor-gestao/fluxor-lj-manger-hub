@@ -877,7 +877,7 @@ export default function BIFinanceiro() {
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#F8FAFC] group-hover:text-[#CBD5E1] transition-colors uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
@@ -905,7 +905,7 @@ export default function BIFinanceiro() {
                         {kpi.trendValue}
                       </div>
                     )}
-                    <span className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide">
+                    <span className="text-[11px] font-medium text-[#F8FAFC] uppercase tracking-wide">
                       {kpi.sub}
                     </span>
                   </div>
@@ -986,7 +986,7 @@ export default function BIFinanceiro() {
                   <h2 className="text-3xl font-black tracking-tighter text-white">
                     {kpi.value}
                   </h2>
-                  <p className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                  <p className="text-[11px] font-bold text-[#CBD5E1] uppercase tracking-tight">
                     {kpi.sub}
                   </p>
                 </div>
@@ -1021,7 +1021,7 @@ export default function BIFinanceiro() {
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-white">{BRL(s.value)}</div>
-                          <div className="text-[10px] font-medium text-[#94A3B8]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="text-[10px] font-medium text-[#F8FAFC]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
@@ -1043,7 +1043,7 @@ export default function BIFinanceiro() {
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-white">{BRL(s.value)}</div>
-                          <div className="text-[10px] font-medium text-[#94A3B8]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
+                          <div className="text-[10px] font-medium text-[#F8FAFC]">Share: {PCT(agg.receitasReal > 0 ? s.value / agg.receitasReal : 0)}</div>
                         </div>
                       </div>
                     );
@@ -1306,12 +1306,12 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader className="bg-[#0b1526]/50">
                   <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1342,12 +1342,12 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Fornecedor</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Vencimento</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Dias atraso</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Prioridade</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Fornecedor</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Vencimento</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Dias atraso</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Prioridade</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1380,12 +1380,12 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Data</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Descrição</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conta</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Origem</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Data</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Descrição</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Conta</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Origem</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1415,12 +1415,12 @@ export default function BIFinanceiro() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Receita</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Recebida</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Em aberto</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Vencido</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Taxa pag.</TableHead>
+                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Receita</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Recebida</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Em aberto</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Vencido</TableHead>
+                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Taxa pag.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1512,7 +1512,7 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
   return (
     <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden group hover:border-white/10 transition-all duration-500">
       <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01]">
-        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] group-hover:text-[#CBD5E1] transition-colors">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F8FAFC] group-hover:text-[#CBD5E1] transition-colors">
           {title}
         </CardTitle>
       </CardHeader>
@@ -1524,12 +1524,12 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 function Empty() {
   return (
-    <div className="flex h-[280px] items-center justify-center text-sm text-[#94A3B8]">
+    <div className="flex h-[280px] items-center justify-center text-sm text-[#F8FAFC]">
       <div className="text-center">
         <div className="bg-white/5 p-4 rounded-full mb-4 inline-block ring-1 ring-white/10">
-          <CalendarRange className="h-6 w-6 text-white/30" />
+          <CalendarRange className="h-6 w-6 text-[#CBD5E1]" />
         </div>
-        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-[#94A3B8]">Sem dados para o período selecionado</p>
+        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-[#F8FAFC]">Sem dados para o período selecionado</p>
       </div>
     </div>
   );
