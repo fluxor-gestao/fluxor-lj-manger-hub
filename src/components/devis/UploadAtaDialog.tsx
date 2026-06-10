@@ -129,14 +129,23 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
     return { exact, suggestions };
   }, [payload, clients]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    if (selectedFile) {
+      if (selectedFile.size > 15 * 1024 * 1024) {
+        toast.error("Arquivo muito grande (máx 15 MB)");
+        return;
+      }
+      setFile(selectedFile);
+      const url = URL.createObjectURL(selectedFile);
+      setPreviewUrl(url);
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) {
-      toast.error("Arquivo muito grande (máx 15 MB)");
-      return;
-    }
     setAnalyzing(true);
-    setStep(2);
+    setStep( step === 1 ? 2 : step ); // Adjusting logic for flow
     try {
       const b64 = await fileToBase64(file);
       const { data, error } = await supabase.functions.invoke("analyze-meeting-report", {
