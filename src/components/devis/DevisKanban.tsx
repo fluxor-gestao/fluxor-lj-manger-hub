@@ -31,7 +31,7 @@ const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
 
 import { PRICING_STATUS_COLORS, PRICING_STATUS_LABELS } from "./DevisPricingManager";
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
+
 
 // Colunas pós-aceite cuja presença é derivada de dados (não do status do devis)
 const DERIVED_COLUMNS = new Set([
