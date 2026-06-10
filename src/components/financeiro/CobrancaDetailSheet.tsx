@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   FilePlus2, Send, BellRing, DollarSign, CheckCircle2, Circle, Clock,
-  Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles,
+  Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
@@ -32,6 +33,8 @@ export type CobrancaRow = {
   open_amount: number | null;
   payment_status: string | null;
   document_reference?: string | null;
+  devis_id?: string | null;
+  devis_number?: string | null;
   notes?: string | null;
   client_id: string | null;
   client: { name: string } | null;
@@ -249,6 +252,24 @@ export function CobrancaDetailSheet({
           <DetailItem label="Competência" value={row.competence_month ?? "—"} />
           <DetailItem label="Lançamento" value={fmtDateBR(row.entry_date)} />
           <DetailItem label="Referência" value={row.document_reference ?? "—"} />
+          <div className="col-span-2">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Devis Vinculado</p>
+            {row.devis_id ? (
+              <div className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <span className="font-mono text-sm font-semibold">{row.devis_number || "Ver Devis"}</span>
+                </div>
+                <Button variant="ghost" size="sm" asChild className="h-7 text-xs">
+                  <Link to={`/comercial/devis/${row.devis_id}`}>
+                    <ExternalLink className="h-3 w-3 mr-1" /> Ver Devis
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Nenhum Devis vinculado</p>
+            )}
+          </div>
           <div className="col-span-2">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Observações</p>
             <p className="text-sm text-foreground/90 whitespace-pre-wrap">
