@@ -1203,11 +1203,11 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : top10ClientesReceita.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={top10ClientesReceita} layout="vertical" onClick={() => setTabFocus("receber")}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis type="number" fontSize={11} />
-                <YAxis type="category" dataKey="name" width={120} fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="receita" fill={CHART_COLORS[2]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <YAxis type="category" dataKey="name" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Bar dataKey="receita" fill="#10B981" fillOpacity={0.8} radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1217,11 +1217,11 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : top10Inadimplentes.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={top10Inadimplentes} layout="vertical" onClick={() => setTabFocus("receber")}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis type="number" fontSize={11} />
-                <YAxis type="category" dataKey="name" width={120} fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="vencido" fill={CHART_COLORS[4]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <YAxis type="category" dataKey="name" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Bar dataKey="vencido" fill="#EF4444" fillOpacity={0.8} radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1231,11 +1231,11 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : topFornecedores.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={topFornecedores} layout="vertical" onClick={() => setTabFocus("pagar")}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis type="number" fontSize={11} />
-                <YAxis type="category" dataKey="name" width={120} fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="value" fill={CHART_COLORS[3]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <YAxis type="category" dataKey="name" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Bar dataKey="value" fill="#F59E0B" fillOpacity={0.8} radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1245,15 +1245,16 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : funil.every((f) => f.value === 0) ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={funil} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis type="number" fontSize={11} />
-                <YAxis type="category" dataKey="stage" width={100} fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Bar dataKey="value">
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <YAxis type="category" dataKey="stage" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={30}>
                   {funil.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} fillOpacity={0.8} />
                   ))}
                 </Bar>
+
               </BarChart>
             </ResponsiveContainer>
           )}
