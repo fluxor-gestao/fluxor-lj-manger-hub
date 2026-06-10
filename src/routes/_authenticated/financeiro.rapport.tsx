@@ -306,9 +306,9 @@ export default function RapportPage() {
 
         // Apply learned rules to each transaction
         const enrichedTxs = await Promise.all(txs.map(async tx => {
-          const { data: rule } = await supabase
+          const { data: rule } = await (supabase
             .from("financial_classification_rules")
-            .select("category_id, confidence_level")
+            .select("category_id, confidence_level") as any)
             .eq("pattern", tx.description)
             .maybeSingle();
 
