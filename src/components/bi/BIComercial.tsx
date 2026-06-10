@@ -1226,11 +1226,11 @@ export default function BIComercial() {
 
       {/* Tabelas */}
       <Tabs value={tabFocus} onValueChange={setTabFocus}>
-        <TabsList>
-          <TabsTrigger value="criticas">Propostas críticas</TabsTrigger>
-          <TabsTrigger value="clientes">Ranking clientes</TabsTrigger>
-          <TabsTrigger value="servicos">Ranking serviços</TabsTrigger>
-          <TabsTrigger value="responsaveis">Responsáveis</TabsTrigger>
+        <TabsList className="bg-[#1a2233]/40 border border-white/5 p-1 h-12 backdrop-blur-xl mb-6">
+          <TabsTrigger value="criticas" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Propostas críticas</TabsTrigger>
+          <TabsTrigger value="clientes" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Ranking clientes</TabsTrigger>
+          <TabsTrigger value="servicos" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Ranking serviços</TabsTrigger>
+          <TabsTrigger value="responsaveis" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Responsáveis</TabsTrigger>
         </TabsList>
 
         <TabsContent value="criticas">
