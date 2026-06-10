@@ -984,9 +984,9 @@ export default function BIComercial() {
                   data={statsPorEmpresa} 
                   dataKey="valorAceito" 
                   nameKey="name" 
-                  innerRadius={60} 
+                  innerRadius={70} 
                   outerRadius={100} 
-                  paddingAngle={5}
+                  paddingAngle={8}
                   stroke="none"
                 >
                   {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
