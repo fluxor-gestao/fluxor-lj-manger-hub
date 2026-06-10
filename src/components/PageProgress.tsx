@@ -59,25 +59,29 @@ export function PageProgress() {
   return (
     <div
       className={cn(
-        "fixed left-0 right-0 top-0 z-[9999] transition-opacity duration-300 pointer-events-none",
+        "fixed left-0 right-0 top-0 z-[9999] transition-all duration-500 pointer-events-none",
         visible ? "opacity-100" : "opacity-0"
       )}
     >
       <div className="relative w-full">
-        <Progress 
-          value={progress} 
-          className="h-[3px] w-full rounded-none bg-primary/10" 
-        />
-        {/* Glow effect */}
+        {/* Main Bar */}
+        <div className="h-[4px] w-full bg-primary/20 backdrop-blur-sm">
+          <div 
+            className="h-full bg-primary transition-all duration-300 ease-out shadow-[0_0_10px_rgba(var(--primary),0.5)]"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        {/* Floating Label */}
         <div 
-          className="absolute top-0 h-[3px] bg-primary blur-[2px] transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        />
-        {isLoading && progress > 0 && progress < 100 && (
-          <div className="absolute right-2 top-2 text-[10px] font-medium text-primary bg-background/80 px-1 py-0.5 rounded backdrop-blur-sm border border-primary/20 shadow-sm animate-in fade-in zoom-in duration-300">
-            {Math.round(progress)}%
+          className="absolute top-2 transition-all duration-300 ease-out"
+          style={{ left: `calc(${progress}% - 20px)` }}
+        >
+          <div className="flex items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg border border-primary/20 animate-in fade-in zoom-in duration-300">
+            {isLoading && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+            <span>{Math.round(progress)}%</span>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
