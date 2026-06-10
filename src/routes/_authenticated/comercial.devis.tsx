@@ -192,6 +192,7 @@ function Comercial() {
         q = q.filter("devis_service_areas.area_slug", "in", `(${filterAreas.join(",")})`);
       }
       if (filterPricing !== "all") q = q.eq("pricing_status", filterPricing);
+      if (filterPricing !== "all") q = q.eq("pricing_status", filterPricing);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -310,6 +311,7 @@ function Comercial() {
   const kanbanDevis = useMemo(() => {
     return devisSummary.filter((d: any) => {
       if (filterClient !== "all" && d.client_id !== filterClient) return false;
+      if (filterPricing !== "all" && d.pricing_status !== filterPricing) return false;
       if (filterPricing !== "all" && d.pricing_status !== filterPricing) return false;
       if (filterCompany !== "all" && d.business_unit !== filterCompany) return false;
       if (filterAreas.length > 0) {
@@ -671,6 +673,21 @@ function Comercial() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Precificação</Label>
+                <Select value={filterPricing} onValueChange={setFilterPricing}>
+                  <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {Object.entries(PRICING_STATUS_LABELS).map(([val, label]) => (
+                      <SelectItem key={val} value={val}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
                     {clients.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -704,9 +721,9 @@ function Comercial() {
                 </Popover>
               </div>
             </div>
-            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterAreas.length > 0 || filterStart || filterEnd) && (
+            {(filterStatus !== "all" || filterClient !== "all" || filterCompany !== "all" || filterAreas.length > 0 || filterStart || filterEnd || filterPricing !== "all") && (
               <div className="mt-3">
-                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterAreas([]); setFilterStart(undefined); setFilterEnd(undefined); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFilterStatus("all"); setFilterClient("all"); setFilterCompany("all"); setFilterAreas([]); setFilterStart(undefined); setFilterEnd(undefined); setFilterPricing("all"); }}>
                   Limpar filtros
                 </Button>
               </div>
