@@ -692,7 +692,7 @@ export default function BIComercial() {
             <Input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           </div>
           <div>
-            <Label className="text-xs">Responsável</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Responsável</Label>
             <Select value={filters.responsible} onValueChange={(v) => setFilters({ ...filters, responsible: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -702,7 +702,7 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Cliente</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Cliente</Label>
             <Select value={filters.clientId} onValueChange={(v) => setFilters({ ...filters, clientId: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -712,7 +712,7 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Status</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Status</Label>
             <Select value={filters.status} onValueChange={(v) => setFilters({ ...filters, status: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -722,7 +722,7 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Unidade de negócio</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Unidade de negócio</Label>
             <Select value={filters.bu} onValueChange={(v) => setFilters({ ...filters, bu: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -734,7 +734,7 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Área principal</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Área principal</Label>
             <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -746,7 +746,7 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Tipo de serviço</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">Tipo de serviço</Label>
             <Select value={filters.serviceType} onValueChange={(v) => setFilters({ ...filters, serviceType: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
