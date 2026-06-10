@@ -257,10 +257,13 @@ export type Database = {
           business_unit_id: string | null
           city: string | null
           company: string | null
+          country: string | null
           created_at: string
           document: string | null
           email: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
           name: string
           notes: string | null
           phone: string | null
@@ -273,10 +276,13 @@ export type Database = {
           business_unit_id?: string | null
           city?: string | null
           company?: string | null
+          country?: string | null
           created_at?: string
           document?: string | null
           email?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -289,10 +295,13 @@ export type Database = {
           business_unit_id?: string | null
           city?: string | null
           company?: string | null
+          country?: string | null
           created_at?: string
           document?: string | null
           email?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           notes?: string | null
           phone?: string | null
