@@ -93,16 +93,16 @@ const COLORS = [
 const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-background/95 backdrop-blur-md border border-border/50 p-4 shadow-2xl rounded-xl">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">{label}</p>
-        <div className="space-y-1.5">
+      <div className="bg-[#111827]/90 backdrop-blur-xl border border-white/10 p-4 shadow-2xl rounded-xl">
+        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-3">{label}</p>
+        <div className="space-y-2">
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-8">
+            <div key={index} className="flex items-center justify-between gap-10">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span className="text-sm font-medium text-foreground/80">{entry.name}</span>
+                <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
+                <span className="text-xs font-bold text-white/70">{entry.name}</span>
               </div>
-              <span className="text-sm font-bold text-foreground">
+              <span className="text-xs font-black text-white">
                 {formatter ? formatter(entry.value) : entry.value}
               </span>
             </div>
@@ -113,6 +113,7 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   }
   return null;
 };
+
 
 type Devis = {
   id: string;
