@@ -684,8 +684,8 @@ export default function BIComercial() {
 
 
           <div>
-            <Label className="text-xs">De</Label>
-            <Input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8] mb-2 block">De</Label>
+            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
             <Label className="text-xs">Até</Label>
