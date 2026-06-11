@@ -350,7 +350,20 @@ export function NovoLancamentoDialog({
               <Label>Descrição *</Label>
               <Input
                 value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                onChange={(e) => {
+                  const desc = e.target.value;
+                  let newUnit = form.business_unit;
+                  
+                  // If description looks like a Devis code (DE2026...), auto-update unit
+                  if (!prefill?.reference_code) {
+                    const match = desc.match(/^([A-Z]{2})\d{6,}/);
+                    if (match && COMPANY_LIST.some(c => c.code === match[1])) {
+                      newUnit = match[1];
+                    }
+                  }
+                  
+                  setForm({ ...form, description: desc, business_unit: newUnit });
+                }}
                 placeholder="Descrição do lançamento"
               />
             </div>
