@@ -941,7 +941,9 @@ export type Database = {
       financial_categories: {
         Row: {
           active: boolean
+          code: string | null
           created_at: string
+          dre_group: string | null
           id: string
           kind: string
           name: string
@@ -950,7 +952,9 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          code?: string | null
           created_at?: string
+          dre_group?: string | null
           id?: string
           kind: string
           name: string
@@ -959,7 +963,9 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          code?: string | null
           created_at?: string
+          dre_group?: string | null
           id?: string
           kind?: string
           name?: string

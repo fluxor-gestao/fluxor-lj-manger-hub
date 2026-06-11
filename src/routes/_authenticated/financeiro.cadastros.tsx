@@ -290,8 +290,59 @@ function AccountDialog({ account, onSave }: { account?: any, onSave: (acc: any) 
 function SimpleSetupCard({ title, description, items, table, loading, showKind }: any) {
   const queryClient = useQueryClient();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const [newName, setNewName] = useState("");
-  const [newKind, setNewKind] = useState("receita");
+  const [newKind, setNewKind] = useState("despesa");
+  const [newDreGroup, setNewDreGroup] = useState("");
+
+  const DRE_GROUPS = [
+    "Despesas com Impostos",
+    "Encargos Sociais",
+    "Despesas com Pessoal",
+    "Despesas Administrativas",
+    "Despesas Financeiras",
+    "Investimentos no Patrimônio",
+    "Ressarcimentos",
+    "Diretoria",
+    "Receita Operacional",
+    "Outras Receitas"
+  ];
+
+  const addOrUpdate = useMutation({
+    mutationFn: async () => {
+      const payload: any = { 
+        name: newName,
+        kind: newKind,
+        dre_group: newDreGroup || null
+      };
+      
+      if (editingItem) {
+        return await supabase.from(table).update(payload).eq("id", editingItem.id);
+      }
+      return await supabase.from(table).insert(payload);
+    },
+    onSuccess: () => {
+      toast.success(editingItem ? "Atualizado com sucesso!" : "Cadastrado com sucesso!");
+      resetForm();
+      setIsAddOpen(false);
+      queryClient.invalidateQueries({ queryKey: [table] });
+    }
+  });
+
+  const resetForm = () => {
+    setNewName("");
+    setNewKind("despesa");
+    setNewDreGroup("");
+    setEditingItem(null);
+  };
+
+  const handleEdit = (it: any) => {
+    setEditingItem(it);
+    setNewName(it.name);
+    setNewKind(it.kind || "despesa");
+    setNewDreGroup(it.dre_group || "");
+    setIsAddOpen(true);
+  };
 
   const add = useMutation({
     mutationFn: async () => {
@@ -325,31 +376,47 @@ function SimpleSetupCard({ title, description, items, table, loading, showKind }
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </div>
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <Dialog open={isAddOpen} onOpenChange={(open) => { setIsAddOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Adicionar</Button></DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Adicionar {title}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editingItem ? "Editar" : "Adicionar"} {title}</DialogTitle></DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Nome</Label>
                 <Input value={newName} onChange={e => setNewName(e.target.value)} />
               </div>
               {showKind && (
-                <div className="space-y-2">
-                  <Label>Tipo</Label>
-                  <Select value={newKind} onValueChange={setNewKind}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="receita">Receita</SelectItem>
-                      <SelectItem value="despesa">Despesa</SelectItem>
-                      <SelectItem value="ambos">Ambos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <Label>Tipo</Label>
+                    <Select value={newKind} onValueChange={setNewKind}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="receita">Receita</SelectItem>
+                        <SelectItem value="despesa">Despesa</SelectItem>
+                        <SelectItem value="ambos">Ambos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Grupo DRE</Label>
+                    <Select value={newDreGroup} onValueChange={setNewDreGroup}>
+                      <SelectTrigger><SelectValue placeholder="Selecione um grupo" /></SelectTrigger>
+                      <SelectContent>
+                        {DRE_GROUPS.map(group => (
+                          <SelectItem key={group} value={group}>{group}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
               )}
             </div>
             <DialogFooter>
-              <Button onClick={() => add.mutate()} disabled={!newName || add.isPending}>Salvar</Button>
+              <Button onClick={() => addOrUpdate.mutate()} disabled={!newName || addOrUpdate.isPending}>
+                {addOrUpdate.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Salvar
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -360,7 +427,7 @@ function SimpleSetupCard({ title, description, items, table, loading, showKind }
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                {showKind && <TableHead>Tipo</TableHead>}
+                {showKind && <TableHead>Tipo / Grupo DRE</TableHead>}
                 <TableHead>Ativo</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -369,7 +436,12 @@ function SimpleSetupCard({ title, description, items, table, loading, showKind }
               {items.map((it: any) => (
                 <TableRow key={it.id}>
                   <TableCell className="font-medium">{it.name}</TableCell>
-                  {showKind && <TableCell className="capitalize">{it.kind}</TableCell>}
+                  {showKind && (
+                    <TableCell>
+                      <div className="capitalize font-medium">{it.kind}</div>
+                      {it.dre_group && <div className="text-[10px] text-muted-foreground uppercase font-bold">{it.dre_group}</div>}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Switch 
                       checked={table === "financial_categories" ? it.active : it.is_active} 
@@ -377,13 +449,18 @@ function SimpleSetupCard({ title, description, items, table, loading, showKind }
                     />
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" className="text-destructive" onClick={async () => {
-                      const { error } = await supabase.from(table).delete().eq("id", it.id);
-                      if (error) toast.error("Não pode ser excluído por estar em uso.");
-                      else { toast.success("Excluído!"); queryClient.invalidateQueries({ queryKey: [table] }); }
-                    }}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(it)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-destructive" onClick={async () => {
+                        const { error } = await supabase.from(table).delete().eq("id", it.id);
+                        if (error) toast.error("Não pode ser excluído por estar em uso.");
+                        else { toast.success("Excluído!"); queryClient.invalidateQueries({ queryKey: [table] }); }
+                      }}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
