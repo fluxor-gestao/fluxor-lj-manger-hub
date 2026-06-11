@@ -423,13 +423,13 @@ function AceitarProposta() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="rounded-lg border p-4">
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">Valor total</div>
-                      <div className="text-2xl font-bold mt-1">{fmtBRL(preview.total_amount)}</div>
+                    <div className="rounded-xl border bg-white p-5 shadow-sm">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Valor total</div>
+                      <div className="text-3xl font-black text-slate-900 tabular-nums leading-none">{fmtBRL(preview.total_amount)}</div>
                     </div>
-                    <div className="rounded-lg border p-4">
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">Entrada (50%)</div>
-                      <div className="text-2xl font-bold mt-1">{fmtBRL(preview.down_payment_amount)}</div>
+                    <div className="rounded-xl border bg-white p-5 shadow-sm border-indigo-100">
+                      <div className="text-[10px] uppercase tracking-wider text-indigo-500 font-bold mb-2">Entrada (50%)</div>
+                      <div className="text-3xl font-black text-indigo-600 tabular-nums leading-none">{fmtBRL(preview.down_payment_amount)}</div>
                     </div>
                   </div>
 
