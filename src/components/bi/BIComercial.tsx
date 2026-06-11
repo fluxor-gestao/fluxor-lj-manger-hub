@@ -1219,8 +1219,8 @@ export default function BIComercial() {
                     }}
                     title={`${h.qtd} propostas`}
                   />
-                  <p className="text-xs font-medium">{h.dia}</p>
-                  <p className="text-xs text-white/40">{h.qtd}</p>
+                  <p className="text-xs font-medium text-slate-600">{h.dia}</p>
+                  <p className="text-xs text-slate-400 font-bold">{h.qtd}</p>
                 </div>
               ))}
             </div>
