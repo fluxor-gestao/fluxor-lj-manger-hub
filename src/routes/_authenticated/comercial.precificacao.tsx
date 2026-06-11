@@ -193,7 +193,7 @@ function Precificacao() {
                     value={editingService?.category || ""} 
                     onChange={e => setEditingService(prev => ({ ...prev, category: e.target.value }))}
                   />
-                </div>
+                <div className="space-y-2">
                   <Label htmlFor="sector">Área Responsável</Label>
                   <Select 
                     value={editingService?.responsible_sector || ""} 
