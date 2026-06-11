@@ -515,9 +515,20 @@ function DevisDetail() {
         </div>
       )}
 
-      <Card>
-        <CardHeader><CardTitle>Informações</CardTitle></CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Tabs defaultValue="info" className="w-full">
+        <TabsList className="bg-white/5 border border-white/10 p-1 mb-6">
+          <TabsTrigger value="info" className="data-[state=active]:bg-primary">
+            <Info className="h-4 w-4 mr-2" /> Informações
+          </TabsTrigger>
+          <TabsTrigger value="anexos" className="data-[state=active]:bg-primary">
+            <Paperclip className="h-4 w-4 mr-2" /> Anexos
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="info" className="space-y-6 m-0">
+          <Card>
+            <CardHeader><CardTitle>Informações</CardTitle></CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Cliente */}
           <div>
             <Label>Cliente</Label>
