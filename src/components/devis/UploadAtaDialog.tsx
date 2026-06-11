@@ -466,7 +466,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
                     <Label className="text-xs">Razão Social</Label>
-                    <Input size="sm" value={editClient?.name} onChange={e => setEditClient(prev => ({ ...prev!, name: e.target.value }))} />
+                    <Input size="sm" value={editClient?.name} onChange={e => setEditClient(prev => prev ? ({ ...prev, name: e.target.value }) : null)} />
                   </div>
                 </div>
               )}
