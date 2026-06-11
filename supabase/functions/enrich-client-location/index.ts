@@ -15,18 +15,19 @@ Deno.serve(async (req) => {
     }
 
     const searchQuery = cnpj 
-      ? `empresa com CNPJ ${cnpj}` 
+      ? `empresa com CNPJ ${cnpj} (Nome: ${name})` 
       : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}`;
 
     const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global.
 Sua tarefa é encontrar informações precisas de endereço para uma empresa, seja ela brasileira ou internacional.
 
-REGRAS:
-1. Priorize fontes oficiais (Receita Federal para CNPJ, registros comerciais locais para empresas estrangeiras).
-2. Se o termo de busca for um CNPJ, foque exclusivamente nos dados da Receita Federal Brasileira.
-3. Se for um nome de empresa internacional, utilize seu conhecimento global para encontrar a sede ou filial mais relevante.
-4. Retorne o resultado em formato JSON estruturado.
-5. Se não encontrar nada conclusivo, retorne um objeto com o campo "error": "Localização não encontrada".
+REGRAS CRÍTICAS:
+1. Priorize fontes oficiais e ATUALIZADAS. Se um CNPJ for fornecido, use-o para buscar o endereço exato registrado na Receita Federal ou em bases de dados de empresas (como cnpj.biz, econodata, etc).
+2. MUITO IMPORTANTE: Verifique se o nome da empresa e o CNPJ coincidem. Às vezes, bases de dados antigas podem estar desatualizadas. 
+3. Se houver divergência entre a base de dados e a localização real conhecida (como "Itarema / Ceará" para certas empresas de energia/turismo), priorize a localização operacional mais relevante.
+4. Para empresas internacionais, encontre a sede global ou a filial principal no país indicado.
+5. Retorne o resultado em formato JSON estruturado.
+6. Se não encontrar nada conclusivo, retorne um objeto com o campo "error": "Localização não encontrada".
 
 CAMPOS NO JSON:
 - address: Logradouro/Rua (ex: Av. Paulista)
