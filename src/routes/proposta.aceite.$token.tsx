@@ -35,6 +35,7 @@ type Preview = {
   title_secondary?: string | null;
   scope_description_secondary?: string | null;
   proposal_structure_secondary?: string | null;
+  business_unit?: CompanyCode | null;
 };
 
 const LANG_LABEL: Record<string, string> = { fr: "FR", en: "EN", es: "ES", pt: "PT" };
