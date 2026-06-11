@@ -875,8 +875,12 @@ function DevisDetail() {
         <AISuggestionsBlock
           suggestions={aiSuggestions}
           onAccept={(key, value) => setForm((f: any) => ({ ...f, [key]: value }))}
-          onAcceptAll={(values) => setForm((f: any) => ({ ...f, ...values }))}
+          onAcceptAll={(values) => {
+            setForm((f: any) => ({ ...f, ...values }));
+            if (values.suggested_pricing_items?.length) handleAcceptPricingItems(values.suggested_pricing_items);
+          }}
           onDismiss={() => setAiSuggestions(null)}
+          onAcceptPricing={handleAcceptPricingItems}
         />
       )}
 
