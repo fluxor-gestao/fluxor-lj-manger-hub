@@ -194,6 +194,18 @@ function Precificacao() {
                     onChange={e => setEditingService(prev => ({ ...prev, category: e.target.value }))}
                   />
                 </div>
+                  <Label htmlFor="sector">Área Responsável</Label>
+                  <Select 
+                    value={editingService?.responsible_sector || ""} 
+                    onValueChange={v => setEditingService(prev => ({ ...prev, responsible_sector: v }))}
+                    disabled={!editingService?.business_unit}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecionar área" /></SelectTrigger>
+                    <SelectContent>
+                      {getAreasFor(editingService?.business_unit).map(a => <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="price">Preço (R$)</Label>
                   <Input 
