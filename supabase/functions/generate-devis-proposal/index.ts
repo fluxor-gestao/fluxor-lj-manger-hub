@@ -71,6 +71,7 @@ function renderScopeItems(items: ScopeItem[]): string {
 }
 
 function buildProposalMarkdown(args: {
+  business_unit?: string;
   title: string;
   client_name?: string;
   client_document?: string;
