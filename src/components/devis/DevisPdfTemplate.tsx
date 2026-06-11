@@ -436,6 +436,20 @@ export default function DevisPdfTemplate({
           </>
         )}
 
+        {pricingItems.length > 0 && (
+          <>
+            <div style={subStyle}>{isSecondary ? "DÉTAIL DE LA TARIFICATION" : "DETALHAMENTO DA PRECIFICAÇÃO"}</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "10px" }}>
+              {pricingItems.map((item, idx) => (
+                <div key={item.id || idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "10px" }}>
+                  <span>{item.quantity}x {item.name}</span>
+                  <span style={{ fontBold: 600 }}>{fmtBRL(item.total_price)}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
         <div style={secStyle}>{L.fees}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
