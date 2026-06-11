@@ -10,10 +10,11 @@ import {
   ArrowUpRight, ArrowDownRight, Users, Target, Activity, 
   AlertTriangle, CheckCircle2, Building2, Calendar, LayoutDashboard,
   Filter, ChevronRight, PieChart as PieIcon, BarChart3, Wallet,
-  FileText
+  FileText, Database
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DREGerencial } from "@/components/bi/DREGerencial";
+import { ImportacaoHistorica } from "@/components/bi/ImportacaoHistorica";
 import { cn } from "@/lib/utils";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import {
