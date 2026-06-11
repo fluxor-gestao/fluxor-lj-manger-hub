@@ -318,24 +318,6 @@ function Precificacao() {
                       {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(service.price)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="font-mono text-emerald-600">
-                          {service.market_price 
-                            ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(service.market_price) 
-                            : "—"}
-                        </span>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-8 w-8 text-primary"
-                          onClick={() => handleAiMarketSearch(service.name)}
-                          disabled={isAiSearching}
-                        >
-                          <Sparkles className={cn("h-4 w-4", isAiSearching && "animate-spin")} />
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button 
                           size="icon" 
