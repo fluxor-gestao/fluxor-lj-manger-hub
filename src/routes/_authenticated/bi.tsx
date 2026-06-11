@@ -119,7 +119,7 @@ function BI() {
                 tabIndex={0}
                 onClick={() => setSelectedDashboard(dashboard.id)}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer rounded-xl transition-all duration-500",
+                  "group relative overflow-hidden cursor-pointer rounded-xl transition-all duration-300",
                   isActive 
                     ? "ring-2 ring-primary/20 shadow-md z-20 scale-[1.02] bg-white border-primary/20" 
                     : "opacity-90 hover:opacity-100 hover:scale-[1.01] bg-white border-slate-200",
@@ -128,33 +128,9 @@ function BI() {
                     : "h-[180px] md:h-[220px] border shadow-sm"
                 )}
               >
-                {/* Background Decoration */}
+                {/* Clean hover effect */}
                 {!selectedDashboard && (
-                  <div className={cn(
-                    "absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-[0.05] transition-transform duration-700 group-hover:scale-150",
-                    dashboard.gradient.replace("from-", "bg-")
-                  )} />
-                )}
-                {/* Background Gradient for unselected state */}
-                {!selectedDashboard && (
-                  <div className={cn(
-                    "absolute inset-0 bg-gradient-to-br transition-all duration-700 opacity-10",
-                    dashboard.gradient
-                  )} />
-                )}
-
-                {/* Glow Effect for active */}
-                {isActive && (
-                   <div className="absolute inset-0 bg-white/5 animate-pulse" />
-                )}
-
-                {/* Modern Effects */}
-                {!selectedDashboard && (
-                  <>
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.05),transparent)] opacity-60" />
-                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-white/5" />
-                  </>
+                  <div className="absolute inset-0 bg-slate-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 )}
 
                 <div className={cn(
