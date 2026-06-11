@@ -1235,11 +1235,11 @@ export default function BIComercial() {
 
       {/* Tabelas */}
       <Tabs value={tabFocus} onValueChange={setTabFocus}>
-        <TabsList className="bg-[#1a2233]/40 border border-white/5 p-1 h-12 backdrop-blur-xl mb-6">
-          <TabsTrigger value="criticas" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Propostas críticas</TabsTrigger>
-          <TabsTrigger value="clientes" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Ranking clientes</TabsTrigger>
-          <TabsTrigger value="servicos" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Ranking serviços</TabsTrigger>
-          <TabsTrigger value="responsaveis" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Responsáveis</TabsTrigger>
+        <TabsList className="bg-slate-100 border border-slate-200 p-1 h-12 mb-6">
+          <TabsTrigger value="criticas" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Propostas críticas</TabsTrigger>
+          <TabsTrigger value="clientes" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Ranking clientes</TabsTrigger>
+          <TabsTrigger value="servicos" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Ranking serviços</TabsTrigger>
+          <TabsTrigger value="responsaveis" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Responsáveis</TabsTrigger>
         </TabsList>
 
         <TabsContent value="criticas">
