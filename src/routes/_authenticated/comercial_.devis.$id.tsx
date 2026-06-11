@@ -793,10 +793,12 @@ function DevisDetail() {
           currentTotal={devis.total_amount}
           onTotalUpdate={(newTotal) => {
             queryClient.invalidateQueries({ queryKey: ["devis", id] });
+            const down = newTotal * 0.5;
             setForm((f: any) => ({ 
               ...f, 
               total_amount: String(newTotal),
-              down_payment_amount: String((newTotal * 0.5).toFixed(2))
+              down_payment_amount: String(down.toFixed(2)),
+              down_payment_percentage: "50"
             }));
           }}
         />
