@@ -28,6 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNavigate } from "@tanstack/react-router";
 import { findArea } from "@/lib/businessAreas";
 import { CompanyCode } from "@/lib/companyCodes";
+import { formatDevisCode } from "@/lib/formatDevis";
 
 // Fix for default marker icons in Leaflet
 import markerIcon from "leaflet/dist/images/marker-icon.png";
