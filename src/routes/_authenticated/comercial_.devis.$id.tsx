@@ -248,6 +248,7 @@ function DevisDetail() {
         responsible_sector: p.responsible_sector ?? "",
         scope_description: p.scope_description ?? "",
         proposal_structure: p.proposal_structure ?? "",
+        suggested_pricing_items: p.suggested_pricing_items || [],
       });
       if (p.total_amount && !form.total_amount) {
         const total = String(p.total_amount);
@@ -260,6 +261,35 @@ function DevisDetail() {
       toast.error(e.message || "Erro ao gerar proposta");
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleAcceptPricingItems = async (items: any[]) => {
+    if (!id || !items.length) return;
+    try {
+      // Buscar todos os service_prices para vincular corretamente se possível
+      const { data: servicePrices } = await supabase.from("service_prices").select("id, name");
+      
+      const payload = items.map(item => {
+        const matchingPrice = servicePrices?.find(s => s.name.toLowerCase() === item.service_name.toLowerCase());
+        return {
+          devis_id: id,
+          service_price_id: matchingPrice?.id || null,
+          name: item.service_name,
+          unit_price: item.unit_price,
+          total_price: item.unit_price * item.quantity,
+          quantity: item.quantity,
+        };
+      });
+
+      const { error } = await supabase.from("devis_pricing_items").insert(payload);
+      if (error) throw error;
+
+      toast.success("Itens de precificação aplicados!");
+      queryClient.invalidateQueries({ queryKey: ["devis-pricing-items", id] });
+      queryClient.invalidateQueries({ queryKey: ["devis", id] });
+    } catch (e: any) {
+      toast.error("Erro ao aplicar precificação: " + e.message);
     }
   };
 
@@ -845,8 +875,12 @@ function DevisDetail() {
         <AISuggestionsBlock
           suggestions={aiSuggestions}
           onAccept={(key, value) => setForm((f: any) => ({ ...f, [key]: value }))}
-          onAcceptAll={(values) => setForm((f: any) => ({ ...f, ...values }))}
+          onAcceptAll={(values) => {
+            setForm((f: any) => ({ ...f, ...values }));
+            if (values.suggested_pricing_items?.length) handleAcceptPricingItems(values.suggested_pricing_items);
+          }}
           onDismiss={() => setAiSuggestions(null)}
+          onAcceptPricing={handleAcceptPricingItems}
         />
       )}
 

@@ -1,5 +1,6 @@
-// Gera proposta jurídica (Devis) — IA gera APENAS o Escopo dos Serviços (Seção III).
+// Gera proposta jurídica (Devis) — IA gera o Escopo dos Serviços (Seção III) e sugere itens de precificação.
 // As demais 10 cláusulas (I, II, IV–XI) vêm de um template fixo em PT.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -158,6 +159,18 @@ Deno.serve(async (req) => {
       deadline_date,
       tier,
     } = await req.json();
+
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Buscar tabela oficial de preços
+    const { data: officialPrices } = await supabase
+      .from("service_prices")
+      .select("name, price, description, category");
+
+    const pricesRef = officialPrices?.map(p => `- ${p.name} (${p.category}): R$ ${p.price}${p.description ? ` - ${p.description}` : ""}`).join("\n") || "Tabela não disponível.";
+
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
     if (!meeting_report) throw new Error("meeting_report é obrigatório");
@@ -189,7 +202,10 @@ REGRAS GERAIS:
         ? `O valor total foi definido pelo cliente: R$ ${total_amount}. Distribua proporcionalmente entre os itens; soma DEVE ser EXATAMENTE ${total_amount}.`
         : `Estime valores de mercado brasileiros plausíveis (BRL): due diligence imobiliária 15.000–60.000; constituição societária 8.000–25.000; licenciamento urbanístico 10.000–40.000; consultoria/negociação 5.000–20.000; pareceres 4.000–15.000; coordenação multidisciplinar 5.000–15.000.`
     }
-- VALOR ZERO PROIBIDO em qualquer scope_items[].amount.`;
+- VALOR ZERO PROIBIDO em qualquer scope_items[].amount.
+
+TABELA DE PREÇOS OFICIAL (REFERÊNCIA OBRIGATÓRIA PARA VALORES):
+${pricesRef}`;
 
     const userPrompt = `Relatório da reunião${client_name ? ` com o cliente "${client_name}"` : ""}:
 
@@ -197,7 +213,7 @@ ${meeting_report}
 
 ${hasTotal ? `Valor total alvo: R$ ${total_amount}` : "Sem valor definido — estime conforme faixas."}
 
-Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃO gere as demais seções do contrato — elas são montadas por template fixo pelo sistema.`;
+Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. Use OBRIGATORIAMENTE os nomes e preços da tabela oficial sempre que houver correspondência com o que foi conversado na reunião.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -242,12 +258,25 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃ
                       required: ["letter", "title", "description", "duration", "amount"],
                     },
                   },
+                  suggested_pricing_items: {
+                    type: "array",
+                    description: "Lista de itens da tabela oficial de preços que compõem esta proposta.",
+                    items: {
+                      type: "object",
+                      properties: {
+                        service_name: { type: "string", description: "Nome EXATO conforme consta na tabela oficial" },
+                        quantity: { type: "number", default: 1 },
+                        unit_price: { type: "number", description: "Valor unitário conforme tabela oficial" }
+                      },
+                      required: ["service_name", "quantity", "unit_price"]
+                    }
+                  },
                   total_amount: { type: "number", exclusiveMinimum: 0 },
                   deadline_date: { type: "string" },
                   payment_terms: { type: "string" },
                   assumptions: { type: "array", items: { type: "string" } },
                 },
-                required: ["title", "scope_description", "scope_items", "total_amount"],
+                required: ["title", "scope_description", "scope_items", "total_amount", "suggested_pricing_items"],
               },
             },
           },
@@ -337,6 +366,7 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃ
         ai.payment_terms ||
         "50% na assinatura via PIX/transferência; 50% na conclusão. Reajuste pelo IPCA acima de 12 meses.",
       assumptions: ai.assumptions || [],
+      suggested_pricing_items: ai.suggested_pricing_items || [],
       proposal_structure,
     };
 
