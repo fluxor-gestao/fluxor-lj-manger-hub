@@ -26,6 +26,10 @@ export const RealtimeSyncProvider: React.FC<{ children: React.ReactNode }> = ({ 
       clients: [["clients"], ["catalog", "clients"]],
       services: [["services"], ["catalog", "services"]],
       devis_service_areas: [["business-areas-usage"]],
+      historical_indicators: [["historical-indicators"]],
+      historical_expenses: [["historical-expenses"]],
+      import_logs: [["import-logs"]],
+      import_batches: [["import-batches"]],
     };
 
     const channel = supabase
