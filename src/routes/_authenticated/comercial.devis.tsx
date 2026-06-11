@@ -85,6 +85,7 @@ type DevisForm = {
   business_unit: CompanyCode | "";
   responsible_sector: string;
   responsible_sectors: string[];
+  down_payment_percentage: string;
 };
 
 const emptyDevis: DevisForm = {
