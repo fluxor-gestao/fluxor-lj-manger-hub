@@ -15,32 +15,32 @@ Deno.serve(async (req) => {
     }
 
     const searchQuery = cnpj 
-      ? `empresa com CNPJ ${cnpj}` 
-      : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}`;
+      ? `empresa com CNPJ ${cnpj} (Nome: ${name}). PESQUISE NA WEB para confirmar o endereço operacional atual. Verifique se a empresa possui instalações em Itarema/Ceará ou outros locais específicos relacionados a parques eólicos ou energia.` 
+      : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço operacional exato.`;
 
-    const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global.
-Sua tarefa é encontrar informações precisas de endereço para uma empresa, seja ela brasileira ou internacional.
+    const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global com ACESSO À PESQUISA NA WEB.
+Sua tarefa é encontrar informações precisas e ATUAIS de endereço para uma empresa.
 
-REGRAS:
-1. Priorize fontes oficiais (Receita Federal para CNPJ, registros comerciais locais para empresas estrangeiras).
-2. Se o termo de busca for um CNPJ, foque exclusivamente nos dados da Receita Federal Brasileira.
-3. Se for um nome de empresa internacional, utilize seu conhecimento global para encontrar a sede ou filial mais relevante.
-4. Retorne o resultado em formato JSON estruturado.
-5. Se não encontrar nada conclusivo, retorne um objeto com o campo "error": "Localização não encontrada".
+REGRAS CRÍTICAS:
+1. NÃO CONFIE APENAS EM CONHECIMENTO PRÉVIO. USE A PESQUISA NA WEB.
+2. PRIORIDADE: Se a pesquisa na web indicar que a empresa opera em um local específico (como Itarema/CE, Ceará, Brasil), use ESSE endereço como o principal, mesmo que o endereço fiscal (sede administrativa em SP/RJ/BH) seja diferente. Usuários buscam a localização de atuação da empresa.
+3. Se o CNPJ for brasileiro, busque em sites como cnpj.biz ou econodata, mas valide com notícias ou site oficial se há uma "base operacional" ou "parque eólico" relevante.
+4. Para empresas internacionais, identifique a sede ou filial operacional principal.
+5. Retorne o resultado em formato JSON estruturado.
 
 CAMPOS NO JSON:
-- address: Logradouro/Rua (ex: Av. Paulista)
-- street_number: Número (ex: 1000)
-- neighborhood: Bairro/Distrito (ex: Bela Vista)
-- city: Cidade
-- state: Estado/Província/Região
-- country: País
-- zip_code: CEP/Postal Code
-- latitude: Número decimal (essencial para o mapa)
-- longitude: Número decimal (essencial para o mapa)
-- trade_name: Nome Fantasia ou Nome Comercial Real
-- source: Fonte específica da informação (ex: Receita Federal, Google Maps, LinkedIn, Website Oficial)
-- is_international: boolean (true se for fora do Brasil)`;
+- address: Logradouro/Rua (ex: Rua Farol do Itapaje)
+- street_number: Número (ex: 02)
+- neighborhood: Bairro/Distrito (ex: Porto dos Barcos)
+- city: Cidade (ex: Itarema)
+- state: Estado/Província/Região (ex: Ceará)
+- country: País (ex: Brasil)
+- zip_code: CEP/Postal Code (ex: 62590-000)
+- latitude: Número decimal
+- longitude: Número decimal
+- trade_name: Nome Fantasia
+- source: Fonte (ex: Google Search / Site Oficial)
+- is_international: boolean`;
 
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
