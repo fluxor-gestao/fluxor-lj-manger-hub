@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     }
 
     const searchQuery = cnpj 
-      ? `empresa com CNPJ ${cnpj} (Nome: ${name}). PESQUISE NA WEB para confirmar o endereço atual, pois registros de CNPJ podem estar desatualizados ou apontar para escritórios contábeis. Busque pela localização operacional real (sede, fábrica ou escritório principal).` 
+      ? `empresa com CNPJ ${cnpj} (Nome: ${name}). PESQUISE NA WEB para confirmar o endereço atual, pois registros de CNPJ podem estar desatualizados ou apontar para escritórios contábeis. Busque pela localização operacional real (sede, fábrica ou escritório principal). Se a empresa for do setor de energia/ventos, verifique se ela possui base em Itarema/Ceará.` 
       : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço exato.`;
 
     const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global com ACESSO À PESQUISA NA WEB.
@@ -23,11 +23,11 @@ Sua tarefa é encontrar informações precisas e ATUAIS de endereço para uma em
 
 REGRAS CRÍTICAS:
 1. NÃO CONFIE APENAS EM CONHECIMENTO PRÉVIO OU BASES ESTÁTICAS. PESQUISE NA WEB por termos como "[Nome da Empresa] endereço", "[CNPJ] localização" ou "[Nome da Empresa] contato".
-2. Priorize a localização OPERACIONAL REAL (ex: sede, fábrica, filial principal) em vez de endereços puramente fiscais/contábeis se houver diferença.
+2. PRIORIDADE ABSOLUTA: Verifique se a empresa possui bases operacionais, parques eólicos ou escritórios em locais específicos mencionados na busca (ex: Itarema/Ceará). Se houver um endereço operacional ativo encontrado na web, use-o preferencialmente sobre o endereço fiscal se o fiscal parecer ser de um escritório contábil ou representante.
 3. Se o CNPJ for brasileiro, use ferramentas de busca para encontrar o endereço mais recente em sites como cnpj.biz, econodata, casas dos dados ou o site oficial da empresa.
 4. Para empresas internacionais, identifique a sede global ou a filial mais relevante.
 5. Retorne o resultado em formato JSON estruturado.
-6. Se encontrar múltiplos endereços, escolha o que parece ser a sede principal ou o mais recente.
+6. Se encontrar múltiplos endereços, escolha o que parece ser a sede operacional principal ou o mais recente.
 
 CAMPOS NO JSON:
 - address: Logradouro/Rua (ex: Av. Paulista)
