@@ -445,6 +445,9 @@ function Gestao() {
     <TabsContent value="dre" className="mt-0 border-none p-0">
       <DREGerencial />
     </TabsContent>
+    <TabsContent value="import" className="mt-0 border-none p-0">
+      <ImportacaoHistorica />
+    </TabsContent>
   </Tabs>
 </div>
 );
