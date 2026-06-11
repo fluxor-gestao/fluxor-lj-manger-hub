@@ -18,6 +18,8 @@ interface MultiAreaSelectorProps {
   onChange: (areas: string[]) => void;
   placeholder?: string;
   className?: string;
+  mainArea?: string;
+  onMainAreaChange?: (slug: string) => void;
 }
 
 export function MultiAreaSelector({
@@ -26,6 +28,8 @@ export function MultiAreaSelector({
   onChange,
   placeholder = "Selecionar áreas...",
   className,
+  mainArea,
+  onMainAreaChange,
 }: MultiAreaSelectorProps) {
   // 1. Áreas fixas do arquivo lib
   const legacyAreas = getAreasFor(companyCode as CompanyCode);
@@ -84,12 +88,21 @@ export function MultiAreaSelector({
           <div className="flex flex-wrap gap-1 items-center overflow-hidden text-left">
             {selectedAreas.length > 0 ? (
               selectedAreas.map((slug) => (
-                <AreaBadge 
-                  key={slug} 
-                  companyCode={companyCode as CompanyCode} 
-                  areaSlug={slug}
-                  className="mr-1"
-                />
+                <div key={slug} className="relative group/badge">
+                  <AreaBadge 
+                    companyCode={companyCode as CompanyCode} 
+                    areaSlug={slug}
+                    className={cn(
+                      "mr-1", 
+                      mainArea === slug && "border-primary bg-primary/10 ring-1 ring-primary"
+                    )}
+                  />
+                  {mainArea === slug && (
+                    <span className="absolute -top-2 -right-1 text-[8px] bg-primary text-white px-1 rounded-full border border-white">
+                      Principal
+                    </span>
+                  )}
+                </div>
               ))
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
@@ -123,6 +136,22 @@ export function MultiAreaSelector({
                 >
                   {area.label}
                 </Label>
+                {selectedAreas.includes(area.slug) && onMainAreaChange && (
+                  <Button
+                    size="sm"
+                    variant={mainArea === area.slug ? "default" : "ghost"}
+                    className={cn(
+                      "h-6 px-2 text-[10px] uppercase font-bold ml-auto",
+                      mainArea === area.slug ? "bg-primary" : "text-muted-foreground hover:text-primary"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMainAreaChange(area.slug);
+                    }}
+                  >
+                    {mainArea === area.slug ? "Principal" : "Marcar Principal"}
+                  </Button>
+                )}
               </div>
             ))
           )}
