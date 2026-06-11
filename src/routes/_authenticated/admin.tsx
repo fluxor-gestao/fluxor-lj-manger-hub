@@ -1421,6 +1421,10 @@ function Admin() {
           <BusinessAreasManager />
         </TabsContent>
 
+        <TabsContent value="backup" className="max-w-4xl mx-auto py-4">
+          <BackupManager />
+        </TabsContent>
+
         <TabsContent value="updates" className="space-y-6">
           <div className="grid gap-6">
             {versionHistory.map((release) => (
