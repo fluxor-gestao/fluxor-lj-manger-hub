@@ -1466,8 +1466,8 @@ export default function BIFinanceiro() {
                   {ins.severidade}
                 </Badge>
               </div>
-              <p className="text-xs text-[#CBD5E1]">{ins.descricao}</p>
-              <p className="text-xs"><span className="text-[#CBD5E1]">Ação sugerida: </span><span className="text-[#E2E8F0] font-medium">{ins.acao}</span></p>
+              <p className="text-xs text-slate-500">{ins.descricao}</p>
+              <p className="text-xs italic"><span className="text-slate-400">Ação sugerida: </span><span className="text-slate-600 font-medium">{ins.acao}</span></p>
             </div>
           ))}
         </CardContent>
