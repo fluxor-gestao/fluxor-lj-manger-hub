@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
+import { appVersion } from "@/config/appVersion";
 import logoBanner from "@/assets/logo-banner.png";
 import {
   Sidebar,
@@ -126,9 +127,14 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
         {!collapsed && user && (
-          <p className="truncate px-2 text-xs text-sidebar-foreground/50">
-            {user.email}
-          </p>
+          <div className="flex flex-col gap-1 px-2">
+            <p className="truncate text-xs text-sidebar-foreground/50">
+              {user.email}
+            </p>
+            <p className="text-[10px] font-medium text-sidebar-foreground/30">
+              v{appVersion.version}
+            </p>
+          </div>
         )}
       </SidebarFooter>
     </Sidebar>
