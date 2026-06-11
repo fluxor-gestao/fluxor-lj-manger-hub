@@ -74,6 +74,7 @@ const emptyForm = () => ({
   amount: "0",
   competence_date: todayISO(),
   category_id: "",
+  dre_group: "",
   cost_center_id: "",
   reference_code: "",
   business_unit: "",
@@ -255,6 +256,8 @@ export function NovoLancamentoDialog({
           open_amount,
           payment_status,
           conciliation_status,
+          dre_group: form.dre_group || null,
+          account_category_id: form.category_id || null,
           notes: form.notes || null,
         };
 
