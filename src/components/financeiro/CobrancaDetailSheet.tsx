@@ -100,7 +100,9 @@ function buildTimeline(r: CobrancaRow): Step[] {
   };
   const invoice: Step = {
     key: "invoice", label: "Fatura gerada",
-    description: r.document_reference ? `Ref. ${r.document_reference}` : "Documento de cobrança",
+    description: r.devis_id 
+      ? `Ref. ${formatDevisCode(r.devis_number, r.devis_id)}`
+      : r.document_reference ? `Ref. ${r.document_reference}` : "Documento de cobrança",
     icon: FileText,
     state: r.document_reference ? "done" : "pending",
   };
