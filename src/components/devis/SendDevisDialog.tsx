@@ -128,6 +128,7 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
             pdf_filename: filename,
             accept_url: acceptUrl,
             language,
+            business_unit: devis.business_unit,
           },
         });
         if (error || (data && (data as any).error)) {
