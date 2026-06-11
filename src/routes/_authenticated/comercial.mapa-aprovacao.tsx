@@ -13,7 +13,7 @@ function MapaAprovacao() {
   return (
     <div className={cn(
       "min-h-[calc(100vh-4rem)] transition-all duration-700 rounded-xl overflow-hidden relative p-6 lg:p-8 space-y-8",
-      "bg-transparent"
+      "bg-[#F8FAFC]"
     )}>
       <div className="relative z-10 space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
