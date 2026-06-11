@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Wallet, ArrowDownCircle, ArrowUpCircle, BarChart3, ArrowLeftRight, type LucideIcon } from "lucide-react";
+import { Wallet, ArrowDownCircle, ArrowUpCircle, BarChart3, ArrowLeftRight, Landmark, type LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/financeiro/")({
@@ -21,6 +21,13 @@ const subModules: SubModule[] = [
     route: "/financeiro/central",
     icon: Wallet,
     gradient: "from-blue-500 to-blue-700",
+  },
+  {
+    title: "Cadastro de Contas",
+    description: "Contas LJ, categorias e métodos",
+    route: "/financeiro/central", // Usando a mesma rota para facilitar, mas com abas
+    icon: Landmark,
+    gradient: "from-slate-600 to-slate-800",
   },
   {
     title: "Contas a Receber",
