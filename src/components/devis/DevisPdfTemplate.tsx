@@ -225,7 +225,7 @@ export default function DevisPdfTemplate({
   const total = Number(devis?.total_amount) || 0;
   const down = Number(devis?.down_payment_amount) || total * 0.5;
   const balance = total - down;
-  const devisNumber = devis?.devis_number || "DE———";
+  const devisNumber = formatDevisCode(devis?.devis_number, devis?.id);
 
   // ----- styles -----
   const pageStyle: React.CSSProperties = {
