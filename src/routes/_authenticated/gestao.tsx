@@ -437,8 +437,13 @@ function Gestao() {
             </CardContent>
           </Card>
       </div>
-    </div>
-  );
+    </TabsContent>
+    <TabsContent value="dre" className="mt-0 border-none p-0">
+      <DREGerencial />
+    </TabsContent>
+  </Tabs>
+</div>
+);
 }
 
 export const Route = createFileRoute("/_authenticated/gestao")({
