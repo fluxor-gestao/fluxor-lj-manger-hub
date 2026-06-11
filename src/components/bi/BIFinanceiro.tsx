@@ -954,9 +954,9 @@ export default function BIFinanceiro() {
             trendValue: ""
           },
         ].map((kpi, i) => (
-          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+          <Card key={i} className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg border border-slate-200 bg-white shadow-sm">
             <div className={cn(
-              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-all duration-500",
               kpi.color === "red" ? "bg-red-500" : 
               kpi.color === "orange" ? "bg-orange-500" : 
               kpi.color === "cyan" ? "bg-cyan-500" : 
@@ -966,15 +966,15 @@ export default function BIFinanceiro() {
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/60 transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
-                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
-                    kpi.color === "red" ? "group-hover:bg-red-500/20 group-hover:border-red-500/20 group-hover:text-red-400" :
-                    kpi.color === "orange" ? "group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-400" :
-                    kpi.color === "cyan" ? "group-hover:bg-cyan-500/20 group-hover:border-cyan-500/20 group-hover:text-cyan-400" :
-                    kpi.color === "violet" ? "group-hover:bg-violet-500/20 group-hover:border-violet-500/20 group-hover:text-violet-400" : ""
+                    "p-2 rounded-lg border transition-all duration-300",
+                    kpi.color === "red" ? "bg-rose-50 border-rose-100 text-rose-600" :
+                    kpi.color === "orange" ? "bg-amber-50 border-amber-100 text-amber-600" :
+                    kpi.color === "cyan" ? "bg-blue-50 border-blue-100 text-blue-600" :
+                    kpi.color === "violet" ? "bg-purple-50 border-purple-100 text-purple-600" : "bg-slate-50 border-slate-100 text-slate-500"
                   )}>
                     <kpi.icon className="h-4 w-4" />
                   </div>
