@@ -192,7 +192,7 @@ function ContasAReceberPage() {
       void t;
       return true;
     });
-  }, [allRows, search, clientFilter, statusFilter, dueFrom, dueTo, onlyOverdue, onlyOpen]);
+  }, [allRows, search, clientFilter, statusFilter, stepFilter, dueFrom, dueTo, onlyOverdue, onlyOpen]);
 
   // Métricas (calculadas sobre todos os recebíveis, não os filtrados, para visão executiva)
   const metrics = useMemo(() => {
