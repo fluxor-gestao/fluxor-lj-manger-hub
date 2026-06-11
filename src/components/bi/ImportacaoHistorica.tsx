@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   Upload, FileText, CheckCircle2, AlertTriangle, Loader2, 
-  History, Download, Search, Database, ArrowRight, X
+  History, Download, Search, Database, ArrowRight, X,
+  TrendingUp
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -201,10 +202,10 @@ export function ImportacaoHistorica() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50/50 group hover:bg-slate-50 hover:border-primary/30 transition-all cursor-pointer relative">
-                <Input 
+                <input 
                   type="file" 
                   accept=".xlsx,.xls,.csv" 
-                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   onChange={(e) => handleFileUpload(e, "indicators")}
                   disabled={isProcessing}
                 />
@@ -228,10 +229,10 @@ export function ImportacaoHistorica() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50/50 group hover:bg-slate-50 hover:border-primary/30 transition-all cursor-pointer relative">
-                <Input 
+                <input 
                   type="file" 
                   accept=".xlsx,.xls,.csv" 
-                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   onChange={(e) => handleFileUpload(e, "expenses")}
                   disabled={isProcessing}
                 />
@@ -397,7 +398,3 @@ export function ImportacaoHistorica() {
     </div>
   );
 }
-
-// Add these Lucide icons to the top imports if they are missing
-import { TrendingUp as TrendingUpIcon } from "lucide-react";
-const TrendingUp = TrendingUpIcon;
