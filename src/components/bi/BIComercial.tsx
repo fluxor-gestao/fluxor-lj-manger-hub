@@ -889,9 +889,9 @@ export default function BIComercial() {
             color: "red"
           },
         ].map((kpi, i) => (
-          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+          <Card key={i} className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg border border-slate-200 bg-white shadow-sm">
             <div className={cn(
-              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              "absolute -right-8 -top-8 h-32 w-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-10 transition-all duration-500",
               kpi.color === "orange" ? "bg-orange-500" : 
               kpi.color === "blue" ? "bg-blue-500" : 
               kpi.color === "rose" ? "bg-rose-500" : 
@@ -899,27 +899,27 @@ export default function BIComercial() {
             )} />
 
             <CardContent className="p-6 relative z-10">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
-                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
-                    kpi.color === "orange" ? "group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-400" :
-                    kpi.color === "blue" ? "group-hover:bg-blue-500/20 group-hover:border-blue-500/20 group-hover:text-blue-400" :
-                    kpi.color === "rose" ? "group-hover:bg-rose-500/20 group-hover:border-rose-500/20 group-hover:text-rose-400" :
-                    kpi.color === "red" ? "group-hover:bg-red-500/20 group-hover:border-red-500/20 group-hover:text-red-400" : ""
+                    "p-2.5 rounded-xl border transition-all duration-300 shadow-sm",
+                    kpi.color === "orange" ? "bg-orange-50 border-orange-100 text-orange-600 group-hover:bg-orange-100" :
+                    kpi.color === "blue" ? "bg-blue-50 border-blue-100 text-blue-600 group-hover:bg-blue-100" :
+                    kpi.color === "rose" ? "bg-rose-50 border-rose-100 text-rose-600 group-hover:bg-rose-100" :
+                    kpi.color === "red" ? "bg-red-50 border-red-100 text-red-600 group-hover:bg-red-100" : "bg-slate-50 border-slate-100 text-slate-500"
                   )}>
-                    <kpi.icon className="h-4 w-4" />
+                    <kpi.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                  <h2 className="text-3xl font-bold tracking-tight text-slate-900 leading-none">
                     {kpi.value}
                   </h2>
-                  <p className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-tight">
                     {kpi.sub}
                   </p>
                 </div>
