@@ -1238,44 +1238,44 @@ export default function BIComercial() {
         </TabsList>
 
         <TabsContent value="criticas">
-          <Card>
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent">
+                  <TableRow className="hover:bg-transparent bg-slate-50">
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
                     <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                     <TableHead className="h-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {criticas.length === 0 && (
-                    <TableRow><TableCell colSpan={9} className="text-center text-white/40 py-6">Sem propostas críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9} className="text-center text-slate-400 py-6 italic text-xs">Sem propostas críticas</TableCell></TableRow>
                   )}
                   {criticas.map((r, i) => (
                     <TableRow key={r.id} className={cn(
-                      "border-white/5 transition-colors group/row",
-                      i % 2 === 0 ? "bg-white/[0.01]" : "bg-transparent",
-                      "hover:bg-white/[0.04]"
+                      "border-slate-100 transition-colors group/row",
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                      "hover:bg-slate-50"
                     )}>
-                      <TableCell className="font-medium text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
-                      <TableCell className="max-w-[220px] truncate text-white/90 font-mono text-[10px]">{r.numero}</TableCell>
-                      <TableCell><Badge variant="outline" className="border-white/20 text-white/90">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
-                      <TableCell className="text-right text-white font-bold">{BRL(r.valor)}</TableCell>
-                      <TableCell className="text-white/70 text-xs">{r.criada}</TableCell>
-                      <TableCell className="text-white/70 text-xs">{r.atualizada}</TableCell>
-                      <TableCell className="text-right text-white/90">
+                      <TableCell className="font-medium text-slate-900 group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
+                      <TableCell className="max-w-[220px] truncate text-slate-500 font-mono text-[10px]">{r.numero}</TableCell>
+                      <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
+                      <TableCell className="text-right text-slate-900 font-bold">{BRL(r.valor)}</TableCell>
+                      <TableCell className="text-slate-500 text-xs">{r.criada}</TableCell>
+                      <TableCell className="text-slate-500 text-xs">{r.atualizada}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-medium">
                         {r.diasParada > 14 ? <Badge variant="destructive" className="animate-pulse">{r.diasParada}d</Badge> : `${r.diasParada}d`}
                       </TableCell>
-                      <TableCell className="text-white font-medium text-xs bg-white/5">{r.acao}</TableCell>
+                      <TableCell className="text-slate-700 font-medium text-xs bg-slate-50/50">{r.acao}</TableCell>
                       <TableCell>
-                        <Button asChild size="sm" variant="ghost">
+                        <Button asChild size="sm" variant="ghost" className="text-slate-400 hover:text-primary transition-colors">
                           <Link to="/comercial/devis/$id" params={{ id: r.id }}>
                             <ExternalLink className="h-3.5 w-3.5 mr-1" /> Ver
                           </Link>
