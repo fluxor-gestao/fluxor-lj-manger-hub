@@ -38,8 +38,18 @@ const I18N: Record<Lang, { tagline: string; cta_help: string; accept: string; re
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function buildHtml(messageText: string, acceptUrl: string | undefined, lang: Lang) {
+const BIZ_UNIT_LABELS: Record<string, Record<Lang, string>> = {
+  DE: { pt: "ADVOCACIA & CONSULTORIA INTERNACIONAL", fr: "AVOCATS & CONSEIL INTERNATIONAL", en: "INTERNATIONAL LAW & CONSULTING", es: "ABOGADOS & CONSULTORÍA INTERNACIONAL" },
+  CO: { pt: "CONTABILIDADE INTERNACIONAL", fr: "COMPTABILITÉ INTERNATIONALE", en: "INTERNATIONAL ACCOUNTING", es: "CONTABILIDAD INTERNACIONAL" },
+  AM: { pt: "CONSULTORIA AMBIENTAL", fr: "CONSEIL ENVIRONNEMENTAL", en: "ENVIRONMENTAL CONSULTING", es: "CONSULTORÍA AMBIENTAL" },
+  IM: { pt: "CONSULTORIA IMOBILIÁRIA", fr: "CONSEIL IMMOBILIER", en: "REAL ESTATE CONSULTING", es: "CONSULTORÍA INMOBILIARIA" },
+  GE: { pt: "GESTÃO INTERNACIONAL", fr: "GESTION INTERNATIONALE", en: "INTERNATIONAL MANAGEMENT", es: "GESTIÓN INTERNACIONAL" },
+};
+
+function buildHtml(messageText: string, acceptUrl: string | undefined, lang: Lang, businessUnit: string = "DE") {
   const t = I18N[lang] ?? I18N.pt;
+  const unitTagline = BIZ_UNIT_LABELS[businessUnit]?.[lang] || BIZ_UNIT_LABELS.DE[lang];
+  
   const ctaBlock = acceptUrl
     ? `
       <p style="margin:28px 0 14px;text-align:center;font-size:13px;color:#4b5563">${t.cta_help}</p>
@@ -62,7 +72,7 @@ function buildHtml(messageText: string, acceptUrl: string | undefined, lang: Lan
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;max-width:600px;width:100%">
         <tr><td style="padding:28px 36px 0">
           <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;letter-spacing:2px;color:#0f172a">LUNDGAARD JENSEN</div>
-          <div style="font-size:11px;letter-spacing:3px;color:#1e40af;margin-top:4px">${t.tagline}</div>
+          <div style="font-size:11px;letter-spacing:3px;color:#1e40af;margin-top:4px">${unitTagline}</div>
           <div style="height:2px;background:#c8a96a;margin:14px 0 0"></div>
         </td></tr>
         <tr><td style="padding:24px 36px 8px">
