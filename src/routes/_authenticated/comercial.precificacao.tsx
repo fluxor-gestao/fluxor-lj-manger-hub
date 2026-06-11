@@ -15,9 +15,8 @@ import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe, Filt
 import { LoadingState, EmptyState } from "@/components/DataStates";
 import { cn } from "@/lib/utils";
 import BulkPriceUpdate from "@/components/devis/BulkPriceUpdate";
-import { COMPANY_LIST, type CompanyCode } from "@/lib/companyCodes";
+import { type CompanyCode } from "@/lib/companyCodes";
 import { AreaBadge } from "@/components/AreaBadge";
-import { getAreasFor } from "@/lib/businessAreas";
 
 export const Route = createFileRoute("/_authenticated/comercial/precificacao")({
   component: Precificacao,
@@ -43,6 +42,34 @@ function Precificacao() {
   const [isBulkUpdateOpen, setIsBulkUpdateOpen] = useState(false);
   const [editingService, setEditingService] = useState<Partial<ServicePrice> | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  const { data: units = [] } = useQuery({
+    queryKey: ["catalog", "business_units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("code, name")
+        .eq("active", true)
+        .order("code");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: areas = [] } = useQuery({
+    queryKey: ["business-areas", editingService?.business_unit],
+    enabled: !!editingService?.business_unit,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_areas")
+        .select("slug, label")
+        .eq("business_unit", editingService?.business_unit)
+        .eq("is_active", true)
+        .order("label");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["service_prices"],
@@ -175,7 +202,7 @@ function Precificacao() {
                   >
                     <SelectTrigger><SelectValue placeholder="Selecionar unidade" /></SelectTrigger>
                     <SelectContent>
-                      {COMPANY_LIST.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                      {units.map((c: any) => <SelectItem key={c.code} value={c.code}>{c.code} — {c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -204,7 +231,7 @@ function Precificacao() {
                   >
                     <SelectTrigger><SelectValue placeholder="Selecionar área" /></SelectTrigger>
                     <SelectContent>
-                      {getAreasFor(editingService?.business_unit).map((a: any) => <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>)}
+                      {areas.map((a: any) => <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
