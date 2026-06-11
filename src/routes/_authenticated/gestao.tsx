@@ -204,7 +204,7 @@ function Gestao() {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <StatCard 
           title="Receita Realizada" 
-          value={BRL(timeframe === "month" ? agg?.recMes : agg?.recAno)} 
+          value={BRL(timeframe === "month" ? (agg?.recMes ?? 0) : (agg?.recAno ?? 0))} 
           subValue={timeframe === "month" ? "No mês atual" : "Acumulado no ano"}
           icon={TrendingUp}
           trend="up"
@@ -213,7 +213,7 @@ function Gestao() {
         />
         <StatCard 
           title="Despesa Paga" 
-          value={BRL(timeframe === "month" ? agg?.desMes : agg?.desAno)} 
+          value={BRL(timeframe === "month" ? (agg?.desMes ?? 0) : (agg?.desAno ?? 0))} 
           subValue={timeframe === "month" ? "No mês atual" : "Acumulado no ano"}
           icon={TrendingDown}
           trend="down"
@@ -222,15 +222,15 @@ function Gestao() {
         />
         <StatCard 
           title="Resultado Líquido" 
-          value={BRL(timeframe === "month" ? agg?.resMes : agg?.resAno)} 
+          value={BRL(timeframe === "month" ? (agg?.resMes ?? 0) : (agg?.resAno ?? 0))} 
           subValue={timeframe === "month" ? `Margem: ${PCT(agg?.margemMes || 0)}` : "Resultado do ano"}
           icon={DollarSign}
           color="blue"
         />
         <StatCard 
           title="Contas a Receber" 
-          value={BRL(agg?.aberto)} 
-          subValue={`Vencido: ${BRL(agg?.vencido)}`}
+          value={BRL(agg?.aberto ?? 0)} 
+          subValue={`Vencido: ${BRL(agg?.vencido ?? 0)}`}
           icon={Wallet}
           trend={agg?.vencido && agg.vencido > 0 ? "down" : "up"}
           trendValue={agg?.vencido && agg.vencido > 0 ? "Atenção" : "Em dia"}
@@ -239,7 +239,7 @@ function Gestao() {
         <StatCard 
           title="Taxa de Conversão" 
           value={PCT(comm?.taxaConv || 0)} 
-          subValue={`Ticket Médio: ${BRL(comm?.ticketMedio)}`}
+          subValue={`Ticket Médio: ${BRL(comm?.ticketMedio ?? 0)}`}
           icon={Target}
           color="violet"
         />
@@ -294,11 +294,11 @@ function Gestao() {
             <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4">
                <div className="space-y-1">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Op. Líquida</p>
-                 <p className="text-sm font-black text-slate-900">{BRL(agg?.resMes)}</p>
+                 <p className="text-sm font-black text-slate-900">{BRL(agg?.resMes ?? 0)}</p>
                </div>
                <div className="space-y-1">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">EBITDA Est.</p>
-                 <p className="text-sm font-black text-slate-900">{BRL(agg?.resMes * 1.15)}</p>
+                 <p className="text-sm font-black text-slate-900">{BRL((agg?.resMes ?? 0) * 1.15)}</p>
                </div>
                <div className="space-y-1">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Impostos</p>
