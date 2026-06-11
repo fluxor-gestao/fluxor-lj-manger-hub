@@ -18,7 +18,7 @@ import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import logo from "@/assets/logo.svg";
 import type { CobrancaRow } from "./CobrancaDetailSheet";
 
-import { formatDevisCode } from "@/lib/formatDevis";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
