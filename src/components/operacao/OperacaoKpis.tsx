@@ -19,25 +19,25 @@ function Kpi({
 }) {
   const cls =
     tone === "success"
-      ? "bg-emerald-500/10 text-emerald-600"
+      ? "bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm"
       : tone === "danger"
-      ? "bg-destructive/10 text-destructive"
+      ? "bg-rose-50 text-rose-600 border border-rose-100 shadow-sm"
       : tone === "warn"
-      ? "bg-amber-500/10 text-amber-600"
+      ? "bg-amber-50 text-amber-600 border border-amber-100 shadow-sm"
       : tone === "primary"
-      ? "bg-primary/10 text-primary"
-      : "bg-muted text-muted-foreground";
+      ? "bg-blue-50 text-blue-600 border border-blue-100 shadow-sm"
+      : "bg-slate-50 text-slate-500 border border-slate-100 shadow-sm";
   return (
-    <Card>
+    <Card className="hover:shadow-md transition-shadow duration-300">
       <CardContent className="py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="text-xl font-semibold tracking-tight">{value}</p>
-            {hint ? <p className="text-[10px] text-muted-foreground">{hint}</p> : null}
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
+            <p className="text-xl font-bold text-slate-900 tracking-tight">{value}</p>
+            {hint ? <p className="text-[10px] font-medium text-slate-400 italic">{hint}</p> : null}
           </div>
-          <div className={`h-9 w-9 rounded-md flex items-center justify-center ${cls}`}>
-            <Icon className="h-4 w-4" />
+          <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${cls}`}>
+            <Icon className="h-5 w-5" />
           </div>
         </div>
       </CardContent>
@@ -108,33 +108,33 @@ export function OperacaoKpis({ services }: { services: ServiceLike[] }) {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow duration-300">
           <CardContent className="py-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-              <Activity className="h-3 w-3" /> Processos por Empresa
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 flex items-center gap-2 pb-2 border-b border-slate-50">
+              <Activity className="h-3 w-3 text-blue-600" /> Processos por Empresa
             </h3>
-            <div className="space-y-2">
-              {buCounts.length === 0 ? <p className="text-xs text-muted-foreground italic">Sem dados</p> :
+            <div className="space-y-3">
+              {buCounts.length === 0 ? <p className="text-xs text-slate-400 italic">Sem dados</p> :
                buCounts.slice(0, 5).map(([bu, count]) => (
-                <div key={bu} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{bu}</span>
-                  <Badge variant="secondary">{count}</Badge>
+                <div key={bu} className="flex items-center justify-between group">
+                  <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">{bu}</span>
+                  <Badge variant="secondary" className="bg-slate-50 text-slate-600 border-slate-100">{count}</Badge>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow duration-300">
           <CardContent className="py-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-              <Activity className="h-3 w-3" /> Processos por Área
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 flex items-center gap-2 pb-2 border-b border-slate-50">
+              <Activity className="h-3 w-3 text-emerald-600" /> Processos por Área
             </h3>
-            <div className="space-y-2">
-              {areaCounts.length === 0 ? <p className="text-xs text-muted-foreground italic">Sem dados</p> :
+            <div className="space-y-3">
+              {areaCounts.length === 0 ? <p className="text-xs text-slate-400 italic">Sem dados</p> :
                areaCounts.slice(0, 5).map(([area, count]) => (
-                <div key={area} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{area}</span>
-                  <Badge variant="secondary">{count}</Badge>
+                <div key={area} className="flex items-center justify-between group">
+                  <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">{area}</span>
+                  <Badge variant="secondary" className="bg-slate-50 text-slate-600 border-slate-100">{count}</Badge>
                 </div>
               ))}
             </div>

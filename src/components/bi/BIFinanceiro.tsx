@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, cloneElement } from "react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -84,29 +84,29 @@ const daysBetween = (a: string, b: string) =>
   Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
 
 const CHART_COLORS = [
-  "#10B981", // Emerald
-  "#0EA5E9", // Sky
-  "#8B5CF6", // Violet
-  "#F59E0B", // Amber
-  "#EF4444", // Red
-  "#EC4899", // Pink
-  "#6366F1", // Indigo
-  "#14B8A6", // Teal
+  "#10b981", // Emerald
+  "#3b82f6", // Blue
+  "#f59e0b", // Amber
+  "#ef4444", // Red
+  "#8b5cf6", // Violet
+  "#0ea5e9", // Sky
+  "#6366f1", // Indigo
+  "#14b8a6", // Teal
 ];
 
 const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#0b1526]/95 backdrop-blur-2xl border border-white/10 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-xl ring-1 ring-white/5">
-        <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em] mb-3 border-b border-white/10 pb-2">{label}</p>
-        <div className="space-y-2.5">
+      <div className="bg-white/95 backdrop-blur-md border border-slate-200 p-3 shadow-lg rounded-lg ring-1 ring-slate-100">
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 border-b border-slate-100 pb-1.5">{label}</p>
+        <div className="space-y-2">
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-12">
-              <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }} />
-                <span className="text-xs font-semibold text-[#E2E8F0]">{entry.name}</span>
+            <div key={index} className="flex items-center justify-between gap-8">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                <span className="text-xs font-medium text-slate-600">{entry.name}</span>
               </div>
-              <span className="text-xs font-bold text-white">
+              <span className="text-xs font-bold text-slate-900">
                 {formatter ? formatter(entry.value) : entry.value}
               </span>
             </div>
@@ -155,6 +155,7 @@ type Filters = {
   paymentStatus: string;
   categoryId: string;
   origin: string;
+  search?: string;
 };
 
 const today0 = new Date();
@@ -180,7 +181,7 @@ export default function BIFinanceiro() {
   const cats = useFinanceiroCatalogs();
   const { filterCode: companyCode } = useCompany();
   const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [tabFocus, setTabFocus] = useState<string | null>(null);
+  const [tabFocus, setTabFocus] = useState<string | null>("visao_geral");
 
   const banks = useQuery({
     queryKey: ["bi", "banks"],
@@ -688,21 +689,21 @@ export default function BIFinanceiro() {
     <div className="space-y-6">
       <ActiveCompanyBanner />
       {/* Filters */}
-      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group hover:border-white/10 transition-all duration-500">
-        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01] flex flex-row items-center justify-between">
+      <Card className="bg-white border-slate-200 shadow-sm overflow-hidden group hover:border-slate-300 transition-all duration-300">
+        <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
-              <Filter className="h-3.5 w-3.5 text-white/70" />
+            <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100">
+              <Filter className="h-3.5 w-3.5 text-slate-500" />
             </div>
-            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E2E8F0] group-hover:text-white transition-colors">Filtros Estratégicos</CardTitle>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-600 transition-colors">Filtros Estratégicos</CardTitle>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all" onClick={exportCSV}>Exportar</Button>
+            <Button variant="outline" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 border-slate-200 transition-all" onClick={exportCSV}>Exportar</Button>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
               onClick={clearFilters}
-              className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all"
+              className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 border-slate-200 transition-all"
             >
               <Eraser className="h-3 w-3 mr-2" /> Limpar
             </Button>
@@ -861,51 +862,48 @@ export default function BIFinanceiro() {
             trendValue: ""
           },
         ].map((kpi, i) => (
-          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+          <Card key={i} className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg border border-slate-200 bg-white shadow-sm">
             {/* Ambient Glow */}
             <div className={cn(
-              "absolute -right-8 -top-8 h-32 w-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-30 transition-all duration-700",
+              "absolute -right-8 -top-8 h-32 w-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-10 transition-all duration-500",
               kpi.color === "emerald" ? "bg-emerald-500" : 
               kpi.color === "rose" ? "bg-rose-500" : 
-              kpi.color === "sky" ? "bg-sky-500" : 
+              kpi.color === "sky" ? "bg-blue-500" : 
               kpi.color === "indigo" ? "bg-indigo-500" : "bg-white"
             )} />
-
-            {/* Micro Inner Shadow */}
-            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]" />
 
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#F8FAFC] group-hover:text-[#CBD5E1] transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
-                    "p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/50 group-hover:text-white transition-all duration-500 shadow-sm",
-                    kpi.color === "emerald" ? "group-hover:bg-emerald-500/20 group-hover:border-emerald-500/30 group-hover:text-emerald-400 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]" :
-                    kpi.color === "rose" ? "group-hover:bg-rose-500/20 group-hover:border-rose-500/30 group-hover:text-rose-400 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]" :
-                    kpi.color === "sky" ? "group-hover:bg-sky-500/20 group-hover:border-sky-500/30 group-hover:text-sky-400 group-hover:shadow-[0_0_20px_rgba(14,165,233,0.2)]" :
-                    kpi.color === "indigo" ? "group-hover:bg-indigo-500/20 group-hover:border-indigo-500/30 group-hover:text-indigo-400 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.2)]" : ""
+                    "p-2.5 rounded-xl border transition-all duration-300 shadow-sm",
+                    kpi.color === "emerald" ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-hover:bg-emerald-100" :
+                    kpi.color === "rose" ? "bg-rose-50 border-rose-100 text-rose-600 group-hover:bg-rose-100" :
+                    kpi.color === "sky" ? "bg-blue-50 border-blue-100 text-blue-600 group-hover:bg-blue-100" :
+                    kpi.color === "indigo" ? "bg-indigo-50 border-indigo-100 text-indigo-600 group-hover:bg-indigo-100" : "bg-slate-50 border-slate-100 text-slate-500"
                   )}>
                     <kpi.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <h2 className="text-4xl font-bold tracking-tight text-white leading-none">
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-bold tracking-tight text-slate-900 leading-none">
                     {kpi.value}
                   </h2>
                   <div className="flex items-center gap-3">
                     {kpi.trend !== "neutral" && (
                       <div className={cn(
-                        "flex items-center text-[11px] font-bold px-2 py-0.5 rounded-full ring-1 ring-inset",
-                        kpi.trend === "pos" ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20" : "bg-rose-500/10 text-rose-400 ring-rose-500/20"
+                        "flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ring-1 ring-inset",
+                        kpi.trend === "pos" ? "bg-emerald-50 text-emerald-600 ring-emerald-100" : "bg-rose-50 text-rose-600 ring-rose-100"
                       )}>
                         {kpi.trend === "pos" ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
                         {kpi.trendValue}
                       </div>
                     )}
-                    <span className="text-[11px] font-medium text-[#F8FAFC] uppercase tracking-wide">
+                    <span className="text-slate-400 font-medium text-[10px] tracking-tight">
                       {kpi.sub}
                     </span>
                   </div>
@@ -956,9 +954,9 @@ export default function BIFinanceiro() {
             trendValue: ""
           },
         ].map((kpi, i) => (
-          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+          <Card key={i} className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg border border-slate-200 bg-white shadow-sm">
             <div className={cn(
-              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-all duration-500",
               kpi.color === "red" ? "bg-red-500" : 
               kpi.color === "orange" ? "bg-orange-500" : 
               kpi.color === "cyan" ? "bg-cyan-500" : 
@@ -968,25 +966,25 @@ export default function BIFinanceiro() {
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/60 transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
-                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
-                    kpi.color === "red" ? "group-hover:bg-red-500/20 group-hover:border-red-500/20 group-hover:text-red-400" :
-                    kpi.color === "orange" ? "group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-400" :
-                    kpi.color === "cyan" ? "group-hover:bg-cyan-500/20 group-hover:border-cyan-500/20 group-hover:text-cyan-400" :
-                    kpi.color === "violet" ? "group-hover:bg-violet-500/20 group-hover:border-violet-500/20 group-hover:text-violet-400" : ""
+                    "p-2 rounded-lg border transition-all duration-300",
+                    kpi.color === "red" ? "bg-rose-50 border-rose-100 text-rose-600" :
+                    kpi.color === "orange" ? "bg-amber-50 border-amber-100 text-amber-600" :
+                    kpi.color === "cyan" ? "bg-blue-50 border-blue-100 text-blue-600" :
+                    kpi.color === "violet" ? "bg-purple-50 border-purple-100 text-purple-600" : "bg-slate-50 border-slate-100 text-slate-500"
                   )}>
                     <kpi.icon className="h-4 w-4" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                  <h2 className="text-3xl font-bold tracking-tight text-slate-900 leading-none">
                     {kpi.value}
                   </h2>
-                  <p className="text-[11px] font-bold text-[#CBD5E1] uppercase tracking-tight">
+                  <p className="text-xs text-slate-400 font-medium">
                     {kpi.sub}
                   </p>
                 </div>
@@ -998,23 +996,23 @@ export default function BIFinanceiro() {
 
       <div className="grid gap-3 lg:grid-cols-2">
 
-        <Card className="border border-white/5 shadow-2xl overflow-hidden relative bg-[#1a2233]/40 backdrop-blur-xl group">
+        <Card className="border border-slate-200 shadow-sm overflow-hidden relative bg-white group">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <CardHeader className="relative z-10 border-b border-white/5 bg-white/[0.02]">
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Resumo Financeiro Estratégico</CardTitle>
+          <CardHeader className="relative z-10 border-b border-slate-100 bg-slate-50/50">
+            <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Resumo Financeiro Estratégico</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10 p-6">
 
             <div className="grid gap-8">
               <div className="space-y-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Receita e Resultado por Empresa</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">Receita e Resultado por Empresa</h4>
                 <div className="grid gap-2">
                   {receitaEmpresa.slice(0, 5).map((s) => {
                     const res = resultadoEmpresa.find(r => r.name === s.name)?.value ?? 0;
                     return (
-                      <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                      <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all group/item">
                         <div className="flex flex-col gap-1">
-                          <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
+                          <span className="font-bold text-slate-900 group-hover/item:text-blue-600 transition-colors">{s.name}</span>
                           <span className={`text-[10px] font-bold uppercase tracking-wider ${res >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
                             {res >= 0 ? "+" : ""}{BRL(res)}
                           </span>
@@ -1293,20 +1291,20 @@ export default function BIFinanceiro() {
 
       {/* Tables */}
       <Tabs value={tabFocus?.startsWith("categoria") ? "receber" : tabFocus ?? "receber"} onValueChange={(v) => setTabFocus(v)}>
-        <TabsList className="bg-[#1a2233]/40 border border-white/5 p-1 h-12 backdrop-blur-xl mb-6">
-          <TabsTrigger value="receber" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Receber críticas</TabsTrigger>
-          <TabsTrigger value="pagar" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Pagar críticas</TabsTrigger>
-          <TabsTrigger value="conciliacao" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Pend. conciliação</TabsTrigger>
-          <TabsTrigger value="ranking" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Ranking clientes</TabsTrigger>
+        <TabsList className="bg-slate-100 border border-slate-200 p-1 h-12 mb-6">
+          <TabsTrigger value="receber" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Receber críticas</TabsTrigger>
+          <TabsTrigger value="pagar" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Pagar críticas</TabsTrigger>
+          <TabsTrigger value="conciliacao" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Pend. conciliação</TabsTrigger>
+          <TabsTrigger value="ranking" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Ranking clientes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="receber">
           <Card>
             <CardContent className="p-0">
               <Table>
-                <TableHeader className="bg-[#0b1526]/50">
-                  <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
                     <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
                     <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
                     <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
@@ -1449,27 +1447,27 @@ export default function BIFinanceiro() {
 
       {/* Insights */}
       <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
-        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.02]">
+        <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#CBD5E1]" />
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Insights Financeiros</CardTitle>
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Insights Financeiros</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pt-6">
 
           {insights.length === 0 && (
-            <p className="text-sm text-[#CBD5E1]">Sem alertas relevantes no período.</p>
+            <p className="text-sm text-slate-400 italic">Sem alertas relevantes no período.</p>
           )}
           {insights.map((ins, i) => (
-            <div key={i} className="rounded-lg border p-3 space-y-1">
+            <div key={i} className="rounded-lg border border-slate-100 p-3 space-y-1 bg-slate-50">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{ins.titulo}</p>
+                <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{ins.titulo}</p>
                 <Badge variant={ins.severidade === "alta" ? "destructive" : ins.severidade === "media" ? "default" : "secondary"}>
                   {ins.severidade}
                 </Badge>
               </div>
-              <p className="text-xs text-[#CBD5E1]">{ins.descricao}</p>
-              <p className="text-xs"><span className="text-[#CBD5E1]">Ação sugerida: </span><span className="text-[#E2E8F0] font-medium">{ins.acao}</span></p>
+              <p className="text-xs text-slate-500">{ins.descricao}</p>
+              <p className="text-xs italic"><span className="text-slate-400">Ação sugerida: </span><span className="text-slate-600 font-medium">{ins.acao}</span></p>
             </div>
           ))}
         </CardContent>
@@ -1493,16 +1491,16 @@ function Kpi({
   tone?: "positive" | "negative";
 }) {
   const toneClass =
-    tone === "positive" ? "text-emerald-600" : tone === "negative" ? "text-red-600" : "text-foreground";
+    tone === "positive" ? "text-emerald-600" : tone === "negative" ? "text-red-600" : "text-slate-600";
   return (
-    <Card>
+    <Card className="hover:shadow-lg transition-all duration-300">
       <CardContent className="p-4 space-y-1">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-[#CBD5E1]">{label}</p>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</p>
           {Icon && <Icon className={`h-4 w-4 ${toneClass}`} />}
         </div>
-        <p className={`text-lg font-semibold leading-tight ${toneClass}`} title={value}>{value}</p>
-        {sub && <p className="text-xs text-[#CBD5E1]">{sub}</p>}
+        <p className="text-xl font-bold text-slate-900 leading-tight" title={value}>{value}</p>
+        {sub && <p className="text-xs text-slate-400 font-medium">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -1510,13 +1508,13 @@ function Kpi({
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden group hover:border-white/10 transition-all duration-500">
-      <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01]">
-        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F8FAFC] group-hover:text-[#CBD5E1] transition-colors">
+    <Card className="bg-white border-slate-200 shadow-sm overflow-hidden group hover:border-slate-300 transition-all duration-300">
+      <CardHeader className="pb-4 border-b border-slate-50 bg-slate-50/30">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-700 transition-colors">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-8">{children}</CardContent>
+      <CardContent className="pt-6">{children}</CardContent>
     </Card>
   );
 }
@@ -1524,12 +1522,12 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 function Empty() {
   return (
-    <div className="flex h-[280px] items-center justify-center text-sm text-[#F8FAFC]">
+    <div className="flex h-[280px] items-center justify-center text-sm text-slate-400 italic">
       <div className="text-center">
-        <div className="bg-white/5 p-4 rounded-full mb-4 inline-block ring-1 ring-white/10">
-          <CalendarRange className="h-6 w-6 text-[#CBD5E1]" />
+        <div className="bg-slate-50 p-4 rounded-full mb-4 inline-block ring-1 ring-slate-100">
+          <CalendarRange className="h-6 w-6 text-slate-300" />
         </div>
-        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-[#F8FAFC]">Sem dados para o período selecionado</p>
+        <p className="font-bold uppercase tracking-wider text-[10px] text-slate-400">Sem dados para o período selecionado</p>
       </div>
     </div>
   );
