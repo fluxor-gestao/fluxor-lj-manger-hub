@@ -128,18 +128,27 @@ export default function DevisCodePreviewDialog({
               onValueChange={(v) => setPrefix(v as ServicePrefix)}
               className="grid grid-cols-3 sm:grid-cols-5 gap-2"
             >
-              {(Object.keys(PREFIX_LABEL) as ServicePrefix[]).map((p) => (
-                <label
-                  key={p}
-                  className={`flex flex-col items-center gap-1 rounded-md border p-3 cursor-pointer transition-colors ${
-                    prefix === p ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
-                  }`}
-                >
-                  <RadioGroupItem value={p} className="sr-only" />
-                  <span className="text-lg font-bold font-display">{p}</span>
-                  <span className="text-[11px] text-muted-foreground">{PREFIX_LABEL[p]}</span>
-                </label>
-              ))}
+              {(Object.keys(PREFIX_META) as ServicePrefix[]).map((p) => {
+                const Icon = PREFIX_META[p].icon;
+                const isSelected = prefix === p;
+                return (
+                  <label
+                    key={p}
+                    className={`flex flex-col items-center gap-2 rounded-xl border p-3 cursor-pointer transition-all duration-200 ${
+                      isSelected 
+                        ? `${COMPANY_BADGE_CLASS[p]} border-2 scale-105 shadow-sm` 
+                        : "border-border hover:border-primary/30 hover:bg-accent/50 opacity-70"
+                    }`}
+                  >
+                    <RadioGroupItem value={p} className="sr-only" />
+                    <Icon className={`h-5 w-5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                    <div className="flex flex-col items-center">
+                      <span className="text-sm font-bold font-display leading-tight">{p}</span>
+                      <span className="text-[10px] opacity-80 font-medium whitespace-nowrap">{COMPANY_SHORT[p]}</span>
+                    </div>
+                  </label>
+                );
+              })}
             </RadioGroup>
           </div>
 
