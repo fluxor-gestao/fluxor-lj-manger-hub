@@ -689,7 +689,7 @@ export default function BIFinanceiro() {
     <div className="space-y-6">
       <ActiveCompanyBanner />
       {/* Filters */}
-      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group hover:border-white/10 transition-all duration-500">
+      <Card className="bg-white border-slate-200 shadow-sm overflow-hidden group hover:border-slate-300 transition-all duration-300">
         <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100">
