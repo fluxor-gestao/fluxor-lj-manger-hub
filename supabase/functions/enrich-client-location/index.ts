@@ -15,16 +15,16 @@ Deno.serve(async (req) => {
     }
 
     const searchQuery = cnpj 
-      ? `empresa com CNPJ ${cnpj} (Nome: ${name}). PESQUISE NA WEB para confirmar o endereço operacional atual. Verifique se a empresa possui instalações em Itarema/Ceará ou outros locais específicos relacionados a parques eólicos ou energia.` 
-      : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço operacional exato.`;
+      ? `EMPRESA CNPJ: ${cnpj} (NOME: ${name}). PESQUISE NA WEB para confirmar o endereço OPERACIONAL atual. Verifique sites como econodata, cnpj.biz, LinkedIn, e sites oficiais de notícias de energia/eólica. FOCO: Qual a localização real de atuação desta empresa hoje? Itarema? Cruz? Ceará?` 
+      : `EMPRESA: ${name}${city ? ` EM ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço OPERACIONAL exato.`;
 
     const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global com ACESSO À PESQUISA NA WEB.
 Sua tarefa é encontrar informações precisas e ATUAIS de endereço para uma empresa.
 
 REGRAS CRÍTICAS:
 1. NÃO CONFIE APENAS EM CONHECIMENTO PRÉVIO. USE A PESQUISA NA WEB.
-2. PRIORIDADE: Se a pesquisa na web indicar que a empresa opera em um local específico (como Itarema/CE, Ceará, Brasil), use ESSE endereço como o principal, mesmo que o endereço fiscal (sede administrativa em SP/RJ/BH) seja diferente. Usuários buscam a localização de atuação da empresa.
-3. Se o CNPJ for brasileiro, busque em sites como cnpj.biz ou econodata, mas valide com notícias ou site oficial se há uma "base operacional" ou "parque eólico" relevante.
+2. PRIORIDADE: Se a pesquisa na web indicar que a empresa opera em um local específico (como Itarema/CE, Cruz/CE, Ceará, Brasil), use ESSE endereço como o principal. O endereço fiscal administrativo (SP/RJ/BH) é SECUNDÁRIO. O usuário quer a localização física de atuação operacional.
+3. Se o CNPJ tiver filiais, identifique a filial relevante para o Ceará/Nordeste. Valide com notícias ou sites oficiais se há uma "base operacional" ou "parque eólico" relevante.
 4. Para empresas internacionais, identifique a sede ou filial operacional principal.
 5. Retorne o resultado em formato JSON estruturado.
 
