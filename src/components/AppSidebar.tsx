@@ -8,10 +8,12 @@ import {
   Shield,
   HelpCircle,
   LogOut,
+  Loader2,
 } from "lucide-react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
-import { appVersion } from "@/config/appVersion";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import logoBanner from "@/assets/logo-banner.png";
 import {
   Sidebar,
