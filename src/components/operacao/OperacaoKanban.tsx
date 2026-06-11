@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatDevisCode } from "@/lib/formatDevis";
 import { CalendarDays, MessageSquare, AlertOctagon, ListChecks, User2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
