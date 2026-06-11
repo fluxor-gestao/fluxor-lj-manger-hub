@@ -201,8 +201,7 @@ function BI() {
 
       {activeDashboard ? (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out space-y-6">
-          <Card className="overflow-hidden border border-white/5 shadow-2xl bg-white/[0.02] backdrop-blur-xl">
-
+          <Card className="overflow-hidden border-slate-200 shadow-xl bg-white">
             <CardContent className="p-0">
               {activeDashboard.id === "financeiro" ? (
                 <div className="p-2"><BIFinanceiro /></div>
@@ -218,9 +217,9 @@ function BI() {
               ) : (
                 <div className="flex min-h-[400px] items-center justify-center p-12 text-center">
                   <div className="max-w-xs">
-                    <BarChart3 className="mx-auto h-12 w-12 text-white/40/30 mb-4" />
-                    <h3 className="text-lg font-semibold">Dashboard em Configuração</h3>
-                    <p className="text-sm text-white/40 mt-2">Estamos preparando os indicadores para este painel.</p>
+                    <BarChart3 className="mx-auto h-12 w-12 text-slate-300 mb-4" />
+                    <h3 className="text-lg font-semibold text-slate-900">Dashboard em Configuração</h3>
+                    <p className="text-sm text-slate-500 mt-2">Estamos preparando os indicadores para este painel.</p>
                   </div>
                 </div>
               )}
@@ -228,12 +227,11 @@ function BI() {
           </Card>
         </div>
       ) : (
-        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center animate-in fade-in duration-500">
-          <div className="mb-4 rounded-full bg-white/5 p-4 shadow-sm ring-1 ring-white/10">
-            <LayoutDashboard className="h-8 w-8 text-white/20" />
-
+        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center animate-in fade-in duration-500 shadow-sm">
+          <div className="mb-4 rounded-full bg-slate-50 p-4 shadow-inner">
+            <LayoutDashboard className="h-8 w-8 text-slate-300" />
           </div>
-          <p className="max-w-xs text-sm text-white/40">
+          <p className="max-w-xs text-sm text-slate-500 font-medium">
             Selecione um dashboard para visualizar os indicadores.
           </p>
         </div>
