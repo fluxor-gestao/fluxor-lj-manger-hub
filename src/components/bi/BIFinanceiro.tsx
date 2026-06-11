@@ -692,18 +692,18 @@ export default function BIFinanceiro() {
       <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group hover:border-white/10 transition-all duration-500">
         <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
-              <Filter className="h-3.5 w-3.5 text-white/70" />
+            <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100">
+              <Filter className="h-3.5 w-3.5 text-slate-500" />
             </div>
-            <CardTitle className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E2E8F0] group-hover:text-white transition-colors">Filtros Estratégicos</CardTitle>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-600 transition-colors">Filtros Estratégicos</CardTitle>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all" onClick={exportCSV}>Exportar</Button>
+            <Button variant="outline" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 border-slate-200 transition-all" onClick={exportCSV}>Exportar</Button>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
               onClick={clearFilters}
-              className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 border border-white/10 transition-all"
+              className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 border-slate-200 transition-all"
             >
               <Eraser className="h-3 w-3 mr-2" /> Limpar
             </Button>
