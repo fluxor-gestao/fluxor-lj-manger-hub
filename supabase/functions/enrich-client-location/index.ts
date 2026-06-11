@@ -15,8 +15,8 @@ Deno.serve(async (req) => {
     }
 
     const searchQuery = cnpj 
-      ? `empresa com CNPJ ${cnpj} (Nome: ${name}). PESQUISE NA WEB para confirmar o endereço operacional atual. Verifique se a empresa possui instalações em Itarema/Ceará ou outros locais específicos relacionados a parques eólicos ou energia.` 
-      : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço operacional exato.`;
+      ? `EMPRESA CNPJ: ${cnpj} (NOME: ${name}). PESQUISE NA WEB para confirmar o endereço OPERACIONAL atual. Verifique sites como econodata, cnpj.biz, LinkedIn, e sites oficiais de notícias de energia/eólica. FOCO: Qual a localização real de atuação desta empresa hoje? Itarema? Cruz? Ceará?` 
+      : `EMPRESA: ${name}${city ? ` EM ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço OPERACIONAL exato.`;
 
     const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global com ACESSO À PESQUISA NA WEB.
 Sua tarefa é encontrar informações precisas e ATUAIS de endereço para uma empresa.
