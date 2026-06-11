@@ -507,7 +507,7 @@ export default function BIComercial() {
         return {
           id: r.id,
           cliente: clientName(r.client_id),
-          numero: r.devis_number || r.title,
+          numero: formatDevisCode(r.devis_number, r.id),
           status: r.status,
           valor: Number(r.total_amount ?? 0),
           criada: r.created_at.slice(0, 10),
