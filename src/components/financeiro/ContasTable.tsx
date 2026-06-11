@@ -1,9 +1,12 @@
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DevisPreviewDialog } from "../devis/DevisPreviewDialog";
+import { useState } from "react";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
 
 const fmt = (n: number) =>
@@ -28,10 +31,11 @@ type Row = {
   supplier_id: string | null;
   client: { name: string } | null;
   supplier: { name: string } | null;
+  devis_id?: string | null;
 };
 
 const COLS =
-  "id, due_date, competence_date, entry_date, movement_description, counterparty_name, amount_in, amount_out, total_brl, paid_amount, open_amount, payment_status, client_id, supplier_id, client:clients(name), supplier:suppliers(name)";
+  "id, due_date, competence_date, entry_date, movement_description, counterparty_name, amount_in, amount_out, total_brl, paid_amount, open_amount, payment_status, client_id, supplier_id, devis_id, client:clients(name), supplier:suppliers(name)";
 
 function statusOf(r: Row): "pago" | "parcial" | "vencido" | "aberto" {
   if (r.payment_status === "pago" || (r.open_amount ?? 0) <= 0.0049) return "pago";
@@ -50,6 +54,7 @@ const statusBadge: Record<string, string> = {
 
 export function ContasTable({ kind }: { kind: Kind }) {
   const isReceber = kind === "receber";
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const q = useQuery({
     queryKey: ["financial-entries", "contas", kind],
     queryFn: async () => {
@@ -120,8 +125,22 @@ export function ContasTable({ kind }: { kind: Kind }) {
             const open = Number(r.open_amount ?? Math.max(0, total - paid));
             const st = statusOf(r);
             return (
-              <TableRow key={r.id} className="even:bg-muted/20 hover:bg-muted/40">
-                <TableCell className="py-1.5">{party}</TableCell>
+              <TableRow 
+                key={r.id} 
+                className={cn(
+                  "even:bg-muted/20 hover:bg-muted/40",
+                  r.devis_id && "cursor-pointer group"
+                )}
+                onClick={() => r.devis_id && setPreviewId(r.devis_id)}
+              >
+                <TableCell className="py-1.5 font-medium flex items-center gap-2">
+                  {party}
+                  {r.devis_id && (
+                    <Badge variant="secondary" className="text-[9px] h-4 px-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Ver Devis
+                    </Badge>
+                  )}
+                </TableCell>
                 <TableCell className="py-1.5 max-w-[280px] truncate" title={r.movement_description ?? ""}>
                   {r.movement_description}
                 </TableCell>
@@ -150,6 +169,7 @@ export function ContasTable({ kind }: { kind: Kind }) {
           </TableRow>
         </TableBody>
       </Table>
+      <DevisPreviewDialog devisId={previewId} open={!!previewId} onOpenChange={(o) => !o && setPreviewId(null)} />
     </Card>
   );
 }
