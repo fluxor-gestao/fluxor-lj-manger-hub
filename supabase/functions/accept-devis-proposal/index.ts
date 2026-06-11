@@ -32,6 +32,7 @@ function previewPayload(devis: any, clientName: string | null) {
     title_secondary: devis.title_secondary ?? null,
     scope_description_secondary: devis.scope_description_secondary ?? null,
     proposal_structure_secondary: devis.proposal_structure_secondary ?? null,
+    business_unit: devis.business_unit ?? "DE",
   };
 }
 
