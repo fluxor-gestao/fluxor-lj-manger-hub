@@ -9,17 +9,17 @@ export interface VersionRelease {
 }
 
 export const appVersion = {
-  version: "1.0.0",
-  releaseDate: "10/06/2026",
+  version: "1.0.8",
+  releaseDate: "11/06/2026",
   releaseName: "Base Comercial e Financeira",
 };
 
 export const versionHistory: VersionRelease[] = [
   {
-    version: "1.0.0",
-    releaseDate: "10/06/2026",
+    version: "1.0.8",
+    releaseDate: "11/06/2026",
     releaseName: "Base Comercial e Financeira",
-    summary: "Lançamento inicial da plataforma com módulos principais de gestão comercial e financeira.",
+    summary: "Lançamento inicial consolidado da plataforma com módulos de gestão comercial, financeira e ferramentas administrativas avançadas.",
     implementations: [
       "Cadastro de clientes centralizado com geolocalização",
       "Fluxo completo de Devis (Propostas Comerciais)",
