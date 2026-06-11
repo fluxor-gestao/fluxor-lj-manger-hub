@@ -1326,29 +1326,33 @@ export default function BIComercial() {
         </TabsContent>
 
         <TabsContent value="servicos">
-          <Card>
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Serviço</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Qtd</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor proposto</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor aceito</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conversão</TableHead>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Serviço</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Qtd</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor proposto</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor aceito</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Conversão</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rankingServicos.length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center text-slate-400 py-6 italic text-xs">Sem dados</TableCell></TableRow>
                   )}
                   {rankingServicos.map((s, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{s.name}</TableCell>
-                      <TableCell className="text-right">{s.qtd}</TableCell>
-                      <TableCell className="text-right">{BRL(s.proposto)}</TableCell>
-                      <TableCell className="text-right">{BRL(s.aceito)}</TableCell>
-                      <TableCell className="text-right">{PCT(s.conversao)}</TableCell>
+                    <TableRow key={i} className={cn(
+                      "border-slate-100 transition-colors",
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                      "hover:bg-slate-50"
+                    )}>
+                      <TableCell className="text-slate-900 font-medium px-4">{s.name}</TableCell>
+                      <TableCell className="text-right text-slate-600">{s.qtd}</TableCell>
+                      <TableCell className="text-right text-slate-900">{BRL(s.proposto)}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-bold">{BRL(s.aceito)}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-medium px-4">{PCT(s.conversao)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
