@@ -154,7 +154,7 @@ function ContasAReceberPage() {
     const s = search.trim().toLowerCase();
     return allRows.filter((r) => {
       const st = statusOf(r);
-      if (onlyOpen && st === "pago") return false;
+      if (onlyOpen && (st === "pago" || r.payment_status === "cancelado")) return false;
       if (onlyOverdue && st !== "vencido") return false;
       if (statusFilter !== "all" && st !== statusFilter) return false;
       if (clientFilter !== "all" && r.client_id !== clientFilter) return false;
