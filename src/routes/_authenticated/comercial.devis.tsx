@@ -469,7 +469,7 @@ function Comercial() {
       if (p.total_amount && !devisForm.total_amount) {
         const total = String(p.total_amount);
         const down = String((Number(p.total_amount) * 0.5).toFixed(2));
-        setDevisForm((f) => ({ ...f, total_amount: total, down_payment_amount: down }));
+        setDevisForm((f) => ({ ...f, total_amount: total, down_payment_amount: down, down_payment_percentage: "50" }));
       }
       if (p.title && !devisForm.title) setDevisForm((f) => ({ ...f, title: p.title }));
     } catch (e: any) {
