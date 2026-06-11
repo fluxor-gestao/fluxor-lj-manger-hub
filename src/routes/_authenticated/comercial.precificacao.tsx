@@ -29,8 +29,8 @@ type ServicePrice = {
   description: string;
   category: string;
   price: number;
-  market_price: number | null;
-  last_market_update: string | null;
+  business_unit: CompanyCode | null;
+  responsible_sector: string | null;
 };
 
 function Precificacao() {
