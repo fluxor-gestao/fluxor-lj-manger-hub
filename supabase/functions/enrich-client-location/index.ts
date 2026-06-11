@@ -15,19 +15,19 @@ Deno.serve(async (req) => {
     }
 
     const searchQuery = cnpj 
-      ? `empresa com CNPJ ${cnpj} (Nome: ${name})` 
-      : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}`;
+      ? `empresa com CNPJ ${cnpj} (Nome: ${name}). PESQUISE NA WEB para confirmar o endereço atual, pois registros de CNPJ podem estar desatualizados ou apontar para escritórios contábeis. Busque pela localização operacional real (sede, fábrica ou escritório principal).` 
+      : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço exato.`;
 
-    const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global.
-Sua tarefa é encontrar informações precisas de endereço para uma empresa, seja ela brasileira ou internacional.
+    const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global com ACESSO À PESQUISA NA WEB.
+Sua tarefa é encontrar informações precisas e ATUAIS de endereço para uma empresa.
 
 REGRAS CRÍTICAS:
-1. Priorize fontes oficiais e ATUALIZADAS. Se um CNPJ for fornecido, use-o para buscar o endereço exato registrado na Receita Federal ou em bases de dados de empresas (como cnpj.biz, econodata, etc).
-2. MUITO IMPORTANTE: Verifique se o nome da empresa e o CNPJ coincidem. Às vezes, bases de dados antigas podem estar desatualizadas. 
-3. Se houver divergência entre a base de dados e a localização real conhecida (como "Itarema / Ceará" para certas empresas de energia/turismo), priorize a localização operacional mais relevante.
-4. Para empresas internacionais, encontre a sede global ou a filial principal no país indicado.
+1. NÃO CONFIE APENAS EM CONHECIMENTO PRÉVIO OU BASES ESTÁTICAS. PESQUISE NA WEB por termos como "[Nome da Empresa] endereço", "[CNPJ] localização" ou "[Nome da Empresa] contato".
+2. Priorize a localização OPERACIONAL REAL (ex: sede, fábrica, filial principal) em vez de endereços puramente fiscais/contábeis se houver diferença.
+3. Se o CNPJ for brasileiro, use ferramentas de busca para encontrar o endereço mais recente em sites como cnpj.biz, econodata, casas dos dados ou o site oficial da empresa.
+4. Para empresas internacionais, identifique a sede global ou a filial mais relevante.
 5. Retorne o resultado em formato JSON estruturado.
-6. Se não encontrar nada conclusivo, retorne um objeto com o campo "error": "Localização não encontrada".
+6. Se encontrar múltiplos endereços, escolha o que parece ser a sede principal ou o mais recente.
 
 CAMPOS NO JSON:
 - address: Logradouro/Rua (ex: Av. Paulista)
@@ -40,7 +40,7 @@ CAMPOS NO JSON:
 - latitude: Número decimal (essencial para o mapa)
 - longitude: Número decimal (essencial para o mapa)
 - trade_name: Nome Fantasia ou Nome Comercial Real
-- source: Fonte específica da informação (ex: Receita Federal, Google Maps, LinkedIn, Website Oficial)
+- source: Fonte específica da informação (ex: Website Oficial, Google Maps, CNPJ.biz, etc)
 - is_international: boolean (true se for fora do Brasil)`;
 
 
