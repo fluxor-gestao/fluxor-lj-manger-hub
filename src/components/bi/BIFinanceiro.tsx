@@ -1071,7 +1071,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1095,7 +1095,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1105,10 +1105,10 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[280px]" /> : resultadoEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={resultadoEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} />
-                <YAxis fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="name" fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                   {resultadoEmpresa.map((entry, i) => (
                     <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} fillOpacity={0.8} />
@@ -1123,10 +1123,10 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : resultadoArea.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={resultadoArea}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={30}>
                   {resultadoArea.map((entry, i) => (
                     <Cell key={i} fill={entry.value >= 0 ? "#10B981" : "#EF4444"} fillOpacity={0.8} />
