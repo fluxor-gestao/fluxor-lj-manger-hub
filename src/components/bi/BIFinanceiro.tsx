@@ -1450,7 +1450,7 @@ export default function BIFinanceiro() {
 
       {/* Insights */}
       <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
-        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.02]">
+        <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-[#CBD5E1]" />
             <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Insights Financeiros</CardTitle>
