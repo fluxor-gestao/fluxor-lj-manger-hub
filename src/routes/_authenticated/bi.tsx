@@ -70,35 +70,29 @@ function BI() {
   return (
     <div className={cn(
       "min-h-[calc(100vh-4rem)] transition-all duration-700 rounded-xl overflow-hidden relative",
-      "bg-[#08111f]"
-    )} style={{
-      background: "linear-gradient(180deg, #08111f 0%, #0b1526 40%, #101827 100%)"
-    }}>
-      {/* Visual Texture */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.05),transparent_50%)] pointer-events-none" />
-
+      "bg-[#F8FAFC]"
+    )}>
       <div className="p-6 lg:p-8 space-y-8 max-w-[1600px] mx-auto relative z-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <h1 className={cn(
               "font-display font-black tracking-tight transition-all duration-500",
-              selectedDashboard ? "text-xl text-white/90" : "text-4xl text-white"
+              selectedDashboard ? "text-xl text-slate-900" : "text-4xl text-slate-900"
             )}>
               {selectedDashboard ? activeDashboard?.fullName : "Dashboards Gerenciais"}
             </h1>
             {!selectedDashboard && (
-              <p className="text-white/50 text-lg">
+              <p className="text-slate-500 text-lg">
                 Selecione uma área para visualizar os indicadores consolidados
               </p>
             )}
           </div>
           {selectedDashboard && (
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm"
               onClick={() => setSelectedDashboard(null)}
-              className="h-9 px-4 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-all rounded-full backdrop-blur-md"
+              className="h-9 px-4 bg-white hover:bg-slate-50 text-slate-600 border-slate-200 shadow-sm transition-all rounded-lg"
             >
               <ArrowLeft className="h-4 w-4 mr-2" /> Voltar à Seleção
             </Button>
@@ -125,19 +119,22 @@ function BI() {
                 tabIndex={0}
                 onClick={() => setSelectedDashboard(dashboard.id)}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-500",
+                  "group relative overflow-hidden cursor-pointer rounded-xl transition-all duration-500",
                   isActive 
-                    ? "ring-1 ring-white/30 shadow-[0_0_40px_rgba(255,255,255,0.1)] z-20 scale-[1.02]" 
-                    : "opacity-80 hover:opacity-100 hover:scale-[1.01]",
+                    ? "ring-2 ring-primary/20 shadow-md z-20 scale-[1.02] bg-white border-primary/20" 
+                    : "opacity-90 hover:opacity-100 hover:scale-[1.01] bg-white border-slate-200",
                   selectedDashboard 
-                    ? "h-[50px] md:h-[60px] bg-white/5 backdrop-blur-xl border border-white/10" 
-                    : "h-[180px] md:h-[220px] bg-[#1a2233] border border-white/5"
+                    ? "h-[50px] md:h-[60px] border shadow-sm" 
+                    : "h-[180px] md:h-[220px] border shadow-sm"
                 )}
-                style={{
-                  boxShadow: !selectedDashboard ? `0 10px 40px -10px ${dashboard.glow}` : undefined,
-                  background: isActive && selectedDashboard ? `linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.1) 100%)` : undefined
-                }}
               >
+                {/* Background Decoration */}
+                {!selectedDashboard && (
+                  <div className={cn(
+                    "absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-[0.05] transition-transform duration-700 group-hover:scale-150",
+                    dashboard.gradient.replace("from-", "bg-")
+                  )} />
+                )}
                 {/* Background Gradient for unselected state */}
                 {!selectedDashboard && (
                   <div className={cn(
@@ -167,10 +164,10 @@ function BI() {
                   <div className={cn(
                     "flex items-center justify-center rounded-xl transition-all duration-500",
                     selectedDashboard 
-                      ? "w-8 h-8 bg-white/10 border border-white/10" 
-                      : "w-14 h-14 bg-white/5 border border-white/10 group-hover:scale-110 group-hover:rotate-3 shadow-2xl"
+                      ? "w-8 h-8 bg-slate-50 border border-slate-100" 
+                      : "w-14 h-14 bg-white border border-slate-100 group-hover:scale-110 group-hover:rotate-3 shadow-sm"
                   )}>
-                    <Icon className={cn("drop-shadow-md", selectedDashboard ? "h-4 w-4 text-white/70" : "h-7 w-7 text-white")} />
+                    <Icon className={cn("drop-shadow-sm", selectedDashboard ? "h-4 w-4 text-slate-400" : "h-7 w-7 text-primary")} />
                   </div>
                   
                   <div className={cn(
@@ -179,20 +176,20 @@ function BI() {
                   )}>
                     <h3 className={cn(
                       "font-display font-black tracking-tight leading-tight",
-                      selectedDashboard ? "text-sm text-white/70" : "text-2xl text-white",
-                      isActive && selectedDashboard && "text-white"
+                      selectedDashboard ? "text-sm text-slate-500" : "text-2xl text-slate-900",
+                      isActive && selectedDashboard && "text-slate-900"
                     )}>
                       {dashboard.title}
                     </h3>
                     {!selectedDashboard && (
-                      <p className="text-white/40 text-sm font-medium mt-1 max-w-[200px] line-clamp-2">
+                      <p className="text-slate-400 text-sm font-medium mt-1 max-w-[200px] line-clamp-2">
                         {dashboard.description}
                       </p>
                     )}
                   </div>
 
                   {isActive && selectedDashboard && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]" />
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
                   )}
                 </div>
               </div>
@@ -204,8 +201,7 @@ function BI() {
 
       {activeDashboard ? (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out space-y-6">
-          <Card className="overflow-hidden border border-white/5 shadow-2xl bg-white/[0.02] backdrop-blur-xl">
-
+          <Card className="overflow-hidden border-slate-200 shadow-xl bg-white">
             <CardContent className="p-0">
               {activeDashboard.id === "financeiro" ? (
                 <div className="p-2"><BIFinanceiro /></div>
@@ -221,9 +217,9 @@ function BI() {
               ) : (
                 <div className="flex min-h-[400px] items-center justify-center p-12 text-center">
                   <div className="max-w-xs">
-                    <BarChart3 className="mx-auto h-12 w-12 text-white/40/30 mb-4" />
-                    <h3 className="text-lg font-semibold">Dashboard em Configuração</h3>
-                    <p className="text-sm text-white/40 mt-2">Estamos preparando os indicadores para este painel.</p>
+                    <BarChart3 className="mx-auto h-12 w-12 text-slate-300 mb-4" />
+                    <h3 className="text-lg font-semibold text-slate-900">Dashboard em Configuração</h3>
+                    <p className="text-sm text-slate-500 mt-2">Estamos preparando os indicadores para este painel.</p>
                   </div>
                 </div>
               )}
@@ -231,12 +227,11 @@ function BI() {
           </Card>
         </div>
       ) : (
-        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center animate-in fade-in duration-500">
-          <div className="mb-4 rounded-full bg-white/5 p-4 shadow-sm ring-1 ring-white/10">
-            <LayoutDashboard className="h-8 w-8 text-white/20" />
-
+        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center animate-in fade-in duration-500 shadow-sm">
+          <div className="mb-4 rounded-full bg-slate-50 p-4 shadow-inner">
+            <LayoutDashboard className="h-8 w-8 text-slate-300" />
           </div>
-          <p className="max-w-xs text-sm text-white/40">
+          <p className="max-w-xs text-sm text-slate-500 font-medium">
             Selecione um dashboard para visualizar os indicadores.
           </p>
         </div>

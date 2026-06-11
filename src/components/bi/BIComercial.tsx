@@ -689,21 +689,19 @@ export default function BIComercial() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-6">
-
-
+        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 p-6">
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">De</Label>
-            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">De</Label>
+            <Input type="date" className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Até</Label>
-            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Até</Label>
+            <Input type="date" className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Responsável</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Responsável</Label>
             <Select value={filters.responsible} onValueChange={(v) => setFilters({ ...filters, responsible: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {responsibles.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
@@ -711,9 +709,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Cliente</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Cliente</Label>
             <Select value={filters.clientId} onValueChange={(v) => setFilters({ ...filters, clientId: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {cats.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -721,9 +719,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Status</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Status</Label>
             <Select value={filters.status} onValueChange={(v) => setFilters({ ...filters, status: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {ALL_STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s] ?? s}</SelectItem>)}
@@ -731,9 +729,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Unidade de negócio</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Unidade de negócio</Label>
             <Select value={filters.bu} onValueChange={(v) => setFilters({ ...filters, bu: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {(businessUnits.data ?? []).map((b) => (
@@ -743,9 +741,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Área principal</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Área principal</Label>
             <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {getAreasFor(filters.bu === "all" ? null : (filters.bu as CompanyCode)).map((a) => (
@@ -755,9 +753,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Tipo de serviço</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Tipo de serviço</Label>
             <Select value={filters.serviceType} onValueChange={(v) => setFilters({ ...filters, serviceType: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {serviceTypes.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -891,9 +889,9 @@ export default function BIComercial() {
             color: "red"
           },
         ].map((kpi, i) => (
-          <Card key={i} className="group relative overflow-hidden transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#1a2233]/40 backdrop-blur-xl shadow-2xl">
+          <Card key={i} className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg border border-slate-200 bg-white shadow-sm">
             <div className={cn(
-              "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700",
+              "absolute -right-8 -top-8 h-32 w-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-10 transition-all duration-500",
               kpi.color === "orange" ? "bg-orange-500" : 
               kpi.color === "blue" ? "bg-blue-500" : 
               kpi.color === "rose" ? "bg-rose-500" : 
@@ -901,27 +899,27 @@ export default function BIComercial() {
             )} />
 
             <CardContent className="p-6 relative z-10">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors uppercase">
+                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                     {kpi.label}
                   </span>
                   <div className={cn(
-                    "p-2 rounded-lg bg-white/5 border border-white/5 text-white/50 group-hover:text-white transition-all duration-500",
-                    kpi.color === "orange" ? "group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-400" :
-                    kpi.color === "blue" ? "group-hover:bg-blue-500/20 group-hover:border-blue-500/20 group-hover:text-blue-400" :
-                    kpi.color === "rose" ? "group-hover:bg-rose-500/20 group-hover:border-rose-500/20 group-hover:text-rose-400" :
-                    kpi.color === "red" ? "group-hover:bg-red-500/20 group-hover:border-red-500/20 group-hover:text-red-400" : ""
+                    "p-2.5 rounded-xl border transition-all duration-300 shadow-sm",
+                    kpi.color === "orange" ? "bg-orange-50 border-orange-100 text-orange-600 group-hover:bg-orange-100" :
+                    kpi.color === "blue" ? "bg-blue-50 border-blue-100 text-blue-600 group-hover:bg-blue-100" :
+                    kpi.color === "rose" ? "bg-rose-50 border-rose-100 text-rose-600 group-hover:bg-rose-100" :
+                    kpi.color === "red" ? "bg-red-50 border-red-100 text-red-600 group-hover:bg-red-100" : "bg-slate-50 border-slate-100 text-slate-500"
                   )}>
-                    <kpi.icon className="h-4 w-4" />
+                    <kpi.icon className="h-4.5 w-4.5" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                  <h2 className="text-3xl font-bold tracking-tight text-slate-900 leading-none">
                     {kpi.value}
                   </h2>
-                  <p className="text-[11px] font-bold text-white/30 uppercase tracking-tight">
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-tight">
                     {kpi.sub}
                   </p>
                 </div>
@@ -951,25 +949,25 @@ export default function BIComercial() {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-white">{BRL(s.valorAceito)}</div>
-                        <div className="text-[10px] font-medium text-[#94A3B8]">Ticket: {BRL(s.ticket)}</div>
+                        <div className="font-bold text-slate-900">{BRL(s.valorAceito)}</div>
+                        <div className="text-[10px] font-medium text-slate-400">Ticket: {BRL(s.ticket)}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="space-y-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Por Área</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">Por Área</h4>
                 <div className="grid gap-2">
                   {statsPorArea.slice(0, 5).map((s) => (
-                    <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                    <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all group/item">
                       <div className="flex flex-col gap-1">
-                        <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
+                        <span className="font-bold text-slate-900 group-hover/item:text-blue-600 transition-colors">{s.name}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{s.criadas} devis · Conv: {PCT(s.conversao)}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-white">{BRL(s.valorAceito)}</div>
-                        <div className="text-[10px] font-medium text-[#94A3B8]">Ticket: {BRL(s.ticket)}</div>
+                        <div className="font-bold text-slate-900">{BRL(s.valorAceito)}</div>
+                        <div className="text-[10px] font-medium text-slate-400">Ticket: {BRL(s.ticket)}</div>
                       </div>
                     </div>
                   ))}
@@ -998,7 +996,7 @@ export default function BIComercial() {
                   {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1020,7 +1018,7 @@ export default function BIComercial() {
                   {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1030,10 +1028,10 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={statsPorEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-                <Tooltip content={<CustomTooltip formatter={PCT} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip content={<CustomTooltip formatter={PCT} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="conversao" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={30} fillOpacity={0.8} />
               </BarChart>
             </ResponsiveContainer>
@@ -1044,10 +1042,10 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorArea.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={statsPorArea} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-                <Tooltip content={<CustomTooltip formatter={PCT} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip content={<CustomTooltip formatter={PCT} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="conversao" fill="#10B981" radius={[4, 4, 0, 0]} barSize={30} fillOpacity={0.8} />
               </BarChart>
             </ResponsiveContainer>
@@ -1061,10 +1059,10 @@ export default function BIComercial() {
                 const stage = ev?.activePayload?.[0]?.payload?.stage;
                 if (stage) setTabFocus("criticas");
               }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis type="category" dataKey="stage" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis type="category" dataKey="stage" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#374151' }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
                   {funnel.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Bar>
@@ -1077,11 +1075,11 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
                 <Line type="monotone" dataKey="Criadas" stroke="#8B5CF6" strokeWidth={3} dot={false} activeDot={{ r: 4 }} />
                 <Line type="monotone" dataKey="Aceitas" stroke="#10B981" strokeWidth={3} dot={false} activeDot={{ r: 4 }} />
               </LineChart>
@@ -1093,11 +1091,11 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: '#F9FAFB' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
                 <Bar dataKey="Valor proposto" fill="#8B5CF6" fillOpacity={0.2} radius={[2, 2, 0, 0]} />
                 <Bar dataKey="Valor aceito" fill="#10B981" fillOpacity={0.8} radius={[2, 2, 0, 0]} />
               </BarChart>
@@ -1113,7 +1111,7 @@ export default function BIComercial() {
                   {statusDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px' }} />
+                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1152,11 +1150,11 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
 
                 {Array.from(new Set(rows.map(r => r.business_unit).filter(Boolean))).map((code, i) => (
                   <Line 
@@ -1184,10 +1182,10 @@ export default function BIComercial() {
                   if (name && name !== "—") setFilters({ ...filters, responsible: name });
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis type="number" fontSize={11} />
-                <YAxis type="category" dataKey="name" width={120} fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis type="number" fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <YAxis type="category" dataKey="name" width={120} fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#374151' }} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="valor" fill={COLORS[0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -1202,7 +1200,7 @@ export default function BIComercial() {
                   {receitaPorServico.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1221,8 +1219,8 @@ export default function BIComercial() {
                     }}
                     title={`${h.qtd} propostas`}
                   />
-                  <p className="text-xs font-medium">{h.dia}</p>
-                  <p className="text-xs text-white/40">{h.qtd}</p>
+                  <p className="text-xs font-medium text-slate-600">{h.dia}</p>
+                  <p className="text-xs text-slate-400 font-bold">{h.qtd}</p>
                 </div>
               ))}
             </div>
@@ -1240,44 +1238,44 @@ export default function BIComercial() {
         </TabsList>
 
         <TabsContent value="criticas">
-          <Card>
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent">
+                  <TableRow className="hover:bg-transparent bg-slate-50">
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
                     <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                     <TableHead className="h-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {criticas.length === 0 && (
-                    <TableRow><TableCell colSpan={9} className="text-center text-white/40 py-6">Sem propostas críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9} className="text-center text-slate-400 py-6 italic text-xs">Sem propostas críticas</TableCell></TableRow>
                   )}
                   {criticas.map((r, i) => (
                     <TableRow key={r.id} className={cn(
-                      "border-white/5 transition-colors group/row",
-                      i % 2 === 0 ? "bg-white/[0.01]" : "bg-transparent",
-                      "hover:bg-white/[0.04]"
+                      "border-slate-100 transition-colors group/row",
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                      "hover:bg-slate-50"
                     )}>
-                      <TableCell className="font-medium text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
-                      <TableCell className="max-w-[220px] truncate text-white/90 font-mono text-[10px]">{r.numero}</TableCell>
-                      <TableCell><Badge variant="outline" className="border-white/20 text-white/90">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
-                      <TableCell className="text-right text-white font-bold">{BRL(r.valor)}</TableCell>
-                      <TableCell className="text-white/70 text-xs">{r.criada}</TableCell>
-                      <TableCell className="text-white/70 text-xs">{r.atualizada}</TableCell>
-                      <TableCell className="text-right text-white/90">
+                      <TableCell className="font-medium text-slate-900 group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
+                      <TableCell className="max-w-[220px] truncate text-slate-500 font-mono text-[10px]">{r.numero}</TableCell>
+                      <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
+                      <TableCell className="text-right text-slate-900 font-bold">{BRL(r.valor)}</TableCell>
+                      <TableCell className="text-slate-500 text-xs">{r.criada}</TableCell>
+                      <TableCell className="text-slate-500 text-xs">{r.atualizada}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-medium">
                         {r.diasParada > 14 ? <Badge variant="destructive" className="animate-pulse">{r.diasParada}d</Badge> : `${r.diasParada}d`}
                       </TableCell>
-                      <TableCell className="text-white font-medium text-xs bg-white/5">{r.acao}</TableCell>
+                      <TableCell className="text-slate-700 font-medium text-xs bg-slate-50/50">{r.acao}</TableCell>
                       <TableCell>
-                        <Button asChild size="sm" variant="ghost">
+                        <Button asChild size="sm" variant="ghost" className="text-slate-400 hover:text-primary transition-colors">
                           <Link to="/comercial/devis/$id" params={{ id: r.id }}>
                             <ExternalLink className="h-3.5 w-3.5 mr-1" /> Ver
                           </Link>
@@ -1292,29 +1290,33 @@ export default function BIComercial() {
         </TabsContent>
 
         <TabsContent value="clientes">
-          <Card>
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Qtd</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor proposto</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor aceito</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conversão</TableHead>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Cliente</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Qtd</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor proposto</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor aceito</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Conversão</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rankingClientes.length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center text-slate-400 py-6 italic text-xs">Sem dados</TableCell></TableRow>
                   )}
                   {[...rankingClientes].sort((a, b) => b.aceito - a.aceito).slice(0, 20).map((c, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="text-white/90 font-medium">{c.name}</TableCell>
-                      <TableCell className="text-right text-white/70">{c.qtd}</TableCell>
-                      <TableCell className="text-right text-white/90">{BRL(c.proposto)}</TableCell>
-                      <TableCell className="text-right text-white font-bold">{BRL(c.aceito)}</TableCell>
-                      <TableCell className="text-right text-white/90">{PCT(c.conversao)}</TableCell>
+                    <TableRow key={i} className={cn(
+                      "border-slate-100 transition-colors",
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                      "hover:bg-slate-50"
+                    )}>
+                      <TableCell className="text-slate-900 font-medium px-4">{c.name}</TableCell>
+                      <TableCell className="text-right text-slate-600">{c.qtd}</TableCell>
+                      <TableCell className="text-right text-slate-900">{BRL(c.proposto)}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-bold">{BRL(c.aceito)}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-medium px-4">{PCT(c.conversao)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1324,29 +1326,33 @@ export default function BIComercial() {
         </TabsContent>
 
         <TabsContent value="servicos">
-          <Card>
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Serviço</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Qtd</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor proposto</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor aceito</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conversão</TableHead>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Serviço</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Qtd</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor proposto</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor aceito</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Conversão</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rankingServicos.length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center text-slate-400 py-6 italic text-xs">Sem dados</TableCell></TableRow>
                   )}
                   {rankingServicos.map((s, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{s.name}</TableCell>
-                      <TableCell className="text-right">{s.qtd}</TableCell>
-                      <TableCell className="text-right">{BRL(s.proposto)}</TableCell>
-                      <TableCell className="text-right">{BRL(s.aceito)}</TableCell>
-                      <TableCell className="text-right">{PCT(s.conversao)}</TableCell>
+                    <TableRow key={i} className={cn(
+                      "border-slate-100 transition-colors",
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                      "hover:bg-slate-50"
+                    )}>
+                      <TableCell className="text-slate-900 font-medium px-4">{s.name}</TableCell>
+                      <TableCell className="text-right text-slate-600">{s.qtd}</TableCell>
+                      <TableCell className="text-right text-slate-900">{BRL(s.proposto)}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-bold">{BRL(s.aceito)}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-medium px-4">{PCT(s.conversao)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1356,36 +1362,39 @@ export default function BIComercial() {
         </TabsContent>
 
         <TabsContent value="responsaveis">
-          <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden">
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0 overflow-x-auto">
-
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Responsável</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Criadas</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Aceitas</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor aceito</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conversão</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Ticket médio</TableHead>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Responsável</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Criadas</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Aceitas</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor aceito</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Conversão</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Ticket médio</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {perfResponsaveis.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-slate-400 py-6 italic text-xs">Sem dados</TableCell></TableRow>
                   )}
                   {perfResponsaveis.map((p, i) => (
                     <TableRow
                       key={i}
-                      className="cursor-pointer hover:bg-muted/40"
+                      className={cn(
+                        "cursor-pointer transition-colors border-slate-100",
+                        i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                        "hover:bg-slate-50"
+                      )}
                       onClick={() => p.name !== "—" && setFilters({ ...filters, responsible: p.name })}
                     >
-                      <TableCell>{p.name}</TableCell>
-                      <TableCell className="text-right">{p.criadas}</TableCell>
-                      <TableCell className="text-right">{p.aceitas}</TableCell>
-                      <TableCell className="text-right">{BRL(p.valor)}</TableCell>
-                      <TableCell className="text-right">{PCT(p.conversao)}</TableCell>
-                      <TableCell className="text-right">{BRL(p.ticket)}</TableCell>
+                      <TableCell className="text-slate-900 font-medium px-4">{p.name}</TableCell>
+                      <TableCell className="text-right text-slate-600">{p.criadas}</TableCell>
+                      <TableCell className="text-right text-slate-600">{p.aceitas}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-bold">{BRL(p.valor)}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-medium">{PCT(p.conversao)}</TableCell>
+                      <TableCell className="text-right text-slate-900 px-4">{BRL(p.ticket)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1396,7 +1405,7 @@ export default function BIComercial() {
       </Tabs>
 
       {/* Insights */}
-      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
+      <Card className="bg-white border-slate-200 shadow-sm overflow-hidden group">
         <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-blue-600" />
