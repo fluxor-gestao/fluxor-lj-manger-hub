@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Upload, Sparkles, CheckCircle2, UserPlus, FileText, Check, X, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -463,7 +464,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                 <div className="grid grid-cols-1 gap-3">
                   <div>
                     <Label className="text-xs">Razão Social</Label>
-                    <Input size="sm" value={editClient?.name} onChange={e => { const val = e.target.value; setEditClient(prev => prev ? ({ ...prev, name: val }) : null); }} />
+                    <Input size="sm" value={editClient?.name || ""} onChange={e => { const val = e.target.value; setEditClient(prev => prev ? ({ ...prev, name: val }) : null); }} />
                   </div>
                 </div>
               )}
