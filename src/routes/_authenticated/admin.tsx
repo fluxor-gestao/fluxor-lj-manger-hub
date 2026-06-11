@@ -14,10 +14,11 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet } from "lucide-react";
+import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar } from "lucide-react";
 import { DevisSequenceManager } from "@/components/devis/DevisSequenceManager";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { versionHistory } from "@/config/appVersion";
 
 type SystemSettings = {
   companyName: string;
@@ -577,6 +578,7 @@ function Admin() {
           <TabsTrigger value="settings"><Settings className="h-4 w-4 mr-2" />Opções do Sistema</TabsTrigger>
           <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
           <TabsTrigger value="commercial-settings"><FileSpreadsheet className="h-4 w-4 mr-2" />Configs Comerciais</TabsTrigger>
+          <TabsTrigger value="updates"><History className="h-4 w-4 mr-2" />Atualizações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -1255,6 +1257,88 @@ function Admin() {
 
         <TabsContent value="areas" className="space-y-4">
           <BusinessAreasManager />
+        </TabsContent>
+
+        <TabsContent value="updates" className="space-y-6">
+          <div className="grid gap-6">
+            {versionHistory.map((release) => (
+              <Card key={release.version} className="overflow-hidden border-primary/10">
+                <CardHeader className="bg-muted/30 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-xl font-bold">v{release.version}</CardTitle>
+                        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
+                          {release.releaseName}
+                        </Badge>
+                      </div>
+                      <CardDescription className="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {release.releaseDate}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-6">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      Resumo
+                    </h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {release.summary}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Implementações
+                      </h4>
+                      <ul className="space-y-2">
+                        {release.implementations.map((item, i) => (
+                          <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/30" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-500" />
+                        Correções
+                      </h4>
+                      <ul className="space-y-2">
+                        {release.fixes.map((item, i) => (
+                          <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/30" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        Melhorias Visuais
+                      </h4>
+                      <ul className="space-y-2">
+                        {release.visualImprovements.map((item, i) => (
+                          <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/30" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
