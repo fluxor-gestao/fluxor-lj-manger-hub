@@ -284,48 +284,116 @@ function Clientes() {
 
           <Dialog open={clientDialogOpen} onOpenChange={(o) => { setClientDialogOpen(o); if (!o) setClientForm(emptyClient); }}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Novo Cliente</Button></DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader><DialogTitle>{clientForm.id ? "Editar Cliente" : "Novo Cliente"}</DialogTitle></DialogHeader>
-              <div className="space-y-3">
-                <div>
-                  <Label>Nome (QSA) *</Label>
-                  <Input value={clientForm.name} onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Empresa</Label>
-                  <Input value={clientForm.company} onChange={(e) => setClientForm({ ...clientForm, company: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Tipo *</Label>
-                  <Select value={clientForm.type} onValueChange={(v: "PF" | "PJ") => setClientForm({ ...clientForm, type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PF">Pessoa Física</SelectItem>
-                      <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Email</Label>
-                    <Input value={clientForm.email} onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })} />
+              <div className="space-y-6 py-4">
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1">Informações Gerais</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="md:col-span-2">
+                      <Label>Razão Social *</Label>
+                      <Input value={clientForm.name} onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Nome Fantasia</Label>
+                      <Input value={clientForm.trade_name} onChange={(e) => setClientForm({ ...clientForm, trade_name: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Documento (CPF/CNPJ)</Label>
+                      <Input value={clientForm.document} onChange={(e) => setClientForm({ ...clientForm, document: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Tipo *</Label>
+                      <Select value={clientForm.type} onValueChange={(v: "PF" | "PJ") => setClientForm({ ...clientForm, type: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PF">Pessoa Física</SelectItem>
+                          <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Empresa Vinculada (Grupo)</Label>
+                      <Input value={clientForm.company} onChange={(e) => setClientForm({ ...clientForm, company: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      <Input value={clientForm.email} onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Telefone</Label>
+                      <Input value={clientForm.phone} onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })} />
+                    </div>
                   </div>
-                  <div>
-                    <Label>Telefone</Label>
-                    <Input value={clientForm.phone} onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })} />
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" /> Localização
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="md:col-span-2">
+                      <Label>Endereço / Logradouro</Label>
+                      <Input value={clientForm.address} onChange={(e) => setClientForm({ ...clientForm, address: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Número</Label>
+                      <Input value={clientForm.street_number} onChange={(e) => setClientForm({ ...clientForm, street_number: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Bairro</Label>
+                      <Input value={clientForm.neighborhood} onChange={(e) => setClientForm({ ...clientForm, neighborhood: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>CEP</Label>
+                      <Input value={clientForm.zip_code} onChange={(e) => setClientForm({ ...clientForm, zip_code: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Cidade</Label>
+                      <Input value={clientForm.city} onChange={(e) => setClientForm({ ...clientForm, city: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Estado</Label>
+                      <Input value={clientForm.state} onChange={(e) => setClientForm({ ...clientForm, state: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>País</Label>
+                      <Input value={clientForm.country} onChange={(e) => setClientForm({ ...clientForm, country: e.target.value })} />
+                    </div>
+                    <div className="md:col-span-2 grid grid-cols-2 gap-3 p-3 bg-muted/30 rounded-lg border border-dashed">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Latitude</Label>
+                        <Input 
+                          type="number" 
+                          step="any"
+                          value={clientForm.latitude ?? ""} 
+                          onChange={(e) => setClientForm({ ...clientForm, latitude: e.target.value ? Number(e.target.value) : undefined })} 
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Longitude</Label>
+                        <Input 
+                          type="number" 
+                          step="any"
+                          value={clientForm.longitude ?? ""} 
+                          onChange={(e) => setClientForm({ ...clientForm, longitude: e.target.value ? Number(e.target.value) : undefined })} 
+                        />
+                      </div>
+                      <p className="col-span-2 text-[10px] text-muted-foreground italic flex items-center gap-1">
+                        <Info className="h-3 w-3" /> Coordenadas são necessárias para exibição no Mapa de Aprovação.
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <Label>Documento (CPF/CNPJ)</Label>
-                  <Input value={clientForm.document} onChange={(e) => setClientForm({ ...clientForm, document: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Observações</Label>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1">Observações</h3>
                   <Textarea rows={3} value={clientForm.notes} onChange={(e) => setClientForm({ ...clientForm, notes: e.target.value })} />
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={() => saveClient.mutate(clientForm)} disabled={!clientForm.name || saveClient.isPending}>Salvar</Button>
+                <Button variant="outline" onClick={() => setClientDialogOpen(false)}>Cancelar</Button>
+                <Button onClick={() => saveClient.mutate(clientForm)} disabled={!clientForm.name || saveClient.isPending}>Salvar Cliente</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
