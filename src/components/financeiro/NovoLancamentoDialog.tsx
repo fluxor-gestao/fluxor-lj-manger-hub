@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { COMPANY_LIST, COMPANY_NAME } from "@/lib/companyCodes";
 
 type BankAccount = { id: string; bank_name: string; account_number: string | null };
 
@@ -38,7 +39,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   /** Called after the entry(ies) is created. Receives the id of the first inserted entry. */
   onCreated?: (firstEntryId?: string) => void | Promise<void>;
-  bankAccounts: BankAccount[];
+  bankAccounts?: BankAccount[];
   /** Values to prefill when the dialog opens. */
   prefill?: NovoLancamentoPrefill;
   /** Override the dialog title. */
@@ -100,7 +101,17 @@ export function NovoLancamentoDialog({
   // Apply prefill whenever the dialog opens
   useEffect(() => {
     if (open) {
-      setForm({ ...emptyForm(), ...(prefill ?? {}) });
+      const initialForm = { ...emptyForm(), ...(prefill ?? {}) };
+      
+      // Auto-detect unit from reference code if it starts with DE, CO, etc.
+      if (initialForm.reference_code && !initialForm.business_unit) {
+        const prefix = initialForm.reference_code.slice(0, 2).toUpperCase();
+        if (COMPANY_LIST.some(c => c.code === prefix)) {
+          initialForm.business_unit = prefix;
+        }
+      }
+      
+      setForm(initialForm);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -339,7 +350,20 @@ export function NovoLancamentoDialog({
               <Label>Descrição *</Label>
               <Input
                 value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                onChange={(e) => {
+                  const desc = e.target.value;
+                  let newUnit = form.business_unit;
+                  
+                  // If description looks like a Devis code (DE2026...), auto-update unit
+                  if (!prefill?.reference_code) {
+                    const match = desc.match(/^([A-Z]{2})\d{6,}/);
+                    if (match && COMPANY_LIST.some(c => c.code === match[1])) {
+                      newUnit = match[1];
+                    }
+                  }
+                  
+                  setForm({ ...form, description: desc, business_unit: newUnit });
+                }}
                 placeholder="Descrição do lançamento"
               />
             </div>
@@ -402,16 +426,36 @@ export function NovoLancamentoDialog({
                 <Label>Código de referência</Label>
                 <Input
                   value={form.reference_code}
-                  onChange={(e) => setForm({ ...form, reference_code: e.target.value })}
+                  onChange={(e) => {
+                    const code = e.target.value.toUpperCase();
+                    let newUnit = form.business_unit;
+                    
+                    const prefix = code.slice(0, 2);
+                    if (COMPANY_LIST.some(c => c.code === prefix)) {
+                      newUnit = prefix;
+                    }
+                    
+                    setForm({ ...form, reference_code: code, business_unit: newUnit });
+                  }}
+                  disabled={!!prefill?.reference_code}
                   placeholder="NF, boleto, etc."
                 />
               </div>
               <div>
                 <Label>Unidade de negócio</Label>
-                <Input
-                  value={form.business_unit}
-                  onChange={(e) => setForm({ ...form, business_unit: e.target.value })}
-                />
+                <Select
+                  value={form.business_unit || "__none__"}
+                  onValueChange={(v) => setForm({ ...form, business_unit: v === "__none__" ? "" : v })}
+                  disabled={!!prefill?.reference_code}
+                >
+                  <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Nenhuma —</SelectItem>
+                    {COMPANY_LIST.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.short}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -481,9 +525,9 @@ export function NovoLancamentoDialog({
                   <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">— Nenhuma —</SelectItem>
-                    {bankAccounts.map((b) => (
+                    {(catalogs as any).financialAccounts.map((b: any) => (
                       <SelectItem key={b.id} value={b.id}>
-                        {b.bank_name}{b.account_number ? ` · ${b.account_number}` : ""}
+                        {b.name} {b.bank ? `· ${b.bank}` : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
