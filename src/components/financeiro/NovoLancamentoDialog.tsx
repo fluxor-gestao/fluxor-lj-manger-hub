@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
+import { COMPANY_LIST, COMPANY_NAME } from "@/lib/companyCodes";
 
 type BankAccount = { id: string; bank_name: string; account_number: string | null };
 
