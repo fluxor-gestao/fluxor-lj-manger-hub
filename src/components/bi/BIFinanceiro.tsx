@@ -84,14 +84,14 @@ const daysBetween = (a: string, b: string) =>
   Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
 
 const CHART_COLORS = [
-  "#10B981", // Emerald
-  "#0EA5E9", // Sky
-  "#8B5CF6", // Violet
-  "#F59E0B", // Amber
-  "#EF4444", // Red
-  "#EC4899", // Pink
-  "#6366F1", // Indigo
-  "#14B8A6", // Teal
+  "#10b981", // Emerald
+  "#3b82f6", // Blue
+  "#f59e0b", // Amber
+  "#ef4444", // Red
+  "#8b5cf6", // Violet
+  "#0ea5e9", // Sky
+  "#6366f1", // Indigo
+  "#14b8a6", // Teal
 ];
 
 const CustomTooltip = ({ active, payload, label, formatter }: any) => {
@@ -180,7 +180,7 @@ export default function BIFinanceiro() {
   const cats = useFinanceiroCatalogs();
   const { filterCode: companyCode } = useCompany();
   const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [tabFocus, setTabFocus] = useState<string | null>(null);
+  const [tabFocus, setTabFocus] = useState<string | null>("visao_geral");
 
   const banks = useQuery({
     queryKey: ["bi", "banks"],
