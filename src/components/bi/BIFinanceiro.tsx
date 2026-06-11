@@ -1279,7 +1279,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
+                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
