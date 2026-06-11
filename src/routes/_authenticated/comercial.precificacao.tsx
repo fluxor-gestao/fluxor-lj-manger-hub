@@ -108,29 +108,18 @@ function Precificacao() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const handleAiMarketSearch = async (serviceName: string) => {
-    setIsAiSearching(true);
-    try {
-      // Usaremos o Lovable AI Gateway para simular uma busca de mercado
-      const response = await supabase.functions.invoke("ai-market-search", {
-        body: { serviceName }
-      });
-      
-      if (response.error) throw new Error(response.error.message);
-      
-      const { marketPrice, source } = response.data;
-      
-      toast.success(`Preço de mercado encontrado: R$ ${marketPrice}`, {
-        description: `Fonte: ${source}`,
-      });
-      
-      // Poderíamos atualizar o serviço aqui se tivéssemos o ID
-    } catch (e: any) {
-      toast.error("Erro na busca de mercado: " + e.message);
-    } finally {
-      setIsAiSearching(false);
-    }
-  };
+  const { data: history = [] } = useQuery({
+    queryKey: ["service_price_history"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_price_history")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const filteredServices = services.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) || 
