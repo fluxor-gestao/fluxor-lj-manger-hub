@@ -1,4 +1,4 @@
-import { AlertOctagon, CalendarDays, Building2, User2, Hash, Wallet, Info, Clock, CheckCircle2, MessageSquare, Paperclip, Timeline } from "lucide-react";
+import { AlertOctagon, CalendarDays, Building2, User2, Hash, Wallet, Info, Clock, CheckCircle2, MessageSquare, Paperclip, Activity } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
