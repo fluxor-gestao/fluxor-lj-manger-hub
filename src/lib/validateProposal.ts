@@ -32,10 +32,8 @@ export function isProposalComplete(text?: string | null): boolean {
   const missing = getMissingClauses(text);
   if (missing.length === 0) return true;
   
-  // Se faltam muitas cláusulas (mais de 5), provavelmente não é uma proposta completa no novo padrão
-  // mas se tiver texto suficiente (> 500 chars), deixamos passar com aviso no console (não bloqueante)
-  if (text && text.length > 500) {
-    console.warn("Proposta enviada sem todas as cláusulas padrão:", missing);
+  // Se faltam cláusulas mas o texto tem conteúdo substancial, permitimos o envio para não travar o processo.
+  if (text && text.length > 300) {
     return true; 
   }
 
