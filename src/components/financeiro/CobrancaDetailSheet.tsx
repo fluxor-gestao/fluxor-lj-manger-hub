@@ -243,7 +243,7 @@ export function CobrancaDetailSheet({
             <Badge variant="outline" className={statusBadge[st]}>{statusLabel[st]}</Badge>
           </div>
           <SheetDescription>
-            {row.movement_description ?? "Cobrança sem descrição"}
+            {formatMovementDescription(row.movement_description, row.devis_number, row.devis_id)}
           </SheetDescription>
         </SheetHeader>
 
