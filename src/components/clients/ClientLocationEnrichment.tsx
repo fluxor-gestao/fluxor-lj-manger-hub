@@ -186,9 +186,31 @@ export default function ClientLocationEnrichment({
               </div>
               
               <div className="grid gap-2 text-sm">
-                <div className="flex flex-col">
-                  <span className="text-[10px] uppercase text-muted-foreground font-bold">Logradouro</span>
-                  <span>{results.address}</span>
+                {results.trade_name && (
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-muted-foreground font-bold">Nome Fantasia</span>
+                    <span className="font-semibold">{results.trade_name}</span>
+                  </div>
+                )}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="col-span-2 flex flex-col">
+                    <span className="text-[10px] uppercase text-muted-foreground font-bold">Logradouro</span>
+                    <span>{results.address}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-muted-foreground font-bold">Número</span>
+                    <span>{results.street_number || "S/N"}</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-muted-foreground font-bold">Bairro</span>
+                    <span>{results.neighborhood || "—"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-muted-foreground font-bold">CEP</span>
+                    <span>{results.zip_code}</span>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex flex-col">
@@ -200,22 +222,16 @@ export default function ClientLocationEnrichment({
                     <span>{results.state}</span>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] uppercase text-muted-foreground font-bold">País</span>
-                    <span>{results.country}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] uppercase text-muted-foreground font-bold">CEP</span>
-                    <span>{results.zip_code}</span>
-                  </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase text-muted-foreground font-bold">País</span>
+                  <span>{results.country}</span>
                 </div>
                 <div className="pt-2 flex items-center gap-4 border-t border-primary/10">
                   <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
-                    <Globe className="h-3 w-3" /> {results.latitude.toFixed(6)}
+                    <Globe className="h-3 w-3" /> Lat: {results.latitude.toFixed(6)}
                   </div>
                   <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
-                    <Globe className="h-3 w-3" /> {results.longitude.toFixed(6)}
+                    <Globe className="h-3 w-3" /> Long: {results.longitude.toFixed(6)}
                   </div>
                 </div>
               </div>
