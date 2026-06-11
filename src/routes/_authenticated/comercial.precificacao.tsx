@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import BulkPriceUpdate from "@/components/devis/BulkPriceUpdate";
 import { COMPANY_LIST, type CompanyCode } from "@/lib/companyCodes";
 import { AreaBadge } from "@/components/AreaBadge";
+import { getAreasFor } from "@/lib/businessAreas";
 
 export const Route = createFileRoute("/_authenticated/comercial/precificacao")({
   component: Precificacao,
