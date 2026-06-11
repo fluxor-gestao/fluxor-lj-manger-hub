@@ -229,8 +229,10 @@ export default function DevisPdfTemplate({
   devis,
   client,
   pricingItems = [],
-  contractor = DEFAULT_CONTRACTOR,
+  contractor: overrideContractor,
 }: DevisPdfTemplateProps) {
+  const businessUnit = (devis?.business_unit || "DE") as string;
+  const contractor = overrideContractor || CONTRACTORS[businessUnit] || DEFAULT_CONTRACTOR;
   const secondaryLang = (devis?.secondary_language || null) as Lang | null;
   const isBilingual = !!secondaryLang && secondaryLang !== "pt";
   const LP = LABELS.pt;
