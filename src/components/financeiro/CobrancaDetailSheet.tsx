@@ -358,12 +358,22 @@ export function CobrancaDetailSheet({
           <Button onClick={() => placeholder("Registrar pagamento")}>
             <DollarSign className="h-4 w-4 mr-2" /> Registrar pagamento
           </Button>
-        </div>
+          </div>
 
-        <p className="mt-3 text-[11px] text-muted-foreground text-center">
-          Ações de envio e geração são placeholders nesta etapa.
-        </p>
-      </SheetContent>
+          <p className="mt-3 text-[11px] text-muted-foreground text-center">
+            Ações de envio e geração são placeholders nesta etapa.
+          </p>
+        </TabsContent>
+
+        <TabsContent value="anexos">
+          <Card className="border-white/10 bg-card/30 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <EntityAttachments entityType="financial_entry" entityId={row.id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </SheetContent>
 
       <FaturaPreviewDialog row={row} open={faturaOpen} onOpenChange={setFaturaOpen} />
       <LembretePreviewDialog row={row} open={lembreteOpen} onOpenChange={setLembreteOpen} />
