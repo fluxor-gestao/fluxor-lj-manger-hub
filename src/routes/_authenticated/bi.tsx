@@ -70,35 +70,29 @@ function BI() {
   return (
     <div className={cn(
       "min-h-[calc(100vh-4rem)] transition-all duration-700 rounded-xl overflow-hidden relative",
-      "bg-[#08111f]"
-    )} style={{
-      background: "linear-gradient(180deg, #08111f 0%, #0b1526 40%, #101827 100%)"
-    }}>
-      {/* Visual Texture */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.05),transparent_50%)] pointer-events-none" />
-
+      "bg-[#F8FAFC]"
+    )}>
       <div className="p-6 lg:p-8 space-y-8 max-w-[1600px] mx-auto relative z-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <h1 className={cn(
               "font-display font-black tracking-tight transition-all duration-500",
-              selectedDashboard ? "text-xl text-white/90" : "text-4xl text-white"
+              selectedDashboard ? "text-xl text-slate-900" : "text-4xl text-slate-900"
             )}>
               {selectedDashboard ? activeDashboard?.fullName : "Dashboards Gerenciais"}
             </h1>
             {!selectedDashboard && (
-              <p className="text-white/50 text-lg">
+              <p className="text-slate-500 text-lg">
                 Selecione uma área para visualizar os indicadores consolidados
               </p>
             )}
           </div>
           {selectedDashboard && (
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm"
               onClick={() => setSelectedDashboard(null)}
-              className="h-9 px-4 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-all rounded-full backdrop-blur-md"
+              className="h-9 px-4 bg-white hover:bg-slate-50 text-slate-600 border-slate-200 shadow-sm transition-all rounded-lg"
             >
               <ArrowLeft className="h-4 w-4 mr-2" /> Voltar à Seleção
             </Button>
@@ -125,19 +119,22 @@ function BI() {
                 tabIndex={0}
                 onClick={() => setSelectedDashboard(dashboard.id)}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-500",
+                  "group relative overflow-hidden cursor-pointer rounded-xl transition-all duration-500",
                   isActive 
-                    ? "ring-1 ring-white/30 shadow-[0_0_40px_rgba(255,255,255,0.1)] z-20 scale-[1.02]" 
-                    : "opacity-80 hover:opacity-100 hover:scale-[1.01]",
+                    ? "ring-2 ring-primary/20 shadow-md z-20 scale-[1.02] bg-white border-primary/20" 
+                    : "opacity-90 hover:opacity-100 hover:scale-[1.01] bg-white border-slate-200",
                   selectedDashboard 
-                    ? "h-[50px] md:h-[60px] bg-white/5 backdrop-blur-xl border border-white/10" 
-                    : "h-[180px] md:h-[220px] bg-[#1a2233] border border-white/5"
+                    ? "h-[50px] md:h-[60px] border shadow-sm" 
+                    : "h-[180px] md:h-[220px] border shadow-sm"
                 )}
-                style={{
-                  boxShadow: !selectedDashboard ? `0 10px 40px -10px ${dashboard.glow}` : undefined,
-                  background: isActive && selectedDashboard ? `linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.1) 100%)` : undefined
-                }}
               >
+                {/* Background Decoration */}
+                {!selectedDashboard && (
+                  <div className={cn(
+                    "absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-[0.05] transition-transform duration-700 group-hover:scale-150",
+                    dashboard.gradient.replace("from-", "bg-")
+                  )} />
+                )}
                 {/* Background Gradient for unselected state */}
                 {!selectedDashboard && (
                   <div className={cn(
