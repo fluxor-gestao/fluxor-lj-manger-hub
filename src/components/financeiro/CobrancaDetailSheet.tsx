@@ -11,10 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   FilePlus2, Send, BellRing, DollarSign, CheckCircle2, Circle, Clock,
-  Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink,
+  Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink, Paperclip, Info, Activity
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { formatDevisCode } from "@/lib/formatDevis";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { EntityAttachments } from "../EntityAttachments";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
