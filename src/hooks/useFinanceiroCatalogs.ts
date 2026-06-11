@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type CatalogItem = { id: string; name: string };
-export type CategoryItem = CatalogItem & { kind: string };
+export type CategoryItem = CatalogItem & { kind: string; dre_group?: string | null };
 
 const STALE = 5 * 60 * 1000;
 
@@ -41,7 +41,7 @@ export function useFinanceiroCatalogs() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("financial_categories")
-        .select("id, name, kind")
+        .select("id, name, kind, dre_group")
         .eq("active", true)
         .order("name");
       if (error) throw error;

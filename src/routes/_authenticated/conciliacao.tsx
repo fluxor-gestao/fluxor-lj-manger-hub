@@ -42,6 +42,7 @@ function Conciliacao() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [filterDre, setFilterDre] = useState("todos");
 
   // Fetch bank statement entries
   const { data: statements = [] } = useQuery({
@@ -720,6 +721,16 @@ function Conciliacao() {
   const filteredStatements = statements.filter((s) => {
     if (pairFilter !== "todos" && s.conciliation_status !== pairFilter) return false;
     if (search && !s.description?.toLowerCase().includes(search.toLowerCase())) return false;
+    
+    const persistedMatch = matches.find(m => m.bank_statement_entry_id === s.id && m.status === "confirmado");
+    const matchedFE = persistedMatch ? financialEntries.find(f => f.id === persistedMatch.financial_entry_id) : null;
+    
+    if (filterDre === "sem_dre") {
+      if (matchedFE && (matchedFE.dre_group || matchedFE.account_category_id)) return false;
+    } else if (filterDre !== "todos") {
+      if (!matchedFE || matchedFE.dre_group !== filterDre) return false;
+    }
+    
     return true;
   });
 
@@ -783,12 +794,26 @@ function Conciliacao() {
               <Input placeholder="Buscar..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             <Select value={pairFilter} onValueChange={setPairFilter}>
-              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[140px] text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="pendente">Pendentes</SelectItem>
                 <SelectItem value="conciliado">Conciliados</SelectItem>
                 <SelectItem value="divergente">Ignorados</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterDre} onValueChange={setFilterDre}>
+              <SelectTrigger className="w-[180px] text-xs">
+                <SelectValue placeholder="Filtro DRE" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos (DRE)</SelectItem>
+                <SelectItem value="sem_dre">Sem DRE</SelectItem>
+                {[
+                  "Despesas com Impostos", "Encargos Sociais", "Despesas com Pessoal",
+                  "Despesas Administrativas", "Despesas Financeiras", "Investimentos no Patrimônio",
+                  "Ressarcimentos", "Diretoria"
+                ].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
               </SelectContent>
             </Select>
             <Button

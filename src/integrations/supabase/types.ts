@@ -1056,6 +1056,7 @@ export type Database = {
       }
       financial_entries: {
         Row: {
+          account_category_id: string | null
           amount_in: number | null
           amount_out: number | null
           amount_signed: number | null
@@ -1075,6 +1076,7 @@ export type Database = {
           devis_id: string | null
           devis_number: string | null
           document_reference: string | null
+          dre_group: string | null
           due_date: string | null
           entry_date: string
           entry_type: Database["public"]["Enums"]["entry_type"] | null
@@ -1107,6 +1109,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          account_category_id?: string | null
           amount_in?: number | null
           amount_out?: number | null
           amount_signed?: number | null
@@ -1126,6 +1129,7 @@ export type Database = {
           devis_id?: string | null
           devis_number?: string | null
           document_reference?: string | null
+          dre_group?: string | null
           due_date?: string | null
           entry_date: string
           entry_type?: Database["public"]["Enums"]["entry_type"] | null
@@ -1158,6 +1162,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          account_category_id?: string | null
           amount_in?: number | null
           amount_out?: number | null
           amount_signed?: number | null
@@ -1177,6 +1182,7 @@ export type Database = {
           devis_id?: string | null
           devis_number?: string | null
           document_reference?: string | null
+          dre_group?: string | null
           due_date?: string | null
           entry_date?: string
           entry_type?: Database["public"]["Enums"]["entry_type"] | null
@@ -1209,6 +1215,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "financial_entries_account_category_id_fkey"
+            columns: ["account_category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "financial_entries_bank_account_id_fkey"
             columns: ["bank_account_id"]
