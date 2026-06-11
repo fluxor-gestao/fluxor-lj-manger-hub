@@ -66,7 +66,8 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
   useEffect(() => {
     if (!open) return;
     setTo(client?.email || "");
-    const companyName = COMPANY_NAME[devis?.business_unit as any] || "Lundgaard Jensen";
+    const bizUnit = devis?.business_unit;
+    const companyName = (bizUnit && COMPANY_NAME[bizUnit as keyof typeof COMPANY_NAME]) || "Lundgaard Jensen";
     setSubject(`Proposta ${devisNumber} — ${companyName}`);
     setMessage(DEFAULT_MESSAGE[language](client?.name || "Cliente", devisNumber));
   }, [open, client?.email, client?.name, devisNumber, language]);
