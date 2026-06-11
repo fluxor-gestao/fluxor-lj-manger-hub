@@ -271,6 +271,13 @@ function DevisDetail() {
     document.body.appendChild(host);
     const root = createRoot(host);
     try {
+      // Carrega itens de precificação para o PDF
+      const { data: pricingItems } = await supabase
+        .from("devis_pricing_items")
+        .select("*")
+        .eq("devis_id", id!)
+        .order("created_at", { ascending: true });
+
       // Garante versão bilíngue (PT + idioma do cliente) quando aplicável
       let effectiveDevis: any = devis;
       try {
@@ -279,7 +286,7 @@ function DevisDetail() {
         console.warn("ensureDevisBilingual falhou — exportando monolíngue:", e?.message);
       }
       await new Promise<void>((resolve) => {
-        root.render(<DevisPdfTemplate devis={effectiveDevis} client={client} />);
+        root.render(<DevisPdfTemplate devis={effectiveDevis} client={client} pricingItems={pricingItems || []} />);
         // aguarda render + carregamento da imagem
         setTimeout(resolve, 700);
       });

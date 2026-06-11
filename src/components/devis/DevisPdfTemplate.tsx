@@ -166,6 +166,7 @@ const fromScopeItemsArray = (raw: any): ScopeItem[] => {
 interface DevisPdfTemplateProps {
   devis: any;
   client: any;
+  pricingItems?: any[];
   contractor?: {
     name: string;
     document: string;
@@ -201,6 +202,7 @@ const COL_W = (CONTENT_W - COL_GAP) / 2;
 export default function DevisPdfTemplate({
   devis,
   client,
+  pricingItems = [],
   contractor = DEFAULT_CONTRACTOR,
 }: DevisPdfTemplateProps) {
   const secondaryLang = (devis?.secondary_language || null) as Lang | null;
@@ -428,6 +430,20 @@ export default function DevisPdfTemplate({
                     {it.amount !== undefined ? ` — ${fmtBRL(it.amount)}` : ""}
                   </strong>
                   {it.description && <div style={{ marginTop: "2px" }}>{it.description}</div>}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {pricingItems.length > 0 && (
+          <>
+            <div style={subStyle}>{isSecondary ? "DÉTAIL DE LA TARIFICATION" : "DETALHAMENTO DA PRECIFICAÇÃO"}</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "10px" }}>
+              {pricingItems.map((item, idx) => (
+                <div key={item.id || idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "10px" }}>
+                  <span>{item.quantity}x {item.name}</span>
+                  <span style={{ fontWeight: 600 }}>{fmtBRL(item.total_price)}</span>
                 </div>
               ))}
             </div>
