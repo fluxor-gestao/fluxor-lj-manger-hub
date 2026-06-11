@@ -690,7 +690,7 @@ export default function BIFinanceiro() {
       <ActiveCompanyBanner />
       {/* Filters */}
       <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group hover:border-white/10 transition-all duration-500">
-        <CardHeader className="pb-4 border-b border-white/5 bg-white/[0.01] flex flex-row items-center justify-between">
+        <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
               <Filter className="h-3.5 w-3.5 text-white/70" />
@@ -1001,7 +1001,7 @@ export default function BIFinanceiro() {
 
         <Card className="border border-white/5 shadow-2xl overflow-hidden relative bg-[#1a2233]/40 backdrop-blur-xl group">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <CardHeader className="relative z-10 border-b border-white/5 bg-white/[0.02]">
+          <CardHeader className="relative z-10 border-b border-slate-100 bg-slate-50/50">
             <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Resumo Financeiro Estratégico</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10 p-6">
