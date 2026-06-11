@@ -14,7 +14,7 @@ import {
   Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink, Paperclip, Info, Activity
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { formatDevisCode } from "@/lib/formatDevis";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { EntityAttachments } from "../EntityAttachments";
@@ -100,7 +100,9 @@ function buildTimeline(r: CobrancaRow): Step[] {
   };
   const invoice: Step = {
     key: "invoice", label: "Fatura gerada",
-    description: r.document_reference ? `Ref. ${r.document_reference}` : "Documento de cobrança",
+    description: r.devis_id 
+      ? `Ref. ${formatDevisCode(r.devis_number, r.devis_id)}`
+      : r.document_reference ? `Ref. ${r.document_reference}` : "Documento de cobrança",
     icon: FileText,
     state: r.document_reference ? "done" : "pending",
   };
@@ -241,7 +243,7 @@ export function CobrancaDetailSheet({
             <Badge variant="outline" className={statusBadge[st]}>{statusLabel[st]}</Badge>
           </div>
           <SheetDescription>
-            {row.movement_description ?? "Cobrança sem descrição"}
+            {formatMovementDescription(row.movement_description, row.devis_number, row.devis_id)}
           </SheetDescription>
         </SheetHeader>
 
@@ -264,7 +266,10 @@ export function CobrancaDetailSheet({
           <DetailItem label="Vencimento" value={fmtDateBR(row.due_date)} />
           <DetailItem label="Competência" value={row.competence_month ?? "—"} />
           <DetailItem label="Lançamento" value={fmtDateBR(row.entry_date)} />
-          <DetailItem label="Referência" value={row.document_reference ?? "—"} />
+          <DetailItem 
+            label="Referência" 
+            value={row.devis_id ? formatDevisCode(row.devis_number, row.devis_id) : (row.document_reference ?? "—")} 
+          />
           <div className="col-span-2">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Devis Vinculado</p>
             {row.devis_id ? (

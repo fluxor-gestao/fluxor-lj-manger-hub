@@ -18,7 +18,7 @@ import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import logo from "@/assets/logo.svg";
 import type { CobrancaRow } from "./CobrancaDetailSheet";
 
-import { formatDevisCode } from "@/lib/formatDevis";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
@@ -107,7 +107,7 @@ export function FaturaPreviewDialog({
     return [
       `Olá, ${cliente}!`,
       "",
-      `Segue a fatura referente a "${row.movement_description ?? "serviços prestados"}".`,
+      `Segue a fatura referente a "${formatMovementDescription(row.movement_description, row.devis_number, row.devis_id)}".`,
       `Valor: ${fmt(open_)}`,
       `Vencimento: ${fmtDateBR(row.due_date)}`,
       "",
@@ -237,7 +237,7 @@ export function FaturaPreviewDialog({
               {/* Descrição */}
               <div className="p-6 border-b">
                 <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-2">Descrição do serviço</p>
-                <p className="font-medium">{row.movement_description ?? "—"}</p>
+                <p className="font-medium">{formatMovementDescription(row.movement_description, row.devis_number, row.devis_id)}</p>
                 {row.devis_id && (
                   <p className="text-xs text-zinc-500 mt-1">Referência: {formatDevisCode(row.devis_number, row.devis_id)}</p>
                 )}
