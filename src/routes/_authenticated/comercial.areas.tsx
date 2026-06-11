@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, ArrowLeft, Filter, Search, Building2, Building } from "lucide-react";
 import { toast } from "sonner";
-import { COMPANY_LIST, COMPANY_SHORT } from "@/lib/companyCodes";
+import { COMPANY_SHORT } from "@/lib/companyCodes";
 
 export const Route = createFileRoute("/_authenticated/comercial/areas")({
   component: AreasManager,
