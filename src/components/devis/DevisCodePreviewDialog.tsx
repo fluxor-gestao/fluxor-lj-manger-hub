@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Hash, FileText, ArrowRight } from "lucide-react";
+import { Loader2, Hash, FileText, ArrowRight, Gavel, Sprout, Calculator, Home, Briefcase } from "lucide-react";
+import { COMPANY_BADGE_CLASS, COMPANY_SHORT } from "@/lib/companyCodes";
 
 export type ServicePrefix = "DE" | "AM" | "CO" | "IM" | "GE";
 
