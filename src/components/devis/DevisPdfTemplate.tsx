@@ -176,11 +176,35 @@ interface DevisPdfTemplateProps {
   };
 }
 
-const DEFAULT_CONTRACTOR = {
-  name: "LUNDGAARD JENSEN ADVOCACIA E CONSULTORIA INTERNACIONAL",
-  document: "21.682.183/0001-42",
-  address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+const CONTRACTORS: Record<string, { name: string; document: string; address: string; logo?: string }> = {
+  DE: {
+    name: "LUNDGAARD JENSEN ADVOCACIA E CONSULTORIA INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+  },
+  CO: {
+    name: "LUNDGAARD JENSEN CONTABILIDADE INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+  },
+  AM: {
+    name: "LUNDGAARD JENSEN CONSULTORIA AMBIENTAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+  },
+  IM: {
+    name: "LUNDGAARD JENSEN CONSULTORIA IMOBILIÁRIA",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+  },
+  GE: {
+    name: "LUNDGAARD JENSEN GESTÃO INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+  },
 };
+
+const DEFAULT_CONTRACTOR = CONTRACTORS.DE;
 
 const FOOTER_TEXT =
   "Rua João Cordeiro, 831 – Praia de Iracema  |  +55 (85) 9 9406-6042  |  +55 (85) 9 3037-9931";
@@ -205,8 +229,10 @@ export default function DevisPdfTemplate({
   devis,
   client,
   pricingItems = [],
-  contractor = DEFAULT_CONTRACTOR,
+  contractor: overrideContractor,
 }: DevisPdfTemplateProps) {
+  const businessUnit = (devis?.business_unit || "DE") as string;
+  const contractor = overrideContractor || CONTRACTORS[businessUnit] || DEFAULT_CONTRACTOR;
   const secondaryLang = (devis?.secondary_language || null) as Lang | null;
   const isBilingual = !!secondaryLang && secondaryLang !== "pt";
   const LP = LABELS.pt;

@@ -5,13 +5,40 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const CONTRACTOR = {
-  name: "LUNDGAARD JENSEN ADVOCACIA E CONSULTORIA INTERNACIONAL",
-  document: "21.682.183/0001-42",
-  address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
-  representative:
-    "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+const CONTRACTORS: Record<string, { name: string; document: string; address: string; representative: string }> = {
+  DE: {
+    name: "LUNDGAARD JENSEN ADVOCACIA E CONSULTORIA INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
+  CO: {
+    name: "LUNDGAARD JENSEN CONTABILIDADE INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
+  AM: {
+    name: "LUNDGAARD JENSEN CONSULTORIA AMBIENTAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
+  IM: {
+    name: "LUNDGAARD JENSEN CONSULTORIA IMOBILIÁRIA",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
+  GE: {
+    name: "LUNDGAARD JENSEN GESTÃO INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
 };
+
+const DEFAULT_CONTRACTOR = CONTRACTORS.DE;
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
@@ -44,6 +71,7 @@ function renderScopeItems(items: ScopeItem[]): string {
 }
 
 function buildProposalMarkdown(args: {
+  business_unit?: string;
   title: string;
   client_name?: string;
   client_document?: string;
@@ -74,10 +102,12 @@ function buildProposalMarkdown(args: {
     .filter(Boolean)
     .join("\n");
 
+  const contractor = CONTRACTORS[args.business_unit || "DE"] || DEFAULT_CONTRACTOR;
+
   return `# ${title}
 
 ## I. Identificação das Partes
-- **CONTRATADO:** ${CONTRACTOR.name}, sociedade de advogados inscrita no CNPJ sob o nº ${CONTRACTOR.document}, com sede na ${CONTRACTOR.address}, neste ato representada pelo sócio ${CONTRACTOR.representative}.
+- **CONTRATADO:** ${contractor.name}, sociedade de advogados inscrita no CNPJ sob o nº ${contractor.document}, com sede na ${contractor.address}, neste ato representada pelo sócio ${contractor.representative}.
 ${clientLines}
 
 ## II. Objeto do Contrato
@@ -283,6 +313,7 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃ
     const downPayment = +(finalTotal * 0.5).toFixed(2);
 
     const proposal_structure = buildProposalMarkdown({
+      business_unit: args.business_unit,
       title: finalTitle,
       client_name,
       client_document,
