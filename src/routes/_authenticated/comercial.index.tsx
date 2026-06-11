@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { FileText, Tags, ClipboardCheck, type LucideIcon } from "lucide-react";
+import { FileText, Tags, ClipboardCheck, Users, type LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/comercial/")({
@@ -17,10 +17,17 @@ type SubModule = {
 const subModules: SubModule[] = [
   {
     title: "Devis",
-    description: "Gestão comercial — clientes e propostas",
+    description: "Gestão comercial de propostas",
     route: "/comercial/devis",
     icon: FileText,
     gradient: "from-blue-500 to-blue-700",
+  },
+  {
+    title: "Clientes",
+    description: "Gestão da base de clientes",
+    route: "/comercial/clientes",
+    icon: Users,
+    gradient: "from-indigo-500 to-indigo-700",
   },
   {
     title: "Precificação",
@@ -31,7 +38,7 @@ const subModules: SubModule[] = [
   },
   {
     title: "Mapa de Aprovação",
-    description: "Fluxo de aprovações comerciais",
+    description: "Inteligência geográfica e análise de conversão",
     route: "/comercial/mapa-aprovacao",
     icon: ClipboardCheck,
     gradient: "from-purple-500 to-purple-700",

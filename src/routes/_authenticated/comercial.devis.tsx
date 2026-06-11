@@ -573,7 +573,7 @@ function Comercial() {
         </TabsList>
 
         {/* DEVIS TAB */}
-        <TabsContent value="devis" className="space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <Card className="overflow-hidden border-0 bg-gradient-to-br from-slate-600 to-slate-700 p-4 text-white shadow-md">
               <div className="flex items-start justify-between gap-3">
