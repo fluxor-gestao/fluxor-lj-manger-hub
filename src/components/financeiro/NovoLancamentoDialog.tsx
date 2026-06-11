@@ -387,21 +387,42 @@ export function NovoLancamentoDialog({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Categoria</Label>
-                <Select
-                  value={form.category_id || "__none__"}
-                  onValueChange={(v) => setForm({ ...form, category_id: v === "__none__" ? "" : v })}
-                  disabled={form.enable_allocation}
-                >
-                  <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">— Nenhuma —</SelectItem>
-                    {categoryOptions.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Grupo DRE</Label>
+                  <Select
+                    value={form.dre_group || "__none__"}
+                    onValueChange={(v) => setForm({ ...form, dre_group: v === "__none__" ? "" : v, category_id: "" })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— Nenhum —</SelectItem>
+                      {[
+                        "Despesas com Impostos", "Encargos Sociais", "Despesas com Pessoal",
+                        "Despesas Administrativas", "Despesas Financeiras", "Investimentos no Patrimônio",
+                        "Ressarcimentos", "Diretoria"
+                      ].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Conta/Subconta Gerencial</Label>
+                  <Select
+                    value={form.category_id || "__none__"}
+                    onValueChange={(v) => setForm({ ...form, category_id: v === "__none__" ? "" : v })}
+                    disabled={!form.dre_group || form.enable_allocation}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— Nenhuma —</SelectItem>
+                      {categoryOptions
+                        .filter(c => !form.dre_group || c.dre_group === form.dre_group)
+                        .map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div>
                 <Label>Centro de custo</Label>
