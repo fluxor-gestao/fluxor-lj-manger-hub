@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { supabase } from "@/integrations/supabase/client";
+import { formatDevisCode } from "@/lib/formatDevis";
 import {
   STATUS_LABEL,
   STATUS_ORDER,
