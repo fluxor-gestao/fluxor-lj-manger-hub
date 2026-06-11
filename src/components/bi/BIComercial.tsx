@@ -1399,17 +1399,17 @@ export default function BIComercial() {
       <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
         <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-white/40" />
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">Insights Comerciais</CardTitle>
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Insights Comerciais</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pt-6">
 
-          {insights.length === 0 && <p className="text-sm text-white/40">Sem alertas relevantes no período.</p>}
+          {insights.length === 0 && <p className="text-sm text-slate-400 italic">Sem alertas relevantes no período.</p>}
           {insights.map((ins, i) => (
-            <div key={i} className="rounded-lg border p-3 space-y-1">
+            <div key={i} className="rounded-lg border border-slate-100 p-3 space-y-1 bg-slate-50">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{ins.titulo}</p>
+                <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{ins.titulo}</p>
                 <Badge variant={ins.severidade === "alta" ? "destructive" : ins.severidade === "media" ? "default" : "secondary"} className="text-white font-bold">
                   {ins.severidade}
                 </Badge>
