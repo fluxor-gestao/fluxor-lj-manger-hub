@@ -689,21 +689,19 @@ export default function BIComercial() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-6">
-
-
+        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 p-6">
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">De</Label>
-            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">De</Label>
+            <Input type="date" className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Até</Label>
-            <Input type="date" className="bg-white/5 border-white/10 text-white focus:ring-primary/20" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Até</Label>
+            <Input type="date" className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Responsável</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Responsável</Label>
             <Select value={filters.responsible} onValueChange={(v) => setFilters({ ...filters, responsible: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {responsibles.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
@@ -711,9 +709,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Cliente</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Cliente</Label>
             <Select value={filters.clientId} onValueChange={(v) => setFilters({ ...filters, clientId: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {cats.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -721,9 +719,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Status</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Status</Label>
             <Select value={filters.status} onValueChange={(v) => setFilters({ ...filters, status: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {ALL_STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s] ?? s}</SelectItem>)}
@@ -731,9 +729,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Unidade de negócio</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Unidade de negócio</Label>
             <Select value={filters.bu} onValueChange={(v) => setFilters({ ...filters, bu: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {(businessUnits.data ?? []).map((b) => (
@@ -743,9 +741,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Área principal</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Área principal</Label>
             <Select value={filters.area} onValueChange={(v) => setFilters({ ...filters, area: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {getAreasFor(filters.bu === "all" ? null : (filters.bu as CompanyCode)).map((a) => (
@@ -755,9 +753,9 @@ export default function BIComercial() {
             </Select>
           </div>
           <div>
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#E2E8F0] mb-2 block">Tipo de serviço</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Tipo de serviço</Label>
             <Select value={filters.serviceType} onValueChange={(v) => setFilters({ ...filters, serviceType: v })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white focus:ring-primary/20"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-white border-slate-200 text-slate-900 focus:ring-primary/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {serviceTypes.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
