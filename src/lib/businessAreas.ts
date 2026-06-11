@@ -54,9 +54,9 @@ import { supabase } from "@/integrations/supabase/client";
 let dbAreasCache: Record<string, string> = {};
 const loadDbAreas = async () => {
   try {
-    const { data } = await supabase.from("business_areas").select("slug, name");
+    const { data } = await supabase.from("business_areas").select("slug, label, name");
     if (data) {
-      dbAreasCache = Object.fromEntries(data.map(a => [a.slug, a.name]));
+      dbAreasCache = Object.fromEntries(data.map(a => [a.slug, a.label || a.name]));
     }
   } catch (e) {
     console.error("Erro ao carregar business_areas dinâmicas", e);
