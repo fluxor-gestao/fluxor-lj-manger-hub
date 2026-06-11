@@ -1380,31 +1380,35 @@ export default function BIFinanceiro() {
         </TabsContent>
 
         <TabsContent value="conciliacao">
-          <Card>
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Data</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Descrição</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Conta</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Origem</TableHead>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Data</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Descrição</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Conta</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Origem</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendentesConciliacao.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Tudo conciliado</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-slate-400 py-6 italic text-xs">Tudo conciliado</TableCell></TableRow>
                   )}
-                  {pendentesConciliacao.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>{r.data}</TableCell>
-                      <TableCell className="max-w-[300px] truncate">{r.descricao}</TableCell>
-                      <TableCell className="text-right">{BRL(r.valor)}</TableCell>
-                      <TableCell>{r.conta}</TableCell>
-                      <TableCell><Badge variant="outline">{r.status}</Badge></TableCell>
-                      <TableCell>{r.origem}</TableCell>
+                  {pendentesConciliacao.map((r, i) => (
+                    <TableRow key={r.id} className={cn(
+                      "border-slate-100 transition-colors group/row",
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                      "hover:bg-slate-50"
+                    )}>
+                      <TableCell className="text-slate-600 text-xs">{r.data}</TableCell>
+                      <TableCell className="max-w-[300px] truncate text-slate-900 font-medium">{r.descricao}</TableCell>
+                      <TableCell className="text-right font-bold text-slate-900">{BRL(r.valor)}</TableCell>
+                      <TableCell className="text-slate-600 text-xs">{r.conta}</TableCell>
+                      <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white">{r.status}</Badge></TableCell>
+                      <TableCell className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">{r.origem}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
