@@ -1,4 +1,4 @@
-import { AlertOctagon, CalendarDays, Building2, User2, Hash, Wallet } from "lucide-react";
+import { AlertOctagon, CalendarDays, Building2, User2, Hash, Wallet, Info, Clock, CheckCircle2, MessageSquare, Paperclip, Activity } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -22,6 +22,7 @@ import { ProcessoTimeline } from "./ProcessoTimeline";
 import { ProcessoTarefas } from "./ProcessoTarefas";
 import { ProcessoComentarios } from "./ProcessoComentarios";
 import { InsightsBlock, buildInsightsForService } from "./InsightsOperacionais";
+import { EntityAttachments } from "../EntityAttachments";
 
 const fmt = (d?: string | null) =>
   d ? new Date(d).toLocaleDateString("pt-BR") : "—";
@@ -238,12 +239,12 @@ export function ProcessoDetailSheet({
         </SheetHeader>
 
         <Tabs defaultValue="overview" className="mt-4">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Visão geral</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-            <TabsTrigger value="tasks">Tarefas</TabsTrigger>
-            <TabsTrigger value="comments">Comentários</TabsTrigger>
-            <TabsTrigger value="files">Anexos</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-white/5 border border-white/10 p-1">
+            <TabsTrigger value="overview" className="text-[10px] sm:text-xs gap-1.5"><Info className="h-3.5 w-3.5" /> Visão geral</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-[10px] sm:text-xs gap-1.5"><Activity className="h-3.5 w-3.5" /> Timeline</TabsTrigger>
+            <TabsTrigger value="tasks" className="text-[10px] sm:text-xs gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Tarefas</TabsTrigger>
+            <TabsTrigger value="comments" className="text-[10px] sm:text-xs gap-1.5"><MessageSquare className="h-3.5 w-3.5" /> Comentários</TabsTrigger>
+            <TabsTrigger value="files" className="text-[10px] sm:text-xs gap-1.5"><Paperclip className="h-3.5 w-3.5" /> Anexos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 mt-4">
@@ -298,9 +299,11 @@ export function ProcessoDetailSheet({
           </TabsContent>
 
           <TabsContent value="files" className="mt-4">
-            <div className="text-center text-xs text-muted-foreground py-10 border border-dashed rounded-lg">
-              Upload e gestão de anexos em breve.
-            </div>
+            <Card className="border-white/10 bg-card/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <EntityAttachments entityType="service" entityId={service.id} />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </SheetContent>

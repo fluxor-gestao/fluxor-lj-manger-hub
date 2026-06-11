@@ -11,10 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   FilePlus2, Send, BellRing, DollarSign, CheckCircle2, Circle, Clock,
-  Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink,
+  Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink, Paperclip, Info, Activity
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { formatDevisCode } from "@/lib/formatDevis";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { EntityAttachments } from "../EntityAttachments";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
@@ -242,8 +245,15 @@ export function CobrancaDetailSheet({
           </SheetDescription>
         </SheetHeader>
 
-        {/* Resumo de valores */}
-        <div className="mt-5 grid grid-cols-3 gap-2">
+        <Tabs defaultValue="info" className="mt-5">
+          <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10 p-1 mb-4">
+            <TabsTrigger value="info" className="gap-2"><Info className="h-4 w-4" /> Informações</TabsTrigger>
+            <TabsTrigger value="anexos" className="gap-2"><Paperclip className="h-4 w-4" /> Anexos</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="info" className="m-0 space-y-5">
+            {/* Resumo de valores */}
+            <div className="grid grid-cols-3 gap-2">
           <ValueTile label="Valor total" value={fmt(total)} />
           <ValueTile label="Recebido" value={fmt(paid)} tone="success" />
           <ValueTile label="Saldo aberto" value={fmt(open_)} tone="primary" />
@@ -348,13 +358,22 @@ export function CobrancaDetailSheet({
           <Button onClick={() => placeholder("Registrar pagamento")}>
             <DollarSign className="h-4 w-4 mr-2" /> Registrar pagamento
           </Button>
-        </div>
+          </div>
 
-        <p className="mt-3 text-[11px] text-muted-foreground text-center">
-          Ações de envio e geração são placeholders nesta etapa.
-        </p>
+          <p className="mt-3 text-[11px] text-muted-foreground text-center">
+            Ações de envio e geração são placeholders nesta etapa.
+          </p>
+        </TabsContent>
+
+        <TabsContent value="anexos">
+          <Card className="border-white/10 bg-card/30 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <EntityAttachments entityType="financial_entry" entityId={row.id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
       </SheetContent>
-
       <FaturaPreviewDialog row={row} open={faturaOpen} onOpenChange={setFaturaOpen} />
       <LembretePreviewDialog row={row} open={lembreteOpen} onOpenChange={setLembreteOpen} />
       <DevisPreviewDialog devisId={row.devis_id || null} open={devisPreviewOpen} onOpenChange={setDevisPreviewOpen} />

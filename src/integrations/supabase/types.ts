@@ -763,6 +763,42 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       entry_allocations: {
         Row: {
           amount: number

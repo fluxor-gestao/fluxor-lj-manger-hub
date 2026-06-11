@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { ArrowLeft, Pencil, Save, X, CalendarIcon, Sparkles, Loader2, Link as LinkIcon, CheckCircle2, FileDown, Languages, AlertTriangle, Plus } from "lucide-react";
+import { ArrowLeft, Pencil, Save, X, CalendarIcon, Sparkles, Loader2, Link as LinkIcon, CheckCircle2, FileDown, Languages, AlertTriangle, Plus, FileText, Info, DollarSign, Paperclip } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -34,6 +34,8 @@ import { AreaBadge } from "@/components/AreaBadge";
 import { getAreasFor, isValidAreaForCompany } from "@/lib/businessAreas";
 import { MultiAreaSelector } from "@/components/devis/MultiAreaSelector";
 import { formatDevisCode } from "@/lib/formatDevis";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EntityAttachments } from "@/components/EntityAttachments";
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
@@ -513,9 +515,20 @@ function DevisDetail() {
         </div>
       )}
 
-      <Card>
-        <CardHeader><CardTitle>Informações</CardTitle></CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Tabs defaultValue="info" className="w-full">
+        <TabsList className="bg-white/5 border border-white/10 p-1 mb-6">
+          <TabsTrigger value="info" className="data-[state=active]:bg-primary">
+            <Info className="h-4 w-4 mr-2" /> Informações
+          </TabsTrigger>
+          <TabsTrigger value="anexos" className="data-[state=active]:bg-primary">
+            <Paperclip className="h-4 w-4 mr-2" /> Anexos
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="info" className="space-y-6 m-0">
+          <Card>
+            <CardHeader><CardTitle>Informações</CardTitle></CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Cliente */}
           <div>
             <Label>Cliente</Label>
@@ -832,6 +845,20 @@ function DevisDetail() {
       )}
 
       <SendDevisDialog open={sendOpen} onOpenChange={setSendOpen} devis={devis} client={client} />
+        </TabsContent>
+
+
+        <TabsContent value="anexos">
+          <Card className="border-white/10 bg-card/30 backdrop-blur-sm">
+            <CardHeader className="border-b border-white/5 bg-white/5">
+              <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">Anexos e Documentos</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <EntityAttachments entityType="devis" entityId={devis.id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
