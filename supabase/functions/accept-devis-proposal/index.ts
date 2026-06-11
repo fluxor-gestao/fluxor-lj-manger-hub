@@ -14,7 +14,7 @@ const json = (body: unknown, status = 200) =>
   });
 
 const PREVIEW_FIELDS =
-  "title, total_amount, down_payment_amount, deadline_date, scope_description, proposal_structure, accepted_at, rejected_at, client_id, source_language, secondary_language, title_secondary, scope_description_secondary, proposal_structure_secondary";
+  "title, total_amount, down_payment_amount, deadline_date, scope_description, proposal_structure, accepted_at, rejected_at, client_id, source_language, secondary_language, title_secondary, scope_description_secondary, proposal_structure_secondary, business_unit";
 
 function previewPayload(devis: any, clientName: string | null) {
   return {
@@ -32,6 +32,7 @@ function previewPayload(devis: any, clientName: string | null) {
     title_secondary: devis.title_secondary ?? null,
     scope_description_secondary: devis.scope_description_secondary ?? null,
     proposal_structure_secondary: devis.proposal_structure_secondary ?? null,
+    business_unit: devis.business_unit ?? "DE",
   };
 }
 

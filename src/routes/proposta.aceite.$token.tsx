@@ -11,10 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CheckCircle2, Loader2, AlertCircle, Calendar, FileText, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle, Calendar, FileText, XCircle, Building2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logo from "@/assets/logo.svg";
+import { COMPANY_NAME, type CompanyCode } from "@/lib/companyCodes";
 
 const FN_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/accept-devis-proposal`;
 const ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -34,6 +35,7 @@ type Preview = {
   title_secondary?: string | null;
   scope_description_secondary?: string | null;
   proposal_structure_secondary?: string | null;
+  business_unit?: CompanyCode | null;
 };
 
 const LANG_LABEL: Record<string, string> = { fr: "FR", en: "EN", es: "ES", pt: "PT" };
@@ -288,10 +290,27 @@ function AceitarProposta() {
   const captionSec = SUMMARY_CAPTION[secLang] || SUMMARY_CAPTION.en;
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-slate-50/50">
       <header className="border-b bg-background">
-        <div className={`${containerCls} mx-auto px-6 py-5 flex items-center gap-4`}>
-          <img src={logo} alt="Lundgaard Jensen" className="h-10 w-auto" />
+        <div className={`${containerCls} mx-auto px-6 py-5 flex items-center justify-between gap-4`}>
+          <div className="flex items-center gap-4">
+            <img src={logo} alt="Lundgaard Jensen" className="h-10 w-auto" />
+            <div className="h-8 w-px bg-border hidden sm:block" />
+            <div className="hidden sm:block">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lundgaard Jensen</div>
+              <div className="text-sm font-bold text-foreground">
+                {preview?.business_unit ? COMPANY_NAME[preview.business_unit] : "Consultoria Internacional"}
+              </div>
+            </div>
+          </div>
+          {preview?.business_unit && (
+            <div className="sm:hidden text-right">
+              <div className="text-[10px] font-bold uppercase text-muted-foreground leading-tight">Lundgaard Jensen</div>
+              <div className="text-xs font-bold leading-tight truncate max-w-[150px]">
+                {COMPANY_NAME[preview.business_unit].split("—")[1]?.trim() || COMPANY_NAME[preview.business_unit]}
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -404,13 +423,13 @@ function AceitarProposta() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="rounded-lg border p-4">
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">Valor total</div>
-                      <div className="text-2xl font-bold mt-1">{fmtBRL(preview.total_amount)}</div>
+                    <div className="rounded-xl border bg-white p-5 shadow-sm">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Valor total</div>
+                      <div className="text-3xl font-black text-slate-900 tabular-nums leading-none">{fmtBRL(preview.total_amount)}</div>
                     </div>
-                    <div className="rounded-lg border p-4">
-                      <div className="text-xs uppercase tracking-wide text-muted-foreground">Entrada (50%)</div>
-                      <div className="text-2xl font-bold mt-1">{fmtBRL(preview.down_payment_amount)}</div>
+                    <div className="rounded-xl border bg-white p-5 shadow-sm border-indigo-100">
+                      <div className="text-[10px] uppercase tracking-wider text-indigo-500 font-bold mb-2">Entrada (50%)</div>
+                      <div className="text-3xl font-black text-indigo-600 tabular-nums leading-none">{fmtBRL(preview.down_payment_amount)}</div>
                     </div>
                   </div>
 

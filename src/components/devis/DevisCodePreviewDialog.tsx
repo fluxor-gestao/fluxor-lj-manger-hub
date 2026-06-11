@@ -6,9 +6,18 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Hash, FileText, ArrowRight } from "lucide-react";
+import { Loader2, Hash, FileText, ArrowRight, Gavel, Sprout, Calculator, Home, Briefcase } from "lucide-react";
+import { COMPANY_BADGE_CLASS, COMPANY_SHORT } from "@/lib/companyCodes";
 
 export type ServicePrefix = "DE" | "AM" | "CO" | "IM" | "GE";
+
+const PREFIX_META: Record<ServicePrefix, { label: string; icon: any }> = {
+  DE: { label: "Advocacia", icon: Gavel },
+  AM: { label: "Ambiental", icon: Sprout },
+  CO: { label: "Contábil", icon: Calculator },
+  IM: { label: "Imobiliária", icon: Home },
+  GE: { label: "Gestão", icon: Briefcase },
+};
 
 const PREFIX_LABEL: Record<ServicePrefix, string> = {
   DE: "Advocacia",
@@ -113,52 +122,63 @@ export default function DevisCodePreviewDialog({
           )}
 
           <div className="space-y-2">
-            <Label className="text-xs">Tipo de serviço</Label>
+            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Tipo de serviço</Label>
             <RadioGroup
               value={prefix}
               onValueChange={(v) => setPrefix(v as ServicePrefix)}
               className="grid grid-cols-3 sm:grid-cols-5 gap-2"
             >
-              {(Object.keys(PREFIX_LABEL) as ServicePrefix[]).map((p) => (
-                <label
-                  key={p}
-                  className={`flex flex-col items-center gap-1 rounded-md border p-3 cursor-pointer transition-colors ${
-                    prefix === p ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
-                  }`}
-                >
-                  <RadioGroupItem value={p} className="sr-only" />
-                  <span className="text-lg font-bold font-display">{p}</span>
-                  <span className="text-[11px] text-muted-foreground">{PREFIX_LABEL[p]}</span>
-                </label>
-              ))}
+              {(Object.keys(PREFIX_META) as ServicePrefix[]).map((p) => {
+                const Icon = PREFIX_META[p].icon;
+                const isSelected = prefix === p;
+                return (
+                  <label
+                    key={p}
+                    className={`flex flex-col items-center gap-2 rounded-xl border p-3 cursor-pointer transition-all duration-200 ${
+                      isSelected 
+                        ? `${COMPANY_BADGE_CLASS[p]} border-2 scale-105 shadow-sm` 
+                        : "border-border hover:border-primary/30 hover:bg-accent/50 opacity-70"
+                    }`}
+                  >
+                    <RadioGroupItem value={p} className="sr-only" />
+                    <Icon className={`h-5 w-5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                    <div className="flex flex-col items-center">
+                      <span className="text-sm font-bold font-display leading-tight">{p}</span>
+                      <span className="text-[10px] opacity-80 font-medium whitespace-nowrap">{COMPANY_SHORT[p]}</span>
+                    </div>
+                  </label>
+                );
+              })}
             </RadioGroup>
           </div>
 
-          <div className="rounded-md border bg-muted/30 p-4 text-center space-y-3">
-            <div className="text-xs text-muted-foreground">Código previsto</div>
-            <div className="flex flex-col items-center justify-center gap-2">
-              <div className="text-2xl font-bold font-display tracking-wider tabular-nums">
-                {loading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : code || "—"}
+          <div className="rounded-2xl border-2 bg-muted/20 p-6 text-center space-y-4 shadow-inner">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Código previsto</div>
+            <div className="flex flex-col items-center justify-center gap-3">
+              <div className="text-4xl font-black font-display tracking-tighter tabular-nums text-primary">
+                {loading ? <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary/40" /> : code || "—"}
               </div>
               
               {!loading && (
-                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-dashed w-full justify-center">
-                  <Label htmlFor="sequence" className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    A partir de:
+                <div className="flex items-center gap-3 mt-2 pt-4 border-t border-dashed w-full justify-center">
+                  <Label htmlFor="sequence" className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold whitespace-nowrap">
+                    Próxima sequência:
                   </Label>
-                  <Input
-                    id="sequence"
-                    type="number"
-                    min="1"
-                    max="999"
-                    value={manualSequence}
-                    onChange={(e) => setManualSequence(e.target.value.slice(0, 3))}
-                    className="h-7 w-20 text-center text-xs font-bold"
-                  />
+                  <div className="relative group">
+                    <Input
+                      id="sequence"
+                      type="number"
+                      min="1"
+                      max="999"
+                      value={manualSequence}
+                      onChange={(e) => setManualSequence(e.target.value.slice(0, 3))}
+                      className="h-9 w-24 text-center text-sm font-black bg-background border-2 border-primary/20 focus:border-primary group-hover:border-primary/40 transition-all rounded-lg"
+                    />
+                  </div>
                 </div>
               )}
             </div>
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline" className={`text-[10px] font-bold px-3 py-1 ${COMPANY_BADGE_CLASS[prefix]}`}>
               {PREFIX_LABEL[prefix]} · {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
             </Badge>
           </div>
