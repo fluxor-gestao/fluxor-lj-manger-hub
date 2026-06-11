@@ -147,6 +147,12 @@ function Precificacao() {
           <Button variant="outline" onClick={() => navigate({ to: "/comercial" })}>
             <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
           </Button>
+          <Button variant="outline" onClick={() => setIsBulkUpdateOpen(true)}>
+            <RefreshCcw className="h-4 w-4 mr-2" /> Atualização em Lote
+          </Button>
+          <Button variant="outline" onClick={() => setIsHistoryOpen(true)}>
+            <History className="h-4 w-4 mr-2" /> Histórico
+          </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingService(null)}>
@@ -158,6 +164,18 @@ function Precificacao() {
                 <DialogTitle>{editingService?.id ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="unit">Unidade de Negócio</Label>
+                  <Select 
+                    value={editingService?.business_unit || ""} 
+                    onValueChange={v => setEditingService(prev => ({ ...prev, business_unit: v as CompanyCode }))}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecionar unidade" /></SelectTrigger>
+                    <SelectContent>
+                      {COMPANY_LIST.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome do Serviço</Label>
                   <Input 
@@ -199,6 +217,46 @@ function Precificacao() {
           </Dialog>
         </div>
       </div>
+
+      <BulkPriceUpdate 
+        open={isBulkUpdateOpen} 
+        onOpenChange={setIsBulkUpdateOpen} 
+        services={services} 
+      />
+
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Histórico de Reajustes</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {history.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">Nenhum histórico registrado.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Critério</TableHead>
+                    <TableHead className="text-right">Reajuste</TableHead>
+                    <TableHead className="text-right">Itens</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {history.map((h: any) => (
+                    <TableRow key={h.id}>
+                      <TableCell className="text-xs">{new Date(h.created_at).toLocaleString("pt-BR")}</TableCell>
+                      <TableCell className="text-xs font-medium">{h.criteria}</TableCell>
+                      <TableCell className="text-right text-xs font-mono">{h.percentage_applied}%</TableCell>
+                      <TableCell className="text-right text-xs">{h.items_count}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card className="p-4">
         <div className="space-y-4 mb-6">
