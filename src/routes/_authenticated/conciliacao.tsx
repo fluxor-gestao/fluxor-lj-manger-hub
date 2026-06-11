@@ -42,6 +42,7 @@ function Conciliacao() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [filterDre, setFilterDre] = useState("todos");
 
   // Fetch bank statement entries
   const { data: statements = [] } = useQuery({
