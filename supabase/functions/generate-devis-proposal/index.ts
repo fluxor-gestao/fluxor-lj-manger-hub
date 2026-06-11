@@ -5,13 +5,40 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const CONTRACTOR = {
-  name: "LUNDGAARD JENSEN ADVOCACIA E CONSULTORIA INTERNACIONAL",
-  document: "21.682.183/0001-42",
-  address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
-  representative:
-    "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+const CONTRACTORS: Record<string, { name: string; document: string; address: string; representative: string }> = {
+  DE: {
+    name: "LUNDGAARD JENSEN ADVOCACIA E CONSULTORIA INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
+  CO: {
+    name: "LUNDGAARD JENSEN CONTABILIDADE INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
+  AM: {
+    name: "LUNDGAARD JENSEN CONSULTORIA AMBIENTAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
+  IM: {
+    name: "LUNDGAARD JENSEN CONSULTORIA IMOBILIÁRIA",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
+  GE: {
+    name: "LUNDGAARD JENSEN GESTÃO INTERNACIONAL",
+    document: "21.682.183/0001-42",
+    address: "Rua João Cordeiro, nº 831, Praia de Iracema, Fortaleza/CE",
+    representative: "Leonardo Carapeba Lundgaard Jensen, brasileiro, casado, advogado, inscrito na OAB/CE sob o nº 20.985",
+  },
 };
+
+const DEFAULT_CONTRACTOR = CONTRACTORS.DE;
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
