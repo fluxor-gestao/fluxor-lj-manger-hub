@@ -1246,13 +1246,13 @@ export default function BIComercial() {
           <Card>
             <CardContent className="p-0">
               <Table>
-                <TableHeader className="bg-[#0b1526]/50">
-                  <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
                     <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Atualizada</TableHead>
                     <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Parada</TableHead>
                     <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
