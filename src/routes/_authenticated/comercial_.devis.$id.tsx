@@ -392,7 +392,7 @@ function DevisDetail() {
         <div className="flex gap-2">
           {editing ? (
             <>
-              <Button variant="outline" onClick={() => { setEditing(false); setAiSuggestions(null); setForm({ ...devis, meeting_date: devis.meeting_date ? parseISO(devis.meeting_date) : undefined, deadline_date: devis.deadline_date ? parseISO(devis.deadline_date) : undefined, total_amount: String(devis.total_amount ?? ""), down_payment_amount: String(devis.down_payment_amount ?? "") }); }}>
+              <Button variant="outline" onClick={() => { setEditing(false); setAiSuggestions(null); const total = devis.total_amount ?? 0; const down = devis.down_payment_amount ?? 0; const pct = total > 0 ? Math.round((down / total) * 100) : 50; setForm({ ...devis, meeting_date: devis.meeting_date ? parseISO(devis.meeting_date) : undefined, deadline_date: devis.deadline_date ? parseISO(devis.deadline_date) : undefined, total_amount: String(total || ""), down_payment_amount: String(down || ""), down_payment_percentage: String(pct) }); }}>
                 <X className="h-4 w-4 mr-2" /> Cancelar
               </Button>
               <Button onClick={() => update.mutate()} disabled={update.isPending}>
