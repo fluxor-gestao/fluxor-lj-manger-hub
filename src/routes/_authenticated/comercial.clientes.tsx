@@ -157,12 +157,22 @@ function Clientes() {
     setClientForm({
       id: c.id,
       name: c.name ?? "",
+      trade_name: c.trade_name ?? "",
       company: c.company ?? "",
       email: c.email ?? "",
       phone: c.phone ?? "",
       document: c.document ?? "",
       type: (c.type as "PF" | "PJ") ?? "PJ",
       notes: c.notes ?? "",
+      country: c.country ?? "Brasil",
+      state: c.state ?? "",
+      city: c.city ?? "",
+      neighborhood: c.neighborhood ?? "",
+      address: c.address ?? "",
+      street_number: c.street_number ?? "",
+      zip_code: c.zip_code ?? "",
+      latitude: c.latitude ?? undefined,
+      longitude: c.longitude ?? undefined,
     });
     setClientDialogOpen(true);
   };
