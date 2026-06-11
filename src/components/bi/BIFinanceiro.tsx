@@ -1194,15 +1194,15 @@ export default function BIFinanceiro() {
               <AreaChart data={cashflow}>
                 <defs>
                   <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#38bdf8" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Area type="monotone" dataKey="Acumulado" stroke="#38bdf8" strokeWidth={3} fillOpacity={1} fill="url(#colorAcc)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: '#F9FAFB' }} />
+                <Area type="monotone" dataKey="Acumulado" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorAcc)" />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -1213,10 +1213,10 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : top10ClientesReceita.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={top10ClientesReceita} layout="vertical" onClick={() => setTabFocus("receber")}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <YAxis type="category" dataKey="name" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <YAxis type="category" dataKey="name" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#374151' }} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="receita" fill="#10B981" fillOpacity={0.8} radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
