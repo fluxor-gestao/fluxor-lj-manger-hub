@@ -721,6 +721,16 @@ function Conciliacao() {
   const filteredStatements = statements.filter((s) => {
     if (pairFilter !== "todos" && s.conciliation_status !== pairFilter) return false;
     if (search && !s.description?.toLowerCase().includes(search.toLowerCase())) return false;
+    
+    const persistedMatch = matches.find(m => m.bank_statement_entry_id === s.id && m.status === "confirmado");
+    const matchedFE = persistedMatch ? financialEntries.find(f => f.id === persistedMatch.financial_entry_id) : null;
+    
+    if (filterDre === "sem_dre") {
+      if (matchedFE && (matchedFE.dre_group || matchedFE.account_category_id)) return false;
+    } else if (filterDre !== "todos") {
+      if (!matchedFE || matchedFE.dre_group !== filterDre) return false;
+    }
+    
     return true;
   });
 
