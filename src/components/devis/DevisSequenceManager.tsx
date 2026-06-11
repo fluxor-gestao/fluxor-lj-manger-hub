@@ -13,21 +13,24 @@ type SequenceConfig = {
   next_number: number;
 };
 
-const PREFIXES = ["DE", "AM", "CO", "IM", "GE"] as const;
-type Prefix = typeof PREFIXES[number];
-
-const PREFIX_LABELS: Record<Prefix, string> = {
-  DE: "Direito Estratégico",
-  AM: "Ambiental",
-  CO: "Contabilidade",
-  IM: "Imobiliário",
-  GE: "Gestão & Consultoria",
-};
 
 export function DevisSequenceManager() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [editingValues, setEditingValues] = useState<Record<string, string>>({});
+
+  const { data: units = [] } = useQuery({
+    queryKey: ["catalog", "business_units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("code, name")
+        .eq("active", true)
+        .order("code");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const { data: settings = [], isLoading } = useQuery({
     queryKey: ["commercial-settings", "devis-sequence"],
@@ -61,7 +64,7 @@ export function DevisSequenceManager() {
     onError: (err: any) => toast.error(err.message),
   });
 
-  const handleSave = (prefix: Prefix) => {
+  const handleSave = (prefix: string) => {
     const val = editingValues[prefix];
     if (!val) return;
     const num = parseInt(val);
@@ -72,7 +75,7 @@ export function DevisSequenceManager() {
     updateSequence.mutate({ prefix, nextNumber: num });
   };
 
-  const getNextNumber = (prefix: Prefix) => {
+  const getNextNumber = (prefix: string) => {
     const setting = settings.find(s => s.key === `devis_sequence_${prefix}`);
     return (setting?.value as SequenceConfig)?.next_number ?? 1;
   };
@@ -101,7 +104,8 @@ export function DevisSequenceManager() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2">
-          {PREFIXES.map((prefix) => {
+          {units.map((unit: any) => {
+            const prefix = unit.code;
             const current = getNextNumber(prefix);
             const isEditing = editingValues[prefix] !== undefined;
             const displayValue = isEditing ? editingValues[prefix] : String(current);
@@ -111,7 +115,7 @@ export function DevisSequenceManager() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-lg font-display text-primary">{prefix}</span>
-                    <span className="text-xs text-muted-foreground">{PREFIX_LABELS[prefix]}</span>
+                    <span className="text-xs text-muted-foreground">{unit.name}</span>
                   </div>
                   <Badge variant="outline" className="text-[10px] uppercase font-mono">
                     Próximo: {current.toString().padStart(3, "0")}

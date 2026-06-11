@@ -91,6 +91,20 @@ export function useFinanceiroCatalogs() {
     },
   });
 
+  const businessUnits = useQuery({
+    queryKey: ["catalog", "business_units"],
+    staleTime: STALE,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("id, code, name")
+        .eq("active", true)
+        .order("code");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   return {
     suppliers: suppliers.data ?? [],
     clients: clients.data ?? [],
@@ -98,5 +112,6 @@ export function useFinanceiroCatalogs() {
     costCenters: costCenters.data ?? [],
     paymentMethods: paymentMethods.data ?? [],
     financialAccounts: financialAccounts.data ?? [],
+    businessUnits: businessUnits.data ?? [],
   };
 }

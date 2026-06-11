@@ -475,8 +475,10 @@ export function NovoLancamentoDialog({
                   <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">— Nenhuma —</SelectItem>
-                    {COMPANY_LIST.map((c) => (
-                      <SelectItem key={c.code} value={c.code}>{c.short}</SelectItem>
+                    {catalogs.businessUnits.map((unit: any) => (
+                      <SelectItem key={unit.id} value={unit.code}>
+                        {unit.code} — {unit.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

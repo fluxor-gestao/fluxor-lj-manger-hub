@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,23 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Loader2, Hash, FileText, ArrowRight, Gavel, Sprout, Calculator, Home, Briefcase } from "lucide-react";
 import { COMPANY_BADGE_CLASS, COMPANY_SHORT } from "@/lib/companyCodes";
+import { useQuery } from "@tanstack/react-query";
 
-export type ServicePrefix = "DE" | "AM" | "CO" | "IM" | "GE";
+export type ServicePrefix = string;
 
-const PREFIX_META: Record<ServicePrefix, { label: string; icon: any }> = {
+const PREFIX_META_HARDCODED: Record<string, { label: string; icon: any }> = {
   DE: { label: "Advocacia", icon: Gavel },
   AM: { label: "Ambiental", icon: Sprout },
   CO: { label: "Contábil", icon: Calculator },
   IM: { label: "Imobiliária", icon: Home },
   GE: { label: "Gestão", icon: Briefcase },
-};
-
-const PREFIX_LABEL: Record<ServicePrefix, string> = {
-  DE: "Advocacia",
-  AM: "Ambiental",
-  CO: "Contábil",
-  IM: "Imobiliária",
-  GE: "Gestão",
 };
 
 export function inferServicePrefix(...sources: (string | null | undefined)[]): ServicePrefix {
@@ -53,11 +46,33 @@ export default function DevisCodePreviewDialog({
   serviceTypeHint,
   onConfirm,
 }: Props) {
+  const { data: units = [] } = useQuery({
+    queryKey: ["catalog", "business_units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("code, name")
+        .eq("active", true)
+        .order("code");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const prefixLabelMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    units.forEach(u => {
+      if (u.code) map[u.code] = u.name || "";
+    });
+    return map;
+  }, [units]);
+
   const [prefix, setPrefix] = useState<ServicePrefix>(initialPrefix);
   const [code, setCode] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [manualSequence, setManualSequence] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
+
 
   useEffect(() => {
     if (open) setPrefix(initialPrefix);
@@ -99,7 +114,7 @@ export default function DevisCodePreviewDialog({
     onConfirm({
       prefix,
       devis_number: code,
-      service_type: serviceTypeHint || PREFIX_LABEL[prefix],
+      service_type: serviceTypeHint || prefixLabelMap[prefix] || prefix,
     });
   };
 
@@ -128,23 +143,25 @@ export default function DevisCodePreviewDialog({
               onValueChange={(v) => setPrefix(v as ServicePrefix)}
               className="grid grid-cols-3 sm:grid-cols-5 gap-2"
             >
-              {(Object.keys(PREFIX_META) as ServicePrefix[]).map((p) => {
-                const Icon = PREFIX_META[p].icon;
+              {units.map((unit: any) => {
+                const p = unit.code;
+                const meta = PREFIX_META_HARDCODED[p] || { label: unit.name, icon: Briefcase };
+                const Icon = meta.icon;
                 const isSelected = prefix === p;
                 return (
                   <label
                     key={p}
                     className={`flex flex-col items-center gap-2 rounded-xl border p-3 cursor-pointer transition-all duration-200 ${
                       isSelected 
-                        ? `${COMPANY_BADGE_CLASS[p]} border-2 scale-105 shadow-sm` 
+                        ? `${COMPANY_BADGE_CLASS[p as keyof typeof COMPANY_BADGE_CLASS] || "border-primary bg-primary/10 text-primary"} border-2 scale-105 shadow-sm` 
                         : "border-border hover:border-primary/30 hover:bg-accent/50 opacity-70"
                     }`}
                   >
                     <RadioGroupItem value={p} className="sr-only" />
                     <Icon className={`h-5 w-5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center text-center">
                       <span className="text-sm font-bold font-display leading-tight">{p}</span>
-                      <span className="text-[10px] opacity-80 font-medium whitespace-nowrap">{COMPANY_SHORT[p]}</span>
+                      <span className="text-[10px] opacity-80 font-medium line-clamp-1">{unit.name}</span>
                     </div>
                   </label>
                 );
@@ -178,8 +195,8 @@ export default function DevisCodePreviewDialog({
                 </div>
               )}
             </div>
-            <Badge variant="outline" className={`text-[10px] font-bold px-3 py-1 ${COMPANY_BADGE_CLASS[prefix]}`}>
-              {PREFIX_LABEL[prefix]} · {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+            <Badge variant="outline" className={`text-[10px] font-bold px-3 py-1 ${COMPANY_BADGE_CLASS[prefix as keyof typeof COMPANY_BADGE_CLASS] || "border-primary text-primary"}`}>
+              {prefixLabelMap[prefix] || prefix} · {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
             </Badge>
           </div>
         </div>
