@@ -34,16 +34,30 @@ export function EntityAttachments({ entityType, entityId }: EntityAttachmentsPro
     queryFn: async () => {
       const { data, error } = await supabase
         .from("entity_attachments")
-        .select(`
-          *,
-          uploader:profiles!entity_attachments_uploaded_by_fkey(full_name)
-        `)
+        .select("*")
         .eq("entity_type", entityType)
         .eq("entity_id", entityId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+
+      // Manually fetch profiles to avoid complex join issues
+      const userIds = [...new Set(data.map((att: any) => att.uploaded_by).filter(Boolean))];
+      let profiles: any[] = [];
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", userIds);
+        profiles = profilesData || [];
+      }
+
+      const profilesMap = Object.fromEntries(profiles.map((p: any) => [p.user_id, p]));
+      
+      return data.map((att: any) => ({
+        ...att,
+        uploader: profilesMap[att.uploaded_by]
+      }));
     },
     enabled: !!entityId,
   });
