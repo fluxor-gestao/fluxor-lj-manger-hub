@@ -240,8 +240,8 @@ export default function MapaAprovacaoDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[600px] items-center justify-center bg-[#08111f] rounded-2xl border border-white/5">
-        <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+      <div className="flex h-[600px] items-center justify-center bg-white rounded-2xl border border-slate-200">
+        <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
       </div>
     );
   }
@@ -250,13 +250,13 @@ export default function MapaAprovacaoDashboard() {
     <div className="space-y-6 animate-in fade-in duration-700">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {kpis.map((kpi, idx) => (
-          <Card key={idx} className="bg-white/5 border-white/10 backdrop-blur-xl relative overflow-hidden group">
+          <Card key={idx} className="bg-white border-slate-200 relative overflow-hidden group">
             <CardContent className="p-4 relative z-10">
               <div className="flex items-center justify-between mb-1">
-                <kpi.icon className={cn("h-4 w-4", kpi.color)} />
+                <kpi.icon className={cn("h-4 w-4", kpi.color.replace('text-blue-400', 'text-blue-600').replace('text-rose-400', 'text-rose-600').replace('text-indigo-400', 'text-indigo-600').replace('text-emerald-400', 'text-emerald-600').replace('text-amber-400', 'text-amber-600'))} />
               </div>
-              <p className="text-[10px] font-bold text-[#CBD5E1] uppercase tracking-wider">{kpi.label}</p>
-              <p className="text-base font-black text-white mt-0.5">{kpi.value}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{kpi.label}</p>
+              <p className="text-lg font-bold text-slate-900 mt-0.5">{kpi.value}</p>
             </CardContent>
           </Card>
         ))}
@@ -264,21 +264,21 @@ export default function MapaAprovacaoDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-6">
-          <Card className="bg-[#111827]/80 border-white/10 p-4">
+          <Card className="bg-white border-slate-200 p-4 shadow-sm">
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-white/90 font-bold text-sm">
-                <Filter className="h-4 w-4 text-blue-400" />
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                <Filter className="h-4 w-4 text-blue-600" />
                 Filtros
               </div>
               
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase text-[#CBD5E1] font-bold tracking-widest">Status</Label>
+                  <Label className="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Status</Label>
                   <Select value={filters.status} onValueChange={(v) => setFilters(f => ({ ...f, status: v }))}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-xs">
+                    <SelectTrigger className="bg-white border-slate-200 text-slate-900 h-9 text-xs">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a2233] border-white/10 text-white">
+                    <SelectContent className="bg-white border-slate-200 text-slate-900">
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="aceita">Aceitos</SelectItem>
                       <SelectItem value="enviada_ao_cliente">Enviados</SelectItem>
@@ -288,12 +288,12 @@ export default function MapaAprovacaoDashboard() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase text-[#CBD5E1] font-bold tracking-widest">Localização</Label>
+                  <Label className="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Localização</Label>
                   <Select value={filters.locationStatus} onValueChange={(v) => setFilters(f => ({ ...f, locationStatus: v }))}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-xs">
+                    <SelectTrigger className="bg-white border-slate-200 text-slate-900 h-9 text-xs">
                       <SelectValue placeholder="Localização" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a2233] border-white/10 text-white">
+                    <SelectContent className="bg-white border-slate-200 text-slate-900">
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="localizada">Localizada</SelectItem>
                       <SelectItem value="pendente">Pendente</SelectItem>
@@ -302,14 +302,14 @@ export default function MapaAprovacaoDashboard() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase text-[#CBD5E1] font-bold tracking-widest">Cidade</Label>
+                  <Label className="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Cidade</Label>
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-white/20" />
+                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
                     <Input 
                       placeholder="Buscar cidade..." 
                       value={filters.city}
                       onChange={(e) => setFilters(f => ({ ...f, city: e.target.value }))}
-                      className="bg-white/5 border-white/10 text-white pl-9 h-9 text-xs"
+                      className="bg-white border-slate-200 text-slate-900 pl-9 h-9 text-xs"
                     />
                   </div>
                 </div>
@@ -318,7 +318,7 @@ export default function MapaAprovacaoDashboard() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className={cn("h-8 text-[10px] transition-all", viewMode === 'markers' ? "bg-blue-500/20 border-blue-500/30 text-blue-400" : "bg-white/5")}
+                    className={cn("h-8 text-[10px] transition-all", viewMode === 'markers' ? "bg-blue-50 border-blue-200 text-blue-600 shadow-sm" : "bg-white border-slate-200 text-slate-600")}
                     onClick={() => setViewMode('markers')}
                   >
                     Marcadores Individuais
@@ -326,7 +326,7 @@ export default function MapaAprovacaoDashboard() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className={cn("h-8 text-[10px] transition-all", viewMode === 'regions' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" : "bg-white/5")}
+                    className={cn("h-8 text-[10px] transition-all", viewMode === 'regions' ? "bg-emerald-50 border-emerald-200 text-emerald-600 shadow-sm" : "bg-white border-slate-200 text-slate-600")}
                     onClick={() => setViewMode('regions')}
                   >
                     Análise por Região
@@ -336,20 +336,20 @@ export default function MapaAprovacaoDashboard() {
             </div>
           </Card>
 
-          <Card className="bg-[#111827]/80 border-white/10 p-4">
-            <div className="flex items-center gap-2 text-white/90 font-bold text-sm mb-4">
-              <Activity className="h-4 w-4 text-emerald-400" />
+          <Card className="bg-white border-slate-200 p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-slate-900 font-bold text-sm mb-4">
+              <Activity className="h-4 w-4 text-emerald-600" />
               Top Cidades
             </div>
             <div className="space-y-4">
               {regionsStats.slice(0, 5).map((reg, idx) => (
                 <div key={idx} className="space-y-1">
                   <div className="flex justify-between text-[11px]">
-                    <span className="text-[#E2E8F0]">{reg.name}</span>
-                    <span className="text-emerald-400 font-bold">{BRL(reg.valor)}</span>
+                    <span className="text-slate-600">{reg.name}</span>
+                    <span className="text-emerald-600 font-bold">{BRL(reg.valor)}</span>
                   </div>
-                  <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500" style={{ width: `${(reg.valor / regionsStats[0].valor) * 100}%` }} />
+                  <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600" style={{ width: `${(reg.valor / regionsStats[0].valor) * 100}%` }} />
                   </div>
                 </div>
               ))}
@@ -357,9 +357,9 @@ export default function MapaAprovacaoDashboard() {
           </Card>
         </div>
 
-        <div className="lg:col-span-3 min-h-[600px] relative rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+        <div className="lg:col-span-3 min-h-[600px] relative rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
           <MapContainer center={[38.7223, -9.1393]} zoom={6} style={{ height: '100%', width: '100%' }}>
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+            <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
             
             {viewMode === 'markers' && filteredDevis.map((d) => {
               if (!d.client.latitude) return null;
