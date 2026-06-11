@@ -164,10 +164,10 @@ function BI() {
                   <div className={cn(
                     "flex items-center justify-center rounded-xl transition-all duration-500",
                     selectedDashboard 
-                      ? "w-8 h-8 bg-white/10 border border-white/10" 
-                      : "w-14 h-14 bg-white/5 border border-white/10 group-hover:scale-110 group-hover:rotate-3 shadow-2xl"
+                      ? "w-8 h-8 bg-slate-50 border border-slate-100" 
+                      : "w-14 h-14 bg-white border border-slate-100 group-hover:scale-110 group-hover:rotate-3 shadow-sm"
                   )}>
-                    <Icon className={cn("drop-shadow-md", selectedDashboard ? "h-4 w-4 text-white/70" : "h-7 w-7 text-white")} />
+                    <Icon className={cn("drop-shadow-sm", selectedDashboard ? "h-4 w-4 text-slate-400" : "h-7 w-7 text-primary")} />
                   </div>
                   
                   <div className={cn(
@@ -176,20 +176,20 @@ function BI() {
                   )}>
                     <h3 className={cn(
                       "font-display font-black tracking-tight leading-tight",
-                      selectedDashboard ? "text-sm text-white/70" : "text-2xl text-white",
-                      isActive && selectedDashboard && "text-white"
+                      selectedDashboard ? "text-sm text-slate-500" : "text-2xl text-slate-900",
+                      isActive && selectedDashboard && "text-slate-900"
                     )}>
                       {dashboard.title}
                     </h3>
                     {!selectedDashboard && (
-                      <p className="text-white/40 text-sm font-medium mt-1 max-w-[200px] line-clamp-2">
+                      <p className="text-slate-400 text-sm font-medium mt-1 max-w-[200px] line-clamp-2">
                         {dashboard.description}
                       </p>
                     )}
                   </div>
 
                   {isActive && selectedDashboard && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]" />
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
                   )}
                 </div>
               </div>
