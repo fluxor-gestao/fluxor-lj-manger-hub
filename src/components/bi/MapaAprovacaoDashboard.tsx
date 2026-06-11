@@ -29,6 +29,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { findArea } from "@/lib/businessAreas";
 import { CompanyCode } from "@/lib/companyCodes";
 import { formatDevisCode } from "@/lib/formatDevis";
+import { DevisPreviewDialog } from "../devis/DevisPreviewDialog";
 
 // Fix for default marker icons in Leaflet
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -96,6 +97,8 @@ export default function MapaAprovacaoDashboard() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"markers" | "regions">("markers");
   const [selectedClient, setSelectedClient] = useState<DevisData | null>(null);
+  const [devisPreviewOpen, setDevisPreviewOpen] = useState(false);
+  const [devisPreviewId, setDevisPreviewId] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     status: "all",
     city: "",
@@ -469,7 +472,10 @@ export default function MapaAprovacaoDashboard() {
 
                 <Button 
                   className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold h-10 mt-6 group"
-                  onClick={() => navigate({ to: `/comercial/devis/${selectedClient.id}` })}
+                  onClick={() => {
+                    setDevisPreviewId(selectedClient.id);
+                    setDevisPreviewOpen(true);
+                  }}
                 >
                   Ver Devis {formatDevisCode(selectedClient.devis_number, selectedClient.id)}
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -479,6 +485,11 @@ export default function MapaAprovacaoDashboard() {
           )}
         </div>
       </div>
+      <DevisPreviewDialog 
+        devisId={devisPreviewId} 
+        open={devisPreviewOpen} 
+        onOpenChange={setDevisPreviewOpen} 
+      />
     </div>
   );
 }
