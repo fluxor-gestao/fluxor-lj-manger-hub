@@ -24,6 +24,8 @@ import { findArea } from "@/lib/businessAreas";
 import { getStatusLabel, getStatusBadgeClass } from "@/lib/devisStatus";
 import DevisPdfTemplate from "./DevisPdfTemplate";
 import { useNavigate } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
+import type { CompanyCode } from "@/lib/companyCodes";
 
 const BRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
@@ -48,7 +50,7 @@ export function DevisPreviewDialog({ devisId, open, onOpenChange }: DevisPreview
           *,
           client:clients(*),
           devis_service_areas(area_slug),
-          responsible:profiles!commercial_responsible(full_name, email)
+          responsible:profiles!devis_commercial_responsible_fkey(full_name, email)
         `)
         .eq("id", devisId)
         .single();
@@ -180,7 +182,7 @@ export function DevisPreviewDialog({ devisId, open, onOpenChange }: DevisPreview
                         <div className="flex flex-wrap gap-2">
                           {devis.devis_service_areas?.map((a: any) => (
                             <Badge key={a.area_slug} variant="outline" className="bg-primary/10 border-primary/20 text-primary-foreground font-semibold py-1">
-                              {findArea(devis.business_unit, a.area_slug)?.label || a.area_slug}
+                              {findArea(devis.business_unit as CompanyCode, a.area_slug)?.label || a.area_slug}
                             </Badge>
                           ))}
                           {!devis.devis_service_areas?.length && <p className="text-sm text-slate-500 italic">Nenhuma área vinculada</p>}

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { FaturaPreviewDialog } from "./FaturaPreviewDialog";
 import { LembretePreviewDialog } from "./LembretePreviewDialog";
+import { DevisPreviewDialog } from "../devis/DevisPreviewDialog";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
@@ -212,6 +213,7 @@ export function CobrancaDetailSheet({
    const next = useMemo(() => (row ? nextActionOf(row) : null), [row]);
   const [faturaOpen, setFaturaOpen] = useState(false);
   const [lembreteOpen, setLembreteOpen] = useState(false);
+  const [devisPreviewOpen, setDevisPreviewOpen] = useState(false);
 
   if (!row) return null;
 
@@ -261,10 +263,8 @@ export function CobrancaDetailSheet({
                   <FileText className="h-4 w-4 text-primary" />
                   <span className="font-mono text-sm font-semibold">{formatDevisCode(row.devis_number, row.devis_id || undefined)}</span>
                 </div>
-                <Button variant="ghost" size="sm" asChild className="h-7 text-xs">
-                  <Link to={`/comercial/devis/${row.devis_id}`}>
-                    <ExternalLink className="h-3 w-3 mr-1" /> Ver Devis
-                  </Link>
+                <Button variant="ghost" size="sm" onClick={() => setDevisPreviewOpen(true)} className="h-7 text-xs">
+                  <ExternalLink className="h-3 w-3 mr-1" /> Ver Devis
                 </Button>
               </div>
             ) : (
@@ -357,6 +357,7 @@ export function CobrancaDetailSheet({
 
       <FaturaPreviewDialog row={row} open={faturaOpen} onOpenChange={setFaturaOpen} />
       <LembretePreviewDialog row={row} open={lembreteOpen} onOpenChange={setLembreteOpen} />
+      <DevisPreviewDialog devisId={row.devis_id || null} open={devisPreviewOpen} onOpenChange={setDevisPreviewOpen} />
     </Sheet>
   );
 }
