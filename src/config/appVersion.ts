@@ -9,12 +9,33 @@ export interface VersionRelease {
 }
 
 export const appVersion = {
-  version: "1.0.8",
+  version: "1.1.12",
   releaseDate: "11/06/2026",
-  releaseName: "Base Comercial e Financeira",
+  releaseName: "Otimização e Limpeza de Dados",
 };
 
 export const versionHistory: VersionRelease[] = [
+  {
+    version: "1.1.12",
+    releaseDate: "11/06/2026",
+    releaseName: "Otimização e Limpeza de Dados",
+    summary: "Atualização focada na integridade da base de dados e melhorias no sistema de enriquecimento de informações corporativas.",
+    implementations: [
+      "Busca de localização inteligente para empresas internacionais",
+      "Priorização de fontes oficiais (Receita Federal) para consultas via CNPJ",
+      "Detecção automática de empresas estrangeiras no enriquecimento",
+      "Sistema de migração de vínculos para limpeza de duplicatas"
+    ],
+    fixes: [
+      "Limpeza profunda da base de clientes removendo duplicatas",
+      "Consolidação de propostas e serviços em registros únicos de clientes",
+      "Correção no envio de propostas (validação flexível de cláusulas)"
+    ],
+    visualImprovements: [
+      "Indicador de processamento (loader) ao refinar propostas",
+      "Interface de enriquecimento de localização atualizada com status de país"
+    ]
+  },
   {
     version: "1.0.8",
     releaseDate: "11/06/2026",
