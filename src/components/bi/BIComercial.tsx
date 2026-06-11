@@ -1200,7 +1200,7 @@ export default function BIComercial() {
                   {receitaPorServico.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip formatter={(v: any) => BRL(Number(v))} />
-                <Legend />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
