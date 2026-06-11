@@ -202,6 +202,7 @@ const COL_W = (CONTENT_W - COL_GAP) / 2;
 export default function DevisPdfTemplate({
   devis,
   client,
+  pricingItems = [],
   contractor = DEFAULT_CONTRACTOR,
 }: DevisPdfTemplateProps) {
   const secondaryLang = (devis?.secondary_language || null) as Lang | null;
