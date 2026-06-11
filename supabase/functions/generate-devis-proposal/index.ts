@@ -158,6 +158,7 @@ Deno.serve(async (req) => {
       total_amount,
       deadline_date,
       tier,
+      business_unit,
     } = await req.json();
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
