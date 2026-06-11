@@ -1002,20 +1002,20 @@ export default function BIFinanceiro() {
         <Card className="border border-white/5 shadow-2xl overflow-hidden relative bg-[#1a2233]/40 backdrop-blur-xl group">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           <CardHeader className="relative z-10 border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-[#CBD5E1] group-hover:text-white/70 transition-colors">Resumo Financeiro Estratégico</CardTitle>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Resumo Financeiro Estratégico</CardTitle>
           </CardHeader>
           <CardContent className="relative z-10 p-6">
 
             <div className="grid gap-8">
               <div className="space-y-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CBD5E1] border-b border-white/10 pb-2">Receita e Resultado por Empresa</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">Receita e Resultado por Empresa</h4>
                 <div className="grid gap-2">
                   {receitaEmpresa.slice(0, 5).map((s) => {
                     const res = resultadoEmpresa.find(r => r.name === s.name)?.value ?? 0;
                     return (
-                      <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item">
+                      <div key={s.name} className="flex items-center justify-between text-sm p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all group/item">
                         <div className="flex flex-col gap-1">
-                          <span className="font-bold text-white group-hover/item:text-primary transition-colors">{s.name}</span>
+                          <span className="font-bold text-slate-900 group-hover/item:text-blue-600 transition-colors">{s.name}</span>
                           <span className={`text-[10px] font-bold uppercase tracking-wider ${res >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
                             {res >= 0 ? "+" : ""}{BRL(res)}
                           </span>
