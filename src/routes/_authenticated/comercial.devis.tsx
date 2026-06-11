@@ -1034,7 +1034,6 @@ function Comercial() {
               </div>
             </Card>
           )}
-        </TabsContent>
 
         {/* CLIENTS TAB */}
         <TabsContent value="clients" className="space-y-4">
