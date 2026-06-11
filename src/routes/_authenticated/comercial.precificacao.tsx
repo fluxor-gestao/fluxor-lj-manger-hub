@@ -51,7 +51,15 @@ function Precificacao() {
         .select("*")
         .order("name");
       if (error) throw error;
-      return data as ServicePrice[];
+      return (data as any[]).map(s => ({
+        id: s.id,
+        name: s.name,
+        description: s.description || "",
+        category: s.category || "Geral",
+        price: s.price || 0,
+        business_unit: s.business_unit as CompanyCode | null,
+        responsible_sector: s.responsible_sector as string | null,
+      })) as ServicePrice[];
     },
   });
 
