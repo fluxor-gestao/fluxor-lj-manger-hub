@@ -11,6 +11,14 @@ import { COMPANY_BADGE_CLASS, COMPANY_SHORT } from "@/lib/companyCodes";
 
 export type ServicePrefix = "DE" | "AM" | "CO" | "IM" | "GE";
 
+const PREFIX_META: Record<ServicePrefix, { label: string; icon: any }> = {
+  DE: { label: "Advocacia", icon: Gavel },
+  AM: { label: "Ambiental", icon: Sprout },
+  CO: { label: "Contábil", icon: Calculator },
+  IM: { label: "Imobiliária", icon: Home },
+  GE: { label: "Gestão", icon: Briefcase },
+};
+
 const PREFIX_LABEL: Record<ServicePrefix, string> = {
   DE: "Advocacia",
   AM: "Ambiental",
