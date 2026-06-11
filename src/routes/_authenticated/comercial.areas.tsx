@@ -251,7 +251,7 @@ function AreasManager() {
                     </SelectTrigger>
                     <SelectContent>
                       {activeUnits.map(u => (
-                        <SelectItem key={u.id} value={u.code}>{u.code} — {u.name}</SelectItem>
+                        <SelectItem key={u.id} value={u.code || ""}>{u.code} — {u.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -306,7 +306,7 @@ function AreasManager() {
               <SelectContent>
                 <SelectItem value="all">Todas as Unidades</SelectItem>
                 {activeUnits.map(u => (
-                  <SelectItem key={u.id} value={u.code}>{u.code} — {u.name.split('—').pop()?.trim() || u.name}</SelectItem>
+                  <SelectItem key={u.id} value={u.code || ""}>{u.code} — {u.name?.split('—').pop()?.trim() || u.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
