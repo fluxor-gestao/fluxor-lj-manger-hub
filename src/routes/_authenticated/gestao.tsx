@@ -10,10 +10,11 @@ import {
   ArrowUpRight, ArrowDownRight, Users, Target, Activity, 
   AlertTriangle, CheckCircle2, Building2, Calendar, LayoutDashboard,
   Filter, ChevronRight, PieChart as PieIcon, BarChart3, Wallet,
-  FileText
+  FileText, Database
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DREGerencial } from "@/components/bi/DREGerencial";
+import { ImportacaoHistorica } from "@/components/bi/ImportacaoHistorica";
 import { cn } from "@/lib/utils";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import {
@@ -192,6 +193,9 @@ function Gestao() {
             </TabsTrigger>
             <TabsTrigger value="dre" className="gap-2 font-bold px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
               <FileText className="h-4 w-4" /> DRE Gerencial
+            </TabsTrigger>
+            <TabsTrigger value="import" className="gap-2 font-bold px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <Database className="h-4 w-4" /> Importações Históricas
             </TabsTrigger>
           </TabsList>
 
@@ -440,6 +444,9 @@ function Gestao() {
     </TabsContent>
     <TabsContent value="dre" className="mt-0 border-none p-0">
       <DREGerencial />
+    </TabsContent>
+    <TabsContent value="import" className="mt-0 border-none p-0">
+      <ImportacaoHistorica />
     </TabsContent>
   </Tabs>
 </div>

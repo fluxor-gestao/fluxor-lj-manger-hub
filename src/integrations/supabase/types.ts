@@ -1386,6 +1386,97 @@ export type Database = {
           },
         ]
       }
+      historical_expenses: {
+        Row: {
+          account_name: string
+          business_unit: string | null
+          created_at: string | null
+          dre_group: string
+          expense_amount: number
+          id: string
+          import_log_id: string | null
+          month: number
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          account_name: string
+          business_unit?: string | null
+          created_at?: string | null
+          dre_group: string
+          expense_amount?: number
+          id?: string
+          import_log_id?: string | null
+          month: number
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          account_name?: string
+          business_unit?: string | null
+          created_at?: string | null
+          dre_group?: string
+          expense_amount?: number
+          id?: string
+          import_log_id?: string | null
+          month?: number
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_expenses_import_log_id_fkey"
+            columns: ["import_log_id"]
+            isOneToOne: false
+            referencedRelation: "import_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      historical_indicators: {
+        Row: {
+          business_unit: string | null
+          created_at: string | null
+          id: string
+          import_log_id: string | null
+          month: number
+          revenue_amount: number
+          service_name: string | null
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          business_unit?: string | null
+          created_at?: string | null
+          id?: string
+          import_log_id?: string | null
+          month: number
+          revenue_amount?: number
+          service_name?: string | null
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          business_unit?: string | null
+          created_at?: string | null
+          id?: string
+          import_log_id?: string | null
+          month?: number
+          revenue_amount?: number
+          service_name?: string | null
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_indicators_import_log_id_fkey"
+            columns: ["import_log_id"]
+            isOneToOne: false
+            referencedRelation: "import_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_batches: {
         Row: {
           error_count: number | null
@@ -1422,6 +1513,39 @@ export type Database = {
           source_kind?: string
           status?: Database["public"]["Enums"]["import_status"]
           success_count?: number | null
+        }
+        Relationships: []
+      }
+      import_logs: {
+        Row: {
+          created_at: string | null
+          error_log: string | null
+          file_name: string
+          id: string
+          import_type: string
+          record_count: number | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_log?: string | null
+          file_name: string
+          id?: string
+          import_type: string
+          record_count?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_log?: string | null
+          file_name?: string
+          id?: string
+          import_type?: string
+          record_count?: number | null
+          status?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

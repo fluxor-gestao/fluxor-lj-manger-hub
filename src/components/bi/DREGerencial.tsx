@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { historicalEntriesToFinancial } from "@/lib/dataUtils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,10 +30,11 @@ export function DREGerencial() {
     costCenter: "all",
   });
 
-  // Always fetch the whole year to calculate "Acumulado no Ano"
+  // Fetch both live and historical entries
   const { data: allYearEntries, isLoading } = useQuery({
     queryKey: ["dre-gerencial-year-entries", filters.year, filters.bu, filters.area, filters.costCenter, companyCode],
     queryFn: async () => {
+      // 1. Live entries
       let qb = supabase
         .from("financial_entries")
         .select("*")
@@ -45,9 +47,37 @@ export function DREGerencial() {
       if (filters.area !== "all") qb = qb.eq("area_slug", filters.area);
       if (filters.costCenter !== "all") qb = qb.eq("cost_center_id", filters.costCenter);
 
-      const { data, error } = await qb;
-      if (error) throw error;
-      return data || [];
+      const { data: live, error: liveErr } = await qb;
+      if (liveErr) throw liveErr;
+
+      // 2. Historical Indicators (Revenue)
+      let qbInd = supabase
+        .from("historical_indicators")
+        .select("*")
+        .eq("year", parseInt(filters.year));
+      
+      if (effectiveBu) qbInd = qbInd.eq("business_unit", effectiveBu);
+      const { data: ind, error: indErr } = await qbInd;
+      if (indErr) throw indErr;
+
+      // 3. Historical Expenses
+      let qbExp = supabase
+        .from("historical_expenses")
+        .select("*")
+        .eq("year", parseInt(filters.year));
+      
+      if (effectiveBu) qbExp = qbExp.eq("business_unit", effectiveBu);
+      const { data: exp, error: expErr } = await qbExp;
+      if (expErr) throw expErr;
+
+      // Combine all
+      const combined = [
+        ...(live || []),
+        ...historicalEntriesToFinancial(ind || []),
+        ...historicalEntriesToFinancial(exp || [])
+      ];
+
+      return combined;
     }
   });
 
