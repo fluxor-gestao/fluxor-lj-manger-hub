@@ -266,7 +266,10 @@ export function CobrancaDetailSheet({
           <DetailItem label="Vencimento" value={fmtDateBR(row.due_date)} />
           <DetailItem label="Competência" value={row.competence_month ?? "—"} />
           <DetailItem label="Lançamento" value={fmtDateBR(row.entry_date)} />
-          <DetailItem label="Referência" value={row.document_reference ?? "—"} />
+          <DetailItem 
+            label="Referência" 
+            value={row.devis_id ? formatDevisCode(row.devis_number, row.devis_id) : (row.document_reference ?? "—")} 
+          />
           <div className="col-span-2">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Devis Vinculado</p>
             {row.devis_id ? (
