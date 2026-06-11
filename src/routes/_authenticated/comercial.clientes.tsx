@@ -233,22 +233,31 @@ function Clientes() {
                       
                       let successCount = 0;
                       for (const row of data as any[]) {
-                        const empresa = row['EMPRESA'] || row['Empresa'];
-                        const nomeQsa = row['CLIENTE - QSA'] || row['Nome'];
+                        const empresa = row['EMPRESA'] || row['Empresa'] || row['Razão Social'] || row['NOME'];
+                        const nomeFantasia = row['NOME FANTASIA'] || row['Nome Fantasia'] || row['Fantasia'];
+                        const cnpj = row['CNPJ'] || row['Documento'] || row['CPF/CNPJ'];
+                        
                         if (!empresa) continue;
                         
-                        const emailField = String(row['e-mail de contato'] || row['Email'] || '').trim();
+                        const emailField = String(row['e-mail de contato'] || row['Email'] || row['E-mail'] || '').trim();
                         const emails = emailField.split(/[,;\s/]+/).filter(e => e.includes('@'));
                         const primaryEmail = emails[0] || null;
                         const allEmails = emails.join(', ');
 
                         const { error } = await supabase.from('clients').insert({
-                          name: String(nomeQsa || empresa).trim(),
-                          company: String(empresa).trim(),
-                          document: String(row['CNPJ'] || '').trim() || null,
+                          name: String(empresa).trim(),
+                          trade_name: nomeFantasia ? String(nomeFantasia).trim() : null,
+                          document: cnpj ? String(cnpj).trim() : null,
                           email: primaryEmail,
+                          phone: row['Telefone'] || row['PHONE'] || null,
+                          address: row['Endereço'] || row['Logradouro'] || null,
+                          street_number: row['Número'] || row['Nº'] || null,
+                          neighborhood: row['Bairro'] || null,
+                          city: row['Cidade'] || row['CITY'] || null,
+                          state: row['Estado'] || row['UF'] || null,
+                          zip_code: row['CEP'] || row['Zip Code'] || null,
                           type: 'PJ',
-                          notes: `E-mails: ${allEmails}\nSócio/QSA: ${nomeQsa || ''}\nIdioma: ${row['Idioma'] || ''}`,
+                          notes: `E-mails: ${allEmails}\nSócio/QSA: ${row['CLIENTE - QSA'] || ''}\nIdioma: ${row['Idioma'] || ''}`,
                           active: true
                         });
                         if (!error) successCount++;
