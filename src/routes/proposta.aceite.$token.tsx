@@ -11,10 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CheckCircle2, Loader2, AlertCircle, Calendar, FileText, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle, Calendar, FileText, XCircle, Building2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logo from "@/assets/logo.svg";
+import { COMPANY_NAME, type CompanyCode } from "@/lib/companyCodes";
 
 const FN_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/accept-devis-proposal`;
 const ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
