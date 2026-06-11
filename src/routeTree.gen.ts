@@ -38,6 +38,7 @@ import { Route as AuthenticatedFinanceiroRapportRouteImport } from './routes/_au
 import { Route as AuthenticatedFinanceiroContasAReceberRouteImport } from './routes/_authenticated/financeiro.contas-a-receber'
 import { Route as AuthenticatedFinanceiroContasAPagarRouteImport } from './routes/_authenticated/financeiro.contas-a-pagar'
 import { Route as AuthenticatedFinanceiroCentralRouteImport } from './routes/_authenticated/financeiro.central'
+import { Route as AuthenticatedFinanceiroCadastrosRouteImport } from './routes/_authenticated/financeiro.cadastros'
 import { Route as AuthenticatedComercialPrecificacaoRouteImport } from './routes/_authenticated/comercial.precificacao'
 import { Route as AuthenticatedComercialMapaAprovacaoRouteImport } from './routes/_authenticated/comercial.mapa-aprovacao'
 import { Route as AuthenticatedComercialDevisRouteImport } from './routes/_authenticated/comercial.devis'
@@ -203,6 +204,12 @@ const AuthenticatedFinanceiroCentralRoute =
     path: '/central',
     getParentRoute: () => AuthenticatedFinanceiroRoute,
   } as any)
+const AuthenticatedFinanceiroCadastrosRoute =
+  AuthenticatedFinanceiroCadastrosRouteImport.update({
+    id: '/cadastros',
+    path: '/cadastros',
+    getParentRoute: () => AuthenticatedFinanceiroRoute,
+  } as any)
 const AuthenticatedComercialPrecificacaoRoute =
   AuthenticatedComercialPrecificacaoRouteImport.update({
     id: '/precificacao',
@@ -291,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
   '/comercial/precificacao': typeof AuthenticatedComercialPrecificacaoRoute
+  '/financeiro/cadastros': typeof AuthenticatedFinanceiroCadastrosRoute
   '/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -330,6 +338,7 @@ export interface FileRoutesByTo {
   '/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
   '/comercial/precificacao': typeof AuthenticatedComercialPrecificacaoRoute
+  '/financeiro/cadastros': typeof AuthenticatedFinanceiroCadastrosRoute
   '/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -373,6 +382,7 @@ export interface FileRoutesById {
   '/_authenticated/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/_authenticated/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
   '/_authenticated/comercial/precificacao': typeof AuthenticatedComercialPrecificacaoRoute
+  '/_authenticated/financeiro/cadastros': typeof AuthenticatedFinanceiroCadastrosRoute
   '/_authenticated/financeiro/central': typeof AuthenticatedFinanceiroCentralRoute
   '/_authenticated/financeiro/contas-a-pagar': typeof AuthenticatedFinanceiroContasAPagarRoute
   '/_authenticated/financeiro/contas-a-receber': typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/comercial/devis'
     | '/comercial/mapa-aprovacao'
     | '/comercial/precificacao'
+    | '/financeiro/cadastros'
     | '/financeiro/central'
     | '/financeiro/contas-a-pagar'
     | '/financeiro/contas-a-receber'
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/comercial/devis'
     | '/comercial/mapa-aprovacao'
     | '/comercial/precificacao'
+    | '/financeiro/cadastros'
     | '/financeiro/central'
     | '/financeiro/contas-a-pagar'
     | '/financeiro/contas-a-receber'
@@ -497,6 +509,7 @@ export interface FileRouteTypes {
     | '/_authenticated/comercial/devis'
     | '/_authenticated/comercial/mapa-aprovacao'
     | '/_authenticated/comercial/precificacao'
+    | '/_authenticated/financeiro/cadastros'
     | '/_authenticated/financeiro/central'
     | '/_authenticated/financeiro/contas-a-pagar'
     | '/_authenticated/financeiro/contas-a-receber'
@@ -743,6 +756,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceiroCentralRouteImport
       parentRoute: typeof AuthenticatedFinanceiroRoute
     }
+    '/_authenticated/financeiro/cadastros': {
+      id: '/_authenticated/financeiro/cadastros'
+      path: '/cadastros'
+      fullPath: '/financeiro/cadastros'
+      preLoaderRoute: typeof AuthenticatedFinanceiroCadastrosRouteImport
+      parentRoute: typeof AuthenticatedFinanceiroRoute
+    }
     '/_authenticated/comercial/precificacao': {
       id: '/_authenticated/comercial/precificacao'
       path: '/precificacao'
@@ -850,6 +870,7 @@ const AuthenticatedComercialRouteWithChildren =
   )
 
 interface AuthenticatedFinanceiroRouteChildren {
+  AuthenticatedFinanceiroCadastrosRoute: typeof AuthenticatedFinanceiroCadastrosRoute
   AuthenticatedFinanceiroCentralRoute: typeof AuthenticatedFinanceiroCentralRoute
   AuthenticatedFinanceiroContasAPagarRoute: typeof AuthenticatedFinanceiroContasAPagarRoute
   AuthenticatedFinanceiroContasAReceberRoute: typeof AuthenticatedFinanceiroContasAReceberRoute
@@ -859,6 +880,8 @@ interface AuthenticatedFinanceiroRouteChildren {
 
 const AuthenticatedFinanceiroRouteChildren: AuthenticatedFinanceiroRouteChildren =
   {
+    AuthenticatedFinanceiroCadastrosRoute:
+      AuthenticatedFinanceiroCadastrosRoute,
     AuthenticatedFinanceiroCentralRoute: AuthenticatedFinanceiroCentralRoute,
     AuthenticatedFinanceiroContasAPagarRoute:
       AuthenticatedFinanceiroContasAPagarRoute,
@@ -929,13 +952,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
