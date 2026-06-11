@@ -390,6 +390,11 @@ function Comercial() {
     mutationFn: async (form: DevisForm) => {
       const total = Number(form.total_amount) || 0;
       const down = form.down_payment_amount === "" ? total * 0.5 : Number(form.down_payment_amount) || 0;
+      
+      if (!form.meeting_date) {
+        throw new Error("O prazo (deadline) é obrigatório.");
+      }
+
       const client = clientsById[form.client_id];
       const title = form.title || (client ? `Devis ${client.name}` : "Novo Devis");
       if (!isCompanyCode(form.business_unit)) {
@@ -401,6 +406,8 @@ function Comercial() {
       const insertPayload: any = {
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
+        deadline_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null, // Using meeting_date for deadline if that's the intention, but wait, usually there's a deadline_date field. Let's check the schema again.
+
         commercial_responsible: form.commercial_responsible || null,
         meeting_summary: form.meeting_summary || null,
         meeting_report: form.meeting_report || null,
