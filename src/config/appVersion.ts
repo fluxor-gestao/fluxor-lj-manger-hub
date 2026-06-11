@@ -9,12 +9,38 @@ export interface VersionRelease {
 }
 
 export const appVersion = {
-  version: "1.1.12",
+  version: "1.2.0",
   releaseDate: "11/06/2026",
-  releaseName: "Otimização e Limpeza de Dados",
+  releaseName: "Central do CEO & DRE Gerencial",
 };
 
 export const versionHistory: VersionRelease[] = [
+  {
+    version: "1.2.0",
+    releaseDate: "11/06/2026",
+    releaseName: "Central do CEO & DRE Gerencial",
+    summary: "Grande atualização focada em inteligência financeira e visão executiva para o grupo.",
+    implementations: [
+      "Nova Central do CEO com KPIs financeiros e comerciais unificados",
+      "DRE Gerencial automatizada com base no novo Plano de Contas",
+      "Sistema de Importação Histórica para migração de planilhas (Excel/CSV)",
+      "Novo Plano de Contas Gerencial com grupos e subcontas oficiais",
+      "Módulo de Conciliação Financeira integrado ao Plano de Contas",
+      "Sistema de alertas gerenciais automáticos (inadimplência, margem)",
+      "Registro de logs de importação com auditoria completa"
+    ],
+    fixes: [
+      "Correção na área de clique dos cards de importação (overlay nativo)",
+      "Sincronização de dados históricos com os novos dashboards de gestão",
+      "Ajuste na navegação e permissões de acesso ao módulo Gestão"
+    ],
+    visualImprovements: [
+      "Nova interface executiva para o Módulo de Gestão",
+      "Cards de KPI com indicadores de tendência e subvalores",
+      "Interface de preview de importação com validação de colunas",
+      "Estilização premium dos cards de 'Importação Histórica'"
+    ]
+  },
   {
     version: "1.1.12",
     releaseDate: "11/06/2026",
