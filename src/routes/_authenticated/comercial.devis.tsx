@@ -1038,11 +1038,11 @@ function Comercial() {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Excluir devis?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  {d.devis_number ? `${d.devis_number} — ` : ""}{d.title || clientsById[d.client_id]?.name || "Devis"}
-                                  <br />Esta ação não pode ser desfeita e removerá lançamentos financeiros e serviços vinculados que dependam deste registro.
-                                </AlertDialogDescription>
+                              <AlertDialogTitle>Excluir devis?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {formatDevisCode(d.devis_number, d.id)} — {d.title || clientsById[d.client_id]?.name || "Devis"}
+                                <br />Esta ação não pode ser desfeita e removerá lançamentos financeiros e serviços vinculados que dependam deste registro.
+                              </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
