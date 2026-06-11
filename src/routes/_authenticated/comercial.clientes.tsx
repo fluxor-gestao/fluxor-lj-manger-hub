@@ -97,14 +97,24 @@ function Clientes() {
 
   const saveClient = useMutation({
     mutationFn: async (form: ClientForm) => {
-      const payload = {
+      const payload: any = {
         name: form.name,
+        trade_name: form.trade_name || null,
         company: form.company || null,
         email: form.email || null,
         phone: form.phone || null,
         document: form.document || null,
         type: form.type,
         notes: form.notes || null,
+        country: form.country || null,
+        state: form.state || null,
+        city: form.city || null,
+        neighborhood: form.neighborhood || null,
+        address: form.address || null,
+        street_number: form.street_number || null,
+        zip_code: form.zip_code || null,
+        latitude: form.latitude ? Number(form.latitude) : null,
+        longitude: form.longitude ? Number(form.longitude) : null,
       };
       if (form.id) {
         const { error } = await supabase.from("clients").update(payload).eq("id", form.id);
