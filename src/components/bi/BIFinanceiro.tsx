@@ -1241,10 +1241,10 @@ export default function BIFinanceiro() {
           {isLoading ? <Skeleton className="h-[260px]" /> : topFornecedores.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={topFornecedores} layout="vertical" onClick={() => setTabFocus("pagar")}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
-                <YAxis type="category" dataKey="name" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.6)' }} />
-                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis type="number" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <YAxis type="category" dataKey="name" width={100} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#374151' }} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="value" fill="#F59E0B" fillOpacity={0.8} radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
