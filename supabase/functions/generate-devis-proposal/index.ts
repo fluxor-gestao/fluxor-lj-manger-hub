@@ -343,7 +343,7 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. Use
     const downPayment = +(finalTotal * 0.5).toFixed(2);
 
     const proposal_structure = buildProposalMarkdown({
-      business_unit: args.business_unit,
+      business_unit,
       title: finalTitle,
       client_name,
       client_document,
