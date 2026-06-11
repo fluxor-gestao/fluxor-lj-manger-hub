@@ -1362,36 +1362,39 @@ export default function BIComercial() {
         </TabsContent>
 
         <TabsContent value="responsaveis">
-          <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden">
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0 overflow-x-auto">
-
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Responsável</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Criadas</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Aceitas</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Valor aceito</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Conversão</TableHead>
-                    <TableHead className="text-right text-[#94A3B8] font-bold uppercase tracking-wider text-[10px]">Ticket médio</TableHead>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Responsável</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Criadas</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Aceitas</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor aceito</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Conversão</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12 px-4">Ticket médio</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {perfResponsaveis.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-white/40 py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-slate-400 py-6 italic text-xs">Sem dados</TableCell></TableRow>
                   )}
                   {perfResponsaveis.map((p, i) => (
                     <TableRow
                       key={i}
-                      className="cursor-pointer hover:bg-muted/40"
+                      className={cn(
+                        "cursor-pointer transition-colors border-slate-100",
+                        i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                        "hover:bg-slate-50"
+                      )}
                       onClick={() => p.name !== "—" && setFilters({ ...filters, responsible: p.name })}
                     >
-                      <TableCell>{p.name}</TableCell>
-                      <TableCell className="text-right">{p.criadas}</TableCell>
-                      <TableCell className="text-right">{p.aceitas}</TableCell>
-                      <TableCell className="text-right">{BRL(p.valor)}</TableCell>
-                      <TableCell className="text-right">{PCT(p.conversao)}</TableCell>
-                      <TableCell className="text-right">{BRL(p.ticket)}</TableCell>
+                      <TableCell className="text-slate-900 font-medium px-4">{p.name}</TableCell>
+                      <TableCell className="text-right text-slate-600">{p.criadas}</TableCell>
+                      <TableCell className="text-right text-slate-600">{p.aceitas}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-bold">{BRL(p.valor)}</TableCell>
+                      <TableCell className="text-right text-slate-900 font-medium">{PCT(p.conversao)}</TableCell>
+                      <TableCell className="text-right text-slate-900 px-4">{BRL(p.ticket)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
