@@ -398,7 +398,3 @@ export function ImportacaoHistorica() {
     </div>
   );
 }
-
-// Add these Lucide icons to the top imports if they are missing
-import { TrendingUp as TrendingUpIcon } from "lucide-react";
-const TrendingUp = TrendingUpIcon;
