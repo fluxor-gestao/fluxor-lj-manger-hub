@@ -25,6 +25,34 @@ export function NovoProcessoDialog() {
     expected_end_date: "",
   });
 
+  const { data: units = [] } = useQuery({
+    queryKey: ["catalog", "business_units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("code, name")
+        .eq("active", true)
+        .order("code");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: areas = [] } = useQuery({
+    queryKey: ["business-areas", form.business_unit],
+    enabled: !!form.business_unit,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_areas")
+        .select("slug, label")
+        .eq("business_unit", form.business_unit)
+        .eq("is_active", true)
+        .order("label");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const create = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("services").insert({
@@ -71,11 +99,29 @@ export function NovoProcessoDialog() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Unidade de negócio</Label>
-              <Input value={form.business_unit} onChange={(e) => setForm({ ...form, business_unit: e.target.value })} />
+              <Select value={form.business_unit} onValueChange={(v) => setForm({ ...form, business_unit: v, responsible_sector: "" })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {units.map((u: any) => (
+                    <SelectItem key={u.code} value={u.code}>{u.code} — {u.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Setor responsável</Label>
-              <Input value={form.responsible_sector} onChange={(e) => setForm({ ...form, responsible_sector: e.target.value })} />
+              <Select value={form.responsible_sector} onValueChange={(v) => setForm({ ...form, responsible_sector: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {areas.map((a: any) => (
+                    <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
