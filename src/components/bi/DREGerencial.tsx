@@ -222,22 +222,39 @@ export function DREGerencial() {
               </Select>
             </div>
 
-            <div className="space-y-1.5 md:col-span-2">
-              <Label className="text-[10px] font-bold uppercase text-slate-400">Período Customizado</Label>
-              <div className="flex gap-2">
-                <Input 
-                  type="date" 
-                  className="h-9 text-xs" 
-                  value={filters.start} 
-                  onChange={(e) => setFilters(f => ({ ...f, start: e.target.value }))}
-                />
-                <Input 
-                  type="date" 
-                  className="h-9 text-xs" 
-                  value={filters.end} 
-                  onChange={(e) => setFilters(f => ({ ...f, end: e.target.value }))}
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase text-slate-400">Serviço/Área</Label>
+              <Select value={filters.area} onValueChange={(v) => setFilters(f => ({ ...f, area: v }))}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Serviço" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="comercial">Comercial</SelectItem>
+                  <SelectItem value="operacao">Operação</SelectItem>
+                  <SelectItem value="financeiro">Financeiro</SelectItem>
+                  <SelectItem value="administrativo">Administrativo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5 md:col-span-1">
+              <Label className="text-[10px] font-bold uppercase text-slate-400">Início</Label>
+              <Input 
+                type="date" 
+                className="h-9 text-xs" 
+                value={filters.start} 
+                onChange={(e) => setFilters(f => ({ ...f, start: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-1">
+              <Label className="text-[10px] font-bold uppercase text-slate-400">Fim</Label>
+              <Input 
+                type="date" 
+                className="h-9 text-xs" 
+                value={filters.end} 
+                onChange={(e) => setFilters(f => ({ ...f, end: e.target.value }))}
+              />
             </div>
           </div>
         </CardContent>
