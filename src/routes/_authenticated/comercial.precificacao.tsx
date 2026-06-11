@@ -77,6 +77,8 @@ function Precificacao() {
         description: service.description || null,
         category: service.category || "Geral",
         price: service.price || 0,
+        business_unit: service.business_unit || null,
+        responsible_sector: service.responsible_sector || null,
       };
 
       if (service.id) {
