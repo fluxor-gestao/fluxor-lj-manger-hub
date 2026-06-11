@@ -1834,6 +1834,45 @@ export type Database = {
         }
         Relationships: []
       }
+      system_versions: {
+        Row: {
+          created_at: string
+          fixes: string[] | null
+          id: string
+          implementations: string[] | null
+          is_current: boolean | null
+          release_date: string
+          release_name: string
+          summary: string | null
+          version: string
+          visual_improvements: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          fixes?: string[] | null
+          id?: string
+          implementations?: string[] | null
+          is_current?: boolean | null
+          release_date?: string
+          release_name: string
+          summary?: string | null
+          version: string
+          visual_improvements?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          fixes?: string[] | null
+          id?: string
+          implementations?: string[] | null
+          is_current?: boolean | null
+          release_date?: string
+          release_name?: string
+          summary?: string | null
+          version?: string
+          visual_improvements?: string[] | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

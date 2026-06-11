@@ -8,10 +8,12 @@ import {
   Shield,
   HelpCircle,
   LogOut,
+  Loader2,
 } from "lucide-react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
-import { appVersion } from "@/config/appVersion";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import logoBanner from "@/assets/logo-banner.png";
 import {
   Sidebar,
@@ -55,6 +57,19 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, hasRole, refreshRole, signOut } = useAuth();
+
+  const { data: currentVersion, isLoading: loadingVersion } = useQuery({
+    queryKey: ["current-system-version"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("system_versions")
+        .select("version")
+        .eq("is_current", true)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.version || "1.2.0";
+    },
+  });
 
   const isActive = (path: string) =>
     path === "/hub" ? location.pathname === "/hub" : location.pathname.startsWith(path);
@@ -131,8 +146,12 @@ export function AppSidebar() {
             <p className="truncate text-xs text-sidebar-foreground/50">
               {user.email}
             </p>
-            <p className="text-[10px] font-medium text-sidebar-foreground/30">
-              v{appVersion.version}
+            <p className="text-[10px] font-medium text-sidebar-foreground/30 flex items-center gap-1.5">
+              {loadingVersion ? (
+                <Loader2 className="h-2 w-2 animate-spin" />
+              ) : (
+                `v${currentVersion}`
+              )}
             </p>
           </div>
         )}
