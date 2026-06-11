@@ -235,6 +235,7 @@ function DevisDetail() {
           client_address: [client?.address, client?.city].filter(Boolean).join(", ") || undefined,
           total_amount: Number(form.total_amount) || undefined,
           deadline_date: form.deadline_date ? format(form.deadline_date, "yyyy-MM-dd") : undefined,
+          business_unit: form.business_unit,
           tier,
         },
       });
