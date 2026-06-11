@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
     if (!to?.length || !subject || !message_text) throw new Error("Parâmetros inválidos");
 
     const lang: Lang = (["pt", "fr", "en", "es"].includes(language) ? language : "pt") as Lang;
-    const htmlBody = buildHtml(message_text, accept_url, lang);
+    const htmlBody = buildHtml(message_text, accept_url, lang, business_unit);
 
     const payload: any = {
       from: FROM_EMAIL,
