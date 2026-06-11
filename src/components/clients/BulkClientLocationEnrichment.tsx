@@ -94,12 +94,16 @@ export default function BulkClientLocationEnrichment({ open, onOpenChange, onCom
                 .from("clients")
                 .update({
                   address: data.address,
+                  street_number: data.street_number || null,
+                  neighborhood: data.neighborhood || null,
                   city: data.city,
                   state: data.state,
                   country: data.country,
                   zip_code: data.zip_code,
                   latitude: data.latitude,
                   longitude: data.longitude,
+                  trade_name: data.trade_name || null,
+                  location_source: data.source || "AI Bulk",
                   location_status: "localizada",
                   location_updated_at: new Date().toISOString(),
                 } as any)
