@@ -525,9 +525,9 @@ export function NovoLancamentoDialog({
                   <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">— Nenhuma —</SelectItem>
-                    {bankAccounts.map((b) => (
+                    {(catalogs as any).financialAccounts.map((b: any) => (
                       <SelectItem key={b.id} value={b.id}>
-                        {b.bank_name}{b.account_number ? ` · ${b.account_number}` : ""}
+                        {b.name} {b.bank ? `· ${b.bank}` : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
