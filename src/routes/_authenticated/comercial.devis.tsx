@@ -105,6 +105,7 @@ const emptyDevis: DevisForm = {
   business_unit: "",
   responsible_sector: "",
   responsible_sectors: [],
+  down_payment_percentage: "50",
 };
 
 function Comercial() {
