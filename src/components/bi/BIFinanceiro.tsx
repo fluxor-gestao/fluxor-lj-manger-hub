@@ -1336,32 +1336,38 @@ export default function BIFinanceiro() {
         </TabsContent>
 
         <TabsContent value="pagar">
-          <Card>
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Fornecedor</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Vencimento</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Valor</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Dias atraso</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Prioridade</TableHead>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Fornecedor</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Prioridade</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {contasPagarCriticas.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem contas a pagar críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-slate-400 py-6 italic text-xs">Sem contas a pagar críticas</TableCell></TableRow>
                   )}
-                  {contasPagarCriticas.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>{r.fornecedor}</TableCell>
-                      <TableCell>{r.vencimento}</TableCell>
-                      <TableCell className="text-right">{BRL(r.valor)}</TableCell>
-                      <TableCell className="text-right">{r.dias > 0 ? <Badge variant="destructive">{r.dias}d</Badge> : r.dias}</TableCell>
-                      <TableCell><Badge variant="outline">{r.status}</Badge></TableCell>
+                  {contasPagarCriticas.map((r, i) => (
+                    <TableRow key={r.id} className={cn(
+                      "border-slate-100 transition-colors group/row",
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                      "hover:bg-slate-50"
+                    )}>
+                      <TableCell className="font-bold text-slate-900 group-hover/row:text-primary transition-colors">{r.fornecedor}</TableCell>
+                      <TableCell className="text-slate-500 text-xs">{r.vencimento}</TableCell>
+                      <TableCell className="text-right font-bold text-slate-900">{BRL(r.valor)}</TableCell>
+                      <TableCell className="text-right">
+                        {r.dias > 0 ? <Badge variant="destructive">{r.dias}d</Badge> : <span className="text-slate-400">{r.dias}</span>}
+                      </TableCell>
+                      <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white">{r.status}</Badge></TableCell>
                       <TableCell>
-                        <Badge variant={r.prioridade === "alta" ? "destructive" : r.prioridade === "média" ? "default" : "secondary"}>
+                        <Badge variant={r.prioridade === "alta" ? "destructive" : r.prioridade === "média" ? "default" : "secondary"} className="font-bold">
                           {r.prioridade}
                         </Badge>
                       </TableCell>
