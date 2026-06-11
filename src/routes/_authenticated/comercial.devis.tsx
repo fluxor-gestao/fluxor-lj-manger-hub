@@ -110,7 +110,7 @@ function Comercial() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { filterCode: companyCode, isConsolidated } = useCompany();
+  const { filterCode: companyCode } = useCompany();
 
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [clientForm, setClientForm] = useState<ClientForm>(emptyClient);
@@ -409,7 +409,7 @@ function Comercial() {
         created_by: user?.id,
         devis_number: form.devis_number || null,
         service_type: form.service_type || aiAccepted.service_type || null,
-        responsible_sector: form.responsible_sectors[0] || null,
+        responsible_sector: form.responsible_sector || null,
         scope_description: aiAccepted.scope_description || null,
         proposal_structure: aiAccepted.proposal_structure || null,
         source_language: form.source_language || "pt",
@@ -770,7 +770,13 @@ function Comercial() {
                     <MultiAreaSelector
                       companyCode={devisForm.business_unit as CompanyCode}
                       selectedAreas={devisForm.responsible_sectors}
-                      onChange={(areas) => setDevisForm({ ...devisForm, responsible_sectors: areas, responsible_sector: areas[0] || "" })}
+                      onChange={(areas) => setDevisForm({ 
+                        ...devisForm, 
+                        responsible_sectors: areas, 
+                        responsible_sector: areas.includes(devisForm.responsible_sector) ? devisForm.responsible_sector : (areas[0] || "") 
+                      })}
+                      mainArea={devisForm.responsible_sector}
+                      onMainAreaChange={(slug) => setDevisForm({ ...devisForm, responsible_sector: slug })}
                     />
                   </div>
                   <div className="md:col-span-2">
