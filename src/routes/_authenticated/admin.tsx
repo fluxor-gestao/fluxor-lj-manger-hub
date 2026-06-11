@@ -1247,6 +1247,10 @@ function Admin() {
             </Button>
           </div>
         </TabsContent>
+        
+        <TabsContent value="commercial-settings" className="space-y-4">
+          <DevisSequenceManager />
+        </TabsContent>
 
         <TabsContent value="areas" className="space-y-4">
           <BusinessAreasManager />
