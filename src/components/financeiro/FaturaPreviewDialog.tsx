@@ -13,6 +13,8 @@ import { Copy, Send, Download, X, CreditCard, Building2, Loader2 } from "lucide-
 import logo from "@/assets/logo.svg";
 import type { CobrancaRow } from "./CobrancaDetailSheet";
 
+import { formatDevisCode } from "@/lib/formatDevis";
+
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
 
