@@ -42,6 +42,7 @@ import { Route as AuthenticatedComercialPrecificacaoRouteImport } from './routes
 import { Route as AuthenticatedComercialMapaAprovacaoRouteImport } from './routes/_authenticated/comercial.mapa-aprovacao'
 import { Route as AuthenticatedComercialDevisRouteImport } from './routes/_authenticated/comercial.devis'
 import { Route as AuthenticatedComercialClientesRouteImport } from './routes/_authenticated/comercial.clientes'
+import { Route as AuthenticatedComercialAreasRouteImport } from './routes/_authenticated/comercial.areas'
 import { Route as AuthenticatedAjudaComercialRouteImport } from './routes/_authenticated/ajuda_.comercial'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin_.api-keys'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -226,6 +227,12 @@ const AuthenticatedComercialClientesRoute =
     path: '/clientes',
     getParentRoute: () => AuthenticatedComercialRoute,
   } as any)
+const AuthenticatedComercialAreasRoute =
+  AuthenticatedComercialAreasRouteImport.update({
+    id: '/areas',
+    path: '/areas',
+    getParentRoute: () => AuthenticatedComercialRoute,
+  } as any)
 const AuthenticatedAjudaComercialRoute =
   AuthenticatedAjudaComercialRouteImport.update({
     id: '/ajuda_/comercial',
@@ -279,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/comercial/areas': typeof AuthenticatedComercialAreasRoute
   '/comercial/clientes': typeof AuthenticatedComercialClientesRoute
   '/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/comercial/areas': typeof AuthenticatedComercialAreasRoute
   '/comercial/clientes': typeof AuthenticatedComercialClientesRoute
   '/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
@@ -359,6 +368,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin_/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/_authenticated/ajuda_/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/_authenticated/comercial/areas': typeof AuthenticatedComercialAreasRoute
   '/_authenticated/comercial/clientes': typeof AuthenticatedComercialClientesRoute
   '/_authenticated/comercial/devis': typeof AuthenticatedComercialDevisRoute
   '/_authenticated/comercial/mapa-aprovacao': typeof AuthenticatedComercialMapaAprovacaoRoute
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/api-keys'
     | '/ajuda/comercial'
+    | '/comercial/areas'
     | '/comercial/clientes'
     | '/comercial/devis'
     | '/comercial/mapa-aprovacao'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/api-keys'
     | '/ajuda/comercial'
+    | '/comercial/areas'
     | '/comercial/clientes'
     | '/comercial/devis'
     | '/comercial/mapa-aprovacao'
@@ -480,6 +492,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/_authenticated/admin_/api-keys'
     | '/_authenticated/ajuda_/comercial'
+    | '/_authenticated/comercial/areas'
     | '/_authenticated/comercial/clientes'
     | '/_authenticated/comercial/devis'
     | '/_authenticated/comercial/mapa-aprovacao'
@@ -758,6 +771,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComercialClientesRouteImport
       parentRoute: typeof AuthenticatedComercialRoute
     }
+    '/_authenticated/comercial/areas': {
+      id: '/_authenticated/comercial/areas'
+      path: '/areas'
+      fullPath: '/comercial/areas'
+      preLoaderRoute: typeof AuthenticatedComercialAreasRouteImport
+      parentRoute: typeof AuthenticatedComercialRoute
+    }
     '/_authenticated/ajuda_/comercial': {
       id: '/_authenticated/ajuda_/comercial'
       path: '/ajuda/comercial'
@@ -804,6 +824,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedComercialRouteChildren {
+  AuthenticatedComercialAreasRoute: typeof AuthenticatedComercialAreasRoute
   AuthenticatedComercialClientesRoute: typeof AuthenticatedComercialClientesRoute
   AuthenticatedComercialDevisRoute: typeof AuthenticatedComercialDevisRoute
   AuthenticatedComercialMapaAprovacaoRoute: typeof AuthenticatedComercialMapaAprovacaoRoute
@@ -813,6 +834,7 @@ interface AuthenticatedComercialRouteChildren {
 
 const AuthenticatedComercialRouteChildren: AuthenticatedComercialRouteChildren =
   {
+    AuthenticatedComercialAreasRoute: AuthenticatedComercialAreasRoute,
     AuthenticatedComercialClientesRoute: AuthenticatedComercialClientesRoute,
     AuthenticatedComercialDevisRoute: AuthenticatedComercialDevisRoute,
     AuthenticatedComercialMapaAprovacaoRoute:

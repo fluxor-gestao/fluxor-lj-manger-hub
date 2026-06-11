@@ -158,7 +158,8 @@ function BusinessAreasManager() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editingArea, setEditingArea] = useState<any>(null);
-  const [name, setName] = useState("");
+  const [label, setLabel] = useState("");
+  const [businessUnit, setBusinessUnit] = useState("");
   const [description, setDescription] = useState("");
   const [displayOrder, setDisplayOrder] = useState("0");
   const [isActive, setIsActive] = useState(true);
@@ -169,8 +170,9 @@ function BusinessAreasManager() {
       const { data, error } = await supabase
         .from("business_areas")
         .select("*")
+        .order("business_unit", { ascending: true })
         .order("display_order", { ascending: true })
-        .order("name", { ascending: true });
+        .order("label", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
@@ -194,9 +196,11 @@ function BusinessAreasManager() {
 
   const saveArea = useMutation({
     mutationFn: async () => {
-      const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").replace(/[^\w]/g, "");
-      const payload = {
-        name,
+      const slug = label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").replace(/[^\w]/g, "");
+      const payload: any = {
+        label,
+        name: label, // keep name for backward compatibility
+        business_unit: businessUnit,
         slug,
         description,
         display_order: parseInt(displayOrder) || 0,
@@ -212,7 +216,7 @@ function BusinessAreasManager() {
       } else {
         const { error } = await supabase
           .from("business_areas")
-          .insert(payload);
+          .insert([payload]);
         if (error) throw error;
       }
     },
@@ -229,7 +233,7 @@ function BusinessAreasManager() {
     mutationFn: async (id: string) => {
       const area = areas.find((a: any) => a.id === id);
       if (area && areaUsage[area.slug]) {
-        throw new Error(`Não é possível excluir a área "${area.name}" pois ela possui ${areaUsage[area.slug]} Devis vinculado(s). Inative-a em vez de excluir.`);
+        throw new Error(`Não é possível excluir a área "${area.label}" pois ela possui ${areaUsage[area.slug]} Devis vinculado(s). Inative-a em vez de excluir.`);
       }
       const { error } = await supabase
         .from("business_areas")
@@ -246,7 +250,8 @@ function BusinessAreasManager() {
 
   const resetForm = () => {
     setEditingArea(null);
-    setName("");
+    setLabel("");
+    setBusinessUnit("");
     setDescription("");
     setDisplayOrder("0");
     setIsActive(true);
@@ -254,7 +259,8 @@ function BusinessAreasManager() {
 
   const handleEdit = (area: any) => {
     setEditingArea(area);
-    setName(area.name);
+    setLabel(area.label || area.name);
+    setBusinessUnit(area.business_unit || "");
     setDescription(area.description || "");
     setDisplayOrder(String(area.display_order));
     setIsActive(area.is_active);
@@ -266,7 +272,7 @@ function BusinessAreasManager() {
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <div>
           <CardTitle>Listagem de Áreas</CardTitle>
-          <CardDescription>Cadastre as áreas/setores que podem ser vinculados aos Devis.</CardDescription>
+          <CardDescription>Cadastre as áreas/setores por Unidade de Negócio.</CardDescription>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger asChild>
@@ -277,9 +283,26 @@ function BusinessAreasManager() {
               <DialogTitle>{editingArea ? "Editar Área" : "Nova Área"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Nome da área</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Migratório, TI, Vendas..." />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Unidade de Negócio</Label>
+                  <Select value={businessUnit} onValueChange={setBusinessUnit}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="DE">DE — Direito Estratégico</SelectItem>
+                      <SelectItem value="AM">AM — Ambiental</SelectItem>
+                      <SelectItem value="CO">CO — Contabilidade</SelectItem>
+                      <SelectItem value="IM">IM — Imobiliário</SelectItem>
+                      <SelectItem value="GE">GE — Gestão & Consultoria</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Nome da área</Label>
+                  <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex: Migratório, TI..." />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Descrição (opcional)</Label>
@@ -298,7 +321,7 @@ function BusinessAreasManager() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button onClick={() => saveArea.mutate()} disabled={!name || saveArea.isPending}>
+              <Button onClick={() => saveArea.mutate()} disabled={!label || !businessUnit || saveArea.isPending}>
                 {saveArea.isPending ? "Salvando..." : "Salvar"}
               </Button>
             </DialogFooter>
@@ -309,9 +332,10 @@ function BusinessAreasManager() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px]">Ordem</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>Slug (identificador)</TableHead>
+              <TableHead>Unidade</TableHead>
+              <TableHead>Área</TableHead>
+              <TableHead>Slug</TableHead>
+              <TableHead>Ordem</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Uso</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -319,15 +343,20 @@ function BusinessAreasManager() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando áreas...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando áreas...</TableCell></TableRow>
             ) : areas.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma área cadastrada.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma área cadastrada.</TableCell></TableRow>
             ) : (
               areas.map((area: any) => (
                 <TableRow key={area.id}>
-                  <TableCell className="font-mono text-xs">{area.display_order}</TableCell>
-                  <TableCell className="font-medium">{area.name}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="font-bold">
+                      {area.business_unit}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-medium">{area.label || area.name}</TableCell>
                   <TableCell className="font-mono text-[10px] text-muted-foreground">{area.slug}</TableCell>
+                  <TableCell className="font-mono text-xs">{area.display_order}</TableCell>
                   <TableCell>
                     <Badge variant={area.is_active ? "default" : "secondary"}>
                       {area.is_active ? "Ativo" : "Inativo"}

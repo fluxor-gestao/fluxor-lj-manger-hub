@@ -189,31 +189,37 @@ export type Database = {
       }
       business_areas: {
         Row: {
+          business_unit: string
           created_at: string | null
           description: string | null
           display_order: number | null
           id: string
           is_active: boolean | null
+          label: string
           name: string
           slug: string
           updated_at: string | null
         }
         Insert: {
+          business_unit: string
           created_at?: string | null
           description?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
+          label: string
           name: string
           slug: string
           updated_at?: string | null
         }
         Update: {
+          business_unit?: string
           created_at?: string | null
           description?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
+          label?: string
           name?: string
           slug?: string
           updated_at?: string | null

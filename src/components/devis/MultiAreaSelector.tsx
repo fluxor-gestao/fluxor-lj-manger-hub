@@ -30,24 +30,27 @@ export function MultiAreaSelector({
   // 1. Áreas fixas do arquivo lib
   const legacyAreas = getAreasFor(companyCode as CompanyCode);
 
-  // 2. Áreas dinâmicas do banco de dados (apenas ativas)
+  // 2. Áreas dinâmicas do banco de dados (apenas ativas para esta unidade)
   const { data: dbAreas = [], isLoading } = useQuery({
-    queryKey: ["business-areas", "active"],
+    queryKey: ["business-areas", "active", companyCode],
     queryFn: async () => {
+      if (!companyCode) return [];
       const { data, error } = await supabase
         .from("business_areas")
         .select("*")
         .eq("is_active", true)
+        .eq("business_unit", companyCode)
         .order("display_order", { ascending: true })
-        .order("name", { ascending: true });
+        .order("label", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
+    enabled: !!companyCode,
   });
 
   // 3. Mescla as áreas (priorizando DB e evitando duplicatas por slug)
   const allAreas = useMemo(() => {
-    const combined = [...dbAreas.map(a => ({ slug: a.slug, label: a.name }))];
+    const combined = [...dbAreas.map(a => ({ slug: a.slug, label: a.label || a.name }))];
     
     // Adiciona áreas legadas que ainda não estão no DB (opcional, para transição suave)
     legacyAreas.forEach(la => {
