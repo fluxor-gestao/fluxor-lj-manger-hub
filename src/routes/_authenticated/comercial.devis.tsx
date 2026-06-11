@@ -566,14 +566,7 @@ function Comercial() {
         </div>
       </div>
 
-      <Tabs defaultValue="devis">
-        <TabsList>
-          <TabsTrigger value="devis"><FileText className="h-4 w-4 mr-2" />Devis</TabsTrigger>
-          <TabsTrigger value="clients"><Users className="h-4 w-4 mr-2" />Clientes</TabsTrigger>
-        </TabsList>
-
-        {/* DEVIS TAB */}
-        <div className="space-y-4">
+      <div className="space-y-4">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <Card className="overflow-hidden border-0 bg-gradient-to-br from-slate-600 to-slate-700 p-4 text-white shadow-md">
               <div className="flex items-start justify-between gap-3">
