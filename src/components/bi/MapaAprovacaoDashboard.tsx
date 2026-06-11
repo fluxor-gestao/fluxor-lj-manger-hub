@@ -117,7 +117,7 @@ export default function MapaAprovacaoDashboard() {
           business_unit, 
           responsible_sector,
           created_at,
-          client:clients(id, name, city, country, address, latitude, longitude, company, location_status),
+          client:clients(id, name, trade_name, city, country, address, latitude, longitude, company, location_status),
           areas:devis_service_areas(area_slug)
         `);
 
@@ -425,7 +425,7 @@ export default function MapaAprovacaoDashboard() {
               <Card className="h-full bg-[#111827]/95 border-white/20 backdrop-blur-2xl shadow-2xl p-5 flex flex-col">
                 <div className="flex justify-between mb-4">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-black text-white">{selectedClient.client.name}</h3>
+                    <h3 className="text-lg font-black text-white">{(selectedClient.client as any).trade_name || selectedClient.client.name}</h3>
                     <p className="text-xs text-[#CBD5E1]">{selectedClient.client.city}, {selectedClient.client.country}</p>
                   </div>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-[#CBD5E1]" onClick={() => setSelectedClient(null)}>✕</Button>

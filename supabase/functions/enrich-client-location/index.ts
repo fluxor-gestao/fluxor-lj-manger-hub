@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     
     if (!OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY no configurada");
+      throw new Error("OPENAI_API_KEY não configurada");
     }
 
     const searchQuery = cnpj 
@@ -27,14 +27,17 @@ REGRAS:
 3. Se houver múltiplos endereços (filiais), tente identificar a matriz ou o endereço mais provável baseado nos termos de busca.
 4. Se não encontrar nada, retorne um objeto vazio.
 
-CAMPOS OBRIGATÓRIOS NO JSON:
-- address: Logradouro (ex: Av. Paulista, 1000)
+CAMPOS NO JSON:
+- address: Logradouro (ex: Av. Paulista)
+- street_number: Número (ex: 1000)
+- neighborhood: Bairro (ex: Bela Vista)
 - city: Cidade
 - state: Estado/Província
 - country: País
 - zip_code: CEP/Postal Code
 - latitude: Número decimal
 - longitude: Número decimal
+- trade_name: Nome Fantasia (opcional)
 - source: Fonte da informação (ex: Google, Receita Federal, Bing)`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -44,7 +47,7 @@ CAMPOS OBRIGATÓRIOS NO JSON:
         "Content-Type": "application/json" 
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // gpt-4o-mini é excelente para extração e mais barato
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Encontre a localização exata de: ${searchQuery}` },

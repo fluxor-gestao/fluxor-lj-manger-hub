@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, ArrowLeft, HelpCircle, Search, Upload, MapPin } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, HelpCircle, Search, Upload, MapPin, Info } from "lucide-react";
 import ClientLocationEnrichment from "@/components/clients/ClientLocationEnrichment";
 import BulkClientLocationEnrichment from "@/components/clients/BulkClientLocationEnrichment";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
@@ -26,15 +26,41 @@ const CLIENTS_PAGE_SIZE = 50;
 type ClientForm = {
   id?: string;
   name: string;
-  company: string;
+  trade_name?: string;
+  company?: string;
   email: string;
   phone: string;
   document: string;
   type: "PF" | "PJ";
   notes: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  neighborhood?: string;
+  address?: string;
+  street_number?: string;
+  zip_code?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
-const emptyClient: ClientForm = { name: "", company: "", email: "", phone: "", document: "", type: "PJ", notes: "" };
+const emptyClient: ClientForm = { 
+  name: "", 
+  trade_name: "",
+  company: "", 
+  email: "", 
+  phone: "", 
+  document: "", 
+  type: "PJ", 
+  notes: "",
+  country: "Brasil",
+  state: "",
+  city: "",
+  neighborhood: "",
+  address: "",
+  street_number: "",
+  zip_code: "",
+};
 
 function Clientes() {
   const queryClient = useQueryClient();
@@ -71,14 +97,24 @@ function Clientes() {
 
   const saveClient = useMutation({
     mutationFn: async (form: ClientForm) => {
-      const payload = {
+      const payload: any = {
         name: form.name,
+        trade_name: form.trade_name || null,
         company: form.company || null,
         email: form.email || null,
         phone: form.phone || null,
         document: form.document || null,
         type: form.type,
         notes: form.notes || null,
+        country: form.country || null,
+        state: form.state || null,
+        city: form.city || null,
+        neighborhood: form.neighborhood || null,
+        address: form.address || null,
+        street_number: form.street_number || null,
+        zip_code: form.zip_code || null,
+        latitude: form.latitude ? Number(form.latitude) : null,
+        longitude: form.longitude ? Number(form.longitude) : null,
       };
       if (form.id) {
         const { error } = await supabase.from("clients").update(payload).eq("id", form.id);
@@ -121,12 +157,22 @@ function Clientes() {
     setClientForm({
       id: c.id,
       name: c.name ?? "",
+      trade_name: c.trade_name ?? "",
       company: c.company ?? "",
       email: c.email ?? "",
       phone: c.phone ?? "",
       document: c.document ?? "",
       type: (c.type as "PF" | "PJ") ?? "PJ",
       notes: c.notes ?? "",
+      country: c.country ?? "Brasil",
+      state: c.state ?? "",
+      city: c.city ?? "",
+      neighborhood: c.neighborhood ?? "",
+      address: c.address ?? "",
+      street_number: c.street_number ?? "",
+      zip_code: c.zip_code ?? "",
+      latitude: c.latitude ?? undefined,
+      longitude: c.longitude ?? undefined,
     });
     setClientDialogOpen(true);
   };
@@ -187,22 +233,31 @@ function Clientes() {
                       
                       let successCount = 0;
                       for (const row of data as any[]) {
-                        const empresa = row['EMPRESA'] || row['Empresa'];
-                        const nomeQsa = row['CLIENTE - QSA'] || row['Nome'];
+                        const empresa = row['EMPRESA'] || row['Empresa'] || row['Razão Social'] || row['NOME'];
+                        const nomeFantasia = row['NOME FANTASIA'] || row['Nome Fantasia'] || row['Fantasia'];
+                        const cnpj = row['CNPJ'] || row['Documento'] || row['CPF/CNPJ'];
+                        
                         if (!empresa) continue;
                         
-                        const emailField = String(row['e-mail de contato'] || row['Email'] || '').trim();
+                        const emailField = String(row['e-mail de contato'] || row['Email'] || row['E-mail'] || '').trim();
                         const emails = emailField.split(/[,;\s/]+/).filter(e => e.includes('@'));
                         const primaryEmail = emails[0] || null;
                         const allEmails = emails.join(', ');
 
                         const { error } = await supabase.from('clients').insert({
-                          name: String(nomeQsa || empresa).trim(),
-                          company: String(empresa).trim(),
-                          document: String(row['CNPJ'] || '').trim() || null,
+                          name: String(empresa).trim(),
+                          trade_name: nomeFantasia ? String(nomeFantasia).trim() : null,
+                          document: cnpj ? String(cnpj).trim() : null,
                           email: primaryEmail,
+                          phone: row['Telefone'] || row['PHONE'] || null,
+                          address: row['Endereço'] || row['Logradouro'] || null,
+                          street_number: row['Número'] || row['Nº'] || null,
+                          neighborhood: row['Bairro'] || null,
+                          city: row['Cidade'] || row['CITY'] || null,
+                          state: row['Estado'] || row['UF'] || null,
+                          zip_code: row['CEP'] || row['Zip Code'] || null,
                           type: 'PJ',
-                          notes: `E-mails: ${allEmails}\nSócio/QSA: ${nomeQsa || ''}\nIdioma: ${row['Idioma'] || ''}`,
+                          notes: `E-mails: ${allEmails}\nSócio/QSA: ${row['CLIENTE - QSA'] || ''}\nIdioma: ${row['Idioma'] || ''}`,
                           active: true
                         });
                         if (!error) successCount++;
@@ -238,48 +293,116 @@ function Clientes() {
 
           <Dialog open={clientDialogOpen} onOpenChange={(o) => { setClientDialogOpen(o); if (!o) setClientForm(emptyClient); }}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Novo Cliente</Button></DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader><DialogTitle>{clientForm.id ? "Editar Cliente" : "Novo Cliente"}</DialogTitle></DialogHeader>
-              <div className="space-y-3">
-                <div>
-                  <Label>Nome (QSA) *</Label>
-                  <Input value={clientForm.name} onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Empresa</Label>
-                  <Input value={clientForm.company} onChange={(e) => setClientForm({ ...clientForm, company: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Tipo *</Label>
-                  <Select value={clientForm.type} onValueChange={(v: "PF" | "PJ") => setClientForm({ ...clientForm, type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PF">Pessoa Física</SelectItem>
-                      <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Email</Label>
-                    <Input value={clientForm.email} onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })} />
+              <div className="space-y-6 py-4">
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1">Informações Gerais</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="md:col-span-2">
+                      <Label>Razão Social *</Label>
+                      <Input value={clientForm.name} onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Nome Fantasia</Label>
+                      <Input value={clientForm.trade_name} onChange={(e) => setClientForm({ ...clientForm, trade_name: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Documento (CPF/CNPJ)</Label>
+                      <Input value={clientForm.document} onChange={(e) => setClientForm({ ...clientForm, document: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Tipo *</Label>
+                      <Select value={clientForm.type} onValueChange={(v: "PF" | "PJ") => setClientForm({ ...clientForm, type: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PF">Pessoa Física</SelectItem>
+                          <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Empresa Vinculada (Grupo)</Label>
+                      <Input value={clientForm.company} onChange={(e) => setClientForm({ ...clientForm, company: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      <Input value={clientForm.email} onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Telefone</Label>
+                      <Input value={clientForm.phone} onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })} />
+                    </div>
                   </div>
-                  <div>
-                    <Label>Telefone</Label>
-                    <Input value={clientForm.phone} onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })} />
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" /> Localização
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="md:col-span-2">
+                      <Label>Endereço / Logradouro</Label>
+                      <Input value={clientForm.address} onChange={(e) => setClientForm({ ...clientForm, address: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Número</Label>
+                      <Input value={clientForm.street_number} onChange={(e) => setClientForm({ ...clientForm, street_number: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Bairro</Label>
+                      <Input value={clientForm.neighborhood} onChange={(e) => setClientForm({ ...clientForm, neighborhood: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>CEP</Label>
+                      <Input value={clientForm.zip_code} onChange={(e) => setClientForm({ ...clientForm, zip_code: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Cidade</Label>
+                      <Input value={clientForm.city} onChange={(e) => setClientForm({ ...clientForm, city: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Estado</Label>
+                      <Input value={clientForm.state} onChange={(e) => setClientForm({ ...clientForm, state: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>País</Label>
+                      <Input value={clientForm.country} onChange={(e) => setClientForm({ ...clientForm, country: e.target.value })} />
+                    </div>
+                    <div className="md:col-span-2 grid grid-cols-2 gap-3 p-3 bg-muted/30 rounded-lg border border-dashed">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Latitude</Label>
+                        <Input 
+                          type="number" 
+                          step="any"
+                          value={clientForm.latitude ?? ""} 
+                          onChange={(e) => setClientForm({ ...clientForm, latitude: e.target.value ? Number(e.target.value) : undefined })} 
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Longitude</Label>
+                        <Input 
+                          type="number" 
+                          step="any"
+                          value={clientForm.longitude ?? ""} 
+                          onChange={(e) => setClientForm({ ...clientForm, longitude: e.target.value ? Number(e.target.value) : undefined })} 
+                        />
+                      </div>
+                      <p className="col-span-2 text-[10px] text-muted-foreground italic flex items-center gap-1">
+                        <Info className="h-3 w-3" /> Coordenadas são necessárias para exibição no Mapa de Aprovação.
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <Label>Documento (CPF/CNPJ)</Label>
-                  <Input value={clientForm.document} onChange={(e) => setClientForm({ ...clientForm, document: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Observações</Label>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1">Observações</h3>
                   <Textarea rows={3} value={clientForm.notes} onChange={(e) => setClientForm({ ...clientForm, notes: e.target.value })} />
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={() => saveClient.mutate(clientForm)} disabled={!clientForm.name || saveClient.isPending}>Salvar</Button>
+                <Button variant="outline" onClick={() => setClientDialogOpen(false)}>Cancelar</Button>
+                <Button onClick={() => saveClient.mutate(clientForm)} disabled={!clientForm.name || saveClient.isPending}>Salvar Cliente</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -310,10 +433,10 @@ function Clientes() {
               <TableRow key={c.id}>
                 <TableCell className="font-medium">{c.name}</TableCell>
                 <TableCell>{c.company || "—"}</TableCell>
-                <TableCell><Badge variant="outline">{c.type || "PJ"}</Badge></TableCell>
-                <TableCell>{c.email}</TableCell>
-                <TableCell>{c.phone}</TableCell>
-                <TableCell>{c.document}</TableCell>
+                    <TableCell><Badge variant="outline">{c.type || "PJ"}</Badge></TableCell>
+                    <TableCell>{c.email || "—"}</TableCell>
+                    <TableCell>{c.phone || "—"}</TableCell>
+                    <TableCell>{c.document || "—"}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Button 
