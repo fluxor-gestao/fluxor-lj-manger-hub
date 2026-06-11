@@ -108,33 +108,33 @@ export function OperacaoKpis({ services }: { services: ServiceLike[] }) {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow duration-300">
           <CardContent className="py-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-              <Activity className="h-3 w-3" /> Processos por Empresa
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 flex items-center gap-2 pb-2 border-b border-slate-50">
+              <Activity className="h-3 w-3 text-blue-600" /> Processos por Empresa
             </h3>
-            <div className="space-y-2">
-              {buCounts.length === 0 ? <p className="text-xs text-muted-foreground italic">Sem dados</p> :
+            <div className="space-y-3">
+              {buCounts.length === 0 ? <p className="text-xs text-slate-400 italic">Sem dados</p> :
                buCounts.slice(0, 5).map(([bu, count]) => (
-                <div key={bu} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{bu}</span>
-                  <Badge variant="secondary">{count}</Badge>
+                <div key={bu} className="flex items-center justify-between group">
+                  <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">{bu}</span>
+                  <Badge variant="secondary" className="bg-slate-50 text-slate-600 border-slate-100">{count}</Badge>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow duration-300">
           <CardContent className="py-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-              <Activity className="h-3 w-3" /> Processos por Área
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 flex items-center gap-2 pb-2 border-b border-slate-50">
+              <Activity className="h-3 w-3 text-emerald-600" /> Processos por Área
             </h3>
-            <div className="space-y-2">
-              {areaCounts.length === 0 ? <p className="text-xs text-muted-foreground italic">Sem dados</p> :
+            <div className="space-y-3">
+              {areaCounts.length === 0 ? <p className="text-xs text-slate-400 italic">Sem dados</p> :
                areaCounts.slice(0, 5).map(([area, count]) => (
-                <div key={area} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{area}</span>
-                  <Badge variant="secondary">{count}</Badge>
+                <div key={area} className="flex items-center justify-between group">
+                  <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">{area}</span>
+                  <Badge variant="secondary" className="bg-slate-50 text-slate-600 border-slate-100">{count}</Badge>
                 </div>
               ))}
             </div>
