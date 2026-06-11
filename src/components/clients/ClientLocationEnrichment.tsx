@@ -32,6 +32,7 @@ export type EnrichmentResult = {
   longitude: number;
   trade_name?: string;
   source: string;
+  is_international?: boolean;
 };
 
 export default function ClientLocationEnrichment({ 

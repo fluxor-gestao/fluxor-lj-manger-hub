@@ -18,27 +18,30 @@ Deno.serve(async (req) => {
       ? `empresa com CNPJ ${cnpj}` 
       : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}`;
 
-    const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização.
-Sua tarefa é encontrar informações precisas de endereço para uma empresa brasileira ou internacional.
+    const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global.
+Sua tarefa é encontrar informações precisas de endereço para uma empresa, seja ela brasileira ou internacional.
 
 REGRAS:
-1. Use as ferramentas de busca ou seu conhecimento interno para localizar o endereço oficial da empresa.
-2. Retorne o resultado em formato JSON estruturado.
-3. Se houver múltiplos endereços (filiais), tente identificar a matriz ou o endereço mais provável baseado nos termos de busca.
-4. Se não encontrar nada, retorne um objeto vazio.
+1. Priorize fontes oficiais (Receita Federal para CNPJ, registros comerciais locais para empresas estrangeiras).
+2. Se o termo de busca for um CNPJ, foque exclusivamente nos dados da Receita Federal Brasileira.
+3. Se for um nome de empresa internacional, utilize seu conhecimento global para encontrar a sede ou filial mais relevante.
+4. Retorne o resultado em formato JSON estruturado.
+5. Se não encontrar nada conclusivo, retorne um objeto com o campo "error": "Localização não encontrada".
 
 CAMPOS NO JSON:
-- address: Logradouro (ex: Av. Paulista)
+- address: Logradouro/Rua (ex: Av. Paulista)
 - street_number: Número (ex: 1000)
-- neighborhood: Bairro (ex: Bela Vista)
+- neighborhood: Bairro/Distrito (ex: Bela Vista)
 - city: Cidade
-- state: Estado/Província
+- state: Estado/Província/Região
 - country: País
 - zip_code: CEP/Postal Code
-- latitude: Número decimal
-- longitude: Número decimal
-- trade_name: Nome Fantasia (opcional)
-- source: Fonte da informação (ex: Google, Receita Federal, Bing)`;
+- latitude: Número decimal (essencial para o mapa)
+- longitude: Número decimal (essencial para o mapa)
+- trade_name: Nome Fantasia ou Nome Comercial Real
+- source: Fonte específica da informação (ex: Receita Federal, Google Maps, LinkedIn, Website Oficial)
+- is_international: boolean (true se for fora do Brasil)`;
+
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
