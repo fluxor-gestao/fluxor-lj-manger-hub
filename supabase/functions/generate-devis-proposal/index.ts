@@ -204,28 +204,8 @@ REGRAS GERAIS:
     }
 - VALOR ZERO PROIBIDO em qualquer scope_items[].amount.
 
-TABELA DE PREÇOS OFICIAL (USE COMO REFERÊNCIA OBRIGATÓRIA PARA VALORES):
-- Abertura de Empresa / PJ: R$ 3.000,00
-- Abertura de IPTU / ITR: R$ 3.000,00
-- Abertura de Conta Corrente (PF ou PJ): R$ 1,000.00
-- Abertura de PJ estrangeira: R$ 1.200,00
-- Due Diligence: a partir de R$ 3.500,00
-- Visto Investimento: R$ 7.500,00
-- Visto Imobiliário: R$ 7.000,00
-- Visto Administrador / Aposentadoria / Nômade Digital: R$ 6.400,00 - R$ 6.500,00
-- Visto Reunião Familiar / Trabalho / Mercosul: R$ 3.000,00 - R$ 4.000,00
-- Registro de Marca: R$ 2.500,00
-- Aditivos / Contrato de Mútuo: R$ 1.200,00 - R$ 1.300,00
-- Naturalização: R$ 8.500,00
-- Consultoria / Parecer Técnico: R$ 3.750,00 - R$ 7.500,00
-- Administração Mensal: R$ 1.350,00
-- Contabilidade Mensal: R$ 945,00 - R$ 1.770,00 (conforme nº funcionários)
-- Certificado Digital: R$ 300,00
-- Alvarás / Autorizações Ambientais: R$ 5.000,00 - R$ 7.500,00
-- Estudos Ambientais (EAS/EAI/EVA): R$ 4.500,00
-- Unificação / Desmembramento de Matrículas: R$ 2.000,00 - R$ 6.000,00
-- Negociação Imobiliária: R$ 2.000,00
-- Escritura / Registro de Imóvel (Acompanhamento): R$ 1.700,00`;
+TABELA DE PREÇOS OFICIAL (REFERÊNCIA OBRIGATÓRIA PARA VALORES):
+${pricesRef}`;
 
     const userPrompt = `Relatório da reunião${client_name ? ` com o cliente "${client_name}"` : ""}:
 
@@ -233,7 +213,7 @@ ${meeting_report}
 
 ${hasTotal ? `Valor total alvo: R$ ${total_amount}` : "Sem valor definido — estime conforme faixas."}
 
-Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. NÃO gere as demais seções do contrato — elas são montadas por template fixo pelo sistema.`;
+Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. Use OBRIGATORIAMENTE os nomes e preços da tabela oficial sempre que houver correspondência com o que foi conversado na reunião.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
