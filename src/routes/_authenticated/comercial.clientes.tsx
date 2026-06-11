@@ -424,10 +424,10 @@ function Clientes() {
               <TableRow key={c.id}>
                 <TableCell className="font-medium">{c.name}</TableCell>
                 <TableCell>{c.company || "—"}</TableCell>
-                <TableCell><Badge variant="outline">{c.type || "PJ"}</Badge></TableCell>
-                <TableCell>{c.email}</TableCell>
-                <TableCell>{c.phone}</TableCell>
-                <TableCell>{c.document}</TableCell>
+                    <TableCell><Badge variant="outline">{c.type || "PJ"}</Badge></TableCell>
+                    <TableCell>{c.email || "—"}</TableCell>
+                    <TableCell>{c.phone || "—"}</TableCell>
+                    <TableCell>{c.document || "—"}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Button 
