@@ -16,6 +16,8 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  Area,
+  AreaChart,
 } from "recharts";
 import {
   Activity,
@@ -147,6 +149,7 @@ type Filters = {
   bu: string;
   area: string;
   serviceType: string;
+  search?: string;
 };
 
 const start6 = new Date();

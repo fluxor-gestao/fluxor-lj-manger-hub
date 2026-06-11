@@ -155,6 +155,7 @@ type Filters = {
   paymentStatus: string;
   categoryId: string;
   origin: string;
+  search?: string;
 };
 
 const today0 = new Date();
