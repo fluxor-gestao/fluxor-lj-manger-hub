@@ -1267,7 +1267,7 @@ export default function BIComercial() {
                       "hover:bg-white/[0.04]"
                     )}>
                       <TableCell className="font-medium text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
-                      <TableCell className="max-w-[220px] truncate text-white/90">{r.numero}</TableCell>
+                      <TableCell className="max-w-[220px] truncate text-white/90 font-mono text-[10px]">{r.numero}</TableCell>
                       <TableCell><Badge variant="outline" className="border-white/20 text-white/90">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
                       <TableCell className="text-right text-white font-bold">{BRL(r.valor)}</TableCell>
                       <TableCell className="text-white/70 text-xs">{r.criada}</TableCell>
