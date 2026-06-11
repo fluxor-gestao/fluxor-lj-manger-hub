@@ -89,7 +89,15 @@ export function OperacaoLista({
                     className="text-left hover:text-primary transition-colors"
                     onClick={() => onOpenDetail(s)}
                   >
-                    <p className="font-medium leading-tight">{s.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium leading-tight">{s.title}</p>
+                      {s.devis?.devis_number && (
+                        <Badge variant="secondary" className="text-[10px] py-0 px-1 font-mono flex items-center gap-1">
+                          <FileText className="h-2.5 w-2.5" />
+                          {formatDevisCode(s.devis.devis_number, s.devis_id || undefined)}
+                        </Badge>
+                      )}
+                    </div>
                     {s.description ? (
                       <p className="text-[11px] text-muted-foreground line-clamp-1">{s.description}</p>
                     ) : null}
