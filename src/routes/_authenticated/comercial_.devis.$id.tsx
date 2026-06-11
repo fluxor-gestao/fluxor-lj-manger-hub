@@ -264,6 +264,35 @@ function DevisDetail() {
     }
   };
 
+  const handleAcceptPricingItems = async (items: any[]) => {
+    if (!id || !items.length) return;
+    try {
+      // Buscar todos os service_prices para vincular corretamente se possível
+      const { data: servicePrices } = await supabase.from("service_prices").select("id, name");
+      
+      const payload = items.map(item => {
+        const matchingPrice = servicePrices?.find(s => s.name.toLowerCase() === item.service_name.toLowerCase());
+        return {
+          devis_id: id,
+          service_price_id: matchingPrice?.id || null,
+          name: item.service_name,
+          unit_price: item.unit_price,
+          total_price: item.unit_price * item.quantity,
+          quantity: item.quantity,
+        };
+      });
+
+      const { error } = await supabase.from("devis_pricing_items").insert(payload);
+      if (error) throw error;
+
+      toast.success("Itens de precificação aplicados!");
+      queryClient.invalidateQueries({ queryKey: ["devis-pricing-items", id] });
+      queryClient.invalidateQueries({ queryKey: ["devis", id] });
+    } catch (e: any) {
+      toast.error("Erro ao aplicar precificação: " + e.message);
+    }
+  };
+
   const handleExportPdf = async () => {
     if (!devis) return;
     if (!isProposalComplete(devis.proposal_structure)) {
