@@ -443,7 +443,7 @@ export default function DevisPdfTemplate({
               {pricingItems.map((item, idx) => (
                 <div key={item.id || idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "10px" }}>
                   <span>{item.quantity}x {item.name}</span>
-                  <span style={{ fontBold: 600 }}>{fmtBRL(item.total_price)}</span>
+                  <span style={{ fontWeight: 600 }}>{fmtBRL(item.total_price)}</span>
                 </div>
               ))}
             </div>
