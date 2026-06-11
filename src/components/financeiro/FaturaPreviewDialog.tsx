@@ -107,7 +107,7 @@ export function FaturaPreviewDialog({
     return [
       `Olá, ${cliente}!`,
       "",
-      `Segue a fatura referente a "${row.movement_description ?? "serviços prestados"}".`,
+      `Segue a fatura referente a "${formatMovementDescription(row.movement_description, row.devis_number, row.devis_id)}".`,
       `Valor: ${fmt(open_)}`,
       `Vencimento: ${fmtDateBR(row.due_date)}`,
       "",
