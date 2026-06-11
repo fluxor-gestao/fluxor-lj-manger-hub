@@ -97,5 +97,6 @@ export function useFinanceiroCatalogs() {
     categories: categories.data ?? [],
     costCenters: costCenters.data ?? [],
     paymentMethods: paymentMethods.data ?? [],
+    financialAccounts: financialAccounts.data ?? [],
   };
 }
