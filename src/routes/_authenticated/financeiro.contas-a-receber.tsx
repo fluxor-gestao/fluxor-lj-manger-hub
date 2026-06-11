@@ -30,6 +30,7 @@ import { FaturaPreviewDialog } from "@/components/financeiro/FaturaPreviewDialog
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { cn } from "@/lib/utils";
+import { formatDevisCode } from "@/lib/formatDevis";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-receber")({
   component: ContasAReceberPage,
