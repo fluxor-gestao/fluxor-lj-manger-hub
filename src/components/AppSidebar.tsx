@@ -58,6 +58,19 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { user, hasRole, refreshRole, signOut } = useAuth();
 
+  const { data: currentVersion, isLoading: loadingVersion } = useQuery({
+    queryKey: ["current-system-version"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("system_versions")
+        .select("version")
+        .eq("is_current", true)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.version || "1.2.0";
+    },
+  });
+
   const isActive = (path: string) =>
     path === "/hub" ? location.pathname === "/hub" : location.pathname.startsWith(path);
 
