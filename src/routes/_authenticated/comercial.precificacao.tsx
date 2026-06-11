@@ -63,7 +63,7 @@ function Precificacao() {
       const { data, error } = await supabase
         .from("business_areas")
         .select("slug, label")
-        .eq("business_unit", editingService?.business_unit)
+        .eq("business_unit", editingService!.business_unit!)
         .eq("is_active", true)
         .order("label");
       if (error) throw error;
