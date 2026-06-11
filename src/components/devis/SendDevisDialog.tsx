@@ -10,6 +10,7 @@ import { Loader2, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import DevisPdfTemplate from "./DevisPdfTemplate";
+import { formatDevisCode } from "@/lib/formatDevis";
 import { generateDevisPdfBase64 } from "@/lib/exportDevisPdf";
 import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
 import { getMissingClauses, isProposalComplete } from "@/lib/validateProposal";
