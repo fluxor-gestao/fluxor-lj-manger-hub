@@ -3,12 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Check, X, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, Upload, Sparkles, CheckCircle2, UserPlus, FileText, Check, X, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MultiAreaSelector } from "./MultiAreaSelector";
 import { format, parseISO, isValid } from "date-fns";
@@ -425,7 +423,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   { id: 8, label: "Pronto para salvar", threshold: 100 },
                 ].map((item) => {
                   const isDone = progress >= item.threshold;
-                  const thresholdsList: number[] = [0, 5, 15, 30, 50, 70, 85, 95];
+                  const thresholdsList = [0, 5, 15, 30, 50, 70, 85, 95];
                   const isCurrent = progress < item.threshold && (item.id === 1 || progress >= thresholdsList[item.id - 1]);
                   return (
                     <div key={item.id} className={cn("flex items-center gap-3 text-xs transition-all duration-500 py-1.5 px-3 rounded-lg border", isDone ? "text-green-600 bg-green-50/50 border-green-100" : isCurrent ? "text-primary font-bold bg-primary/5 border-primary/10 animate-pulse" : "text-muted-foreground opacity-50")}>
@@ -462,8 +460,8 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   <Button variant="ghost" size="sm" onClick={() => setMatchMode("new")}>Trocar</Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
                     <Label className="text-xs">Razão Social</Label>
                     <Input size="sm" value={editClient?.name} onChange={e => { const val = e.target.value; setEditClient(prev => prev ? ({ ...prev, name: val }) : null); }} />
                   </div>
@@ -473,12 +471,12 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
 
             <Card className="p-4 space-y-3">
               <h3 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4" /> Devis estruturado</h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 gap-3 text-sm">
+                <div>
                   <Label className="text-xs">Título</Label>
                   <p className="font-medium">{payload.devis.title || "—"}</p>
                 </div>
-                <div className="col-span-2 space-y-2 mt-2">
+                <div className="space-y-2 mt-2">
                   <Label className="text-xs font-semibold flex items-center gap-1.5"><Sparkles className="h-3 w-3 text-primary" /> Áreas sugeridas</Label>
                   <MultiAreaSelector companyCode="" selectedAreas={selectedAreas} onChange={setSelectedAreas} placeholder="Selecione as áreas..." />
                 </div>
