@@ -13,9 +13,9 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ArrowLeft, Filter, Search, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Filter, Search, Building2, Building } from "lucide-react";
 import { toast } from "sonner";
-import { COMPANY_LIST } from "@/lib/companyCodes";
+import { COMPANY_LIST, COMPANY_SHORT } from "@/lib/companyCodes";
 
 export const Route = createFileRoute("/_authenticated/comercial/areas")({
   component: AreasManager,
@@ -25,6 +25,7 @@ function AreasManager() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [unitDialogOpen, setUnitDialogOpen] = useState(false);
   const [editingArea, setEditingArea] = useState<any>(null);
   const [search, setSearch] = useState("");
   const [filterUnit, setFilterUnit] = useState<string>("all");
@@ -35,6 +36,24 @@ function AreasManager() {
   const [description, setDescription] = useState("");
   const [displayOrder, setDisplayOrder] = useState("0");
   const [isActive, setIsActive] = useState(true);
+
+  // Business Unit form state
+  const [unitCode, setUnitCode] = useState("");
+  const [unitName, setUnitName] = useState("");
+
+  const { data: units = [], isLoading: isLoadingUnits } = useQuery({
+    queryKey: ["business-units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("*")
+        .order("code", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const activeUnits = useMemo(() => units.filter(u => u.active), [units]);
 
   const { data: areas = [], isLoading } = useQuery({
     queryKey: ["business-areas"],
@@ -109,6 +128,28 @@ function AreasManager() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const saveUnit = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        code: unitCode.toUpperCase(),
+        name: unitName,
+        active: true,
+      };
+      const { error } = await supabase
+        .from("business_units")
+        .insert([payload]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Unidade de negócio criada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["business-units"] });
+      setUnitDialogOpen(false);
+      setUnitCode("");
+      setUnitName("");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   const deleteArea = useMutation({
     mutationFn: async (id: string) => {
       const area = areas.find((a: any) => a.id === id);
@@ -154,10 +195,45 @@ function AreasManager() {
           <h1 className="text-3xl font-bold font-display tracking-tight">Catálogo de Áreas</h1>
           <p className="text-muted-foreground mt-1">Gestão oficial de unidades e setores comerciais</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => navigate({ to: "/comercial" })}>
             <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
           </Button>
+          
+          <Dialog open={unitDialogOpen} onOpenChange={setUnitDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-primary/20 hover:bg-primary/5">
+                <Building className="h-4 w-4 mr-2" /> Nova Unidade
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Nova Unidade de Negócio</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Sigla / Código</Label>
+                    <Input value={unitCode} onChange={(e) => setUnitCode(e.target.value)} placeholder="Ex: DE, AM..." maxLength={4} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nome da Unidade</Label>
+                    <Input value={unitName} onChange={(e) => setUnitName(e.target.value)} placeholder="Ex: Direito Estratégico" />
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground italic">
+                  * Esta unidade ficará disponível também em Opções/Usuários.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setUnitDialogOpen(false)}>Cancelar</Button>
+                <Button onClick={() => saveUnit.mutate()} disabled={!unitCode || !unitName || saveUnit.isPending}>
+                  {saveUnit.isPending ? "Salvando..." : "Criar Unidade"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-2" /> Nova Área</Button>
@@ -174,8 +250,8 @@ function AreasManager() {
                       <SelectValue placeholder="Selecione a Unidade" />
                     </SelectTrigger>
                     <SelectContent>
-                      {COMPANY_LIST.map(c => (
-                        <SelectItem key={c.code} value={c.code}>{c.code} — {c.name}</SelectItem>
+                      {activeUnits.map(u => (
+                        <SelectItem key={u.id} value={u.code}>{u.code} — {u.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -229,8 +305,8 @@ function AreasManager() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as Unidades</SelectItem>
-                {COMPANY_LIST.map(c => (
-                  <SelectItem key={c.code} value={c.code}>{c.short}</SelectItem>
+                {activeUnits.map(u => (
+                  <SelectItem key={u.id} value={u.code}>{u.code} — {u.name.split('—').pop()?.trim() || u.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -265,7 +341,7 @@ function AreasManager() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm font-medium">
-                        {COMPANY_LIST.find(c => c.code === area.business_unit)?.short || area.business_unit}
+                        {units.find(u => u.code === area.business_unit)?.name?.split('—').pop()?.trim() || area.business_unit}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
