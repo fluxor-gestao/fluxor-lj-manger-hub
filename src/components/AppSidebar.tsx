@@ -146,8 +146,12 @@ export function AppSidebar() {
             <p className="truncate text-xs text-sidebar-foreground/50">
               {user.email}
             </p>
-            <p className="text-[10px] font-medium text-sidebar-foreground/30">
-              v{appVersion.version}
+            <p className="text-[10px] font-medium text-sidebar-foreground/30 flex items-center gap-1.5">
+              {loadingVersion ? (
+                <Loader2 className="h-2 w-2 animate-spin" />
+              ) : (
+                `v${currentVersion}`
+              )}
             </p>
           </div>
         )}
