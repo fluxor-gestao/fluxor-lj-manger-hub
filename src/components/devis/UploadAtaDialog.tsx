@@ -427,7 +427,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                 ].map((item) => {
                   const isDone = progress >= item.threshold;
                   const thresholds = [0, 5, 15, 30, 50, 70, 85, 95];
-                  const isCurrent = progress < item.threshold && (item.id === 1 || progress >= (thresholds[item.id - 1] as number));
+                  const isCurrent = progress < item.threshold && (item.id === 1 || progress >= (Number(thresholds[item.id - 1])));
                   return (
                     <div key={item.id} className={cn("flex items-center gap-3 text-xs transition-all duration-500 py-1.5 px-3 rounded-lg border", isDone ? "text-green-600 bg-green-50/50 border-green-100" : isCurrent ? "text-primary font-bold bg-primary/5 border-primary/10 animate-pulse" : "text-muted-foreground opacity-50")}>
                       <div className={cn("flex items-center justify-center h-5 w-5 rounded-full border transition-all duration-500", isDone ? "bg-green-500 border-green-500 text-white" : isCurrent ? "bg-primary/10 border-primary text-primary" : "bg-muted/50 border-muted-foreground/20 text-muted-foreground")}>
