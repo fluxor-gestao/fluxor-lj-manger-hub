@@ -70,7 +70,7 @@ function BI() {
   return (
     <div className={cn(
       "min-h-[calc(100vh-4rem)] transition-all duration-700 rounded-xl overflow-hidden relative",
-      "bg-[#F8FAFC]"
+      "bg-transparent"
     )}>
       <div className="p-6 lg:p-8 space-y-8 max-w-[1600px] mx-auto relative z-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
