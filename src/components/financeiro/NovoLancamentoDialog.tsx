@@ -100,7 +100,17 @@ export function NovoLancamentoDialog({
   // Apply prefill whenever the dialog opens
   useEffect(() => {
     if (open) {
-      setForm({ ...emptyForm(), ...(prefill ?? {}) });
+      const initialForm = { ...emptyForm(), ...(prefill ?? {}) };
+      
+      // Auto-detect unit from reference code if it starts with DE, CO, etc.
+      if (initialForm.reference_code && !initialForm.business_unit) {
+        const prefix = initialForm.reference_code.slice(0, 2).toUpperCase();
+        if (COMPANY_LIST.some(c => c.code === prefix)) {
+          initialForm.business_unit = prefix;
+        }
+      }
+      
+      setForm(initialForm);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
