@@ -1182,7 +1182,7 @@ export default function BIFinanceiro() {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px', paddingLeft: '20px', color: '#94A3B8', textTransform: 'uppercase' }} />
+                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px', paddingLeft: '20px', color: '#374151', textTransform: 'uppercase' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
