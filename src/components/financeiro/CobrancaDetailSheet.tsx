@@ -373,8 +373,7 @@ export function CobrancaDetailSheet({
           </Card>
         </TabsContent>
       </Tabs>
-    </SheetContent>
-
+      </SheetContent>
       <FaturaPreviewDialog row={row} open={faturaOpen} onOpenChange={setFaturaOpen} />
       <LembretePreviewDialog row={row} open={lembreteOpen} onOpenChange={setLembreteOpen} />
       <DevisPreviewDialog devisId={row.devis_id || null} open={devisPreviewOpen} onOpenChange={setDevisPreviewOpen} />
