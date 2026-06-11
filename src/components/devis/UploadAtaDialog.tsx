@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Eye, Check, X, Info, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Check, X, Info, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MultiAreaSelector } from "./MultiAreaSelector";
 import { format, parseISO, isValid } from "date-fns";
@@ -16,6 +16,8 @@ import { ptBR } from "date-fns/locale";
 import type { CompanyCode } from "@/lib/companyCodes";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { LogoGlobeAnimation } from "../LogoGlobeAnimation";
 
 export type AnalyzedClient = {
   name: string;
@@ -158,20 +160,16 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
     setAnalyzing(true);
     setProgress(5);
     
-    // Simulação de progresso enquanto a IA trabalha
     const interval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 92) return prev;
-        // Sobe mais rápido no início, mais devagar no final
-        const increment = prev < 40 ? 8 : prev < 70 ? 3 : 1;
-        return prev + increment;
+        if (prev >= 98) return prev;
+        const increment = prev < 30 ? 5 : prev < 60 ? 2 : prev < 85 ? 1 : 0.5;
+        return +(prev + increment).toFixed(1);
       });
-    }, 600);
+    }, 800);
 
     try {
       const b64 = await fileToBase64(file);
-      
-      // Busca áreas oficiais para guiar a IA
       const { data: officialAreas } = await supabase
         .from("business_areas")
         .select("slug, label")
@@ -192,15 +190,9 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       if (data?.error) throw new Error(data.error);
 
       setProgress(100);
-      
-      // Pequeno delay para o usuário ver o 100%
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 800));
 
       const p = data.payload as AnalyzedPayload;
-      
-      // Lógica de Data:
-      // 1. Se a IA detectou uma data válida no texto, usa ela.
-      // 2. Caso contrário, usa a data atual (do upload).
       const todayStr = format(new Date(), "yyyy-MM-dd");
       let finalDate = todayStr;
       
@@ -304,18 +296,16 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </DialogTitle>
         </DialogHeader>
 
-        {/* Stepper */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className={step >= 1 ? "text-primary font-medium" : ""}>1. Upload</span>
+          <span className={cn(step >= 1 && "text-primary font-medium")}>1. Upload</span>
           <span>→</span>
-          <span className={step >= 2 ? "text-primary font-medium" : ""}>2. Confirmação</span>
+          <span className={cn(step >= 2 && "text-primary font-medium")}>2. Confirmação</span>
           <span>→</span>
-          <span className={step >= 3 ? "text-primary font-medium" : ""}>3. Análise IA</span>
+          <span className={cn(step >= 3 && "text-primary font-medium")}>3. Análise IA</span>
           <span>→</span>
-          <span className={step >= 4 ? "text-primary font-medium" : ""}>4. Revisão</span>
+          <span className={cn(step >= 4 && "text-primary font-medium")}>4. Revisão</span>
         </div>
 
-        {/* Step 1: upload */}
         {step === 1 && (
           <div className="space-y-4">
             <Card className="p-6 border-dashed border-2 text-center space-y-3">
@@ -350,9 +340,6 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground mt-1">
-                A IA detecta automaticamente. Use override se a detecção falhar.
-              </p>
             </div>
 
             <DialogFooter>
@@ -363,7 +350,6 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </div>
         )}
 
-        {/* Step 2: visual confirmation */}
         {step === 2 && file && (
           <div className="space-y-4">
             <div className="text-center space-y-1">
@@ -384,30 +370,13 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
               
               <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center overflow-auto relative">
                 {file.type === "application/pdf" && previewUrl ? (
-                  <object
-                    data={previewUrl}
-                    type="application/pdf"
-                    className="w-full h-full"
-                  >
-                    <div className="text-center p-8">
-                      <div className="bg-white rounded-full p-4 inline-flex mb-3 shadow-sm">
-                        <FileText className="h-10 w-10 text-muted-foreground" />
-                      </div>
-                      <p className="text-sm font-medium">Visualização não disponível</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Seu navegador bloqueou a visualização direta. Você pode prosseguir com a análise normalmente.
-                      </p>
-                    </div>
-                  </object>
+                  <object data={previewUrl} type="application/pdf" className="w-full h-full" />
                 ) : file.type.startsWith("image/") && previewUrl ? (
                   <img src={previewUrl} alt="Preview" className="max-w-full h-auto" />
                 ) : (
                   <div className="text-center p-8">
-                    <div className="bg-white rounded-full p-4 inline-flex mb-3 shadow-sm">
-                      <FileText className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-medium">Visualização não disponível para este formato</p>
-                    <p className="text-xs text-muted-foreground mt-1">{file.type || "Formato desconhecido"}</p>
+                    <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm font-medium">Visualização não disponível</p>
                   </div>
                 )}
               </div>
@@ -424,11 +393,9 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </div>
         )}
 
-        {/* Step 3: analyzing */}
         {step === 3 && (
           <div className="py-12 flex flex-col items-center gap-6">
             <LogoGlobeAnimation className="mb-2" />
-            
             <div className="text-center space-y-2">
               <h3 className="font-semibold text-xl text-primary font-display">Inteligência Artificial em ação</h3>
               <p className="text-sm text-muted-foreground max-w-xs mx-auto">
@@ -440,17 +407,14 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
               <div className="space-y-2">
                 <div className="flex justify-between items-end text-xs mb-1">
                   <span className="text-muted-foreground font-medium uppercase tracking-wider">Progresso da análise</span>
-                  <span className="text-primary font-bold text-sm">{progress}%</span>
+                  <span className="text-primary font-bold text-sm">{Math.floor(progress)}%</span>
                 </div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-muted-foreground/5 shadow-inner">
-                  <div 
-                    className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-700 ease-out shadow-[0_0_10px_rgba(var(--primary),0.5)]" 
-                    style={{ width: `${progress}%` }} 
-                  />
+                  <div className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-700 ease-out" style={{ width: `${progress}%` }} />
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 gap-3 pt-2">
+              <div className="grid grid-cols-1 gap-2 pt-2">
                 {[
                   { id: 1, label: "Ata recebida", threshold: 5 },
                   { id: 2, label: "Extraindo conteúdo", threshold: 15 },
@@ -462,29 +426,11 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   { id: 8, label: "Pronto para salvar", threshold: 100 },
                 ].map((item) => {
                   const isDone = progress >= item.threshold;
-                  const isCurrent = progress < item.threshold && (
-                    item.id === 1 || progress >= [0, 5, 15, 30, 50, 70, 85, 95][item.id - 1]
-                  );
-                  
+                  const isCurrent = progress < item.threshold && (item.id === 1 || progress >= [0, 5, 15, 30, 50, 70, 85, 95][item.id - 1]);
                   return (
-                    <div 
-                      key={item.id} 
-                      className={cn(
-                        "flex items-center gap-3 text-xs transition-all duration-500 py-1 px-2 rounded-lg border",
-                        isDone ? "text-green-600 bg-green-50/50 border-green-100" : 
-                        isCurrent ? "text-primary font-bold bg-primary/5 border-primary/10 animate-pulse" : 
-                        "text-muted-foreground bg-transparent border-transparent opacity-50"
-                      )}
-                    >
-                      <div className={cn(
-                        "flex items-center justify-center h-5 w-5 rounded-full border transition-all duration-500",
-                        isDone ? "bg-green-500 border-green-500 text-white" : 
-                        isCurrent ? "bg-primary/10 border-primary text-primary" : 
-                        "bg-muted/50 border-muted-foreground/20 text-muted-foreground"
-                      )}>
-                        {isDone ? <Check className="h-3 w-3" strokeWidth={3} /> : 
-                         isCurrent ? <Loader2 className="h-3 w-3 animate-spin" /> : 
-                         <span className="text-[10px] font-bold">{item.id}</span>}
+                    <div key={item.id} className={cn("flex items-center gap-3 text-xs transition-all duration-500 py-1.5 px-3 rounded-lg border", isDone ? "text-green-600 bg-green-50/50 border-green-100" : isCurrent ? "text-primary font-bold bg-primary/5 border-primary/10 animate-pulse" : "text-muted-foreground opacity-50")}>
+                      <div className={cn("flex items-center justify-center h-5 w-5 rounded-full border transition-all duration-500", isDone ? "bg-green-500 border-green-500 text-white" : isCurrent ? "bg-primary/10 border-primary text-primary" : "bg-muted/50 border-muted-foreground/20 text-muted-foreground")}>
+                        {isDone ? <Check className="h-3 w-3" strokeWidth={3} /> : isCurrent ? <Loader2 className="h-3 w-3 animate-spin" /> : <span className="text-[10px] font-bold">{item.id}</span>}
                       </div>
                       <span className="flex-1">{item.label}</span>
                       {isDone && <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
@@ -495,254 +441,52 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
             </div>
           </div>
         )}
-                <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 65 ? 'text-green-600' : 'text-muted-foreground'}`}>
-                  {progress >= 65 ? <CheckCircle2 className="h-3.3 w-3.3" /> : progress >= 35 ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 ml-1" />} 
-                  Extraindo dados do cliente
-                </div>
-                <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 90 ? 'text-green-600' : 'text-muted-foreground'}`}>
-                  {progress >= 90 ? <CheckCircle2 className="h-3.3 w-3.3" /> : progress >= 65 ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 ml-1" />} 
-                  Gerando estrutura da proposta
-                </div>
-              </div>
-            </div>
 
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg flex gap-3 max-w-md">
-              <Info className="h-5 w-5 text-blue-500 shrink-0" />
-              <p className="text-xs text-blue-700 leading-relaxed">
-                Este processo pode levar de 15 a 45 segundos dependendo do tamanho e complexidade do documento enviado.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: review */}
         {step === 4 && payload && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-xs">
-              <Badge variant="outline">Idioma detectado: {LANG_LABEL[payload.detected_language] || payload.detected_language}</Badge>
+              <Badge variant="outline">Idioma: {LANG_LABEL[payload.detected_language] || payload.detected_language}</Badge>
               <Badge variant="outline" className="flex gap-1 items-center">
                 <CalendarIcon className="h-3 w-3" /> Reunião: {format(parseISO(meetingDate), "dd/MM/yyyy")}
               </Badge>
             </div>
 
-            {/* Client card */}
             <Card className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" /> Cliente
-                </h3>
-                {matches.exact ? (
-                  <Badge variant="secondary" className="gap-1">
-                    <CheckCircle2 className="h-3 w-3" /> Cliente encontrado
-                  </Badge>
-                ) : matches.suggestions.length > 0 ? (
-                  <Badge variant="secondary" className="gap-1">
-                    <AlertTriangle className="h-3 w-3" /> Possíveis correspondências
-                  </Badge>
-                ) : (
-                  <Badge variant="outline">Novo cliente</Badge>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={matchMode === "existing" ? "default" : "outline"}
-                  onClick={() => setMatchMode("existing")}
-                >
-                  Vincular existente
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={matchMode === "new" ? "default" : "outline"}
-                  onClick={() => setMatchMode("new")}
-                >
-                  Criar novo
-                </Button>
-              </div>
-
+              <h3 className="font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Cliente</h3>
               {matchMode === "existing" ? (
-                <div>
-                  <Label>Selecionar cliente</Label>
-                  <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                    <SelectTrigger><SelectValue placeholder="Escolher..." /></SelectTrigger>
-                    <SelectContent>
-                      {(matches.exact ? [matches.exact] : []).concat(matches.suggestions).map((c: any) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name} {c.document ? `• ${c.document}` : ""}
-                        </SelectItem>
-                      ))}
-                      {clients
-                        .filter(
-                          (c: any) =>
-                            c.id !== matches.exact?.id &&
-                            !matches.suggestions.some((s: any) => s.id === c.id),
-                        )
-                        .map((c: any) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{clients.find(c => c.id === selectedClientId)?.name}</p>
+                    <p className="text-xs text-muted-foreground">{clients.find(c => c.id === selectedClientId)?.email}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setMatchMode("new")}>Trocar</Button>
                 </div>
               ) : (
-                editClient && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="md:col-span-2">
-                      <Label>Nome *</Label>
-                      <Input
-                        value={editClient.name}
-                        onChange={(e) => setEditClient({ ...editClient, name: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Tipo</Label>
-                      <Select
-                        value={editClient.type || "PJ"}
-                        onValueChange={(v: "PF" | "PJ") => setEditClient({ ...editClient, type: v })}
-                      >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="PF">Pessoa Física</SelectItem>
-                          <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Documento</Label>
-                      <Input
-                        value={editClient.document}
-                        onChange={(e) => setEditClient({ ...editClient, document: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Email</Label>
-                      <Input
-                        value={editClient.email}
-                        onChange={(e) => setEditClient({ ...editClient, email: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Telefone</Label>
-                      <Input
-                        value={editClient.phone}
-                        onChange={(e) => setEditClient({ ...editClient, phone: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Cidade</Label>
-                      <Input
-                        value={editClient.city}
-                        onChange={(e) => setEditClient({ ...editClient, city: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Endereço</Label>
-                      <Input
-                        value={editClient.address}
-                        onChange={(e) => setEditClient({ ...editClient, address: e.target.value })}
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label>Observações</Label>
-                      <Textarea
-                        rows={2}
-                        value={editClient.notes}
-                        onChange={(e) => setEditClient({ ...editClient, notes: e.target.value })}
-                      />
-                    </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <Label className="text-xs">Razão Social</Label>
+                    <Input size="sm" value={editClient?.name} onChange={e => setEditClient(prev => ({ ...prev!, name: e.target.value }))} />
                   </div>
-                )
+                </div>
               )}
             </Card>
 
-            {/* Devis card */}
             <Card className="p-4 space-y-3">
-              <h3 className="font-semibold flex items-center gap-2">
-                <FileText className="h-4 w-4" /> Devis estruturado
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                <div>
+              <h3 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4" /> Devis estruturado</h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="col-span-2">
                   <Label className="text-xs">Título</Label>
                   <p className="font-medium">{payload.devis.title || "—"}</p>
                 </div>
-                <div>
-                  <Label className="text-xs">Tipo de serviço</Label>
-                  <p>{payload.devis.service_type || "—"}</p>
-                </div>
-                <div>
-                  <Label className="text-xs">Data da Reunião</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full justify-start font-normal h-8 mt-1">
-                        <CalendarIcon className="mr-2 h-3 w-3" />
-                        {format(parseISO(meetingDate), "dd/MM/yyyy")}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={parseISO(meetingDate)}
-                        onSelect={(date) => date && setMeetingDate(format(date, "yyyy-MM-dd"))}
-                        initialFocus
-                        locale={ptBR}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="md:col-span-2 space-y-2 mt-2">
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs font-semibold flex items-center gap-1.5">
-                      <Sparkles className="h-3 w-3 text-primary" /> Áreas sugeridas pelo relatório
-                    </Label>
-                  </div>
-                  <MultiAreaSelector
-                    companyCode={""} // Será preenchido no contexto global do Devis, mas aqui permitimos seleção livre
-                    selectedAreas={selectedAreas}
-                    onChange={setSelectedAreas}
-                    placeholder="Selecione as áreas identificadas..."
-                  />
-                  <p className="text-[10px] text-muted-foreground italic">
-                    Revise as áreas pré-selecionadas pela IA antes de prosseguir.
-                  </p>
+                <div className="col-span-2 space-y-2 mt-2">
+                  <Label className="text-xs font-semibold flex items-center gap-1.5"><Sparkles className="h-3 w-3 text-primary" /> Áreas sugeridas</Label>
+                  <MultiAreaSelector companyCode="" selectedAreas={selectedAreas} onChange={setSelectedAreas} placeholder="Selecione as áreas..." />
                 </div>
                 <div>
                   <Label className="text-xs">Valor total</Label>
-                  <p className="font-medium">
-                    {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-                      payload.devis.total_amount || 0,
-                    )}
-                  </p>
+                  <p className="font-medium font-mono text-primary">{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(payload.devis.total_amount || 0)}</p>
                 </div>
               </div>
-
-              {payload.devis.scope_items?.length > 0 && (
-                <div>
-                  <Label className="text-xs">Itens do escopo</Label>
-                  <ul className="text-sm space-y-1 mt-1">
-                    {payload.devis.scope_items.map((it, i) => (
-                      <li key={i} className="border-l-2 border-primary pl-2">
-                        <span className="font-medium">{it.letter}) {it.title}</span>
-                        {it.amount > 0 && (
-                          <span className="text-muted-foreground"> — {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(it.amount)}</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {payload.devis.proposal_structure && (
-                <details className="text-xs">
-                  <summary className="cursor-pointer text-primary">Ver estrutura da proposta (markdown)</summary>
-                  <pre className="mt-2 whitespace-pre-wrap font-mono bg-muted/40 p-3 rounded max-h-64 overflow-y-auto">
-                    {payload.devis.proposal_structure}
-                  </pre>
-                </details>
-              )}
             </Card>
 
             <DialogFooter className="gap-2">
