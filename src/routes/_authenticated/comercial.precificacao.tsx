@@ -313,7 +313,14 @@ function Precificacao() {
                         <div className="text-xs text-muted-foreground line-clamp-1">{service.description}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{service.category}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-semibold">{service.category}</span>
+                        <div className="flex gap-1">
+                          {service.business_unit && <AreaBadge companyCode={service.business_unit} areaSlug={service.responsible_sector || ""} />}
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-right font-mono">
                       {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(service.price)}
                     </TableCell>
