@@ -9,8 +9,11 @@ import {
   TrendingUp, TrendingDown, DollarSign, ShoppingCart, Briefcase, 
   ArrowUpRight, ArrowDownRight, Users, Target, Activity, 
   AlertTriangle, CheckCircle2, Building2, Calendar, LayoutDashboard,
-  Filter, ChevronRight, PieChart as PieIcon, BarChart3, Wallet
+  Filter, ChevronRight, PieChart as PieIcon, BarChart3, Wallet,
+  FileText
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DREGerencial } from "@/components/bi/DREGerencial";
 import { cn } from "@/lib/utils";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import {
@@ -179,26 +182,40 @@ function Gestao() {
              </p>
           </div>
         </div>
-        
-        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
-          <Button 
-            variant={timeframe === "month" ? "default" : "ghost"} 
-            size="sm" 
-            className="rounded-lg h-8 text-xs font-bold"
-            onClick={() => setTimeframe("month")}
-          >
-            Visão Mensal
-          </Button>
-          <Button 
-            variant={timeframe === "year" ? "default" : "ghost"} 
-            size="sm" 
-            className="rounded-lg h-8 text-xs font-bold"
-            onClick={() => setTimeframe("year")}
-          >
-            Visão Anual
-          </Button>
-        </div>
       </div>
+
+      <Tabs defaultValue="dashboard" className="space-y-8">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <TabsList className="bg-slate-100/50 p-1 h-11">
+            <TabsTrigger value="dashboard" className="gap-2 font-bold px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <LayoutDashboard className="h-4 w-4" /> Dashboard Geral
+            </TabsTrigger>
+            <TabsTrigger value="dre" className="gap-2 font-bold px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <FileText className="h-4 w-4" /> DRE Gerencial
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
+            <Button 
+              variant={timeframe === "month" ? "default" : "ghost"} 
+              size="sm" 
+              className="rounded-lg h-8 text-xs font-bold"
+              onClick={() => setTimeframe("month")}
+            >
+              Mês
+            </Button>
+            <Button 
+              variant={timeframe === "year" ? "default" : "ghost"} 
+              size="sm" 
+              className="rounded-lg h-8 text-xs font-bold"
+              onClick={() => setTimeframe("year")}
+            >
+              Ano
+            </Button>
+          </div>
+        </div>
+
+        <TabsContent value="dashboard" className="space-y-8 mt-0 border-none p-0">
 
       {/* KPI GRID */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
@@ -420,8 +437,13 @@ function Gestao() {
             </CardContent>
           </Card>
       </div>
-    </div>
-  );
+    </TabsContent>
+    <TabsContent value="dre" className="mt-0 border-none p-0">
+      <DREGerencial />
+    </TabsContent>
+  </Tabs>
+</div>
+);
 }
 
 export const Route = createFileRoute("/_authenticated/gestao")({
