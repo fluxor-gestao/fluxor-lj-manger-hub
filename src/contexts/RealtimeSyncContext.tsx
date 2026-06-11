@@ -10,19 +10,21 @@ export const RealtimeSyncProvider: React.FC<{ children: React.ReactNode }> = ({ 
   useEffect(() => {
     // Mapeamento de tabelas para chaves de query
     const tableToQueryKeys: Record<string, string[][]> = {
-      business_units: [["business-units"]],
+      business_units: [["business-units"], ["catalog", "business_units"]],
       business_areas: [["business-areas"], ["business-areas-usage"]],
-      system_versions: [["system-versions"]],
+      system_versions: [["system-versions"], ["current-system-version"]],
       profiles: [["profiles"], ["current-user-profile"]],
       devis: [["devis"], ["devis-list"], ["business-areas-usage"]],
       financial_entries: [["financial-entries"], ["financial-data"]],
-      financial_categories: [["financial-categories"]],
+      financial_categories: [["financial-categories"], ["catalog", "financial_categories"]],
+      financial_cost_centers: [["catalog", "financial_cost_centers"]],
       cost_centers: [["cost-centers"]],
+      financial_payment_methods: [["catalog", "financial_payment_methods"]],
       payment_methods: [["payment-methods"]],
-      financial_accounts: [["financial-accounts"]],
-      suppliers: [["suppliers"]],
-      clients: [["clients"]],
-      services: [["services"]],
+      financial_accounts: [["financial-accounts"], ["catalog", "financial_accounts"]],
+      suppliers: [["suppliers"], ["catalog", "suppliers"]],
+      clients: [["clients"], ["catalog", "clients"]],
+      services: [["services"], ["catalog", "services"]],
       devis_service_areas: [["business-areas-usage"]],
     };
 
@@ -44,9 +46,9 @@ export const RealtimeSyncProvider: React.FC<{ children: React.ReactNode }> = ({ 
               queryClient.invalidateQueries({ queryKey: key });
             });
           } else {
-            // Se não houver mapeamento específico, podemos invalidar por prefixo ou 
-            // simplesmente logar para sabermos que precisamos adicionar
-            console.log(`[RealtimeSync] Change detected in ${table}, but no query key mapping found.`);
+            // Tentativa de invalidação por nome da tabela se não houver mapeamento
+            console.log(`[RealtimeSync] Change detected in ${table}, no specific mapping, trying general invalidation.`);
+            queryClient.invalidateQueries({ queryKey: [table] });
           }
         }
       )
