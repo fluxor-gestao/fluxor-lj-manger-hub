@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { RefreshCcw, AlertTriangle, CheckCircle2, History } from "lucide-react";
+import { RefreshCcw, AlertTriangle, CheckCircle2, History, Loader2 } from "lucide-react";
 import { COMPANY_LIST, type CompanyCode } from "@/lib/companyCodes";
 import { getAreasFor } from "@/lib/businessAreas";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 interface BulkPriceUpdateProps {
   open: boolean;
