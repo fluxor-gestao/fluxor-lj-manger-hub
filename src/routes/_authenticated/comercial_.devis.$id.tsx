@@ -162,7 +162,11 @@ function DevisDetail() {
       if (requiresValidation(form.status) && !devis?.validated_at) {
         throw new Error("Valide a proposta antes de mover para este status.");
       }
+      if (!form.deadline_date) {
+        throw new Error("O prazo (deadline) é obrigatório.");
+      }
       if (!isCompanyCode(form.business_unit)) {
+
         throw new Error("Selecione a empresa responsável.");
       }
       if (selectedAreas.length === 0) {
@@ -605,21 +609,22 @@ function DevisDetail() {
 
           {/* Prazo (deadline) */}
           <div>
-            <Label>Prazo (deadline)</Label>
+            <Label className={cn(editing && !form.deadline_date && "text-destructive font-bold animate-pulse")}>Prazo (deadline) *</Label>
             {editing ? (
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start font-normal", !form.deadline_date && "text-muted-foreground")}>
+                  <Button variant="outline" className={cn("w-full justify-start font-normal", !form.deadline_date && "border-destructive text-destructive shadow-[0_0_10px_rgba(239,68,68,0.1)]")}>
                     <CalendarIcon className="h-4 w-4 mr-2" />
-                    {form.deadline_date ? format(form.deadline_date, "dd/MM/yyyy") : "Selecionar"}
+                    {form.deadline_date ? format(form.deadline_date, "dd/MM/yyyy") : "Selecionar prazo obrigatório"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar mode="single" selected={form.deadline_date} onSelect={(d) => setForm({ ...form, deadline_date: d, validation_deadline_defined: !!d })} initialFocus className={cn("p-3 pointer-events-auto")} locale={ptBR} />
                 </PopoverContent>
               </Popover>
-            ) : <p className="font-medium mt-1">{devis.deadline_date ? format(parseISO(devis.deadline_date), "dd/MM/yyyy") : "—"}</p>}
+            ) : <p className={cn("font-medium mt-1", !devis.deadline_date && "text-destructive italic")}>{devis.deadline_date ? format(parseISO(devis.deadline_date), "dd/MM/yyyy") : "PENDENTE"}</p>}
           </div>
+
 
           {/* Responsável */}
           <div>

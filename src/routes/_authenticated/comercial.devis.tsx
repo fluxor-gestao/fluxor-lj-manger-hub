@@ -390,6 +390,11 @@ function Comercial() {
     mutationFn: async (form: DevisForm) => {
       const total = Number(form.total_amount) || 0;
       const down = form.down_payment_amount === "" ? total * 0.5 : Number(form.down_payment_amount) || 0;
+      
+      if (!form.meeting_date) {
+        throw new Error("O prazo (deadline) é obrigatório.");
+      }
+
       const client = clientsById[form.client_id];
       const title = form.title || (client ? `Devis ${client.name}` : "Novo Devis");
       if (!isCompanyCode(form.business_unit)) {
@@ -401,6 +406,9 @@ function Comercial() {
       const insertPayload: any = {
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
+        deadline_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
+
+
         commercial_responsible: form.commercial_responsible || null,
         meeting_summary: form.meeting_summary || null,
         meeting_report: form.meeting_report || null,
@@ -791,12 +799,12 @@ function Comercial() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Data da reunião</Label>
+                    <Label>Prazo (Deadline) *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("w-full justify-start font-normal", !devisForm.meeting_date && "text-muted-foreground")}>
+                        <Button variant="outline" className={cn("w-full justify-start font-normal", !devisForm.meeting_date && "border-destructive text-destructive")}>
                           <CalendarIcon className="h-4 w-4 mr-2" />
-                          {devisForm.meeting_date ? format(devisForm.meeting_date, "dd/MM/yyyy") : "Selecionar"}
+                          {devisForm.meeting_date ? format(devisForm.meeting_date, "dd/MM/yyyy") : "Selecionar prazo"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -804,6 +812,7 @@ function Comercial() {
                       </PopoverContent>
                     </Popover>
                   </div>
+
                   <div>
                     <Label>Responsável comercial</Label>
                     <Select value={devisForm.commercial_responsible} onValueChange={(v) => setDevisForm({ ...devisForm, commercial_responsible: v })}>
@@ -923,7 +932,13 @@ function Comercial() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={() => createDevis.mutate(devisForm)} disabled={!devisForm.client_id || !isCompanyCode(devisForm.business_unit) || devisForm.responsible_sectors.length === 0 || createDevis.isPending}>Salvar</Button>
+                  <Button 
+                    onClick={() => createDevis.mutate(devisForm)} 
+                    disabled={!devisForm.client_id || !devisForm.meeting_date || !isCompanyCode(devisForm.business_unit) || devisForm.responsible_sectors.length === 0 || createDevis.isPending}
+                  >
+                    Salvar
+                  </Button>
+
                 </DialogFooter>
               </DialogContent>
               </Dialog>
