@@ -162,7 +162,11 @@ function DevisDetail() {
       if (requiresValidation(form.status) && !devis?.validated_at) {
         throw new Error("Valide a proposta antes de mover para este status.");
       }
+      if (!form.deadline_date) {
+        throw new Error("O prazo (deadline) é obrigatório.");
+      }
       if (!isCompanyCode(form.business_unit)) {
+
         throw new Error("Selecione a empresa responsável.");
       }
       if (selectedAreas.length === 0) {

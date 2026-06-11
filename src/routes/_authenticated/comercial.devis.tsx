@@ -406,7 +406,8 @@ function Comercial() {
       const insertPayload: any = {
         client_id: form.client_id || null,
         meeting_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
-        deadline_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null, // Using meeting_date for deadline if that's the intention, but wait, usually there's a deadline_date field. Let's check the schema again.
+        deadline_date: form.meeting_date ? format(form.meeting_date, "yyyy-MM-dd") : null,
+
 
         commercial_responsible: form.commercial_responsible || null,
         meeting_summary: form.meeting_summary || null,
@@ -798,12 +799,12 @@ function Comercial() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Data da reunião</Label>
+                    <Label>Prazo (Deadline) *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("w-full justify-start font-normal", !devisForm.meeting_date && "text-muted-foreground")}>
+                        <Button variant="outline" className={cn("w-full justify-start font-normal", !devisForm.meeting_date && "border-destructive text-destructive")}>
                           <CalendarIcon className="h-4 w-4 mr-2" />
-                          {devisForm.meeting_date ? format(devisForm.meeting_date, "dd/MM/yyyy") : "Selecionar"}
+                          {devisForm.meeting_date ? format(devisForm.meeting_date, "dd/MM/yyyy") : "Selecionar prazo"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -811,6 +812,7 @@ function Comercial() {
                       </PopoverContent>
                     </Popover>
                   </div>
+
                   <div>
                     <Label>Responsável comercial</Label>
                     <Select value={devisForm.commercial_responsible} onValueChange={(v) => setDevisForm({ ...devisForm, commercial_responsible: v })}>

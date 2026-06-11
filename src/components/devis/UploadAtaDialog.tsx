@@ -191,17 +191,19 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       await new Promise(r => setTimeout(r, 800));
 
       const p = data.payload as AnalyzedPayload;
-      const todayStr = format(new Date(), "yyyy-MM-dd");
-      let finalDate = todayStr;
       
-      if (p.meeting.date) {
-        const parsed = parseISO(p.meeting.date);
+      let finalDate = ""; // Forçar preenchimento manual se não identificado
+      
+      if (p.meeting.date || p.devis.deadline_date) {
+        const dateToTry = p.devis.deadline_date || p.meeting.date;
+        const parsed = parseISO(dateToTry);
         if (isValid(parsed)) {
-          finalDate = p.meeting.date;
+          finalDate = dateToTry;
         }
       }
       
       p.meeting.date = finalDate;
+
       setPayload(p);
       setEditClient(p.client);
       setMeetingDate(finalDate);
@@ -232,7 +234,14 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
 
   const handleConfirm = async () => {
     if (!payload) return;
+    
+    if (!meetingDate) {
+      toast.error("O prazo (deadline) é obrigatório.");
+      return;
+    }
+
     setCreating(true);
+
     try {
       let clientId = selectedClientId;
 
