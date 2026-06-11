@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Download, Filter, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertTriangle, Download, Filter, FileText, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCompany } from "@/contexts/CompanyContext";
 
@@ -29,32 +29,21 @@ export function DREGerencial() {
     costCenter: "all",
   });
 
-  const { data: entries, isLoading } = useQuery({
-    queryKey: ["dre-gerencial-entries", filters, companyCode],
+  // Always fetch the whole year to calculate "Acumulado no Ano"
+  const { data: allYearEntries, isLoading } = useQuery({
+    queryKey: ["dre-gerencial-year-entries", filters.year, filters.bu, filters.area, filters.costCenter, companyCode],
     queryFn: async () => {
       let qb = supabase
         .from("financial_entries")
         .select("*")
-        .neq("entry_type", "transferencia");
+        .neq("entry_type", "transferencia")
+        .gte("entry_date", `${filters.year}-01-01`)
+        .lte("entry_date", `${filters.year}-12-31`);
 
       const effectiveBu = companyCode || (filters.bu !== "all" ? filters.bu : null);
       if (effectiveBu) qb = qb.eq("business_unit", effectiveBu);
       if (filters.area !== "all") qb = qb.eq("area_slug", filters.area);
       if (filters.costCenter !== "all") qb = qb.eq("cost_center_id", filters.costCenter);
-
-      if (filters.start) qb = qb.gte("entry_date", filters.start);
-      if (filters.end) qb = qb.lte("entry_date", filters.end);
-      
-      if (!filters.start && !filters.end) {
-        if (filters.month !== "all") {
-          const m = filters.month.padStart(2, "0");
-          qb = qb.gte("entry_date", `${filters.year}-${m}-01`)
-                 .lte("entry_date", `${filters.year}-${m}-31`);
-        } else {
-          qb = qb.gte("entry_date", `${filters.year}-01-01`)
-                 .lte("entry_date", `${filters.year}-12-31`);
-        }
-      }
 
       const { data, error } = await qb;
       if (error) throw error;
@@ -78,61 +67,86 @@ export function DREGerencial() {
     }
   });
 
-  const dre = useMemo(() => {
-    if (!entries) return null;
+  const analytics = useMemo(() => {
+    if (!allYearEntries) return null;
 
-    const result: any = {
-      receitaBruta: 0,
-      impostos: 0,
-      receitaLiquida: 0,
-      pessoal: 0,
-      encargos: 0,
-      administrativo: 0,
-      financeiro: 0,
-      diretoria: 0,
-      investimentos: 0,
-      resultadoOperacional: 0,
-      unclassified: 0,
-      countUnclassified: 0,
-    };
+    const filtered = allYearEntries.filter(e => {
+      if (filters.start || filters.end) {
+        if (filters.start && e.entry_date < filters.start) return false;
+        if (filters.end && e.entry_date > filters.end) return false;
+        return true;
+      }
+      if (filters.month !== "all") {
+        const m = filters.month.padStart(2, "0");
+        return e.entry_date.startsWith(`${filters.year}-${m}`);
+      }
+      return true;
+    });
 
-    for (const e of entries) {
-      const val = Number(e.paid_amount || 0); // Using paid amount for DRE realized
-      const group = e.dre_group;
+    const calculateDRE = (rows: any[]) => {
+      const res: any = {
+        receitaBruta: 0,
+        impostos: 0,
+        pessoal: 0,
+        encargos: 0,
+        administrativo: 0,
+        financeiro: 0,
+        diretoria: 0,
+        investimentos: 0,
+        unclassified: 0,
+        countUnclassified: 0,
+      };
 
-      if (e.entry_type === "receita") {
-        result.receitaBruta += val;
-      } else if (e.entry_type === "despesa") {
-        if (!group) {
-          result.unclassified += val;
-          result.countUnclassified++;
-        } else {
-          if (group === "Despesas com Impostos") result.impostos += val;
-          else if (group === "Despesas com Pessoal") result.pessoal += val;
-          else if (group === "Encargos Sociais") result.encargos += val;
-          else if (group === "Despesas Administrativas") result.administrativo += val;
-          else if (group === "Despesas Financeiras") result.financeiro += val;
-          else if (group === "Diretoria") result.diretoria += val;
-          else if (group === "Investimentos no Patrimônio") result.investimentos += val;
+      for (const e of rows) {
+        const val = Number(e.paid_amount || 0);
+        const group = e.dre_group;
+
+        if (e.entry_type === "receita") {
+          res.receitaBruta += val;
+        } else if (e.entry_type === "despesa") {
+          if (!group) {
+            res.unclassified += val;
+            res.countUnclassified++;
+          } else {
+            if (group === "Despesas com Impostos") res.impostos += val;
+            else if (group === "Despesas com Pessoal") res.pessoal += val;
+            else if (group === "Encargos Sociais") res.encargos += val;
+            else if (group === "Despesas Administrativas") res.administrativo += val;
+            else if (group === "Despesas Financeiras") res.financeiro += val;
+            else if (group === "Diretoria") res.diretoria += val;
+            else if (group === "Investimentos no Patrimônio") res.investimentos += val;
+          }
         }
       }
-    }
+      res.receitaLiquida = res.receitaBruta - res.impostos;
+      res.resultadoOperacional = res.receitaLiquida - (
+        res.pessoal + res.encargos + res.administrativo + res.financeiro + res.diretoria + res.investimentos
+      );
+      return res;
+    };
 
-    result.receitaLiquida = result.receitaBruta - result.impostos;
-    result.resultadoOperacional = result.receitaLiquida - (
-      result.pessoal + result.encargos + result.administrativo + result.financeiro + result.diretoria + result.investimentos
-    );
+    const currentDRE = calculateDRE(filtered);
+    const yearDRE = calculateDRE(allYearEntries);
 
-    // Margins
-    result.margemOp = result.receitaBruta > 0 ? result.resultadoOperacional / result.receitaBruta : 0;
-    result.pesoFolha = result.receitaBruta > 0 ? (result.pessoal + result.encargos) / result.receitaBruta : 0;
-    result.pesoImpostos = result.receitaBruta > 0 ? result.impostos / result.receitaBruta : 0;
-    result.pesoAdm = result.receitaBruta > 0 ? result.administrativo / result.receitaBruta : 0;
+    // Margins and weights for current view
+    currentDRE.margemOp = currentDRE.receitaBruta > 0 ? currentDRE.resultadoOperacional / currentDRE.receitaBruta : 0;
+    currentDRE.pesoFolha = currentDRE.receitaBruta > 0 ? (currentDRE.pessoal + currentDRE.encargos) / currentDRE.receitaBruta : 0;
+    currentDRE.pesoImpostos = currentDRE.receitaBruta > 0 ? currentDRE.impostos / currentDRE.receitaBruta : 0;
+    currentDRE.pesoAdm = currentDRE.receitaBruta > 0 ? currentDRE.administrativo / currentDRE.receitaBruta : 0;
+    
+    currentDRE.acumuladoAno = yearDRE.resultadoOperacional;
 
-    return result;
-  }, [entries]);
+    return currentDRE;
+  }, [allYearEntries, filters]);
 
-  if (isLoading) return <div>Carregando DRE...</div>;
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center p-12 space-y-4">
+      <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Calculando DRE Gerencial...</p>
+    </div>
+  );
+
+  const dre = analytics;
 
   return (
     <div className="space-y-6">
@@ -187,7 +201,7 @@ export function DREGerencial() {
                 <SelectContent>
                   <SelectItem value="all">Todas</SelectItem>
                   {businessUnits?.map(bu => (
-                    <SelectItem key={bu.code} value={bu.code}>{bu.name}</SelectItem>
+                    <SelectItem key={bu.code} value={bu.code || "unknown"}>{bu.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -230,7 +244,7 @@ export function DREGerencial() {
       </Card>
 
       {/* ALERTAS */}
-      {dre?.countUnclassified > 0 && (
+      {dre && dre.countUnclassified > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-4 animate-in slide-in-from-top-4">
           <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
@@ -278,13 +292,13 @@ export function DREGerencial() {
               <TableRow className="text-slate-500 italic">
                 <TableCell className="pl-8">(-) Impostos sobre Vendas</TableCell>
                 <TableCell className="text-right text-rose-600">{BRL(dre?.impostos)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.pesoImpostos)}</TableCell>
+                <TableCell className="text-right">{PCT(dre?.pesoImpostos || 0)}</TableCell>
               </TableRow>
 
               <TableRow className="font-bold border-t-2 border-slate-100">
                 <TableCell>RECEITA LÍQUIDA</TableCell>
                 <TableCell className="text-right">{BRL(dre?.receitaLiquida)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.receitaBruta > 0 ? dre.receitaLiquida / dre.receitaBruta : 0)}</TableCell>
+                <TableCell className="text-right">{PCT(dre && dre.receitaBruta > 0 ? dre.receitaLiquida / dre.receitaBruta : 0)}</TableCell>
               </TableRow>
 
               <TableRow className="h-4 bg-slate-50/10"><TableCell colSpan={3}></TableCell></TableRow>
@@ -293,41 +307,41 @@ export function DREGerencial() {
               <TableRow>
                 <TableCell className="pl-8 text-slate-600">(-) Despesas com Pessoal</TableCell>
                 <TableCell className="text-right text-rose-600">{BRL(dre?.pessoal)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.receitaBruta > 0 ? dre.pessoal / dre.receitaBruta : 0)}</TableCell>
+                <TableCell className="text-right">{PCT(dre && dre.receitaBruta > 0 ? dre.pessoal / dre.receitaBruta : 0)}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="pl-8 text-slate-600">(-) Encargos Sociais</TableCell>
                 <TableCell className="text-right text-rose-600">{BRL(dre?.encargos)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.receitaBruta > 0 ? dre.encargos / dre.receitaBruta : 0)}</TableCell>
+                <TableCell className="text-right">{PCT(dre && dre.receitaBruta > 0 ? dre.encargos / dre.receitaBruta : 0)}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="pl-8 text-slate-600">(-) Despesas Administrativas</TableCell>
                 <TableCell className="text-right text-rose-600">{BRL(dre?.administrativo)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.pesoAdm)}</TableCell>
+                <TableCell className="text-right">{PCT(dre?.pesoAdm || 0)}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="pl-8 text-slate-600">(-) Despesas Financeiras</TableCell>
                 <TableCell className="text-right text-rose-600">{BRL(dre?.financeiro)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.receitaBruta > 0 ? dre.financeiro / dre.receitaBruta : 0)}</TableCell>
+                <TableCell className="text-right">{PCT(dre && dre.receitaBruta > 0 ? dre.financeiro / dre.receitaBruta : 0)}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="pl-8 text-slate-600">(-) Diretoria</TableCell>
                 <TableCell className="text-right text-rose-600">{BRL(dre?.diretoria)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.receitaBruta > 0 ? dre.diretoria / dre.receitaBruta : 0)}</TableCell>
+                <TableCell className="text-right">{PCT(dre && dre.receitaBruta > 0 ? dre.diretoria / dre.receitaBruta : 0)}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="pl-8 text-slate-600">(-) Investimentos</TableCell>
                 <TableCell className="text-right text-rose-600">{BRL(dre?.investimentos)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.receitaBruta > 0 ? dre.investimentos / dre.receitaBruta : 0)}</TableCell>
+                <TableCell className="text-right">{PCT(dre && dre.receitaBruta > 0 ? dre.investimentos / dre.receitaBruta : 0)}</TableCell>
               </TableRow>
 
               <TableRow className="h-4 bg-slate-50/10"><TableCell colSpan={3}></TableCell></TableRow>
 
               {/* RESULTADO OPERACIONAL */}
-              <TableRow className={cn("font-black text-white", dre?.resultadoOperacional >= 0 ? "bg-emerald-600" : "bg-rose-600")}>
+              <TableRow className={cn("font-black text-white", (dre?.resultadoOperacional || 0) >= 0 ? "bg-emerald-600" : "bg-rose-600")}>
                 <TableCell>RESULTADO OPERACIONAL</TableCell>
                 <TableCell className="text-right">{BRL(dre?.resultadoOperacional)}</TableCell>
-                <TableCell className="text-right">{PCT(dre?.margemOp)}</TableCell>
+                <TableCell className="text-right">{PCT(dre?.margemOp || 0)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -340,9 +354,9 @@ export function DREGerencial() {
           <CardContent className="p-4">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margem Operacional</p>
             <div className="flex items-end justify-between">
-              <h4 className="text-2xl font-black text-slate-900">{PCT(dre?.margemOp)}</h4>
-              <Badge variant={dre?.margemOp >= 0.2 ? "success" : "warning"} className="text-[10px] h-5">
-                {dre?.margemOp >= 0.2 ? "Saudável" : "Atenção"}
+              <h4 className="text-2xl font-black text-slate-900">{PCT(dre?.margemOp || 0)}</h4>
+              <Badge className={cn("text-[10px] h-5", (dre?.margemOp || 0) >= 0.2 ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-amber-100 text-amber-700 hover:bg-amber-100")}>
+                {(dre?.margemOp || 0) >= 0.2 ? "Saudável" : "Atenção"}
               </Badge>
             </div>
           </CardContent>
@@ -352,7 +366,7 @@ export function DREGerencial() {
           <CardContent className="p-4">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Peso da Folha / Rec.</p>
             <div className="flex items-end justify-between">
-              <h4 className="text-2xl font-black text-slate-900">{PCT(dre?.pesoFolha)}</h4>
+              <h4 className="text-2xl font-black text-slate-900">{PCT(dre?.pesoFolha || 0)}</h4>
               <p className="text-[10px] text-slate-500 font-medium">Meta: máx 40%</p>
             </div>
           </CardContent>
@@ -360,9 +374,9 @@ export function DREGerencial() {
 
         <Card className="border-slate-200/60 shadow-sm">
           <CardContent className="p-4">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Resultado Mensal</p>
-            <h4 className={cn("text-2xl font-black", dre?.resultadoOperacional >= 0 ? "text-emerald-600" : "text-rose-600")}>
-              {BRL(dre?.resultadoOperacional)}
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Resultado Acumulado Ano</p>
+            <h4 className={cn("text-2xl font-black", (dre?.acumuladoAno || 0) >= 0 ? "text-emerald-600" : "text-rose-600")}>
+              {BRL(dre?.acumuladoAno)}
             </h4>
           </CardContent>
         </Card>
@@ -370,10 +384,11 @@ export function DREGerencial() {
         <Card className="border-slate-200/60 shadow-sm">
           <CardContent className="p-4">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Peso Impostos / Rec.</p>
-            <h4 className="text-2xl font-black text-slate-900">{PCT(dre?.pesoImpostos)}</h4>
+            <h4 className="text-2xl font-black text-slate-900">{PCT(dre?.pesoImpostos || 0)}</h4>
           </CardContent>
         </Card>
       </div>
     </div>
   );
 }
+
