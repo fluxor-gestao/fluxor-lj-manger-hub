@@ -264,6 +264,20 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. Use
                   assumptions: { type: "array", items: { type: "string" } },
                 },
                 required: ["title", "scope_description", "scope_items", "total_amount"],
+                properties: {
+                  ...ai.properties,
+                  suggested_pricing_items: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        service_name: { type: "string" },
+                        quantity: { type: "number" },
+                        unit_price: { type: "number" }
+                      }
+                    }
+                  }
+                }
               },
             },
           },
