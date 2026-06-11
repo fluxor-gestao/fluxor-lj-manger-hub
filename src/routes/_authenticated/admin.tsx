@@ -1427,7 +1427,6 @@ function Admin() {
         <TabsContent value="updates" className="space-y-6">
           <VersionManager />
         </TabsContent>
-        </TabsContent>
       </Tabs>
     </div>
   );
