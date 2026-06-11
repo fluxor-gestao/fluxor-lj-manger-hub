@@ -29,9 +29,10 @@ const FIELD_META: { key: FieldKey; label: string; rows?: number; type: "input" |
 
 interface Props {
   suggestions: AISuggestions;
-  onAccept: (key: FieldKey, value: string) => void;
+  onAccept: (key: any, value: any) => void;
   onAcceptAll: (values: AISuggestions) => void;
   onDismiss: () => void;
+  onAcceptPricing?: (items: AISuggestions["suggested_pricing_items"]) => void;
 }
 
 export default function AISuggestionsBlock({ suggestions, onAccept, onAcceptAll, onDismiss }: Props) {
