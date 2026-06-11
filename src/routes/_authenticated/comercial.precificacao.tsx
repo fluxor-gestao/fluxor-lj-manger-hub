@@ -301,7 +301,6 @@ function Precificacao() {
                   <TableHead>Serviço</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead className="text-right">Preço de Tabela</TableHead>
-                  <TableHead className="text-right">Preço de Mercado (IA)</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
