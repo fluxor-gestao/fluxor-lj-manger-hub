@@ -11,6 +11,11 @@ export type AISuggestions = {
   responsible_sector: string;
   scope_description: string;
   proposal_structure: string;
+  suggested_pricing_items?: {
+    service_name: string;
+    quantity: number;
+    unit_price: number;
+  }[];
 };
 
 type FieldKey = keyof AISuggestions;
