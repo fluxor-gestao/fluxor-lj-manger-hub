@@ -49,8 +49,7 @@ export function DevisPreviewDialog({ devisId, open, onOpenChange }: DevisPreview
         .select(`
           *,
           client:clients(*),
-          devis_service_areas(area_slug),
-          responsible:profiles!devis_commercial_responsible_fkey(full_name, email)
+          devis_service_areas(area_slug)
         `)
         .eq("id", devisId)
         .single();
