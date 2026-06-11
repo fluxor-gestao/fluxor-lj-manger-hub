@@ -117,7 +117,7 @@ export default function MapaAprovacaoDashboard() {
           business_unit, 
           responsible_sector,
           created_at,
-          client:clients(id, name, city, country, address, latitude, longitude, company, location_status),
+          client:clients(id, name, trade_name, city, country, address, latitude, longitude, company, location_status),
           areas:devis_service_areas(area_slug)
         `);
 
