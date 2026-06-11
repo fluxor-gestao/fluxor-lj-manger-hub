@@ -25,7 +25,7 @@ const subModules: SubModule[] = [
   {
     title: "Cadastro de Contas",
     description: "Contas LJ, categorias e métodos",
-    route: "/financeiro/central", // Usando a mesma rota para facilitar, mas com abas
+    route: "/financeiro/cadastros",
     icon: Landmark,
     gradient: "from-slate-600 to-slate-800",
   },
