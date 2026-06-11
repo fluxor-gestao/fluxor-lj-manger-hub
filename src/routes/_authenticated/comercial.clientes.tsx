@@ -26,15 +26,41 @@ const CLIENTS_PAGE_SIZE = 50;
 type ClientForm = {
   id?: string;
   name: string;
-  company: string;
+  trade_name?: string;
+  company?: string;
   email: string;
   phone: string;
   document: string;
   type: "PF" | "PJ";
   notes: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  neighborhood?: string;
+  address?: string;
+  street_number?: string;
+  zip_code?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
-const emptyClient: ClientForm = { name: "", company: "", email: "", phone: "", document: "", type: "PJ", notes: "" };
+const emptyClient: ClientForm = { 
+  name: "", 
+  trade_name: "",
+  company: "", 
+  email: "", 
+  phone: "", 
+  document: "", 
+  type: "PJ", 
+  notes: "",
+  country: "Brasil",
+  state: "",
+  city: "",
+  neighborhood: "",
+  address: "",
+  street_number: "",
+  zip_code: "",
+};
 
 function Clientes() {
   const queryClient = useQueryClient();
