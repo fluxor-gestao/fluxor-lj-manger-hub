@@ -92,12 +92,16 @@ function DevisDetail() {
     if (editing) return;
     const areas = (devis.devis_service_areas || []).map((a: any) => a.area_slug);
     setSelectedAreas(areas);
+    const total = devis.total_amount ?? 0;
+    const down = devis.down_payment_amount ?? 0;
+    const pct = total > 0 ? Math.round((down / total) * 100) : 50;
     setForm({
       ...devis,
       meeting_date: devis.meeting_date ? parseISO(devis.meeting_date) : undefined,
       deadline_date: devis.deadline_date ? parseISO(devis.deadline_date) : undefined,
-      total_amount: String(devis.total_amount ?? ""),
-      down_payment_amount: String(devis.down_payment_amount ?? ""),
+      total_amount: String(total || ""),
+      down_payment_amount: String(down || ""),
+      down_payment_percentage: String(pct),
     });
   }, [devis, editing]);
 
