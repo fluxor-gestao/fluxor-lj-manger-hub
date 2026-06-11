@@ -46,6 +46,7 @@ import { getAreasFor, isValidAreaForCompany, Area } from "@/lib/businessAreas";
 import { AreaBadge } from "@/components/AreaBadge";
 import { MultiAreaSelector } from "@/components/devis/MultiAreaSelector";
 import { MapPin } from "lucide-react";
+import { formatDevisCode } from "@/lib/formatDevis";
 
 const DEVIS_PAGE_SIZE = 20;
 const CLIENTS_PAGE_SIZE = 50;
