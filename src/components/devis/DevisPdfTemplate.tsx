@@ -1,6 +1,8 @@
 import logoBanner from "@/assets/logo-banner.png";
 import brazilWatermark from "@/assets/brazil-watermark.png";
 
+import { formatDevisCode } from "@/lib/formatDevis";
+
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
 
