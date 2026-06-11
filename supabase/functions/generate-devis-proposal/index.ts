@@ -159,6 +159,18 @@ Deno.serve(async (req) => {
       deadline_date,
       tier,
     } = await req.json();
+
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Buscar tabela oficial de preços
+    const { data: officialPrices } = await supabase
+      .from("service_prices")
+      .select("name, price, description, category");
+
+    const pricesRef = officialPrices?.map(p => `- ${p.name} (${p.category}): R$ ${p.price}${p.description ? ` - ${p.description}` : ""}`).join("\n") || "Tabela não disponível.";
+
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
     if (!meeting_report) throw new Error("meeting_report é obrigatório");
