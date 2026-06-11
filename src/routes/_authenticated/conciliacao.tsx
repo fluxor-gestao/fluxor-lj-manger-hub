@@ -784,12 +784,26 @@ function Conciliacao() {
               <Input placeholder="Buscar..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             <Select value={pairFilter} onValueChange={setPairFilter}>
-              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[140px] text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="pendente">Pendentes</SelectItem>
                 <SelectItem value="conciliado">Conciliados</SelectItem>
                 <SelectItem value="divergente">Ignorados</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterDre} onValueChange={setFilterDre}>
+              <SelectTrigger className="w-[180px] text-xs">
+                <SelectValue placeholder="Filtro DRE" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos (DRE)</SelectItem>
+                <SelectItem value="sem_dre">Sem DRE</SelectItem>
+                {[
+                  "Despesas com Impostos", "Encargos Sociais", "Despesas com Pessoal",
+                  "Despesas Administrativas", "Despesas Financeiras", "Investimentos no Patrimônio",
+                  "Ressarcimentos", "Diretoria"
+                ].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
               </SelectContent>
             </Select>
             <Button
