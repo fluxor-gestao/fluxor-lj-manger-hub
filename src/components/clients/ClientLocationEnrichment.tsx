@@ -22,12 +22,15 @@ interface Props {
 
 export type EnrichmentResult = {
   address: string;
+  street_number?: string;
+  neighborhood?: string;
   city: string;
   state: string;
   country: string;
   zip_code: string;
   latitude: number;
   longitude: number;
+  trade_name?: string;
   source: string;
 };
 
