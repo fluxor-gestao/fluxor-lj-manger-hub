@@ -8,10 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { RefreshCcw, AlertTriangle, CheckCircle2, History, Loader2 } from "lucide-react";
-import { COMPANY_LIST, type CompanyCode } from "@/lib/companyCodes";
-import { getAreasFor } from "@/lib/businessAreas";
+import { type CompanyCode } from "@/lib/companyCodes";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 interface BulkPriceUpdateProps {
@@ -35,14 +34,38 @@ export default function BulkPriceUpdate({ open, onOpenChange, services }: BulkPr
   const [filterArea, setFilterArea] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
 
+  const { data: units = [] } = useQuery({
+    queryKey: ["catalog", "business_units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("code, name")
+        .eq("active", true)
+        .order("code");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: areas = [] } = useQuery({
+    queryKey: ["business-areas", filterUnit],
+    enabled: filterUnit !== "all",
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_areas")
+        .select("slug, label")
+        .eq("business_unit", filterUnit)
+        .eq("is_active", true)
+        .order("label");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const categories = useMemo(() => {
     return Array.from(new Set(services.map(s => s.category))).sort();
   }, [services]);
 
-  const areas = useMemo(() => {
-    if (filterUnit === "all") return [];
-    return getAreasFor(filterUnit as CompanyCode);
-  }, [filterUnit]);
 
   const filteredItems = useMemo(() => {
     return services.filter(s => {
@@ -166,8 +189,8 @@ export default function BulkPriceUpdate({ open, onOpenChange, services }: BulkPr
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todas as unidades</SelectItem>
-                        {COMPANY_LIST.map(c => (
-                          <SelectItem key={c.code} value={c.code}>{c.short}</SelectItem>
+                        {units.map((c: any) => (
+                          <SelectItem key={c.code} value={c.code}>{c.code} — {c.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
