@@ -134,11 +134,12 @@ export function DevisPreviewDialog({ devisId, open, onOpenChange }: DevisPreview
                       color="text-amber-400"
                     />
                     <ValueCard 
-                      label="Prazo" 
-                      value={devis.deadline_date ? new Date(devis.deadline_date).toLocaleDateString() : "—"} 
+                      label="Prazo (Deadline)" 
+                      value={devis.deadline_date ? new Date(devis.deadline_date).toLocaleDateString() : "PENDENTE"} 
                       icon={Calendar}
-                      color="text-blue-400"
+                      color={devis.deadline_date ? "text-blue-400" : "text-destructive"}
                     />
+
                     <ValueCard 
                       label="Reunião" 
                       value={devis.meeting_date ? new Date(devis.meeting_date).toLocaleDateString() : "—"} 

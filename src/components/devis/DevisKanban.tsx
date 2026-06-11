@@ -168,7 +168,7 @@ function DevisCard({
         <span className="truncate">
           {responsavel?.full_name || responsavel?.email || "—"}
         </span>
-        <span>{devis.meeting_date ? format(parseISO(devis.meeting_date), "dd/MM") : "—"}</span>
+        <span>{devis.deadline_date ? format(parseISO(devis.deadline_date), "dd/MM") : "—"}</span>
       </div>
     </Card>
   );
