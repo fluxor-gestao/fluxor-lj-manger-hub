@@ -14,7 +14,7 @@ import {
   Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink, Paperclip, Info, Activity
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { formatDevisCode } from "@/lib/formatDevis";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { EntityAttachments } from "../EntityAttachments";
