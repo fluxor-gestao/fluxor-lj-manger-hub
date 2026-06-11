@@ -1297,33 +1297,37 @@ export default function BIFinanceiro() {
         </TabsList>
 
         <TabsContent value="receber">
-          <Card>
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent">
+                  <TableRow className="hover:bg-transparent bg-slate-50">
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Próxima ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {contasReceberCriticas.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem contas a receber críticas</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-slate-400 py-6 italic text-xs">Sem contas a receber críticas</TableCell></TableRow>
                   )}
-                  {contasReceberCriticas.map((r) => (
-                    <TableRow key={r.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group/row">
-                      <TableCell className="font-bold text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
-                      <TableCell className="text-white/70 text-xs">{r.vencimento}</TableCell>
-                      <TableCell className="text-right font-bold text-white">{BRL(r.valor)}</TableCell>
+                  {contasReceberCriticas.map((r, i) => (
+                    <TableRow key={r.id} className={cn(
+                      "border-slate-100 transition-colors group/row",
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                      "hover:bg-slate-50"
+                    )}>
+                      <TableCell className="font-bold text-slate-900 group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
+                      <TableCell className="text-slate-500 text-xs">{r.vencimento}</TableCell>
+                      <TableCell className="text-right font-bold text-slate-900">{BRL(r.valor)}</TableCell>
                       <TableCell className="text-right">
-                        {r.dias > 0 ? <Badge variant="destructive" className="animate-pulse">{r.dias}d</Badge> : <span className="text-white/50">{r.dias}</span>}
+                        {r.dias > 0 ? <Badge variant="destructive" className="animate-pulse">{r.dias}d</Badge> : <span className="text-slate-400">{r.dias}</span>}
                       </TableCell>
-                      <TableCell><Badge variant="outline" className="border-white/20 text-white/90 font-medium">{r.status}</Badge></TableCell>
-                      <TableCell className="text-white font-medium text-xs bg-white/5">{r.acao}</TableCell>
+                      <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white font-medium">{r.status}</Badge></TableCell>
+                      <TableCell className="text-slate-700 font-medium text-xs bg-slate-50/50">{r.acao}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
