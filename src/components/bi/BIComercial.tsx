@@ -66,6 +66,8 @@ import { findArea, getAreasFor } from "@/lib/businessAreas";
 import { isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
 import { STATUS_LABELS, ALL_STATUSES } from "@/lib/devisStatus";
 
+import { formatDevisCode } from "@/lib/formatDevis";
+
 // ----- helpers -----
 const BRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n || 0);
