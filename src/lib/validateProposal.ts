@@ -1,41 +1,21 @@
-// Valida que o proposal_structure contém todas as 11 cláusulas obrigatórias.
+// O sistema pode sugerir cláusulas obrigatórias (I a XI), 
+// mas não deve impedir o envio se o usuário decidir omitir alguma ou usar outro formato.
 const REQUIRED = [
-  "I.",
-  "II.",
-  "III.",
-  "IV.",
-  "V.",
-  "VI.",
-  "VII.",
-  "VIII.",
-  "IX.",
-  "X.",
-  "XI.",
+  "I.", "II.", "III.", "IV.", "V.", "VI.", "VII.", "VIII.", "IX.", "X.", "XI.",
 ];
 
 export function getMissingClauses(text?: string | null): string[] {
   const t = (text || "").toString();
-  // Se o texto parece conter os cabeçalhos das seções em formato Markdown (## I., ## II., etc),
-  // consideramos válido mesmo sem o ponto final exato em alguns casos de formatação.
   return REQUIRED.filter((m) => {
-    // Escapa o ponto para a regex
     const escapedM = m.replace(".", "\\.");
-    // Procura por: "## I.", "## I ", " I. ", ou "I. " no início da linha/palavra
     const pattern = new RegExp(`(##\\s+${escapedM}|\\b${escapedM}\\b)`, "i");
     return !pattern.test(t);
   });
 }
 
 export function isProposalComplete(text?: string | null): boolean {
-  // Para propostas legadas ou geradas sem a estrutura completa (I-XI), 
-  // permitimos o envio se houver conteúdo substancial, para não bloquear o usuário.
-  const missing = getMissingClauses(text);
-  if (missing.length === 0) return true;
-  
-  // Se faltam cláusulas mas o texto tem conteúdo substancial, permitimos o envio para não travar o processo.
-  if (text && text.length > 300) {
-    return true; 
-  }
-
-  return false;
+  // Sempre retornamos true para não bloquear o envio da proposta,
+  // independente da presença das cláusulas I a XI.
+  // A validação passa a ser apenas informativa se necessário.
+  return true;
 }
