@@ -17,3 +17,22 @@ export function formatDevisCode(devisNumber: string | null | undefined, fallback
 
   return fallbackId;
 }
+
+/**
+ * Limpa a descrição removendo referências a UUIDs e substituindo pelo código do Devis.
+ */
+export function formatMovementDescription(description: string | null | undefined, devisNumber: string | null | undefined, devisId: string | null | undefined): string {
+  if (!description) return "—";
+  if (!devisId) return description;
+
+  const code = formatDevisCode(devisNumber, devisId);
+  const shortId = devisId.slice(0, 8);
+  
+  // Substitui #uuid por #código
+  let result = description.replace(new RegExp(`#${shortId}[^\\s]*`, 'gi'), `#${code}`);
+  
+  // Caso não tenha o #, mas tenha o uuid solto ou parte dele
+  result = result.replace(new RegExp(devisId, 'gi'), code);
+  
+  return result;
+}
