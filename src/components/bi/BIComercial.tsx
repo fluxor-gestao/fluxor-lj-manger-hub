@@ -1182,10 +1182,10 @@ export default function BIComercial() {
                   if (name && name !== "—") setFilters({ ...filters, responsible: name });
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis type="number" fontSize={11} />
-                <YAxis type="category" dataKey="name" width={120} fontSize={11} />
-                <Tooltip formatter={(v: any) => BRL(Number(v))} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis type="number" fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <YAxis type="category" dataKey="name" width={120} fontSize={11} axisLine={false} tickLine={false} tick={{ fill: '#374151' }} />
+                <Tooltip content={<CustomTooltip formatter={BRL} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="valor" fill={COLORS[0]} />
               </BarChart>
             </ResponsiveContainer>
