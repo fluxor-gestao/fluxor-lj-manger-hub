@@ -1150,11 +1150,11 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : monthly.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => BRL(v).split(',')[0]} />
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
 
                 {Array.from(new Set(rows.map(r => r.business_unit).filter(Boolean))).map((code, i) => (
                   <Line 
