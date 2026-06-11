@@ -13,6 +13,7 @@ import {
   Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { formatDevisCode } from "@/lib/formatDevis";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
@@ -258,7 +259,7 @@ export function CobrancaDetailSheet({
               <div className="flex items-center justify-between p-2 rounded-md border bg-muted/30">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-primary" />
-                  <span className="font-mono text-sm font-semibold">{row.devis_number || "Ver Devis"}</span>
+                  <span className="font-mono text-sm font-semibold">{formatDevisCode(row.devis_number, row.devis_id || undefined)}</span>
                 </div>
                 <Button variant="ghost" size="sm" asChild className="h-7 text-xs">
                   <Link to={`/comercial/devis/${row.devis_id}`}>

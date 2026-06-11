@@ -66,6 +66,8 @@ import { findArea, getAreasFor } from "@/lib/businessAreas";
 import { isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
 import { STATUS_LABELS, ALL_STATUSES } from "@/lib/devisStatus";
 
+import { formatDevisCode } from "@/lib/formatDevis";
+
 // ----- helpers -----
 const BRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n || 0);
@@ -505,7 +507,7 @@ export default function BIComercial() {
         return {
           id: r.id,
           cliente: clientName(r.client_id),
-          numero: r.devis_number || r.title,
+          numero: formatDevisCode(r.devis_number, r.id),
           status: r.status,
           valor: Number(r.total_amount ?? 0),
           criada: r.created_at.slice(0, 10),
@@ -645,7 +647,11 @@ export default function BIComercial() {
   const exportCSV = () => {
     const cols = ["id", "devis_number", "title", "status", "total_amount", "client_id", "commercial_responsible", "created_at", "sent_at", "accepted_at", "rejected_at"];
     const lines = [cols.join(",")];
-    for (const r of rows) lines.push(cols.map((c) => JSON.stringify((r as any)[c] ?? "")).join(","));
+    for (const r of rows) {
+      const rowData = { ...r } as any;
+      rowData.devis_number = formatDevisCode(r.devis_number, r.id);
+      lines.push(cols.map((c) => JSON.stringify(rowData[c] ?? "")).join(","));
+    }
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -1261,7 +1267,7 @@ export default function BIComercial() {
                       "hover:bg-white/[0.04]"
                     )}>
                       <TableCell className="font-medium text-white group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
-                      <TableCell className="max-w-[220px] truncate text-white/90">{r.numero}</TableCell>
+                      <TableCell className="max-w-[220px] truncate text-white/90 font-mono text-[10px]">{r.numero}</TableCell>
                       <TableCell><Badge variant="outline" className="border-white/20 text-white/90">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
                       <TableCell className="text-right text-white font-bold">{BRL(r.valor)}</TableCell>
                       <TableCell className="text-white/70 text-xs">{r.criada}</TableCell>

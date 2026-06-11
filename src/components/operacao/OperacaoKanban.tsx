@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatDevisCode } from "@/lib/formatDevis";
 import { CalendarDays, MessageSquare, AlertOctagon, ListChecks, User2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -84,6 +85,11 @@ export function OperacaoKanban({
                     {s.client?.name ? (
                       <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{s.client.name}</p>
                     ) : null}
+                    {s.devis?.devis_number && (
+                      <p className="text-[10px] text-primary font-mono mt-0.5">
+                        {formatDevisCode(s.devis.devis_number, s.devis_id || undefined)}
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-1 mt-2">
                       {s.business_unit ? (
                         <Badge variant="secondary" className="text-[10px] leading-none px-1 h-4">{s.business_unit}</Badge>

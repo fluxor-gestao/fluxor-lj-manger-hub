@@ -30,6 +30,7 @@ import { FaturaPreviewDialog } from "@/components/financeiro/FaturaPreviewDialog
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { cn } from "@/lib/utils";
+import { formatDevisCode } from "@/lib/formatDevis";
 
 export const Route = createFileRoute("/_authenticated/financeiro/contas-a-receber")({
   component: ContasAReceberPage,
@@ -445,9 +446,9 @@ function ContasAReceberPage() {
                         <span className="max-w-[280px] truncate font-medium group-hover:underline" title={r.movement_description ?? ""}>
                           {r.movement_description ?? "—"}
                         </span>
-                        {r.devis_number && (
+                        {(r.devis_number || r.devis_id) && (
                           <Badge variant="secondary" className="text-[10px] py-0 px-1 font-mono">
-                            {r.devis_number}
+                            {formatDevisCode(r.devis_number, r.devis_id || undefined)}
                           </Badge>
                         )}
                       </button>

@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { supabase } from "@/integrations/supabase/client";
+import { formatDevisCode } from "@/lib/formatDevis";
 import {
   STATUS_LABEL,
   STATUS_ORDER,
@@ -142,7 +143,7 @@ export function ProcessoDetailSheet({
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1 min-w-0">
               <SheetTitle className="text-xl leading-tight">
-                {code ? <span className="text-primary">{code}</span> : null}
+                {code ? <span className="text-primary">{formatDevisCode(code, service.devis_id || undefined)}</span> : null}
                 {code ? " — " : null}
                 {service.title}
               </SheetTitle>

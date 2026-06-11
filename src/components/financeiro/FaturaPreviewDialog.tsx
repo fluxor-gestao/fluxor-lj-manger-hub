@@ -13,6 +13,8 @@ import { Copy, Send, Download, X, CreditCard, Building2, Loader2 } from "lucide-
 import logo from "@/assets/logo.svg";
 import type { CobrancaRow } from "./CobrancaDetailSheet";
 
+import { formatDevisCode } from "@/lib/formatDevis";
+
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
 
@@ -193,8 +195,8 @@ export function FaturaPreviewDialog({
               <div className="p-6 border-b">
                 <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-2">Descrição do serviço</p>
                 <p className="font-medium">{row.movement_description ?? "—"}</p>
-                {row.document_reference && (
-                  <p className="text-xs text-zinc-500 mt-1">Referência: {row.document_reference}</p>
+                {row.devis_id && (
+                  <p className="text-xs text-zinc-500 mt-1">Referência: {formatDevisCode(row.devis_number, row.devis_id)}</p>
                 )}
               </div>
 

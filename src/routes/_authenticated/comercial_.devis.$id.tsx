@@ -33,6 +33,7 @@ import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCode
 import { AreaBadge } from "@/components/AreaBadge";
 import { getAreasFor, isValidAreaForCompany } from "@/lib/businessAreas";
 import { MultiAreaSelector } from "@/components/devis/MultiAreaSelector";
+import { formatDevisCode } from "@/lib/formatDevis";
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
@@ -382,7 +383,7 @@ function DevisDetail() {
             <h1 className="text-3xl font-bold font-display">{(devis?.title ?? "")}</h1>
             <p className="text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
               <span>Detalhes do devis</span>
-              {(devis?.devis_number ?? "") && <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{(devis?.devis_number ?? "")}</span>}
+              <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{formatDevisCode(devis.devis_number, devis.id)}</span>
               <CompanyBadge code={(devis as any)?.business_unit} />
               <div className="flex flex-wrap gap-1">
                 {devis.devis_service_areas?.length > 0 ? (
