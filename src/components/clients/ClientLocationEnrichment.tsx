@@ -91,6 +91,7 @@ export default function ClientLocationEnrichment({
         longitude: results.longitude,
         location_source: results.source,
         location_status: "localizada",
+        is_international: results.is_international || false,
         location_updated_at: new Date().toISOString(),
       };
 
