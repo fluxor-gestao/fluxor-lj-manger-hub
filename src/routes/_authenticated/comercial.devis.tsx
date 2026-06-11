@@ -514,7 +514,8 @@ function Comercial() {
         : "",
       responsible_sectors: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
         ? [payload.devis.responsible_sector as string]
-        : [],
+          : [],
+      down_payment_percentage: "50",
     });
     setAiAccepted({
       service_type: payload.devis.service_type || service_type,
