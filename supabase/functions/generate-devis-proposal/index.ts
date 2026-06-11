@@ -1,5 +1,6 @@
-// Gera proposta jurídica (Devis) — IA gera APENAS o Escopo dos Serviços (Seção III).
+// Gera proposta jurídica (Devis) — IA gera o Escopo dos Serviços (Seção III) e sugere itens de precificação.
 // As demais 10 cláusulas (I, II, IV–XI) vêm de um template fixo em PT.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
