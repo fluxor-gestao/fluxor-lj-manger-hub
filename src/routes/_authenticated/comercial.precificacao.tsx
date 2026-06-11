@@ -11,9 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe, Filter } from "lucide-react";
+import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe, Filter, RefreshCcw, History } from "lucide-react";
 import { LoadingState, EmptyState } from "@/components/DataStates";
 import { cn } from "@/lib/utils";
+import BulkPriceUpdate from "@/components/devis/BulkPriceUpdate";
+import { COMPANY_LIST, type CompanyCode } from "@/lib/companyCodes";
+import { AreaBadge } from "@/components/AreaBadge";
+import { getAreasFor } from "@/lib/businessAreas";
 
 export const Route = createFileRoute("/_authenticated/comercial/precificacao")({
   component: Precificacao,
@@ -26,8 +30,8 @@ type ServicePrice = {
   description: string;
   category: string;
   price: number;
-  market_price: number | null;
-  last_market_update: string | null;
+  business_unit: CompanyCode | null;
+  responsible_sector: string | null;
 };
 
 function Precificacao() {
@@ -36,8 +40,9 @@ function Precificacao() {
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkUpdateOpen, setIsBulkUpdateOpen] = useState(false);
   const [editingService, setEditingService] = useState<Partial<ServicePrice> | null>(null);
-  const [isAiSearching, setIsAiSearching] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["service_prices"],
@@ -47,7 +52,15 @@ function Precificacao() {
         .select("*")
         .order("name");
       if (error) throw error;
-      return data as ServicePrice[];
+      return (data as any[]).map(s => ({
+        id: s.id,
+        name: s.name,
+        description: s.description || "",
+        category: s.category || "Geral",
+        price: s.price || 0,
+        business_unit: s.business_unit as CompanyCode | null,
+        responsible_sector: s.responsible_sector as string | null,
+      })) as ServicePrice[];
     },
   });
 
@@ -65,6 +78,8 @@ function Precificacao() {
         description: service.description || null,
         category: service.category || "Geral",
         price: service.price || 0,
+        business_unit: service.business_unit || null,
+        responsible_sector: service.responsible_sector || null,
       };
 
       if (service.id) {
@@ -104,29 +119,18 @@ function Precificacao() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const handleAiMarketSearch = async (serviceName: string) => {
-    setIsAiSearching(true);
-    try {
-      // Usaremos o Lovable AI Gateway para simular uma busca de mercado
-      const response = await supabase.functions.invoke("ai-market-search", {
-        body: { serviceName }
-      });
-      
-      if (response.error) throw new Error(response.error.message);
-      
-      const { marketPrice, source } = response.data;
-      
-      toast.success(`Preço de mercado encontrado: R$ ${marketPrice}`, {
-        description: `Fonte: ${source}`,
-      });
-      
-      // Poderíamos atualizar o serviço aqui se tivéssemos o ID
-    } catch (e: any) {
-      toast.error("Erro na busca de mercado: " + e.message);
-    } finally {
-      setIsAiSearching(false);
-    }
-  };
+  const { data: history = [] } = useQuery({
+    queryKey: ["service_price_history"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_price_history")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const filteredServices = services.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -146,6 +150,12 @@ function Precificacao() {
           <Button variant="outline" onClick={() => navigate({ to: "/comercial" })}>
             <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
           </Button>
+          <Button variant="outline" onClick={() => setIsBulkUpdateOpen(true)}>
+            <RefreshCcw className="h-4 w-4 mr-2" /> Atualização em Lote
+          </Button>
+          <Button variant="outline" onClick={() => setIsHistoryOpen(true)}>
+            <History className="h-4 w-4 mr-2" /> Histórico
+          </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingService(null)}>
@@ -157,6 +167,18 @@ function Precificacao() {
                 <DialogTitle>{editingService?.id ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="unit">Unidade de Negócio</Label>
+                  <Select 
+                    value={editingService?.business_unit || ""} 
+                    onValueChange={v => setEditingService(prev => ({ ...prev, business_unit: v as CompanyCode }))}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecionar unidade" /></SelectTrigger>
+                    <SelectContent>
+                      {COMPANY_LIST.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome do Serviço</Label>
                   <Input 
@@ -172,6 +194,19 @@ function Precificacao() {
                     value={editingService?.category || ""} 
                     onChange={e => setEditingService(prev => ({ ...prev, category: e.target.value }))}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sector">Área Responsável</Label>
+                  <Select 
+                    value={editingService?.responsible_sector || ""} 
+                    onValueChange={v => setEditingService(prev => ({ ...prev, responsible_sector: v }))}
+                    disabled={!editingService?.business_unit}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecionar área" /></SelectTrigger>
+                    <SelectContent>
+                      {getAreasFor(editingService?.business_unit).map((a: any) => <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="price">Preço (R$)</Label>
@@ -199,6 +234,46 @@ function Precificacao() {
         </div>
       </div>
 
+      <BulkPriceUpdate 
+        open={isBulkUpdateOpen} 
+        onOpenChange={setIsBulkUpdateOpen} 
+        services={services} 
+      />
+
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Histórico de Reajustes</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {history.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">Nenhum histórico registrado.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Critério</TableHead>
+                    <TableHead className="text-right">Reajuste</TableHead>
+                    <TableHead className="text-right">Itens</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {history.map((h: any) => (
+                    <TableRow key={h.id}>
+                      <TableCell className="text-xs">{new Date(h.created_at).toLocaleString("pt-BR")}</TableCell>
+                      <TableCell className="text-xs font-medium">{h.criteria}</TableCell>
+                      <TableCell className="text-right text-xs font-mono">{h.percentage_applied}%</TableCell>
+                      <TableCell className="text-right text-xs">{h.items_count}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Card className="p-4">
         <div className="space-y-4 mb-6">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -225,11 +300,8 @@ function Precificacao() {
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+            </Select>
             </div>
-            <Button variant="outline" className="gap-2 shrink-0">
-              <Globe className="h-4 w-4" /> Busca de Mercado
-            </Button>
           </div>
         </div>
 
@@ -245,7 +317,6 @@ function Precificacao() {
                   <TableHead>Serviço</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead className="text-right">Preço de Tabela</TableHead>
-                  <TableHead className="text-right">Preço de Mercado (IA)</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -258,27 +329,16 @@ function Precificacao() {
                         <div className="text-xs text-muted-foreground line-clamp-1">{service.description}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{service.category}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-semibold">{service.category}</span>
+                        <div className="flex gap-1">
+                          {service.business_unit && <AreaBadge companyCode={service.business_unit} areaSlug={service.responsible_sector || ""} />}
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-right font-mono">
                       {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(service.price)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="font-mono text-emerald-600">
-                          {service.market_price 
-                            ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(service.market_price) 
-                            : "—"}
-                        </span>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-8 w-8 text-primary"
-                          onClick={() => handleAiMarketSearch(service.name)}
-                          disabled={isAiSearching}
-                        >
-                          <Sparkles className={cn("h-4 w-4", isAiSearching && "animate-spin")} />
-                        </Button>
-                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

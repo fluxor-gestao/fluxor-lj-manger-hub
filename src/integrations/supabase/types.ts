@@ -1304,8 +1304,39 @@ export type Database = {
         }
         Relationships: []
       }
+      service_price_history: {
+        Row: {
+          created_at: string | null
+          criteria: string
+          details: Json | null
+          id: string
+          items_count: number
+          percentage_applied: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          criteria: string
+          details?: Json | null
+          id?: string
+          items_count: number
+          percentage_applied?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          criteria?: string
+          details?: Json | null
+          id?: string
+          items_count?: number
+          percentage_applied?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       service_prices: {
         Row: {
+          business_unit: string | null
           category: string | null
           created_at: string
           description: string | null
@@ -1314,9 +1345,11 @@ export type Database = {
           market_price: number | null
           name: string
           price: number
+          responsible_sector: string | null
           updated_at: string
         }
         Insert: {
+          business_unit?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -1325,9 +1358,11 @@ export type Database = {
           market_price?: number | null
           name: string
           price?: number
+          responsible_sector?: string | null
           updated_at?: string
         }
         Update: {
+          business_unit?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -1336,6 +1371,7 @@ export type Database = {
           market_price?: number | null
           name?: string
           price?: number
+          responsible_sector?: string | null
           updated_at?: string
         }
         Relationships: []
