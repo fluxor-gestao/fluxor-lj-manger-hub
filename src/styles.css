@@ -81,35 +81,12 @@
   --sidebar-ring: 215 80% 55%;
 }
 
+/* Removed dark mode by commenting out the .dark class definition */
+/*
 .dark {
-  --background: 220 25% 8%;
-  --foreground: 220 10% 95%;
-  --card: 220 25% 12%;
-  --card-foreground: 220 10% 95%;
-  --popover: 220 25% 12%;
-  --popover-foreground: 220 10% 95%;
-  --primary: 215 80% 55%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 220 20% 18%;
-  --secondary-foreground: 220 10% 90%;
-  --muted: 220 20% 15%;
-  --muted-foreground: 220 10% 55%;
-  --accent: 220 20% 18%;
-  --accent-foreground: 220 10% 90%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 220 20% 20%;
-  --input: 220 20% 20%;
-  --ring: 215 80% 55%;
-  --sidebar-background: 220 30% 6%;
-  --sidebar-foreground: 220 10% 85%;
-  --sidebar-primary: 215 80% 55%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 220 25% 12%;
-  --sidebar-accent-foreground: 220 10% 90%;
-  --sidebar-border: 220 25% 12%;
-  --sidebar-ring: 215 80% 55%;
+  ...
 }
+*/
 
 @layer base {
   * {
