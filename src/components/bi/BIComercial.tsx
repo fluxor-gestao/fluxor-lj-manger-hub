@@ -933,7 +933,7 @@ export default function BIComercial() {
 
       <div className="grid gap-3 lg:grid-cols-2">
 
-        <Card className="border border-white/5 shadow-2xl overflow-hidden relative bg-[#1a2233]/40 backdrop-blur-xl group">
+        <Card className="border border-slate-200 shadow-sm overflow-hidden relative bg-white group">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           <CardHeader className="relative z-10 border-b border-slate-100 bg-slate-50/50">
             <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Resumo por Empresa e Área</CardTitle>
