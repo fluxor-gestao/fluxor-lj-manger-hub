@@ -204,7 +204,7 @@ function Precificacao() {
                   >
                     <SelectTrigger><SelectValue placeholder="Selecionar área" /></SelectTrigger>
                     <SelectContent>
-                      {getAreasFor(editingService?.business_unit).map(a => <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>)}
+                      {getAreasFor(editingService?.business_unit).map((a: any) => <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
