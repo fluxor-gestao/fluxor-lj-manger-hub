@@ -848,7 +848,7 @@ export default function BIComercial() {
                         {kpi.trendValue}
                       </div>
                     )}
-                    <span className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide">
+                    <span className="text-slate-400 font-medium text-[10px] tracking-tight">
                       {kpi.sub}
                     </span>
                   </div>
