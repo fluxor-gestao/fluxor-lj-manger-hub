@@ -18,7 +18,6 @@ import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, Briefcase
 import { DevisSequenceManager } from "@/components/devis/DevisSequenceManager";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { versionHistory } from "@/config/appVersion";
 
 type SystemSettings = {
   companyName: string;
