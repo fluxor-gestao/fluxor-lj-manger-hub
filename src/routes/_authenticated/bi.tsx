@@ -15,8 +15,8 @@ const dashboards = [
     title: "Comercial",
     fullName: "Dashboard Comercial",
     icon: ShoppingCart,
-    gradient: "from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9]",
-    glow: "rgba(139, 92, 246, 0.3)",
+    gradient: "from-purple-500 via-purple-600 to-purple-700",
+    glow: "rgba(139, 92, 246, 0.4)",
     description: "Vendas, conversão e funil comercial",
     embedUrl:
       "https://app.powerbi.com/view?r=eyJrIjoiMDk0YTI0NmQtOTdjNC00ZGY1LTgyOTQtZjg0ZmZkNzY0MTE1IiwidCI6ImViYzMxZTJiLWE5OTYtNGQ4MS04NzIwLWRjNWNkYWQ4YzNmYyJ9",
@@ -26,8 +26,8 @@ const dashboards = [
     title: "Financeiro",
     fullName: "Dashboard Financeiro",
     icon: DollarSign,
-    gradient: "from-[#0EA5E9] via-[#0284C7] to-[#0369A1]",
-    glow: "rgba(14, 165, 233, 0.3)",
+    gradient: "from-sky-500 via-sky-600 to-sky-700",
+    glow: "rgba(14, 165, 233, 0.4)",
     description: "Receitas, despesas e fluxo de caixa",
     embedUrl: undefined as string | undefined,
   },
@@ -36,8 +36,8 @@ const dashboards = [
     title: "Operação",
     fullName: "Dashboard Operação",
     icon: BriefcaseBusiness,
-    gradient: "from-[#10B981] via-[#059669] to-[#047857]",
-    glow: "rgba(16, 185, 129, 0.3)",
+    gradient: "from-emerald-500 via-emerald-600 to-emerald-700",
+    glow: "rgba(16, 185, 129, 0.4)",
     description: "Processos, prazos e produtividade",
     embedUrl: undefined as string | undefined,
   },
@@ -121,16 +121,19 @@ function BI() {
                 className={cn(
                   "group relative overflow-hidden cursor-pointer rounded-xl transition-all duration-300",
                   isActive 
-                    ? "ring-2 ring-primary/20 shadow-md z-20 scale-[1.02] bg-white border-primary/20" 
+                    ? "ring-2 ring-primary/20 shadow-lg z-20 scale-[1.02] bg-white border-primary/20" 
                     : "opacity-90 hover:opacity-100 hover:scale-[1.01] bg-white border-slate-200",
                   selectedDashboard 
                     ? "h-[50px] md:h-[60px] border shadow-sm" 
-                    : "h-[180px] md:h-[220px] border shadow-sm"
+                    : "h-[180px] md:h-[220px] border shadow-md"
                 )}
               >
-                {/* Clean hover effect */}
+                {/* Background color gradient for the card */}
                 {!selectedDashboard && (
-                  <div className="absolute inset-0 bg-slate-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className={cn(
+                    "absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 bg-gradient-to-br",
+                    dashboard.gradient
+                  )} />
                 )}
 
                 <div className={cn(
@@ -141,9 +144,21 @@ function BI() {
                     "flex items-center justify-center rounded-xl transition-all duration-500",
                     selectedDashboard 
                       ? "w-8 h-8 bg-slate-50 border border-slate-100" 
-                      : "w-14 h-14 bg-white border border-slate-100 group-hover:scale-110 group-hover:rotate-3 shadow-sm"
+                      : cn("w-14 h-14 bg-white border border-slate-100 group-hover:scale-110 group-hover:rotate-3 shadow-sm transition-colors duration-500", 
+                           dashboard.id === 'comercial' ? 'group-hover:border-purple-200 group-hover:bg-purple-50' :
+                           dashboard.id === 'financeiro' ? 'group-hover:border-sky-200 group-hover:bg-sky-50' :
+                           'group-hover:border-emerald-200 group-hover:bg-emerald-50'
+                        )
                   )}>
-                    <Icon className={cn("drop-shadow-sm", selectedDashboard ? "h-4 w-4 text-slate-400" : "h-7 w-7 text-primary")} />
+                    <Icon className={cn(
+                      "drop-shadow-sm transition-colors duration-500", 
+                      selectedDashboard ? "h-4 w-4 text-slate-400" : "h-7 w-7",
+                      !selectedDashboard && (
+                        dashboard.id === 'comercial' ? 'text-purple-600' :
+                        dashboard.id === 'financeiro' ? 'text-sky-600' :
+                        'text-emerald-600'
+                      )
+                    )} />
                   </div>
                   
                   <div className={cn(
