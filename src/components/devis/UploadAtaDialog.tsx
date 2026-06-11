@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Check, X, Info, Calendar as CalendarIcon, Globe, Eye } from "lucide-react";
+import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Check, X, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MultiAreaSelector } from "./MultiAreaSelector";
 import { format, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { CompanyCode } from "@/lib/companyCodes";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -296,7 +295,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
           <span className={cn(step >= 1 && "text-primary font-medium")}>1. Upload</span>
           <span>→</span>
           <span className={cn(step >= 2 && "text-primary font-medium")}>2. Confirmação</span>
@@ -330,7 +329,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
               )}
             </Card>
 
-            <div>
+            <div className="space-y-2">
               <Label>Idioma do documento</Label>
               <Select value={langHint} onValueChange={setLangHint}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
