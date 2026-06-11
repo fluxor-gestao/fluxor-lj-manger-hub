@@ -102,10 +102,12 @@ function buildProposalMarkdown(args: {
     .filter(Boolean)
     .join("\n");
 
+  const contractor = CONTRACTORS[args.business_unit || "DE"] || DEFAULT_CONTRACTOR;
+
   return `# ${title}
 
 ## I. Identificação das Partes
-- **CONTRATADO:** ${CONTRACTOR.name}, sociedade de advogados inscrita no CNPJ sob o nº ${CONTRACTOR.document}, com sede na ${CONTRACTOR.address}, neste ato representada pelo sócio ${CONTRACTOR.representative}.
+- **CONTRATADO:** ${contractor.name}, sociedade de advogados inscrita no CNPJ sob o nº ${contractor.document}, com sede na ${contractor.address}, neste ato representada pelo sócio ${contractor.representative}.
 ${clientLines}
 
 ## II. Objeto do Contrato
