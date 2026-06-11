@@ -122,7 +122,7 @@ export default function DevisCodePreviewDialog({
           )}
 
           <div className="space-y-2">
-            <Label className="text-xs">Tipo de serviço</Label>
+            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Tipo de serviço</Label>
             <RadioGroup
               value={prefix}
               onValueChange={(v) => setPrefix(v as ServicePrefix)}
