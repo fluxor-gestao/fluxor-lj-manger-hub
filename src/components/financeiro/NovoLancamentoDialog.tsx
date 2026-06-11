@@ -38,7 +38,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   /** Called after the entry(ies) is created. Receives the id of the first inserted entry. */
   onCreated?: (firstEntryId?: string) => void | Promise<void>;
-  bankAccounts: BankAccount[];
+  bankAccounts?: BankAccount[];
   /** Values to prefill when the dialog opens. */
   prefill?: NovoLancamentoPrefill;
   /** Override the dialog title. */
