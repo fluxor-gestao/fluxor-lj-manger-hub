@@ -807,13 +807,6 @@ export default function BIComercial() {
           },
         ].map((kpi, i) => (
           <Card key={i} className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg border border-slate-200 bg-white shadow-sm">
-            <div className={cn(
-              "absolute -right-8 -top-8 h-32 w-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-10 transition-all duration-500",
-              kpi.color === "purple" ? "bg-purple-500" : 
-              kpi.color === "sky" ? "bg-blue-500" : 
-              kpi.color === "emerald" ? "bg-emerald-500" : 
-              kpi.color === "indigo" ? "bg-indigo-500" : "bg-white"
-            )} />
 
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-5">
