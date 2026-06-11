@@ -200,7 +200,7 @@ function Comercial() {
         q = q.filter("devis_service_areas.area_slug", "in", `(${filterAreas.join(",")})`);
       }
       if (filterPricing !== "all") q = q.eq("pricing_status", filterPricing);
-      if (filterPricing !== "all") q = q.eq("pricing_status", filterPricing);
+      if (filterCompany !== "all") q = q.eq("business_unit", filterCompany);
       const { data, count, error } = await q;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
