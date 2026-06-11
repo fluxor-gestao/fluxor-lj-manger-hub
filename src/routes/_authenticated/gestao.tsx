@@ -9,8 +9,11 @@ import {
   TrendingUp, TrendingDown, DollarSign, ShoppingCart, Briefcase, 
   ArrowUpRight, ArrowDownRight, Users, Target, Activity, 
   AlertTriangle, CheckCircle2, Building2, Calendar, LayoutDashboard,
-  Filter, ChevronRight, PieChart as PieIcon, BarChart3, Wallet
+  Filter, ChevronRight, PieChart as PieIcon, BarChart3, Wallet,
+  FileText
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DREGerencial } from "@/components/bi/DREGerencial";
 import { cn } from "@/lib/utils";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import {
