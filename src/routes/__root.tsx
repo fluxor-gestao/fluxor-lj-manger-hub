@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CompanyProvider } from "@/contexts/CompanyContext";
+import { RealtimeSyncProvider } from "@/contexts/RealtimeSyncContext";
 import {
   Outlet,
   Link,
@@ -130,14 +131,16 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <CompanyProvider>
-          <TooltipProvider>
-            <PageProgress />
-            <Toaster />
-            <Sonner />
-            <Outlet />
-          </TooltipProvider>
-        </CompanyProvider>
+        <RealtimeSyncProvider>
+          <CompanyProvider>
+            <TooltipProvider>
+              <PageProgress />
+              <Toaster />
+              <Sonner />
+              <Outlet />
+            </TooltipProvider>
+          </CompanyProvider>
+        </RealtimeSyncProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
