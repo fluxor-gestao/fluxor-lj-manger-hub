@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar } from "lucide-react";
+import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar, Database, Download, ShieldAlert, Loader2 } from "lucide-react";
 import { DevisSequenceManager } from "@/components/devis/DevisSequenceManager";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -401,6 +401,167 @@ function BusinessAreasManager() {
   );
 }
 
+function BackupManager() {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [step, setStep] = useState(0);
+  const { user } = useAuth();
+
+  const steps = [
+    "Validando permissão",
+    "Coletando dados",
+    "Gerando CSVs",
+    "Compactando arquivo",
+    "Preparando download"
+  ];
+
+  const handleGenerateBackup = async () => {
+    setIsGenerating(true);
+    setStep(0);
+
+    try {
+      // Fake progress for visual feedback
+      const interval = setInterval(() => {
+        setStep(prev => (prev < 4 ? prev + 1 : prev));
+      }, 1500);
+
+      const { data, error } = await supabase.functions.invoke("generate-system-backup");
+      
+      clearInterval(interval);
+      setStep(4);
+
+      if (error) throw error;
+
+      // Create download link
+      const blob = new Blob([data], { type: "application/zip" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `backup_sistema_${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Backup gerado com sucesso!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Erro ao gerar backup: " + (error.message || "Erro desconhecido"));
+    } finally {
+      setIsGenerating(false);
+      setStep(0);
+    }
+  };
+
+  return (
+    <Card className="border-primary/10">
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            <Database className="h-5 w-5" />
+          </div>
+          <div>
+            <CardTitle>Backup Geral do Sistema</CardTitle>
+            <CardDescription>Exporte todas as informações operacionais e financeiras em formato CSV (ZIP).</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3 text-amber-800">
+          <ShieldAlert className="h-5 w-5 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-semibold mb-1">Atenção: Informações Sensíveis</p>
+            <p className="opacity-90">
+              Este arquivo conterá dados confidenciais de clientes, propostas, lançamentos financeiros e usuários. 
+              Mantenha o arquivo em local seguro após o download.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              Dados Incluídos
+            </h4>
+            <ul className="text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
+              <li>• Clientes & Áreas</li>
+              <li>• Devis & Propostas</li>
+              <li>• Mapa de Aprovação</li>
+              <li>• Tarefas & Comentários</li>
+              <li>• Financeiro & Lançamentos</li>
+              <li>• Contas a Receber/Pagar</li>
+              <li>• Histórico de E-mails</li>
+              <li>• Metadados de Anexos</li>
+            </ul>
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Segurança
+            </h4>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>• Senhas não são exportadas</li>
+              <li>• Chaves de API ocultas</li>
+              <li>• Acesso restrito a administradores</li>
+              <li>• Registro de log da operação</li>
+            </ul>
+          </div>
+        </div>
+
+        {isGenerating && (
+          <div className="space-y-3 py-4 border-t border-b border-dashed">
+            <div className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-2 font-medium">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Processando...
+              </span>
+              <span className="text-xs text-muted-foreground">{Math.round(((step + 1) / 5) * 100)}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-500 ease-in-out" 
+                style={{ width: `${((step + 1) / 5) * 100}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-center text-muted-foreground uppercase tracking-wider font-semibold">
+              Etapa {step + 1}: {steps[step]}
+            </p>
+          </div>
+        )}
+
+        <div className="flex justify-end pt-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button disabled={isGenerating} size="lg" className="bg-primary hover:bg-primary/90">
+                <Download className="h-4 w-4 mr-2" />
+                Gerar Backup Geral
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <ShieldAlert className="h-5 w-5 text-amber-500" />
+                  Confirmar Exportação Geral
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  Este backup contém informações sensíveis de todo o sistema, incluindo dados financeiros e de clientes.
+                  O download pode demorar alguns minutos dependendo do volume de dados.
+                  <br /><br />
+                  Deseja continuar com a geração do arquivo ZIP?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleGenerateBackup}>Confirmar e Gerar</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function Admin() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -579,6 +740,7 @@ function Admin() {
           <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
           <TabsTrigger value="commercial-settings"><FileSpreadsheet className="h-4 w-4 mr-2" />Configs Comerciais</TabsTrigger>
           <TabsTrigger value="updates"><History className="h-4 w-4 mr-2" />Atualizações</TabsTrigger>
+          <TabsTrigger value="backup"><Database className="h-4 w-4 mr-2" />Backup Geral</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -1257,6 +1419,10 @@ function Admin() {
 
         <TabsContent value="areas" className="space-y-4">
           <BusinessAreasManager />
+        </TabsContent>
+
+        <TabsContent value="backup" className="max-w-4xl mx-auto py-4">
+          <BackupManager />
         </TabsContent>
 
         <TabsContent value="updates" className="space-y-6">
