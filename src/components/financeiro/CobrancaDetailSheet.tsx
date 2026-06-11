@@ -245,8 +245,15 @@ export function CobrancaDetailSheet({
           </SheetDescription>
         </SheetHeader>
 
-        {/* Resumo de valores */}
-        <div className="mt-5 grid grid-cols-3 gap-2">
+        <Tabs defaultValue="info" className="mt-5">
+          <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10 p-1 mb-4">
+            <TabsTrigger value="info" className="gap-2"><Info className="h-4 w-4" /> Informações</TabsTrigger>
+            <TabsTrigger value="anexos" className="gap-2"><Paperclip className="h-4 w-4" /> Anexos</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="info" className="m-0 space-y-5">
+            {/* Resumo de valores */}
+            <div className="grid grid-cols-3 gap-2">
           <ValueTile label="Valor total" value={fmt(total)} />
           <ValueTile label="Recebido" value={fmt(paid)} tone="success" />
           <ValueTile label="Saldo aberto" value={fmt(open_)} tone="primary" />
