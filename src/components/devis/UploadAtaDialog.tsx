@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Check, X, Info, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, UserPlus, FileText, Check, X, Info, Calendar as CalendarIcon, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { MultiAreaSelector } from "./MultiAreaSelector";
 import { format, parseISO, isValid } from "date-fns";
