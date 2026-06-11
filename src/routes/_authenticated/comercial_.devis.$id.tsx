@@ -772,6 +772,13 @@ function DevisDetail() {
                     >
                       {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
                       {generating ? "Refinando..." : "Refinar proposta"}
+                      {generating && (
+                        <div className="ml-2 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></span>
+                        </div>
+                      )}
                     </Button>
                   ) : (
                     <Button
