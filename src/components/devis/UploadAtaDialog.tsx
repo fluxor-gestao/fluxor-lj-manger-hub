@@ -427,39 +427,74 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
         {/* Step 3: analyzing */}
         {step === 3 && (
           <div className="py-12 flex flex-col items-center gap-6">
-            <div className="relative">
-              <div className="h-24 w-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-              <Sparkles className="h-8 w-8 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
-            </div>
+            <LogoGlobeAnimation className="mb-2" />
             
             <div className="text-center space-y-2">
-              <h3 className="font-semibold text-lg text-primary animate-pulse">Inteligência Artificial em ação</h3>
+              <h3 className="font-semibold text-xl text-primary font-display">Inteligência Artificial em ação</h3>
               <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                Estamos lendo seu documento para extrair automaticamente o cliente, resumo da reunião e estruturar a proposta comercial.
+                Analisando os detalhes da ata para estruturar sua proposta comercial com precisão.
               </p>
             </div>
 
-            <div className="w-full max-w-sm space-y-4">
-              <div className="flex justify-between items-end text-xs mb-1">
-                <span className="text-muted-foreground font-medium">Progresso da análise</span>
-                <span className="text-primary font-bold">{progress}%</span>
-              </div>
-              <div className="h-3 w-full bg-muted rounded-full overflow-hidden border border-muted-foreground/10">
-                <div 
-                  className="h-full bg-primary transition-all duration-500 ease-out" 
-                  style={{ width: `${progress}%` }} 
-                />
+            <div className="w-full max-w-sm space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between items-end text-xs mb-1">
+                  <span className="text-muted-foreground font-medium uppercase tracking-wider">Progresso da análise</span>
+                  <span className="text-primary font-bold text-sm">{progress}%</span>
+                </div>
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-muted-foreground/5 shadow-inner">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-700 ease-out shadow-[0_0_10px_rgba(var(--primary),0.5)]" 
+                    style={{ width: `${progress}%` }} 
+                  />
+                </div>
               </div>
               
-              <div className="flex flex-col gap-2 pt-2">
-                <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 10 ? 'text-green-600' : 'text-muted-foreground'}`}>
-                  {progress >= 10 ? <CheckCircle2 className="h-3.3 w-3.3" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground ml-1" />} 
-                  Processando arquivo base
-                </div>
-                <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 35 ? 'text-green-600' : 'text-muted-foreground'}`}>
-                  {progress >= 35 ? <CheckCircle2 className="h-3.3 w-3.3" /> : progress >= 10 ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 ml-1" />} 
-                  Detectando idioma e contexto
-                </div>
+              <div className="grid grid-cols-1 gap-3 pt-2">
+                {[
+                  { id: 1, label: "Ata recebida", threshold: 5 },
+                  { id: 2, label: "Extraindo conteúdo", threshold: 15 },
+                  { id: 3, label: "Identificando cliente", threshold: 30 },
+                  { id: 4, label: "Identificando serviços", threshold: 50 },
+                  { id: 5, label: "Sugerindo áreas cadastradas", threshold: 70 },
+                  { id: 6, label: "Montando proposta", threshold: 85 },
+                  { id: 7, label: "Revisão final", threshold: 95 },
+                  { id: 8, label: "Pronto para salvar", threshold: 100 },
+                ].map((item) => {
+                  const isDone = progress >= item.threshold;
+                  const isCurrent = progress < item.threshold && (
+                    item.id === 1 || progress >= [0, 5, 15, 30, 50, 70, 85, 95][item.id - 1]
+                  );
+                  
+                  return (
+                    <div 
+                      key={item.id} 
+                      className={cn(
+                        "flex items-center gap-3 text-xs transition-all duration-500 py-1 px-2 rounded-lg border",
+                        isDone ? "text-green-600 bg-green-50/50 border-green-100" : 
+                        isCurrent ? "text-primary font-bold bg-primary/5 border-primary/10 animate-pulse" : 
+                        "text-muted-foreground bg-transparent border-transparent opacity-50"
+                      )}
+                    >
+                      <div className={cn(
+                        "flex items-center justify-center h-5 w-5 rounded-full border transition-all duration-500",
+                        isDone ? "bg-green-500 border-green-500 text-white" : 
+                        isCurrent ? "bg-primary/10 border-primary text-primary" : 
+                        "bg-muted/50 border-muted-foreground/20 text-muted-foreground"
+                      )}>
+                        {isDone ? <Check className="h-3 w-3" strokeWidth={3} /> : 
+                         isCurrent ? <Loader2 className="h-3 w-3 animate-spin" /> : 
+                         <span className="text-[10px] font-bold">{item.id}</span>}
+                      </div>
+                      <span className="flex-1">{item.label}</span>
+                      {isDone && <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
                 <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${progress >= 65 ? 'text-green-600' : 'text-muted-foreground'}`}>
                   {progress >= 65 ? <CheckCircle2 className="h-3.3 w-3.3" /> : progress >= 35 ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 ml-1" />} 
                   Extraindo dados do cliente
