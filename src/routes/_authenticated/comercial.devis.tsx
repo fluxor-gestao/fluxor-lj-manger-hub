@@ -766,23 +766,12 @@ function Comercial() {
                     </Select>
                   </div>
                   <div className="md:col-span-2">
-                    <Label>Área principal *</Label>
-                    <Select
-                      value={devisForm.responsible_sector}
-                      onValueChange={(v) => setDevisForm({ ...devisForm, responsible_sector: v })}
-                      disabled={!isCompanyCode(devisForm.business_unit)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={isCompanyCode(devisForm.business_unit) ? "Selecionar área" : "Selecione a empresa primeiro"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <MultiAreaSelector
-                          companyCode={devisForm.business_unit as CompanyCode}
-                          selectedAreas={devisForm.responsible_sectors}
-                          onChange={(areas) => setDevisForm({ ...devisForm, responsible_sectors: areas, responsible_sector: areas[0] || "" })}
-                        />
-                      </SelectContent>
-                    </Select>
+                    <Label>Áreas responsáveis *</Label>
+                    <MultiAreaSelector
+                      companyCode={devisForm.business_unit as CompanyCode}
+                      selectedAreas={devisForm.responsible_sectors}
+                      onChange={(areas) => setDevisForm({ ...devisForm, responsible_sectors: areas, responsible_sector: areas[0] || "" })}
+                    />
                   </div>
                   <div className="md:col-span-2">
                     <Label>Cliente *</Label>
