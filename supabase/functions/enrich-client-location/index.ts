@@ -15,33 +15,32 @@ Deno.serve(async (req) => {
     }
 
     const searchQuery = cnpj 
-      ? `empresa com CNPJ ${cnpj} (Nome: ${name}). PESQUISE NA WEB para confirmar o endereço atual, pois registros de CNPJ podem estar desatualizados ou apontar para escritórios contábeis. Busque pela localização operacional real (sede, fábrica ou escritório principal). Se a empresa for do setor de energia/ventos, verifique se ela possui base em Itarema/Ceará.` 
-      : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço exato.`;
+      ? `empresa com CNPJ ${cnpj} (Nome: ${name}). PESQUISE NA WEB para confirmar o endereço operacional atual. Verifique se a empresa possui instalações em Itarema/Ceará ou outros locais específicos relacionados a parques eólicos ou energia.` 
+      : `${name}${city ? ` em ${city}` : ""}${country ? `, ${country}` : ""}. PESQUISE NA WEB para encontrar o endereço operacional exato.`;
 
     const systemPrompt = `Você é um especialista em enriquecimento de dados corporativos e geolocalização global com ACESSO À PESQUISA NA WEB.
 Sua tarefa é encontrar informações precisas e ATUAIS de endereço para uma empresa.
 
 REGRAS CRÍTICAS:
-1. NÃO CONFIE APENAS EM CONHECIMENTO PRÉVIO OU BASES ESTÁTICAS. PESQUISE NA WEB por termos como "[Nome da Empresa] endereço", "[CNPJ] localização" ou "[Nome da Empresa] contato".
-2. PRIORIDADE ABSOLUTA: Verifique se a empresa possui bases operacionais, parques eólicos ou escritórios em locais específicos mencionados na busca (ex: Itarema/Ceará). Se houver um endereço operacional ativo encontrado na web, use-o preferencialmente sobre o endereço fiscal se o fiscal parecer ser de um escritório contábil ou representante.
-3. Se o CNPJ for brasileiro, use ferramentas de busca para encontrar o endereço mais recente em sites como cnpj.biz, econodata, casas dos dados ou o site oficial da empresa.
-4. Para empresas internacionais, identifique a sede global ou a filial mais relevante.
+1. NÃO CONFIE APENAS EM CONHECIMENTO PRÉVIO. USE A PESQUISA NA WEB.
+2. PRIORIDADE: Se a pesquisa na web indicar que a empresa opera em um local específico (como Itarema/CE, Ceará, Brasil), use ESSE endereço como o principal, mesmo que o endereço fiscal (sede administrativa em SP/RJ/BH) seja diferente. Usuários buscam a localização de atuação da empresa.
+3. Se o CNPJ for brasileiro, busque em sites como cnpj.biz ou econodata, mas valide com notícias ou site oficial se há uma "base operacional" ou "parque eólico" relevante.
+4. Para empresas internacionais, identifique a sede ou filial operacional principal.
 5. Retorne o resultado em formato JSON estruturado.
-6. Se encontrar múltiplos endereços, escolha o que parece ser a sede operacional principal ou o mais recente.
 
 CAMPOS NO JSON:
-- address: Logradouro/Rua (ex: Av. Paulista)
-- street_number: Número (ex: 1000)
-- neighborhood: Bairro/Distrito (ex: Bela Vista)
-- city: Cidade
-- state: Estado/Província/Região
-- country: País
-- zip_code: CEP/Postal Code
-- latitude: Número decimal (essencial para o mapa)
-- longitude: Número decimal (essencial para o mapa)
-- trade_name: Nome Fantasia ou Nome Comercial Real
-- source: Fonte específica da informação (ex: Website Oficial, Google Maps, CNPJ.biz, etc)
-- is_international: boolean (true se for fora do Brasil)`;
+- address: Logradouro/Rua (ex: Rua Farol do Itapaje)
+- street_number: Número (ex: 02)
+- neighborhood: Bairro/Distrito (ex: Porto dos Barcos)
+- city: Cidade (ex: Itarema)
+- state: Estado/Província/Região (ex: Ceará)
+- country: País (ex: Brasil)
+- zip_code: CEP/Postal Code (ex: 62590-000)
+- latitude: Número decimal
+- longitude: Número decimal
+- trade_name: Nome Fantasia
+- source: Fonte (ex: Google Search / Site Oficial)
+- is_international: boolean`;
 
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
