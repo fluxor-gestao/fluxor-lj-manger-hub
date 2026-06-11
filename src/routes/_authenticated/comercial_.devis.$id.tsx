@@ -845,6 +845,18 @@ function DevisDetail() {
       )}
 
       <SendDevisDialog open={sendOpen} onOpenChange={setSendOpen} devis={devis} client={client} />
+        </TabsContent>
+        <TabsContent value="anexos">
+          <Card className="border-white/10 bg-card/30 backdrop-blur-sm">
+            <CardHeader className="border-b border-white/5 bg-white/5">
+              <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">Anexos e Documentos</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <EntityAttachments entityType="devis" entityId={devis.id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
