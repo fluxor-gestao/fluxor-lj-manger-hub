@@ -55,7 +55,7 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
     (import.meta.env.VITE_PUBLIC_SITE_URL as string | undefined) ||
     "https://ljmanager.fluxorbi.com";
   const acceptUrl = `${publicBase}/proposta/aceite/${devis?.accept_token}`;
-  const devisNumber = devis?.devis_number || devis?.id?.slice(0, 8) || "";
+  const devisNumber = formatDevisCode(devis?.devis_number, devis?.id);
 
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
