@@ -268,6 +268,8 @@ export type Database = {
           document: string | null
           email: string | null
           id: string
+          is_international: boolean | null
+          last_enrichment_query: string | null
           latitude: number | null
           location_source: string | null
           location_status: string | null
@@ -295,6 +297,8 @@ export type Database = {
           document?: string | null
           email?: string | null
           id?: string
+          is_international?: boolean | null
+          last_enrichment_query?: string | null
           latitude?: number | null
           location_source?: string | null
           location_status?: string | null
@@ -322,6 +326,8 @@ export type Database = {
           document?: string | null
           email?: string | null
           id?: string
+          is_international?: boolean | null
+          last_enrichment_query?: string | null
           latitude?: number | null
           location_source?: string | null
           location_status?: string | null
