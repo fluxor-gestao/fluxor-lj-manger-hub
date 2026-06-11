@@ -452,12 +452,30 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
 
         {step === 4 && payload && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-3 text-xs flex-wrap">
               <Badge variant="outline">Idioma: {LANG_LABEL[payload.detected_language] || payload.detected_language}</Badge>
-              <Badge variant="outline" className="flex gap-1 items-center">
-                <CalendarIcon className="h-3 w-3" /> Reunião: {format(parseISO(meetingDate), "dd/MM/yyyy")}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-3 w-3" />
+                <span className="font-semibold text-primary">Prazo (Deadline) *</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("h-7 text-[10px] px-2 py-0", !meetingDate && "border-destructive text-destructive animate-pulse")}>
+                      {meetingDate ? format(parseISO(meetingDate), "dd/MM/yyyy") : "Selecionar prazo"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar 
+                      mode="single" 
+                      selected={meetingDate ? parseISO(meetingDate) : undefined} 
+                      onSelect={(d) => d && setMeetingDate(format(d, "yyyy-MM-dd"))} 
+                      initialFocus 
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
+
 
             <Card className="p-4 space-y-3">
               <h3 className="font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Cliente</h3>
