@@ -162,8 +162,11 @@ function DevisCard({
         )}
       </div>
       <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span className="truncate font-mono text-[9px] text-primary">
+          {formatDevisCode(devis.devis_number, devis.id)}
+        </span>
         <span className="truncate">
-          {responsavel?.full_name || responsavel?.email || "Sem responsável"}
+          {responsavel?.full_name || responsavel?.email || "—"}
         </span>
         <span>{devis.meeting_date ? format(parseISO(devis.meeting_date), "dd/MM") : "—"}</span>
       </div>
