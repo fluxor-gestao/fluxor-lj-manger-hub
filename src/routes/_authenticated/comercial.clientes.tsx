@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, ArrowLeft, HelpCircle, Search, Upload, MapPin } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, HelpCircle, Search, Upload, MapPin, Info } from "lucide-react";
 import ClientLocationEnrichment from "@/components/clients/ClientLocationEnrichment";
 import BulkClientLocationEnrichment from "@/components/clients/BulkClientLocationEnrichment";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
