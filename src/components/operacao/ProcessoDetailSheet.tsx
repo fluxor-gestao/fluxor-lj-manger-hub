@@ -1,4 +1,4 @@
-import { AlertOctagon, CalendarDays, Building2, User2, Hash, Wallet } from "lucide-react";
+import { AlertOctagon, CalendarDays, Building2, User2, Hash, Wallet, Info, Clock, CheckCircle2, MessageSquare, Paperclip, Timeline } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -22,6 +22,7 @@ import { ProcessoTimeline } from "./ProcessoTimeline";
 import { ProcessoTarefas } from "./ProcessoTarefas";
 import { ProcessoComentarios } from "./ProcessoComentarios";
 import { InsightsBlock, buildInsightsForService } from "./InsightsOperacionais";
+import { EntityAttachments } from "../EntityAttachments";
 
 const fmt = (d?: string | null) =>
   d ? new Date(d).toLocaleDateString("pt-BR") : "—";
