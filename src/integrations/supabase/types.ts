@@ -821,6 +821,57 @@ export type Database = {
           },
         ]
       }
+      financial_accounts: {
+        Row: {
+          account_number: string | null
+          agency: string | null
+          bank: string | null
+          business_unit: string | null
+          created_at: string | null
+          holder_document: string | null
+          holder_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          notes: string | null
+          pix_key: string | null
+          pix_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_number?: string | null
+          agency?: string | null
+          bank?: string | null
+          business_unit?: string | null
+          created_at?: string | null
+          holder_document?: string | null
+          holder_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          notes?: string | null
+          pix_key?: string | null
+          pix_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_number?: string | null
+          agency?: string | null
+          bank?: string | null
+          business_unit?: string | null
+          created_at?: string | null
+          holder_document?: string | null
+          holder_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notes?: string | null
+          pix_key?: string | null
+          pix_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       financial_categories: {
         Row: {
           active: boolean
@@ -909,6 +960,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_cost_centers: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
       }
       financial_entries: {
         Row: {
@@ -1129,6 +1201,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_payment_methods: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
       }
       financial_payments: {
         Row: {
