@@ -858,16 +858,58 @@ function Comercial() {
                     <CurrencyInputBRL
                       value={devisForm.total_amount}
                       onChange={(total) => {
-                        const auto = total === "" ? "" : String((Number(total) * 0.5).toFixed(2));
-                        setDevisForm({ ...devisForm, total_amount: total, down_payment_amount: auto });
+                        const totalNum = Number(total) || 0;
+                        const pctNum = Number(devisForm.down_payment_percentage) || 50;
+                        const down = (totalNum * (pctNum / 100)).toFixed(2);
+                        setDevisForm({ 
+                          ...devisForm, 
+                          total_amount: total, 
+                          down_payment_amount: total === "" ? "" : down 
+                        });
                       }}
                     />
                   </div>
                   <div>
-                    <Label>Valor de entrada (50% auto)</Label>
+                    <div className="flex justify-between">
+                      <Label>Valor de entrada (R$)</Label>
+                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <Input
+                          type="number"
+                          className="h-5 w-12 px-1 py-0 text-[10px]"
+                          value={devisForm.down_payment_percentage}
+                          onChange={(e) => {
+                            const pct = e.target.value;
+                            const totalNum = Number(devisForm.total_amount) || 0;
+                            const down = (totalNum * (Number(pct) / 100)).toFixed(2);
+                            setDevisForm({
+                              ...devisForm,
+                              down_payment_percentage: pct,
+                              down_payment_amount: totalNum > 0 ? down : devisForm.down_payment_amount
+                            });
+                          }}
+                        />
+                        <span>%</span>
+                      </div>
+                    </div>
                     <CurrencyInputBRL
                       value={devisForm.down_payment_amount}
-                      onChange={(v) => setDevisForm({ ...devisForm, down_payment_amount: v })}
+                      onChange={(v) => {
+                        const totalNum = Number(devisForm.total_amount) || 0;
+                        const pct = totalNum > 0 ? Math.round((Number(v) / totalNum) * 100) : 50;
+                        setDevisForm({ 
+                          ...devisForm, 
+                          down_payment_amount: v,
+                          down_payment_percentage: totalNum > 0 ? String(pct) : devisForm.down_payment_percentage
+                        });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label>Saldo final (R$)</Label>
+                    <Input 
+                      disabled 
+                      className="bg-muted" 
+                      value={fmtBRL((Number(devisForm.total_amount) || 0) - (Number(devisForm.down_payment_amount) || 0))} 
                     />
                   </div>
                   <div>
