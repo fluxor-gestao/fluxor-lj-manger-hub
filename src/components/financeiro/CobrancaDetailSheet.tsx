@@ -13,6 +13,7 @@ import {
   Mail, Eye, FileText, AlertTriangle, CalendarClock, Sparkles, ExternalLink,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { formatDevisCode } from "@/lib/formatDevis";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
