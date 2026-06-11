@@ -457,7 +457,7 @@ function ContasAReceberPage() {
                         className="text-left hover:text-primary transition-colors group flex flex-col items-start gap-1"
                       >
                         <span className="max-w-[280px] truncate font-medium group-hover:underline" title={r.movement_description ?? ""}>
-                          {r.movement_description ?? "—"}
+                          {formatMovementDescription(r.movement_description, r.devis_number, r.devis_id)}
                         </span>
                         {(r.devis_number || r.devis_id) && (
                           <Badge variant="secondary" className="text-[10px] py-0 px-1 font-mono">
