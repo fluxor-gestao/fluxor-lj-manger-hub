@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Wallet, ArrowDownCircle, ArrowUpCircle, BarChart3, ArrowLeftRight, type LucideIcon } from "lucide-react";
+import { Wallet, ArrowDownCircle, ArrowUpCircle, BarChart3, ArrowLeftRight, Landmark, type LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/financeiro/")({
