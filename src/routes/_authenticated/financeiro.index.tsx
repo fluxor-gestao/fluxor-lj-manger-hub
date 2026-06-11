@@ -23,6 +23,13 @@ const subModules: SubModule[] = [
     gradient: "from-blue-500 to-blue-700",
   },
   {
+    title: "Cadastro de Contas",
+    description: "Contas LJ, categorias e métodos",
+    route: "/financeiro/central", // Usando a mesma rota para facilitar, mas com abas
+    icon: Landmark,
+    gradient: "from-slate-600 to-slate-800",
+  },
+  {
     title: "Contas a Receber",
     description: "Recebimentos em aberto e histórico",
     route: "/financeiro/contas-a-receber",
