@@ -11,9 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe, Filter } from "lucide-react";
+import { Plus, Search, Sparkles, Pencil, Trash2, ArrowLeft, Loader2, Globe, Filter, RefreshCcw, History } from "lucide-react";
 import { LoadingState, EmptyState } from "@/components/DataStates";
 import { cn } from "@/lib/utils";
+import BulkPriceUpdate from "@/components/devis/BulkPriceUpdate";
+import { COMPANY_LIST, type CompanyCode } from "@/lib/companyCodes";
+import { AreaBadge } from "@/components/AreaBadge";
 
 export const Route = createFileRoute("/_authenticated/comercial/precificacao")({
   component: Precificacao,
