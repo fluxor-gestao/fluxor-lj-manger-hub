@@ -1460,7 +1460,7 @@ export default function BIFinanceiro() {
       </Tabs>
 
       {/* Insights */}
-      <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden group">
+      <Card className="bg-white border-slate-200 shadow-sm overflow-hidden group">
         <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-blue-600" />
