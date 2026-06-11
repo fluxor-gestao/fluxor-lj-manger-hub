@@ -426,16 +426,36 @@ export function NovoLancamentoDialog({
                 <Label>Código de referência</Label>
                 <Input
                   value={form.reference_code}
-                  onChange={(e) => setForm({ ...form, reference_code: e.target.value })}
+                  onChange={(e) => {
+                    const code = e.target.value.toUpperCase();
+                    let newUnit = form.business_unit;
+                    
+                    const prefix = code.slice(0, 2);
+                    if (COMPANY_LIST.some(c => c.code === prefix)) {
+                      newUnit = prefix;
+                    }
+                    
+                    setForm({ ...form, reference_code: code, business_unit: newUnit });
+                  }}
+                  disabled={!!prefill?.reference_code}
                   placeholder="NF, boleto, etc."
                 />
               </div>
               <div>
                 <Label>Unidade de negócio</Label>
-                <Input
-                  value={form.business_unit}
-                  onChange={(e) => setForm({ ...form, business_unit: e.target.value })}
-                />
+                <Select
+                  value={form.business_unit || "__none__"}
+                  onValueChange={(v) => setForm({ ...form, business_unit: v === "__none__" ? "" : v })}
+                  disabled={!!prefill?.reference_code}
+                >
+                  <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Nenhuma —</SelectItem>
+                    {COMPANY_LIST.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.short}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
