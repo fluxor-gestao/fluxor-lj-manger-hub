@@ -1018,7 +1018,7 @@ export default function BIComercial() {
                   {statsPorArea.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -1028,10 +1028,10 @@ export default function BIComercial() {
           {isLoading ? <Skeleton className="h-[280px]" /> : statsPorEmpresa.length === 0 ? <Empty /> : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={statsPorEmpresa} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)' }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-                <Tooltip content={<CustomTooltip formatter={PCT} />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                <Tooltip content={<CustomTooltip formatter={PCT} />} cursor={{ fill: '#F9FAFB' }} />
                 <Bar dataKey="conversao" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={30} fillOpacity={0.8} />
               </BarChart>
             </ResponsiveContainer>
