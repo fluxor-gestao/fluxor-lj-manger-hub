@@ -258,26 +258,25 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. Use
                       required: ["letter", "title", "description", "duration", "amount"],
                     },
                   },
+                  suggested_pricing_items: {
+                    type: "array",
+                    description: "Lista de itens da tabela oficial de preços que compõem esta proposta.",
+                    items: {
+                      type: "object",
+                      properties: {
+                        service_name: { type: "string", description: "Nome EXATO conforme consta na tabela oficial" },
+                        quantity: { type: "number", default: 1 },
+                        unit_price: { type: "number", description: "Valor unitário conforme tabela oficial" }
+                      },
+                      required: ["service_name", "quantity", "unit_price"]
+                    }
+                  },
                   total_amount: { type: "number", exclusiveMinimum: 0 },
                   deadline_date: { type: "string" },
                   payment_terms: { type: "string" },
                   assumptions: { type: "array", items: { type: "string" } },
                 },
-                required: ["title", "scope_description", "scope_items", "total_amount"],
-                properties: {
-                  ...ai.properties,
-                  suggested_pricing_items: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        service_name: { type: "string" },
-                        quantity: { type: "number" },
-                        unit_price: { type: "number" }
-                      }
-                    }
-                  }
-                }
+                required: ["title", "scope_description", "scope_items", "total_amount", "suggested_pricing_items"],
               },
             },
           },
