@@ -352,7 +352,7 @@ export function ImportacaoHistorica() {
               ) : importLogs?.map(log => (
                 <TableRow key={log.id} className="group hover:bg-slate-50/50 transition-colors">
                   <TableCell className="text-xs font-medium text-slate-500">
-                    {new Date(log.created_at).toLocaleString('pt-BR')}
+                    {log.created_at ? new Date(log.created_at).toLocaleString('pt-BR') : "—"}
                   </TableCell>
                   <TableCell className="text-xs font-bold text-slate-900">
                     {log.profiles?.full_name || "Sistema"}
