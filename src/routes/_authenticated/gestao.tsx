@@ -194,6 +194,9 @@ function Gestao() {
             <TabsTrigger value="dre" className="gap-2 font-bold px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
               <FileText className="h-4 w-4" /> DRE Gerencial
             </TabsTrigger>
+            <TabsTrigger value="import" className="gap-2 font-bold px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <Database className="h-4 w-4" /> Importações Históricas
+            </TabsTrigger>
           </TabsList>
 
           <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
