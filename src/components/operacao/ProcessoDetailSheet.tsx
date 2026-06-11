@@ -239,12 +239,12 @@ export function ProcessoDetailSheet({
         </SheetHeader>
 
         <Tabs defaultValue="overview" className="mt-4">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Visão geral</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-            <TabsTrigger value="tasks">Tarefas</TabsTrigger>
-            <TabsTrigger value="comments">Comentários</TabsTrigger>
-            <TabsTrigger value="files">Anexos</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-white/5 border border-white/10 p-1">
+            <TabsTrigger value="overview" className="text-[10px] sm:text-xs gap-1.5"><Info className="h-3.5 w-3.5" /> Visão geral</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-[10px] sm:text-xs gap-1.5"><Activity className="h-3.5 w-3.5" /> Timeline</TabsTrigger>
+            <TabsTrigger value="tasks" className="text-[10px] sm:text-xs gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Tarefas</TabsTrigger>
+            <TabsTrigger value="comments" className="text-[10px] sm:text-xs gap-1.5"><MessageSquare className="h-3.5 w-3.5" /> Comentários</TabsTrigger>
+            <TabsTrigger value="files" className="text-[10px] sm:text-xs gap-1.5"><Paperclip className="h-3.5 w-3.5" /> Anexos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 mt-4">
