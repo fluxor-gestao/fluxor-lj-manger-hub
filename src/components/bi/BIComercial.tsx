@@ -1428,16 +1428,16 @@ export default function BIComercial() {
 function Kpi({
   label, value, sub, icon: Icon, tone,
 }: { label: string; value: string; sub?: string; icon?: any; tone?: "positive" | "negative" }) {
-  const toneClass = tone === "positive" ? "text-emerald-600" : tone === "negative" ? "text-red-600" : "text-foreground";
+  const toneClass = tone === "positive" ? "text-emerald-600" : tone === "negative" ? "text-red-600" : "text-slate-600";
   return (
-    <Card>
+    <Card className="hover:shadow-lg transition-all duration-300">
       <CardContent className="p-4 space-y-1">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-white/40">{label}</p>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</p>
           {Icon && <Icon className={`h-4 w-4 ${toneClass}`} />}
         </div>
-        <p className={`text-lg font-semibold leading-tight ${toneClass}`} title={value}>{value}</p>
-        {sub && <p className="text-xs text-white/40">{sub}</p>}
+        <p className="text-xl font-bold text-slate-900 leading-tight" title={value}>{value}</p>
+        {sub && <p className="text-xs text-slate-400 font-medium">{sub}</p>}
       </CardContent>
     </Card>
   );
