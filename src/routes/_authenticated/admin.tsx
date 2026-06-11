@@ -579,6 +579,7 @@ function Admin() {
           <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
           <TabsTrigger value="commercial-settings"><FileSpreadsheet className="h-4 w-4 mr-2" />Configs Comerciais</TabsTrigger>
           <TabsTrigger value="updates"><History className="h-4 w-4 mr-2" />Atualizações</TabsTrigger>
+          <TabsTrigger value="backup"><Database className="h-4 w-4 mr-2" />Backup Geral</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
