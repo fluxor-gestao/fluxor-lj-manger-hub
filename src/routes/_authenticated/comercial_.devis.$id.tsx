@@ -248,6 +248,7 @@ function DevisDetail() {
         responsible_sector: p.responsible_sector ?? "",
         scope_description: p.scope_description ?? "",
         proposal_structure: p.proposal_structure ?? "",
+        suggested_pricing_items: p.suggested_pricing_items || [],
       });
       if (p.total_amount && !form.total_amount) {
         const total = String(p.total_amount);
