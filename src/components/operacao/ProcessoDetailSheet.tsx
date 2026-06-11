@@ -299,9 +299,11 @@ export function ProcessoDetailSheet({
           </TabsContent>
 
           <TabsContent value="files" className="mt-4">
-            <div className="text-center text-xs text-muted-foreground py-10 border border-dashed rounded-lg">
-              Upload e gestão de anexos em breve.
-            </div>
+            <Card className="border-white/10 bg-card/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <EntityAttachments entityType="service" entityId={service.id} />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </SheetContent>
