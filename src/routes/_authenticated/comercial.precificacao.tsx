@@ -284,11 +284,8 @@ function Precificacao() {
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+            </Select>
             </div>
-            <Button variant="outline" className="gap-2 shrink-0">
-              <Globe className="h-4 w-4" /> Busca de Mercado
-            </Button>
           </div>
         </div>
 
