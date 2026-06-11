@@ -111,7 +111,7 @@ function ContasAReceberPage() {
   const [dueFrom, setDueFrom] = useState<string>("");
   const [dueTo, setDueTo] = useState<string>("");
   const [onlyOverdue, setOnlyOverdue] = useState(false);
-  const [onlyOpen, setOnlyOpen] = useState(true);
+  const [onlyOpen, setOnlyOpen] = useState(false); // Changed default to false or adjusted logic
 
   // Detalhe da cobrança
   const [detail, setDetail] = useState<CobrancaRow | null>(null);
@@ -154,7 +154,7 @@ function ContasAReceberPage() {
     const s = search.trim().toLowerCase();
     return allRows.filter((r) => {
       const st = statusOf(r);
-      if (onlyOpen && st === "pago") return false;
+      if (onlyOpen && (st === "pago" || r.payment_status === "cancelado")) return false;
       if (onlyOverdue && st !== "vencido") return false;
       if (statusFilter !== "all" && st !== statusFilter) return false;
       if (clientFilter !== "all" && r.client_id !== clientFilter) return false;
@@ -192,7 +192,7 @@ function ContasAReceberPage() {
       void t;
       return true;
     });
-  }, [allRows, search, clientFilter, statusFilter, dueFrom, dueTo, onlyOverdue, onlyOpen]);
+  }, [allRows, search, clientFilter, statusFilter, stepFilter, dueFrom, dueTo, onlyOverdue, onlyOpen]);
 
   // Métricas (calculadas sobre todos os recebíveis, não os filtrados, para visão executiva)
   const metrics = useMemo(() => {
@@ -332,7 +332,20 @@ function ContasAReceberPage() {
           }}
           active={statusFilter === "pago"}
         />
-        <KpiCard tone="muted" icon={<ListChecks className="h-4 w-4" />} label="Cobranças pendentes" value={String(metrics.pendentesQtd)} />
+        <KpiCard 
+          tone="muted" 
+          icon={<ListChecks className="h-4 w-4" />} 
+          label="Cobranças pendentes" 
+          value={String(metrics.pendentesQtd)} 
+          onClick={() => {
+            clearFilters();
+            setOnlyOpen(true);
+            // Ao filtrar por pendentes, queremos todas que não estão pagas
+            // already defaults to onlyOpen = true in clearFilters
+            document.getElementById('cobrancas-table')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          active={onlyOpen && !onlyOverdue && !dueTo && statusFilter === "all" && stepFilter === "all"}
+        />
       </div>
 
       {/* Filtros */}
