@@ -33,6 +33,7 @@ import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCode
 import { AreaBadge } from "@/components/AreaBadge";
 import { getAreasFor, isValidAreaForCompany } from "@/lib/businessAreas";
 import { MultiAreaSelector } from "@/components/devis/MultiAreaSelector";
+import { formatDevisCode } from "@/lib/formatDevis";
 
 const fmtBRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
