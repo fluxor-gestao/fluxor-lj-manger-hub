@@ -576,6 +576,7 @@ function Admin() {
           <TabsTrigger value="logs"><ScrollText className="h-4 w-4 mr-2" />Logs</TabsTrigger>
           <TabsTrigger value="settings"><Settings className="h-4 w-4 mr-2" />Opções do Sistema</TabsTrigger>
           <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
+          <TabsTrigger value="commercial-settings"><FileSpreadsheet className="h-4 w-4 mr-2" />Configs Comerciais</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
