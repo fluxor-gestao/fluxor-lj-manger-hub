@@ -166,6 +166,7 @@ const fromScopeItemsArray = (raw: any): ScopeItem[] => {
 interface DevisPdfTemplateProps {
   devis: any;
   client: any;
+  pricingItems?: any[];
   contractor?: {
     name: string;
     document: string;
