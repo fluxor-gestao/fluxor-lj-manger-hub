@@ -69,7 +69,7 @@ export function DevisPreviewDialog({ devisId, open, onOpenChange }: DevisPreview
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 border-white/10 bg-[#0B1120] text-slate-200">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 border-white/10 bg-[#0B1120] text-slate-200 shadow-2xl">
         <DialogHeader className="p-6 pb-2 shrink-0">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -166,8 +166,7 @@ export function DevisPreviewDialog({ devisId, open, onOpenChange }: DevisPreview
                           <Info className="h-3 w-3" /> Responsável Comercial
                         </h4>
                         <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                          <p className="font-bold text-white">{devis.responsible?.full_name || "—"}</p>
-                          <p className="text-xs text-slate-400">{devis.responsible?.email || "—"}</p>
+                          <p className="font-bold text-white truncate">{devis.commercial_responsible || "—"}</p>
                         </div>
                       </section>
                     </div>
@@ -215,11 +214,11 @@ export function DevisPreviewDialog({ devisId, open, onOpenChange }: DevisPreview
           </div>
         </Tabs>
 
-        <DialogFooter className="p-6 border-t border-white/5 bg-white/5 shrink-0 flex items-center justify-between sm:justify-between gap-4">
+        <DialogFooter className="p-6 border-t border-white/5 bg-white/5 shrink-0 flex flex-row items-center justify-between gap-4">
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-slate-400 hover:text-white">
             Fechar
           </Button>
-          <Button onClick={handleOpenFull} className="font-bold bg-primary hover:bg-primary/90 text-white">
+          <Button onClick={handleOpenFull} className="font-bold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all active:scale-95">
             <ExternalLink className="h-4 w-4 mr-2" /> Abrir Devis completo
           </Button>
         </DialogFooter>
