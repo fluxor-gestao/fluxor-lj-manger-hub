@@ -155,6 +155,191 @@ const defaultSystemSettings: SystemSettings = {
   externalBiEnabled: false,
 };
 
+function BusinessUnitsManager() {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [editingUnit, setEditingUnit] = useState<any>(null);
+  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isActive, setIsActive] = useState(true);
+
+  const { data: units = [], isLoading } = useQuery({
+    queryKey: ["business-units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("*")
+        .order("code", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const saveUnit = useMutation({
+    mutationFn: async () => {
+      const payload: any = {
+        code: code.toUpperCase(),
+        name,
+        description,
+        active: isActive,
+      };
+
+      if (editingUnit) {
+        const { error } = await supabase
+          .from("business_units")
+          .update(payload)
+          .eq("id", editingUnit.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("business_units")
+          .insert([payload]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success(editingUnit ? "Unidade atualizada!" : "Unidade criada!");
+      queryClient.invalidateQueries({ queryKey: ["business-units"] });
+      setOpen(false);
+      resetForm();
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const deleteUnit = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("business_units")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Unidade removida!");
+      queryClient.invalidateQueries({ queryKey: ["business-units"] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const resetForm = () => {
+    setEditingUnit(null);
+    setCode("");
+    setName("");
+    setDescription("");
+    setIsActive(true);
+  };
+
+  const handleEdit = (unit: any) => {
+    setEditingUnit(unit);
+    setCode(unit.code);
+    setName(unit.name);
+    setDescription(unit.description || "");
+    setIsActive(unit.active);
+    setOpen(true);
+  };
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <div>
+          <CardTitle>Listagem de Unidades</CardTitle>
+          <CardDescription>Gerencie as unidades de negócio do grupo.</CardDescription>
+        </div>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+          <DialogTrigger asChild>
+            <Button size="sm"><Plus className="h-4 w-4 mr-2" />Nova Unidade</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingUnit ? "Editar Unidade" : "Nova Unidade"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Sigla / Código</Label>
+                  <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Ex: DE, AM..." maxLength={4} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nome da Unidade</Label>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Direito Estratégico" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Descrição (opcional)</Label>
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Breve descrição da unidade" />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch checked={isActive} onCheckedChange={setIsActive} id="unit-active" />
+                <Label htmlFor="unit-active">Ativo</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+              <Button onClick={() => saveUnit.mutate()} disabled={!code || !name || saveUnit.isPending}>
+                {saveUnit.isPending ? "Salvando..." : "Salvar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Código</TableHead>
+              <TableHead>Nome</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Carregando unidades...</TableCell></TableRow>
+            ) : units.length === 0 ? (
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Nenhuma unidade cadastrada.</TableCell></TableRow>
+            ) : (
+              units.map((unit: any) => (
+                <TableRow key={unit.id}>
+                  <TableCell>
+                    <Badge variant="outline" className="font-bold">{unit.code}</Badge>
+                  </TableCell>
+                  <TableCell className="font-medium">{unit.name}</TableCell>
+                  <TableCell>
+                    <Badge variant={unit.active ? "default" : "secondary"}>
+                      {unit.active ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(unit)}><Pencil className="h-4 w-4" /></Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir unidade?</AlertDialogTitle>
+                            <AlertDialogDescription>Esta ação removerá a unidade de negócio. Verifique se não há áreas vinculadas.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteUnit.mutate(unit.id)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">Excluir</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
+
 function BusinessAreasManager() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -164,6 +349,19 @@ function BusinessAreasManager() {
   const [description, setDescription] = useState("");
   const [displayOrder, setDisplayOrder] = useState("0");
   const [isActive, setIsActive] = useState(true);
+
+  const { data: units = [] } = useQuery({
+    queryKey: ["business-units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_units")
+        .select("*")
+        .eq("active", true)
+        .order("code", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const { data: areas = [], isLoading } = useQuery({
     queryKey: ["business-areas"],
@@ -292,11 +490,11 @@ function BusinessAreasManager() {
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="DE">DE — Direito Estratégico</SelectItem>
-                      <SelectItem value="AM">AM — Ambiental</SelectItem>
-                      <SelectItem value="CO">CO — Contabilidade</SelectItem>
-                      <SelectItem value="IM">IM — Imobiliário</SelectItem>
-                      <SelectItem value="GE">GE — Gestão & Consultoria</SelectItem>
+                      {units.map((unit: any) => (
+                        <SelectItem key={unit.id} value={unit.code}>
+                          {unit.code} — {unit.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -329,6 +527,7 @@ function BusinessAreasManager() {
           </DialogContent>
         </Dialog>
       </CardHeader>
+
       <CardContent>
         <Table>
           <TableHeader>
@@ -736,6 +935,7 @@ function Admin() {
           <TabsTrigger value="users"><Users className="h-4 w-4 mr-2" />Usuários</TabsTrigger>
           <TabsTrigger value="logs"><ScrollText className="h-4 w-4 mr-2" />Logs</TabsTrigger>
           <TabsTrigger value="settings"><Settings className="h-4 w-4 mr-2" />Opções do Sistema</TabsTrigger>
+          <TabsTrigger value="units"><Building2 className="h-4 w-4 mr-2" />Unidades</TabsTrigger>
           <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
           <TabsTrigger value="commercial-settings"><FileSpreadsheet className="h-4 w-4 mr-2" />Configs Comerciais</TabsTrigger>
           <TabsTrigger value="updates"><History className="h-4 w-4 mr-2" />Atualizações</TabsTrigger>
@@ -1415,6 +1615,10 @@ function Admin() {
         
         <TabsContent value="commercial-settings" className="space-y-4">
           <DevisSequenceManager />
+        </TabsContent>
+
+        <TabsContent value="units" className="space-y-4">
+          <BusinessUnitsManager />
         </TabsContent>
 
         <TabsContent value="areas" className="space-y-4">
