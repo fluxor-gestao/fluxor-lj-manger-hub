@@ -263,13 +263,17 @@ export type Database = {
           email: string | null
           id: string
           latitude: number | null
+          location_source: string | null
           location_status: string | null
           location_updated_at: string | null
           longitude: number | null
           name: string
+          neighborhood: string | null
           notes: string | null
           phone: string | null
           state: string | null
+          street_number: string | null
+          trade_name: string | null
           type: string
           updated_at: string
           zip_code: string | null
@@ -286,13 +290,17 @@ export type Database = {
           email?: string | null
           id?: string
           latitude?: number | null
+          location_source?: string | null
           location_status?: string | null
           location_updated_at?: string | null
           longitude?: number | null
           name: string
+          neighborhood?: string | null
           notes?: string | null
           phone?: string | null
           state?: string | null
+          street_number?: string | null
+          trade_name?: string | null
           type?: string
           updated_at?: string
           zip_code?: string | null
@@ -309,13 +317,17 @@ export type Database = {
           email?: string | null
           id?: string
           latitude?: number | null
+          location_source?: string | null
           location_status?: string | null
           location_updated_at?: string | null
           longitude?: number | null
           name?: string
+          neighborhood?: string | null
           notes?: string | null
           phone?: string | null
           state?: string | null
+          street_number?: string | null
+          trade_name?: string | null
           type?: string
           updated_at?: string
           zip_code?: string | null
