@@ -244,7 +244,7 @@ function DevisDetail() {
       if (p.total_amount && !form.total_amount) {
         const total = String(p.total_amount);
         const down = String((Number(p.total_amount) * 0.5).toFixed(2));
-        setForm((f: any) => ({ ...f, total_amount: total, down_payment_amount: down }));
+        setForm((f: any) => ({ ...f, total_amount: total, down_payment_amount: down, down_payment_percentage: "50" }));
       }
       if (p.title && !form.title) setForm((f: any) => ({ ...f, title: p.title }));
       toast.success(tier === "final" ? "Proposta refinada!" : "Proposta gerada.");
