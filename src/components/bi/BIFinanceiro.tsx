@@ -981,10 +981,10 @@ export default function BIFinanceiro() {
                 </div>
 
                 <div className="space-y-1">
-                  <h2 className="text-3xl font-black tracking-tighter text-white">
+                  <h2 className="text-3xl font-bold tracking-tight text-slate-900 leading-none">
                     {kpi.value}
                   </h2>
-                  <p className="text-[11px] font-bold text-[#CBD5E1] uppercase tracking-tight">
+                  <p className="text-xs text-slate-400 font-medium">
                     {kpi.sub}
                   </p>
                 </div>
@@ -996,7 +996,7 @@ export default function BIFinanceiro() {
 
       <div className="grid gap-3 lg:grid-cols-2">
 
-        <Card className="border border-white/5 shadow-2xl overflow-hidden relative bg-[#1a2233]/40 backdrop-blur-xl group">
+        <Card className="border border-slate-200 shadow-sm overflow-hidden relative bg-white group">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           <CardHeader className="relative z-10 border-b border-slate-100 bg-slate-50/50">
             <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Resumo Financeiro Estratégico</CardTitle>
