@@ -1010,7 +1010,12 @@ function Comercial() {
                     <TableRow><TableCell colSpan={9}><EmptyState title="Nenhum devis encontrado" description="Ajuste os filtros ou crie um novo devis." /></TableCell></TableRow>
                   ) : devisListRows.map((d: any) => (
                     <TableRow key={d.id} className="cursor-pointer" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
-                      <TableCell className="font-medium">{clientsById[d.client_id]?.name || "—"}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-col">
+                          <span>{clientsById[d.client_id]?.name || "—"}</span>
+                          <span className="text-[10px] font-mono text-muted-foreground">{formatDevisCode(d.devis_number, d.id)}</span>
+                        </div>
+                      </TableCell>
                       <TableCell><CompanyBadge code={d.business_unit} /></TableCell>
                       <TableCell><AreaBadge companyCode={d.business_unit} areaSlug={d.responsible_sector} /></TableCell>
                       <TableCell><Badge variant="outline" className={devisStatusColors[d.status] || ""}>{statusLabels[d.status] || d.status}</Badge></TableCell>
