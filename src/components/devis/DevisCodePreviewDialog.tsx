@@ -62,7 +62,7 @@ export default function DevisCodePreviewDialog({
   const prefixLabelMap = useMemo(() => {
     const map: Record<string, string> = {};
     units.forEach(u => {
-      map[u.code] = u.name;
+      if (u.code) map[u.code] = u.name || "";
     });
     return map;
   }, [units]);
