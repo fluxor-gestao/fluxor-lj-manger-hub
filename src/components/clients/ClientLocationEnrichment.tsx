@@ -78,19 +78,28 @@ export default function ClientLocationEnrichment({
     if (!results) return;
     setSaving(true);
     try {
+      const updatePayload: any = {
+        address: results.address,
+        street_number: results.street_number || null,
+        neighborhood: results.neighborhood || null,
+        city: results.city,
+        state: results.state,
+        country: results.country,
+        zip_code: results.zip_code,
+        latitude: results.latitude,
+        longitude: results.longitude,
+        location_source: results.source,
+        location_status: "localizada",
+        location_updated_at: new Date().toISOString(),
+      };
+
+      if (results.trade_name) {
+        updatePayload.trade_name = results.trade_name;
+      }
+
       const { error } = await supabase
         .from("clients")
-        .update({
-          address: results.address,
-          city: results.city,
-          state: results.state,
-          country: results.country,
-          zip_code: results.zip_code,
-          latitude: results.latitude,
-          longitude: results.longitude,
-          location_status: "localizada",
-          location_updated_at: new Date().toISOString(),
-        } as any)
+        .update(updatePayload)
         .eq("id", clientId);
 
       if (error) throw error;
