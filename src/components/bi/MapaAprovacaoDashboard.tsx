@@ -401,10 +401,10 @@ export default function MapaAprovacaoDashboard() {
                     <div className="p-1 min-w-[150px]">
                       <p className="font-bold text-sm border-b border-black/5 pb-1 mb-1">{reg.name}</p>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2">
-                        <p className="text-[10px] text-[#E2E8F0] uppercase font-bold">Total</p>
-                        <p className="text-[10px] text-right font-black">{BRL(reg.valor)}</p>
-                        <p className="text-[10px] text-[#E2E8F0] uppercase font-bold">Conv.</p>
-                        <p className="text-[10px] text-right font-black">{PCT(reg.conversao)}</p>
+                        <p className="text-[10px] text-slate-500 uppercase font-bold">Total</p>
+                        <p className="text-[10px] text-right font-black text-slate-900">{BRL(reg.valor)}</p>
+                        <p className="text-[10px] text-slate-500 uppercase font-bold">Conv.</p>
+                        <p className="text-[10px] text-right font-black text-slate-900">{PCT(reg.conversao)}</p>
                       </div>
                       {topAreas.length > 0 && (
                         <div className="space-y-1 mt-2 pt-2 border-t border-black/5">
