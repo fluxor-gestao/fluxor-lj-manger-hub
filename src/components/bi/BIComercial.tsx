@@ -647,7 +647,11 @@ export default function BIComercial() {
   const exportCSV = () => {
     const cols = ["id", "devis_number", "title", "status", "total_amount", "client_id", "commercial_responsible", "created_at", "sent_at", "accepted_at", "rejected_at"];
     const lines = [cols.join(",")];
-    for (const r of rows) lines.push(cols.map((c) => JSON.stringify((r as any)[c] ?? "")).join(","));
+    for (const r of rows) {
+      const rowData = { ...r } as any;
+      rowData.devis_number = formatDevisCode(r.devis_number, r.id);
+      lines.push(cols.map((c) => JSON.stringify(rowData[c] ?? "")).join(","));
+    }
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
