@@ -14,7 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase } from "lucide-react";
+import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet } from "lucide-react";
+import { DevisSequenceManager } from "@/components/devis/DevisSequenceManager";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -575,6 +576,7 @@ function Admin() {
           <TabsTrigger value="logs"><ScrollText className="h-4 w-4 mr-2" />Logs</TabsTrigger>
           <TabsTrigger value="settings"><Settings className="h-4 w-4 mr-2" />Opções do Sistema</TabsTrigger>
           <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
+          <TabsTrigger value="commercial-settings"><FileSpreadsheet className="h-4 w-4 mr-2" />Configs Comerciais</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -1245,6 +1247,10 @@ function Admin() {
               {saveSettings.isPending ? "Salvando..." : "Salvar Opções"}
             </Button>
           </div>
+        </TabsContent>
+        
+        <TabsContent value="commercial-settings" className="space-y-4">
+          <DevisSequenceManager />
         </TabsContent>
 
         <TabsContent value="areas" className="space-y-4">
