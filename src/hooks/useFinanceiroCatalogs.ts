@@ -50,13 +50,13 @@ export function useFinanceiroCatalogs() {
   });
 
   const costCenters = useQuery({
-    queryKey: ["catalog", "cost_centers"],
+    queryKey: ["catalog", "financial_cost_centers"],
     staleTime: STALE,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("cost_centers")
+        .from("financial_cost_centers")
         .select("id, name")
-        .eq("active", true)
+        .eq("is_active", true)
         .order("name");
       if (error) throw error;
       return (data ?? []) as CatalogItem[];
@@ -64,16 +64,30 @@ export function useFinanceiroCatalogs() {
   });
 
   const paymentMethods = useQuery({
-    queryKey: ["catalog", "payment_methods"],
+    queryKey: ["catalog", "financial_payment_methods"],
     staleTime: STALE,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("payment_methods")
+        .from("financial_payment_methods")
         .select("id, name")
-        .eq("active", true)
+        .eq("is_active", true)
         .order("name");
       if (error) throw error;
       return (data ?? []) as CatalogItem[];
+    },
+  });
+
+  const financialAccounts = useQuery({
+    queryKey: ["catalog", "financial_accounts"],
+    staleTime: STALE,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("financial_accounts")
+        .select("id, name, bank, business_unit")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as (CatalogItem & { bank: string; business_unit: string })[];
     },
   });
 
