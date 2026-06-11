@@ -152,31 +152,33 @@ export default function DevisCodePreviewDialog({
             </RadioGroup>
           </div>
 
-          <div className="rounded-md border bg-muted/30 p-4 text-center space-y-3">
-            <div className="text-xs text-muted-foreground">Código previsto</div>
-            <div className="flex flex-col items-center justify-center gap-2">
-              <div className="text-2xl font-bold font-display tracking-wider tabular-nums">
-                {loading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : code || "—"}
+          <div className="rounded-2xl border-2 bg-muted/20 p-6 text-center space-y-4 shadow-inner">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">Código previsto</div>
+            <div className="flex flex-col items-center justify-center gap-3">
+              <div className="text-4xl font-black font-display tracking-tighter tabular-nums text-primary">
+                {loading ? <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary/40" /> : code || "—"}
               </div>
               
               {!loading && (
-                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-dashed w-full justify-center">
-                  <Label htmlFor="sequence" className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    A partir de:
+                <div className="flex items-center gap-3 mt-2 pt-4 border-t border-dashed w-full justify-center">
+                  <Label htmlFor="sequence" className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold whitespace-nowrap">
+                    Próxima sequência:
                   </Label>
-                  <Input
-                    id="sequence"
-                    type="number"
-                    min="1"
-                    max="999"
-                    value={manualSequence}
-                    onChange={(e) => setManualSequence(e.target.value.slice(0, 3))}
-                    className="h-7 w-20 text-center text-xs font-bold"
-                  />
+                  <div className="relative group">
+                    <Input
+                      id="sequence"
+                      type="number"
+                      min="1"
+                      max="999"
+                      value={manualSequence}
+                      onChange={(e) => setManualSequence(e.target.value.slice(0, 3))}
+                      className="h-9 w-24 text-center text-sm font-black bg-background border-2 border-primary/20 focus:border-primary group-hover:border-primary/40 transition-all rounded-lg"
+                    />
+                  </div>
                 </div>
               )}
             </div>
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline" className={`text-[10px] font-bold px-3 py-1 ${COMPANY_BADGE_CLASS[prefix]}`}>
               {PREFIX_LABEL[prefix]} · {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
             </Badge>
           </div>
