@@ -290,7 +290,7 @@ function AceitarProposta() {
   const captionSec = SUMMARY_CAPTION[secLang] || SUMMARY_CAPTION.en;
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-slate-50/50">
       <header className="border-b bg-background">
         <div className={`${containerCls} mx-auto px-6 py-5 flex items-center justify-between gap-4`}>
           <div className="flex items-center gap-4">
