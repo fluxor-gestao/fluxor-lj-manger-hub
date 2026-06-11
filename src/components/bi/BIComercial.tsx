@@ -996,7 +996,7 @@ export default function BIComercial() {
                   {statsPorEmpresa.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} fillOpacity={0.8} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip formatter={BRL} />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#94A3B8' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', color: '#374151' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
