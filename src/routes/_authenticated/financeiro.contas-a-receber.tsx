@@ -111,7 +111,7 @@ function ContasAReceberPage() {
   const [dueFrom, setDueFrom] = useState<string>("");
   const [dueTo, setDueTo] = useState<string>("");
   const [onlyOverdue, setOnlyOverdue] = useState(false);
-  const [onlyOpen, setOnlyOpen] = useState(true);
+  const [onlyOpen, setOnlyOpen] = useState(false); // Changed default to false or adjusted logic
 
   // Detalhe da cobrança
   const [detail, setDetail] = useState<CobrancaRow | null>(null);
@@ -332,7 +332,20 @@ function ContasAReceberPage() {
           }}
           active={statusFilter === "pago"}
         />
-        <KpiCard tone="muted" icon={<ListChecks className="h-4 w-4" />} label="Cobranças pendentes" value={String(metrics.pendentesQtd)} />
+        <KpiCard 
+          tone="muted" 
+          icon={<ListChecks className="h-4 w-4" />} 
+          label="Cobranças pendentes" 
+          value={String(metrics.pendentesQtd)} 
+          onClick={() => {
+            clearFilters();
+            setOnlyOpen(true);
+            // Ao filtrar por pendentes, queremos todas que não estão pagas
+            // already defaults to onlyOpen = true in clearFilters
+            document.getElementById('cobrancas-table')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          active={onlyOpen && !onlyOverdue && !dueTo && statusFilter === "all" && stepFilter === "all"}
+        />
       </div>
 
       {/* Filtros */}
