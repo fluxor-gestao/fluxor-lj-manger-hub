@@ -37,11 +37,11 @@ export function ImportacaoHistorica() {
         .from("import_logs")
         .select(`
           *,
-          profiles:user_id (full_name)
+          profiles (full_name)
         `)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     }
   });
 
