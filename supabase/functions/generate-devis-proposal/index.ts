@@ -366,6 +366,7 @@ Gere APENAS title, scope_description, scope_items (A/B/C...) e total_amount. Use
         ai.payment_terms ||
         "50% na assinatura via PIX/transferência; 50% na conclusão. Reajuste pelo IPCA acima de 12 meses.",
       assumptions: ai.assumptions || [],
+      suggested_pricing_items: ai.suggested_pricing_items || [],
       proposal_structure,
     };
 
