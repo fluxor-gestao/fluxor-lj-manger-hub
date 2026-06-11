@@ -1418,35 +1418,38 @@ export default function BIFinanceiro() {
         </TabsContent>
 
         <TabsContent value="ranking">
-          <Card className="bg-[#1a2233]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden">
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0 overflow-x-auto">
-
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Cliente</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Receita</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Recebida</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Em aberto</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Vencido</TableHead>
-                    <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px]">Taxa pag.</TableHead>
+                  <TableRow className="hover:bg-transparent bg-slate-50">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Receita</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Recebida</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Em aberto</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Vencido</TableHead>
+                    <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Taxa pag.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {topClientes.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-[#CBD5E1] py-6">Sem dados</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-slate-400 py-6 italic text-xs">Sem dados</TableCell></TableRow>
                   )}
                   {topClientes
                     .sort((a, b) => b.receita - a.receita)
                     .slice(0, 20)
                     .map((c, i) => (
-                      <TableRow key={i}>
-                        <TableCell>{c.name}</TableCell>
-                        <TableCell className="text-right">{BRL(c.receita)}</TableCell>
-                        <TableCell className="text-right">{BRL(c.receita - c.aberto)}</TableCell>
-                        <TableCell className="text-right">{BRL(c.aberto)}</TableCell>
-                        <TableCell className="text-right">{c.vencido > 0 ? <Badge variant="destructive">{BRL(c.vencido)}</Badge> : BRL(0)}</TableCell>
-                        <TableCell className="text-right">{PCT(c.taxaPag)}</TableCell>
+                      <TableRow key={i} className={cn(
+                        "border-slate-100 transition-colors",
+                        i % 2 === 0 ? "bg-white" : "bg-slate-50/30",
+                        "hover:bg-slate-50"
+                      )}>
+                        <TableCell className="font-medium text-slate-900">{c.name}</TableCell>
+                        <TableCell className="text-right text-slate-900">{BRL(c.receita)}</TableCell>
+                        <TableCell className="text-right text-slate-900">{BRL(c.receita - c.aberto)}</TableCell>
+                        <TableCell className="text-right text-slate-900">{BRL(c.aberto)}</TableCell>
+                        <TableCell className="text-right">{c.vencido > 0 ? <Badge variant="destructive">{BRL(c.vencido)}</Badge> : <span className="text-slate-400">{BRL(0)}</span>}</TableCell>
+                        <TableCell className="text-right font-medium text-slate-900">{PCT(c.taxaPag)}</TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
