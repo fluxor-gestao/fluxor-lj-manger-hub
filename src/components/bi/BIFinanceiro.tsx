@@ -1294,20 +1294,20 @@ export default function BIFinanceiro() {
 
       {/* Tables */}
       <Tabs value={tabFocus?.startsWith("categoria") ? "receber" : tabFocus ?? "receber"} onValueChange={(v) => setTabFocus(v)}>
-        <TabsList className="bg-[#1a2233]/40 border border-white/5 p-1 h-12 backdrop-blur-xl mb-6">
-          <TabsTrigger value="receber" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Receber críticas</TabsTrigger>
-          <TabsTrigger value="pagar" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Pagar críticas</TabsTrigger>
-          <TabsTrigger value="conciliacao" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Pend. conciliação</TabsTrigger>
-          <TabsTrigger value="ranking" className="data-[state=active]:bg-white/10 data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest px-6 transition-all">Ranking clientes</TabsTrigger>
+        <TabsList className="bg-slate-100 border border-slate-200 p-1 h-12 mb-6">
+          <TabsTrigger value="receber" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Receber críticas</TabsTrigger>
+          <TabsTrigger value="pagar" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Pagar críticas</TabsTrigger>
+          <TabsTrigger value="conciliacao" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Pend. conciliação</TabsTrigger>
+          <TabsTrigger value="ranking" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm font-bold text-[10px] uppercase tracking-wider px-6 transition-all text-slate-500">Ranking clientes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="receber">
           <Card>
             <CardContent className="p-0">
               <Table>
-                <TableHeader className="bg-[#0b1526]/50">
-                  <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
                     <TableHead className="text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Vencimento</TableHead>
                     <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
                     <TableHead className="text-right text-[#F8FAFC] font-bold uppercase tracking-wider text-[10px] h-12">Dias atraso</TableHead>
