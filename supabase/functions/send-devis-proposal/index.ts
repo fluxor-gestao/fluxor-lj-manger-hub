@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const { devis_id, to, subject, message_text, pdf_base64, pdf_filename, accept_url, language } = await req.json();
+    const { devis_id, to, subject, message_text, pdf_base64, pdf_filename, accept_url, language, business_unit } = await req.json();
     if (!to?.length || !subject || !message_text) throw new Error("Parâmetros inválidos");
 
     const lang: Lang = (["pt", "fr", "en", "es"].includes(language) ? language : "pt") as Lang;
