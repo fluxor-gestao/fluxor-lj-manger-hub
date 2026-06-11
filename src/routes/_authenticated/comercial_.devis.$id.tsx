@@ -617,26 +617,75 @@ function DevisDetail() {
             {editing ? (
               <CurrencyInputBRL
                 value={form.total_amount}
-                onChange={(total) =>
+                onChange={(total) => {
+                  const totalNum = Number(total) || 0;
+                  const pctNum = Number(form.down_payment_percentage) || 50;
+                  const down = (totalNum * (pctNum / 100)).toFixed(2);
                   setForm({
                     ...form,
                     total_amount: total,
-                    down_payment_amount: total === "" ? "" : String((Number(total) * 0.5).toFixed(2)),
-                  })
-                }
+                    down_payment_amount: total === "" ? "" : down,
+                  });
+                }}
               />
             ) : <p className="font-medium mt-1 text-lg">{fmtBRL(devis.total_amount)}</p>}
           </div>
 
           {/* Entrada */}
           <div>
-            <Label>Valor de entrada</Label>
+            <div className="flex justify-between items-center">
+              <Label>Valor de entrada</Label>
+              {editing && (
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Input
+                    type="number"
+                    className="h-5 w-12 px-1 py-0 text-[10px]"
+                    value={form.down_payment_percentage}
+                    onChange={(e) => {
+                      const pct = e.target.value;
+                      const totalNum = Number(form.total_amount) || 0;
+                      const down = (totalNum * (Number(pct) / 100)).toFixed(2);
+                      setForm({
+                        ...form,
+                        down_payment_percentage: pct,
+                        down_payment_amount: totalNum > 0 ? down : form.down_payment_amount
+                      });
+                    }}
+                  />
+                  <span>%</span>
+                </div>
+              )}
+            </div>
             {editing ? (
               <CurrencyInputBRL
                 value={form.down_payment_amount}
-                onChange={(v) => setForm({ ...form, down_payment_amount: v })}
+                onChange={(v) => {
+                  const totalNum = Number(form.total_amount) || 0;
+                  const pct = totalNum > 0 ? Math.round((Number(v) / totalNum) * 100) : 50;
+                  setForm({ 
+                    ...form, 
+                    down_payment_amount: v,
+                    down_payment_percentage: totalNum > 0 ? String(pct) : form.down_payment_percentage
+                  });
+                }}
               />
             ) : <p className="font-medium mt-1 text-lg">{fmtBRL(devis.down_payment_amount)}</p>}
+          </div>
+
+          {/* Saldo Final */}
+          <div>
+            <Label>Saldo final</Label>
+            {editing ? (
+              <Input 
+                disabled 
+                className="bg-muted" 
+                value={fmtBRL((Number(form.total_amount) || 0) - (Number(form.down_payment_amount) || 0))} 
+              />
+            ) : (
+              <p className="font-medium mt-1 text-lg">
+                {fmtBRL((Number(devis.total_amount) || 0) - (Number(devis.down_payment_amount) || 0))}
+              </p>
+            )}
           </div>
 
           {/* Título */}
