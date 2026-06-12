@@ -488,9 +488,6 @@ function Comercial() {
     }
   };
 
-  // Pending payload entre o upload de ata e o diálogo de código
-  const [codePreviewOpen, setCodePreviewOpen] = useState(false);
-  const [pendingAta, setPendingAta] = useState<ConfirmedAtaResult | null>(null);
 
   const handleAtaConfirm = async (result: ConfirmedAtaResult) => {
     queryClient.invalidateQueries({ queryKey: ["clients"] });
