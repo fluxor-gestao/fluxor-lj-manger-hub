@@ -26,6 +26,7 @@ import { Pagination } from "@/components/Pagination";
 import { rangeFor } from "@/lib/pagination";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 
 const PAGE_SIZE = 50;
 
@@ -292,7 +293,7 @@ function Financeiro() {
     const headers = [
       "Data", "Competência", "Negócio", "Banco/Conta", "Tipo", "Origem",
       "Conta Mov.", "Descrição", "Fornecedor/Cliente",
-      "Entrada", "Saída", "Status", "Previsto/Realizado",
+      "Entrada", "Saída", "Status", "Previsto/Realizado", "Devis Referência"
     ];
     const xlsxRows = rows.map((e) => [
       e.entry_date,
@@ -302,12 +303,13 @@ function Financeiro() {
       e.entry_type ?? "",
       getOrigem(e),
       e.movement_account,
-      e.movement_description,
+      formatMovementDescription(e.movement_description, e.devis_number, e.devis_id),
       e.counterparty_name,
       Number(e.amount_in || 0),
       Number(e.amount_out || 0),
       e.conciliation_status,
       isPrevisto(e) ? "Previsto" : "Realizado",
+      formatDevisCode(e.devis_number, e.devis_id || undefined),
     ]);
     const ws = XLSX.utils.aoa_to_sheet([headers, ...xlsxRows]);
     const wb = XLSX.utils.book_new();
@@ -732,7 +734,7 @@ function EntriesTable({
                       className="inline-flex"
                     >
                       <Badge variant="outline" className="cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors font-mono text-[10px]">
-                        {e.devis_number || "Ver Devis"}
+                        {formatDevisCode(e.devis_number, e.devis_id || undefined)}
                       </Badge>
                     </Link>
                   ) : (
@@ -750,7 +752,7 @@ function EntriesTable({
                 </TableCell>
                 <TableCell className="py-1.5 text-xs capitalize">{getOrigem(e)}</TableCell>
                 <TableCell className="py-1.5 max-w-[240px] truncate" title={e.movement_description ?? ""}>
-                  {e.movement_description}
+                  {formatMovementDescription(e.movement_description, e.devis_number, e.devis_id)}
                 </TableCell>
                 <TableCell className="py-1.5">{e.counterparty_name ?? "—"}</TableCell>
                 <TableCell className="py-1.5 text-right text-success font-medium tabular-nums">

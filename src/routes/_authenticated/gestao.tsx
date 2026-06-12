@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DREGerencial } from "@/components/bi/DREGerencial";
 import { ImportacaoHistorica } from "@/components/bi/ImportacaoHistorica";
 import { cn } from "@/lib/utils";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend,
@@ -70,7 +71,7 @@ function Gestao() {
     queryFn: async () => {
       let qb = supabase
         .from("financial_entries")
-        .select("entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, entry_date, due_date, dre_group, account_category_id, payment_status")
+        .select("entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, entry_date, due_date, dre_group, account_category_id, payment_status, devis_id, devis_number, movement_description")
         .gte("entry_date", startOfYearISO());
 
       if (companyCode) qb = qb.eq("business_unit", companyCode);
@@ -86,7 +87,7 @@ function Gestao() {
     queryFn: async () => {
       let qb = supabase
         .from("devis")
-        .select("status, total_amount, created_at, accepted_at, service_type");
+        .select("status, total_amount, created_at, accepted_at, service_type, devis_number, id");
 
       if (companyCode) qb = qb.eq("business_unit", companyCode);
       
@@ -315,7 +316,7 @@ function Gestao() {
             <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4">
                <div className="space-y-1">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Op. Líquida</p>
-                 <p className="text-sm font-black text-slate-900">{BRL(agg?.resMes ?? 0)}</p>
+                  <p className="text-sm font-black text-slate-900">{BRL(agg?.resMes ?? 0)}</p>
                </div>
                <div className="space-y-1">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">EBITDA Est.</p>

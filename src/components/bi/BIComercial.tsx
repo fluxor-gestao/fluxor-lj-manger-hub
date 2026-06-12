@@ -1,4 +1,4 @@
-import { useMemo, useState, cloneElement } from "react";
+import { useMemo, useState, cloneElement, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -138,6 +138,7 @@ type Devis = {
   meeting_date: string | null;
   deadline_date: string | null;
   devis_service_areas?: { area_slug: string }[];
+  client?: { name: string } | null;
 };
 
 type Filters = {
@@ -193,7 +194,7 @@ export default function BIComercial() {
       let qb = supabase
         .from("devis")
         .select(
-          "id, devis_number, title, status, total_amount, business_unit, responsible_sector, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date, devis_service_areas(area_slug)"
+          "id, devis_number, title, status, total_amount, business_unit, responsible_sector, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date, devis_service_areas(area_slug), client:clients(name)"
         )
         .gte("created_at", filters.from)
         .lte("created_at", filters.to + "T23:59:59")
@@ -1230,7 +1231,7 @@ export default function BIComercial() {
                 <TableHeader>
                   <TableRow className="hover:bg-transparent bg-slate-50">
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Cliente</TableHead>
-                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Proposta</TableHead>
+                    <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Referência</TableHead>
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Status</TableHead>
                     <TableHead className="text-right text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Valor</TableHead>
                     <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-[10px] h-12">Criada</TableHead>
@@ -1251,7 +1252,7 @@ export default function BIComercial() {
                       "hover:bg-slate-50"
                     )}>
                       <TableCell className="font-medium text-slate-900 group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
-                      <TableCell className="max-w-[220px] truncate text-slate-500 font-mono text-[10px]">{r.numero}</TableCell>
+                      <TableCell className="max-w-[220px] truncate text-slate-500 font-mono text-[10px]">{formatDevisCode(r.numero, r.id)}</TableCell>
                       <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
                       <TableCell className="text-right text-slate-900 font-bold">{BRL(r.valor)}</TableCell>
                       <TableCell className="text-slate-500 text-xs">{r.criada}</TableCell>

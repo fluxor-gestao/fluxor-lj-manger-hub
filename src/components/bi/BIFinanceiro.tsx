@@ -1,5 +1,6 @@
 import { useMemo, useState, cloneElement } from "react";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Area,
@@ -69,6 +70,7 @@ import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { findArea, getAreasFor } from "@/lib/businessAreas";
 import { isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 
 // ------------ helpers ------------
 const BRL = (n: number) =>
@@ -141,6 +143,8 @@ type Row = {
   responsible_sector: string | null;
   movement_description: string | null;
   counterparty_name: string | null;
+  devis_id: string | null;
+  devis_number: string | null;
 };
 
 type Filters = {
@@ -218,7 +222,7 @@ export default function BIFinanceiro() {
       let qb = supabase
         .from("financial_entries")
         .select(
-          "id, entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, due_date, paid_at, entry_date, competence_month, payment_status, conciliation_status, client_id, supplier_id, category_id, bank_account_id, business_unit, responsible_sector, movement_description, counterparty_name, source_type, document_reference"
+          "id, entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, due_date, paid_at, entry_date, competence_month, payment_status, conciliation_status, client_id, supplier_id, category_id, bank_account_id, business_unit, responsible_sector, movement_description, counterparty_name, source_type, document_reference, devis_id, devis_number"
         )
         .gte("entry_date", filters.from)
         .lte("entry_date", filters.to)
@@ -1396,7 +1400,9 @@ export default function BIFinanceiro() {
                       "hover:bg-slate-50"
                     )}>
                       <TableCell className="text-slate-600 text-xs">{r.data}</TableCell>
-                      <TableCell className="max-w-[300px] truncate text-slate-900 font-medium">{r.descricao}</TableCell>
+                      <TableCell className="max-w-[300px] truncate text-slate-900 font-medium">
+                        {formatMovementDescription(r.descricao, null, null)}
+                      </TableCell>
                       <TableCell className="text-right font-bold text-slate-900">{BRL(r.valor)}</TableCell>
                       <TableCell className="text-slate-600 text-xs">{r.conta}</TableCell>
                       <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white">{r.status}</Badge></TableCell>
