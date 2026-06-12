@@ -35,13 +35,15 @@ export type AnalyzedDevis = {
   responsible_sectors: string[];
   scope_description: string;
   proposal_structure: string;
-  scope_items: { letter: string; title: string; description: string; amount: number }[];
+  scope_items: { letter: string; title: string; description: string; amount: number; confidence?: number; is_catalog_item?: boolean }[];
+  suggested_pricing_items?: { service_name: string; quantity: number; unit_price: number }[];
   total_amount: number;
   deadline_date: string;
 };
 
 export type AnalyzedPayload = {
   detected_language: "pt" | "fr" | "en" | "es";
+  client_id?: string;
   client: AnalyzedClient;
   meeting: { date: string; summary: string; report: string };
   devis: AnalyzedDevis;
@@ -168,18 +170,12 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
 
     try {
       const b64 = await fileToBase64(file);
-      const { data: officialAreas } = await supabase
-        .from("business_areas")
-        .select("slug, label")
-        .eq("is_active", true);
-
       const { data, error } = await supabase.functions.invoke("analyze-meeting-report", {
         body: {
           file_base64: b64,
           file_name: file.name,
           mime_type: file.type,
           language_hint: langHint,
-          official_areas: officialAreas,
         },
       });
       
@@ -209,18 +205,23 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       setMeetingDate(finalDate);
       setSelectedAreas(p.devis.responsible_sectors || (p.devis.responsible_sector ? [p.devis.responsible_sector] : []));
       
-      const docNorm = normalize(p.client.document);
-      const emailNorm = (p.client.email || "").toLowerCase().trim();
-      const exact = clients.find(
-        (cl: any) =>
-          (docNorm && normalize(cl.document) === docNorm) ||
-          (emailNorm && (cl.email || "").toLowerCase().trim() === emailNorm),
-      );
-      if (exact) {
+      if (p.client_id) {
         setMatchMode("existing");
-        setSelectedClientId(exact.id);
+        setSelectedClientId(p.client_id);
       } else {
-        setMatchMode("new");
+        const docNorm = normalize(p.client.document);
+        const emailNorm = (p.client.email || "").toLowerCase().trim();
+        const exact = clients.find(
+          (cl: any) =>
+            (docNorm && normalize(cl.document) === docNorm) ||
+            (emailNorm && (cl.email || "").toLowerCase().trim() === emailNorm),
+        );
+        if (exact) {
+          setMatchMode("existing");
+          setSelectedClientId(exact.id);
+        } else {
+          setMatchMode("new");
+        }
       }
       setStep(4);
     } catch (e: any) {
@@ -424,13 +425,13 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
               <div className="grid grid-cols-1 gap-2 pt-2">
                 {[
                   { id: 1, label: "Ata recebida", threshold: 5 },
-                  { id: 2, label: "Extraindo conteúdo", threshold: 15 },
-                  { id: 3, label: "Identificando cliente", threshold: 30 },
-                  { id: 4, label: "Identificando serviços", threshold: 50 },
-                  { id: 5, label: "Sugerindo áreas cadastradas", threshold: 70 },
-                  { id: 6, label: "Montando proposta", threshold: 85 },
-                  { id: 7, label: "Revisão final", threshold: 95 },
-                  { id: 8, label: "Pronto para salvar", threshold: 100 },
+                  { id: 2, label: "Identificando cliente", threshold: 15 },
+                  { id: 3, label: "Verificando base de clientes", threshold: 30 },
+                  { id: 4, label: "Consultando áreas cadastradas", threshold: 50 },
+                  { id: 5, label: "Consultando serviços da precificação", threshold: 70 },
+                  { id: 6, label: "Sugerindo serviços compatíveis", threshold: 85 },
+                  { id: 7, label: "Preparando revisão do Devis", threshold: 95 },
+                  { id: 8, label: "Pronto para revisar", threshold: 100 },
                 ].map((item) => {
                   const isDone = progress >= item.threshold;
                   const thresholdsList = [0, 5, 15, 30, 50, 70, 85, 95];
@@ -512,6 +513,36 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   <Label className="text-xs">Valor total</Label>
                   <p className="font-medium font-mono text-primary">{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(payload.devis.total_amount || 0)}</p>
                 </div>
+              </div>
+            </Card>
+            <Card className="p-4 space-y-3">
+              <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4" /> Itens e Compatibilidade</h3>
+              <div className="space-y-3">
+                {payload.devis.scope_items.map((item, idx) => (
+                  <div key={idx} className="p-2 border rounded text-xs space-y-1 bg-muted/20">
+                    <div className="flex justify-between items-start">
+                      <span className="font-semibold">{item.letter}) {item.title}</span>
+                      <span className="font-mono text-primary font-bold">
+                        {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.amount)}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground line-clamp-2 italic">{item.description}</p>
+                    
+                    {!item.is_catalog_item || item.title.includes("[NÃO CADASTRADO]") ? (
+                      <Badge variant="destructive" className="text-[9px] py-0 h-4">Item não existe no catálogo</Badge>
+                    ) : item.confidence !== undefined && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="h-1 flex-1 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className={cn("h-full transition-all", item.confidence > 0.8 ? "bg-green-500" : item.confidence > 0.5 ? "bg-yellow-500" : "bg-red-500")} 
+                            style={{ width: `${item.confidence * 100}%` }} 
+                          />
+                        </div>
+                        <span className="text-[9px] font-medium text-muted-foreground">Match: {Math.round(item.confidence * 100)}%</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </Card>
 
