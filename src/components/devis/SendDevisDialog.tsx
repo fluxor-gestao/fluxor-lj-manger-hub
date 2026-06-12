@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, Check, AlertCircle } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import DevisPdfTemplate from "./DevisPdfTemplate";
@@ -62,6 +63,17 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [step, setStep] = useState<number>(0); // 0 idle, 1..5 etapas
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const STEPS = [
+    "Validando proposta",
+    "Gerando link",
+    "Preparando e-mail",
+    "Enviando",
+    "Concluído",
+  ];
+
 
   useEffect(() => {
     if (!open) return;
@@ -73,20 +85,27 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
   }, [open, client?.email, client?.name, devisNumber, language]);
 
   const handleSend = async () => {
+    if (sending) return; // bloqueia clique duplo
+    setErrorMsg(null);
+    setStep(1); // Validando proposta
+
     const recipients = to
       .split(/[,;]/)
       .map((s) => s.trim())
       .filter(Boolean);
     if (recipients.length === 0) {
+      setStep(0);
       toast.error("Informe ao menos um destinatário");
       return;
     }
     if (!subject.trim() || !message.trim()) {
+      setStep(0);
       toast.error("Assunto e mensagem são obrigatórios");
       return;
     }
     if (!isProposalComplete(devis?.proposal_structure)) {
       const missing = getMissingClauses(devis?.proposal_structure);
+      setStep(0);
       toast.error(`Proposta incompleta — regere a proposta. Cláusulas faltantes: ${missing.join(", ")}`);
       return;
     }
@@ -101,12 +120,15 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
     const root = createRoot(host);
 
     try {
+      setStep(2); // Gerando link
       let effectiveDevis: any = devis;
       try {
         effectiveDevis = await ensureDevisBilingual(devis);
       } catch (e: any) {
         console.warn("ensureDevisBilingual falhou — enviando monolíngue:", e?.message);
       }
+
+      setStep(3); // Preparando e-mail (renderiza PDF)
       await new Promise<void>((resolve) => {
         root.render(<DevisPdfTemplate devis={effectiveDevis} client={client} />);
         setTimeout(resolve, 800);
@@ -115,7 +137,7 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
       const filename = `Devis-${devisNumber}-${safeName}.pdf`;
       const { base64 } = await generateDevisPdfBase64(host, filename);
 
-      // Envia via edge function (Resend) — uma chamada por destinatário
+      setStep(4); // Enviando
       let lastError: string | null = null;
       for (const recipient of recipients) {
         const { data, error } = await supabase.functions.invoke("send-devis-proposal", {
@@ -138,19 +160,25 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
       }
       if (lastError) throw new Error(lastError);
 
+      setStep(5); // Concluído
       toast.success("Proposta enviada ao cliente!");
       queryClient.invalidateQueries({ queryKey: ["devis"] });
       queryClient.invalidateQueries({ queryKey: ["devis", devis.id] });
-      onOpenChange(false);
-
+      setTimeout(() => {
+        onOpenChange(false);
+        setStep(0);
+      }, 900);
     } catch (e: any) {
-      toast.error(e.message || "Erro ao enviar proposta");
+      const msg = e?.message || "Erro ao enviar proposta";
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       root.unmount();
       host.remove();
       setSending(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -181,6 +209,68 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
             <Input value={acceptUrl} readOnly className="font-mono text-xs" />
           </div>
         </div>
+
+
+
+        {(step > 0 || errorMsg) && (
+          <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Progresso do envio
+            </p>
+            <ol className="space-y-1.5">
+              {STEPS.map((label, idx) => {
+                const n = idx + 1;
+                const done = step > n || step === 5;
+                const active = step === n && !errorMsg;
+                const failed = !!errorMsg && step === n;
+                return (
+                  <li key={label} className="flex items-center gap-2 text-sm">
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                        failed
+                          ? "bg-rose-100 text-rose-700"
+                          : done
+                          ? "bg-emerald-100 text-emerald-700"
+                          : active
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-slate-200 text-slate-500"
+                      }`}
+                    >
+                      {failed ? (
+                        <AlertCircle className="h-3 w-3" />
+                      ) : done ? (
+                        <Check className="h-3 w-3" />
+                      ) : active ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        n
+                      )}
+                    </span>
+                    <span
+                      className={
+                        failed
+                          ? "text-rose-700 font-medium"
+                          : done
+                          ? "text-slate-700"
+                          : active
+                          ? "text-slate-900 font-medium"
+                          : "text-slate-400"
+                      }
+                    >
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+            {errorMsg && (
+              <div className="mt-2 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-700">
+                {errorMsg}
+              </div>
+            )}
+          </div>
+        )}
+
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={sending}>
