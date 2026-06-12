@@ -385,7 +385,7 @@ function Gestao() {
               </div>
             </div>
             <div className="p-4 bg-slate-50/50 border-t border-slate-100">
-               <Button variant="link" className="p-0 h-auto text-[10px] uppercase font-black tracking-widest text-primary hover:no-underline">
+               <Button variant="link" className="p-0 h-auto text-[10px] uppercase font-black tracking-widest text-primary hover:no-underline" onClick={() => navigate({ to: "/admin", search: { tab: "diagnostics" } })}>
                  Ver todos os diagnósticos <ChevronRight className="h-3 w-3 ml-1" />
                </Button>
             </div>
