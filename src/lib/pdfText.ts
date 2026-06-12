@@ -14,7 +14,7 @@ export interface PdfTextResult {
 }
 
 export async function extractPdfText(file: File | ArrayBuffer): Promise<PdfTextResult> {
-  const data = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
+  const data = file instanceof ArrayBuffer ? file.slice(0) : await file.arrayBuffer();
   const doc = await pdfjsLib.getDocument({ data }).promise;
   const pages: string[][] = [];
 
