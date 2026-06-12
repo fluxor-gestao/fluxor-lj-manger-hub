@@ -407,7 +407,47 @@ export default function MapaAprovacaoDashboard() {
               ))}
             </div>
           </Card>
+
+          {empresasPendentes.length > 0 && (
+            <Card className="bg-white border-amber-200 p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm mb-3">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                Empresas sem localização
+                <Badge variant="outline" className="ml-auto text-[10px] border-amber-300 text-amber-700">{empresasPendentes.length}</Badge>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-auto">
+                {empresasPendentes.slice(0, 20).map(e => (
+                  <div key={e.id} className="text-[11px] border-b border-slate-100 pb-1.5 last:border-0">
+                    <div className="font-semibold text-slate-800 truncate">{e.company || e.name}</div>
+                    <div className="text-slate-500 flex justify-between">
+                      <span className="truncate">{e.city || 'sem cidade'}{e.country ? `, ${e.country}` : ''}</span>
+                      <span className="text-amber-700 font-bold ml-2">{e.devisCount} devis</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {clientesPFSemLocal.length > 0 && (
+            <Card className="bg-white border-slate-200 p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm mb-3">
+                <Users className="h-4 w-4 text-slate-500" />
+                Clientes PF sem localização
+                <Badge variant="outline" className="ml-auto text-[10px]">{clientesPFSemLocal.length}</Badge>
+              </div>
+              <div className="space-y-1 max-h-40 overflow-auto">
+                {clientesPFSemLocal.slice(0, 20).map(c => (
+                  <div key={c.id} className="flex justify-between text-[11px] border-b border-slate-100 pb-1 last:border-0">
+                    <span className="truncate text-slate-700">{c.name}</span>
+                    <span className="text-slate-500 ml-2">{c.devisCount}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
+
 
         <div className="lg:col-span-3 min-h-[600px] relative rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
           <MapContainer center={[38.7223, -9.1393]} zoom={6} style={{ height: '100%', width: '100%' }}>
