@@ -15,25 +15,66 @@ Deno.serve(async (req) => {
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
     if (!file_base64) throw new Error("file_base64 é obrigatório");
 
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // 1. Buscar Clientes Reais
+    const { data: clients } = await supabase
+      .from("clients")
+      .select("id, name, company, document")
+      .eq("active", true);
+
+    // 2. Buscar Áreas (Business Areas)
+    const { data: areas } = await supabase
+      .from("business_areas")
+      .select("slug, label, business_unit")
+      .eq("is_active", true);
+
+    // 3. Buscar Precificação (Service Prices)
+    const { data: prices } = await supabase
+      .from("service_prices")
+      .select("name, price, business_unit, category");
+
+    const clientsContext = clients?.map(c => `- ${c.name}${c.company ? ` (${c.company})` : ""}${c.document ? ` [Doc: ${c.document}]` : ""} (ID: ${c.id})`).join("\n") || "Nenhum cliente cadastrado.";
+    const areasContext = areas?.map(a => `- ${a.slug}: ${a.label} (Unidade: ${a.business_unit})`).join("\n") || "Nenhuma área cadastrada.";
+    const pricesContext = prices?.map(p => `- ${p.name}: R$ ${p.price} (Unidade: ${p.business_unit}, Categoria: ${p.category})`).join("\n") || "Nenhuma precificação cadastrada.";
+
     const langInstr = language_hint && language_hint !== "auto" ? `O idioma do documento é ${language_hint} — use este idioma em toda a saída.` : "Detecte automaticamente o idioma do documento.";
 
-    const areaInstr = official_areas?.length 
-      ? `CATÁLOGO OFICIAL DE ÁREAS (USE APENAS ESTES SLUGS): ${official_areas.map((a: any) => `${a.slug} (${a.label})`).join(", ")}. 
-         REGRA CRÍTICA: Se o assunto da reunião não se encaixar em nenhuma destas áreas, deixe o campo 'responsible_sectors' VAZIO. NUNCA invente slugs fora desta lista.`
-      : "Identifique as áreas comerciais envolvidas.";
+    const systemPrompt = `Você é um analista comercial sênior da Lundgaard Jensen.
+Sua tarefa é analisar uma Ata de Reunião e extrair dados estruturados para criar uma proposta (Devis).
 
-    const systemPrompt = `Você é um analista comercial multilíngue.
+REGRA CRÍTICA DE IDIOMA:
+- Determine o idioma final (campo "detected_language": pt, fr, en ou es).
+- TODOS os campos textuais de saída devem estar 100% nesse mesmo idioma.
+- Se o relatório estiver em francês ou inglês, traduza as descrições e títulos para o idioma detectado (geralmente pt-BR).
 
-REGRA CRÍTICA DE IDIOMA (OBRIGATÓRIA):
-- Primeiro determine o idioma final (campo "detected_language": pt, fr, en ou es).
-- TODOS os campos textuais de saída devem estar 100% nesse mesmo idioma, sem exceção.
-- NUNCA misture idiomas. reescreva tudo no idioma final escolhido.
-- Não traduza nomes próprios, valores monetários ou siglas técnicas.
+CADASTROS REAIS DO SISTEMA (USE COMO REFERÊNCIA OBRIGATÓRIA):
 
-${areaInstr}
+CLIENTES CADASTRADOS:
+${clientsContext}
 
-Sua tarefa: extrair (1) idioma detectado, (2) dados do cliente, (3) resumo da reunião,
-(4) estrutura inicial da proposta comercial.`;
+ÁREAS (CENTROS DE RESULTADO):
+${areasContext}
+
+CATÁLOGO DE SERVIÇOS (PRECIFICAÇÃO):
+${pricesContext}
+
+INSTRUÇÕES DE CORRESPONDÊNCIA:
+1. CLIENTE: Compare o nome/empresa da Ata com a lista de CLIENTES CADASTRADOS.
+   - Se houver match claro (nome, empresa ou documento), use o ID existente no campo "client_id".
+   - Se for um novo cliente, deixe "client_id" vazio e preencha os dados em "client".
+   - Se o cliente tiver empresas vinculadas (mesma empresa no cadastro), sugira a correta.
+2. ÁREAS: O campo 'responsible_sectors' deve conter APENAS slugs da lista de ÁREAS acima.
+   - Se não houver correspondência exata, deixe vazio. NUNCA invente áreas.
+3. SERVIÇOS: Ao identificar serviços na Ata, compare com o CATÁLOGO DE SERVIÇOS.
+   - Use o nome exato do catálogo se houver match.
+   - Se o serviço não existir no catálogo, marque no título do item de escopo como "[NÃO CADASTRADO] Nome do Serviço".
+   - Tente manter os preços próximos aos do catálogo.
+   - Adicione um campo "confidence" (0-1) para cada serviço sugerido em relação ao catálogo.
+
+Sua saída deve ser um objeto JSON estruturado contendo o idioma, dados do cliente, reunião e devis.`;
 
     const userContent: any[] = [
       { type: "text", text: `Analise esta ata${file_name ? ` (${file_name})` : ""}. ${langInstr}` },
@@ -75,6 +116,7 @@ Sua tarefa: extrair (1) idioma detectado, (2) dados do cliente, (3) resumo da re
               type: "object",
               properties: {
                 detected_language: { type: "string", enum: ["pt", "fr", "en", "es"] },
+                client_id: { type: "string", description: "ID do cliente existente se encontrado no catálogo." },
                 client: {
                   type: "object",
                   properties: {
@@ -93,14 +135,20 @@ Sua tarefa: extrair (1) idioma detectado, (2) dados do cliente, (3) resumo da re
                   type: "object",
                   properties: {
                     title: { type: "string" }, service_type: { type: "string" },
-                    responsible_sectors: { type: "array", items: { type: "string" }, description: "Slugs das áreas oficiais identificadas. Deixe vazio se não houver match exato." },
+                    responsible_sectors: { type: "array", items: { type: "string" }, description: "Slugs das áreas oficiais identificadas." },
                     scope_description: { type: "string" }, proposal_structure: { type: "string" },
                     scope_items: {
                       type: "array",
                       items: {
                         type: "object",
-                        properties: { letter: { type: "string" }, title: { type: "string" }, description: { type: "string" }, amount: { type: "number" } },
-                        required: ["letter", "title", "description", "amount"],
+                        properties: { 
+                          letter: { type: "string" }, 
+                          title: { type: "string" }, 
+                          description: { type: "string" }, 
+                          amount: { type: "number" },
+                          confidence: { type: "number" }
+                        },
+                        required: ["letter", "title", "description", "amount", "confidence"],
                       },
                     },
                     total_amount: { type: "number" }, deadline_date: { type: "string" },
