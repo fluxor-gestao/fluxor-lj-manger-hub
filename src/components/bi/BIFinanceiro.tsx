@@ -1,6 +1,7 @@
 import { useMemo, useState, cloneElement } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Area,
@@ -70,6 +71,7 @@ import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { findArea, getAreasFor } from "@/lib/businessAreas";
 import { isCompanyCode, type CompanyCode } from "@/lib/companyCodes";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 
 // ------------ helpers ------------
