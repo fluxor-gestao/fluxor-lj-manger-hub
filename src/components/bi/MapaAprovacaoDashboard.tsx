@@ -250,33 +250,17 @@ export default function MapaAprovacaoDashboard() {
     const total = filteredDevis.length;
     const aceitos = filteredDevis.filter(d => isAccepted(d.status)).length;
     const valorAceito = filteredDevis.filter(d => isAccepted(d.status)).reduce((acc, d) => acc + (d.total_amount || 0), 0);
-    const taxa = total > 0 ? aceitos / total : 0;
-    const ticketMedio = aceitos > 0 ? valorAceito / aceitos : 0;
-
-  const stats = useMemo(() => {
-    const totalClients = new Set(devisList.map(d => d.client.id)).size;
-    const locatedClients = new Set(devisList.filter(d => d.client.location_status === 'localizada').map(d => d.client.id)).size;
-    const pendingClients = totalClients - locatedClients;
-
-    return { totalClients, locatedClients, pendingClients };
-  }, [devisList]);
-
-  const kpis = useMemo(() => {
-    const total = filteredDevis.length;
-    const aceitos = filteredDevis.filter(d => ["aceita", "aprovado", "convertido"].includes(d.status)).length;
-    const valorAceito = filteredDevis.filter(d => ["aceita", "aprovado", "convertido"].includes(d.status)).reduce((acc, d) => acc + (d.total_amount || 0), 0);
-    const taxa = total > 0 ? aceitos / total : 0;
     const ticketMedio = aceitos > 0 ? valorAceito / aceitos : 0;
 
     return [
-      { label: "Clientes Mapeados", value: stats.locatedClients, icon: Users, color: "text-blue-400" },
-      { label: "Sem Localização", value: stats.pendingClients, icon: AlertCircle, color: "text-rose-400" },
-      { label: "Devis Enviados", value: total, icon: FileText, color: "text-indigo-400" },
-      { label: "Devis Aceitos", value: aceitos, icon: CheckCircle2, color: "text-emerald-400" },
-      { label: "Total Aceito", value: BRL(valorAceito), icon: DollarSign, color: "text-amber-400" },
-      { label: "Ticket Médio", value: BRL(ticketMedio), icon: Target, color: "text-rose-400" },
+      { label: "Clientes Mapeados", value: stats.locatedClients, icon: Users, color: "text-blue-600" },
+      { label: "Sem Localização", value: stats.pendingClients, icon: AlertCircle, color: "text-rose-600" },
+      { label: "Devis no recorte", value: total, icon: FileText, color: "text-indigo-600" },
+      { label: "Devis Aceitos", value: aceitos, icon: CheckCircle2, color: "text-emerald-600" },
+      { label: "Total Aceito", value: BRL(valorAceito), icon: DollarSign, color: "text-amber-600" },
+      { label: "Ticket Médio", value: BRL(ticketMedio), icon: Target, color: "text-rose-600" },
     ];
-  }, [filteredDevis]);
+  }, [filteredDevis, stats]);
 
   const regionsStats = useMemo(() => {
     const map = new Map<string, { total: number; aceitos: number; valor: number }>();
