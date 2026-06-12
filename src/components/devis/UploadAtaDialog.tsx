@@ -424,13 +424,13 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
               <div className="grid grid-cols-1 gap-2 pt-2">
                 {[
                   { id: 1, label: "Ata recebida", threshold: 5 },
-                  { id: 2, label: "Extraindo conteúdo", threshold: 15 },
-                  { id: 3, label: "Identificando cliente", threshold: 30 },
-                  { id: 4, label: "Identificando serviços", threshold: 50 },
-                  { id: 5, label: "Sugerindo áreas cadastradas", threshold: 70 },
-                  { id: 6, label: "Montando proposta", threshold: 85 },
-                  { id: 7, label: "Revisão final", threshold: 95 },
-                  { id: 8, label: "Pronto para salvar", threshold: 100 },
+                  { id: 2, label: "Identificando cliente", threshold: 15 },
+                  { id: 3, label: "Verificando base de clientes", threshold: 30 },
+                  { id: 4, label: "Consultando áreas cadastradas", threshold: 50 },
+                  { id: 5, label: "Consultando serviços da precificação", threshold: 70 },
+                  { id: 6, label: "Sugerindo serviços compatíveis", threshold: 85 },
+                  { id: 7, label: "Preparando revisão do Devis", threshold: 95 },
+                  { id: 8, label: "Pronto para revisar", threshold: 100 },
                 ].map((item) => {
                   const isDone = progress >= item.threshold;
                   const thresholdsList = [0, 5, 15, 30, 50, 70, 85, 95];
