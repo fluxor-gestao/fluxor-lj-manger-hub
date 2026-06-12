@@ -84,7 +84,7 @@ function AuthPage() {
           </form>
           <div className="mt-6 text-center">
             <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
-              v{appVersion.version}
+              v{currentVersion || appVersion.version}
             </span>
           </div>
         </CardContent>
