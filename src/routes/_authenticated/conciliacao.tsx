@@ -60,7 +60,19 @@ function Conciliacao() {
   const { data: financialEntries = [] } = useQuery({
     queryKey: ["financial-entries-conciliation"],
     queryFn: async () => {
-      const { data } = await supabase.from("financial_entries").select("*").eq("conciliation_status", "pendente").order("entry_date", { ascending: false }).limit(200);
+      // Buscamos apenas registros pendentes e válidos (não excluídos logicamente ou obsoletos)
+      const { data } = await supabase
+        .from("financial_entries")
+        .select(`
+          *,
+          devis:devis_id (
+            devis_number,
+            id
+          )
+        `)
+        .eq("conciliation_status", "pendente")
+        .order("entry_date", { ascending: false })
+        .limit(300);
       return data ?? [];
     },
   });
@@ -1115,19 +1127,34 @@ function Conciliacao() {
               autoFocus
             />
             <div className="max-h-[400px] overflow-y-auto divide-y border rounded-md">
-              {financialEntries
-                .filter((fe) => {
+              {(() => {
+                const filtered = financialEntries.filter((fe) => {
                   if (!searchTerm) return true;
                   const t = searchTerm.toLowerCase();
+                  const devisCode = fe.devis?.devis_number || "";
                   return (
                     fe.movement_description?.toLowerCase().includes(t) ||
                     fe.counterparty_name?.toLowerCase().includes(t) ||
+                    devisCode.toLowerCase().includes(t) ||
                     String(fe.amount_in ?? "").includes(t) ||
                     String(fe.amount_out ?? "").includes(t)
                   );
-                })
-                .slice(0, 50)
-                .map((fe) => (
+                });
+
+                if (filtered.length === 0) {
+                  return (
+                    <div className="p-12 text-center">
+                      <p className="text-sm text-muted-foreground">Nenhum candidato encontrado.</p>
+                      {searchTerm && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Tente outros termos ou remova o filtro.
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+
+                return filtered.slice(0, 50).map((fe) => (
                   <button
                     key={fe.id}
                     className="w-full text-left p-3 hover:bg-accent transition-colors"
@@ -1139,17 +1166,36 @@ function Conciliacao() {
                     }}
                   >
                     <div className="flex justify-between gap-2">
-                      <div className="text-sm font-medium">{fe.movement_description || "(sem descrição)"}</div>
+                      <div className="text-sm font-medium flex items-center gap-2">
+                        {fe.movement_description || "(sem descrição)"}
+                        {fe.devis?.devis_number && (
+                          <Badge variant="secondary" className="text-[10px] font-mono h-4 px-1.5">
+                            {fe.devis.devis_number}
+                          </Badge>
+                        )}
+                      </div>
                       <div className="text-sm font-bold">{fmt(Number(fe.amount_in || fe.amount_out || 0))}</div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {fe.entry_date} · {fe.counterparty_name || "—"} {fe.business_unit ? `· ${fe.business_unit}` : ""}
+                    <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                      <span>{fe.entry_date}</span>
+                      <span>·</span>
+                      <span>{fe.counterparty_name || "—"}</span>
+                      {fe.business_unit && (
+                        <>
+                          <span>·</span>
+                          <span>{fe.business_unit}</span>
+                        </>
+                      )}
+                      {fe.source_type && (
+                        <>
+                          <span>·</span>
+                          <span className="capitalize">{fe.source_type}</span>
+                        </>
+                      )}
                     </div>
                   </button>
-                ))}
-              {financialEntries.length === 0 && (
-                <div className="p-6 text-center text-sm text-muted-foreground">Nenhum lançamento pendente.</div>
-              )}
+                ));
+              })()}
             </div>
           </div>
         </DialogContent>
