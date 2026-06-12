@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DREGerencial } from "@/components/bi/DREGerencial";
 import { ImportacaoHistorica } from "@/components/bi/ImportacaoHistorica";
 import { cn } from "@/lib/utils";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend,
@@ -70,7 +71,7 @@ function Gestao() {
     queryFn: async () => {
       let qb = supabase
         .from("financial_entries")
-        .select("entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, entry_date, due_date, dre_group, account_category_id, payment_status")
+        .select("entry_type, total_brl, paid_amount, open_amount, amount_in, amount_out, entry_date, due_date, dre_group, account_category_id, payment_status, devis_id, devis_number, movement_description")
         .gte("entry_date", startOfYearISO());
 
       if (companyCode) qb = qb.eq("business_unit", companyCode);
@@ -86,7 +87,7 @@ function Gestao() {
     queryFn: async () => {
       let qb = supabase
         .from("devis")
-        .select("status, total_amount, created_at, accepted_at, service_type");
+        .select("status, total_amount, created_at, accepted_at, service_type, devis_number, id");
 
       if (companyCode) qb = qb.eq("business_unit", companyCode);
       

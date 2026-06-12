@@ -1,4 +1,4 @@
-import { useMemo, useState, cloneElement } from "react";
+import { useMemo, useState, cloneElement, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -138,6 +138,7 @@ type Devis = {
   meeting_date: string | null;
   deadline_date: string | null;
   devis_service_areas?: { area_slug: string }[];
+  client?: { name: string } | null;
 };
 
 type Filters = {
@@ -193,7 +194,7 @@ export default function BIComercial() {
       let qb = supabase
         .from("devis")
         .select(
-          "id, devis_number, title, status, total_amount, business_unit, responsible_sector, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date, devis_service_areas(area_slug)"
+          "id, devis_number, title, status, total_amount, business_unit, responsible_sector, service_type, client_id, commercial_responsible, created_at, updated_at, sent_at, accepted_at, rejected_at, meeting_date, deadline_date, devis_service_areas(area_slug), client:clients(name)"
         )
         .gte("created_at", filters.from)
         .lte("created_at", filters.to + "T23:59:59")
