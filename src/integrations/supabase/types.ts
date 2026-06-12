@@ -1606,6 +1606,84 @@ export type Database = {
         }
         Relationships: []
       }
+      service_milestones: {
+        Row: {
+          assignee: string | null
+          billable: boolean
+          billing_amount: number | null
+          billing_percent: number | null
+          billing_type: string | null
+          charge_entry_id: string | null
+          charge_generated: boolean
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          service_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee?: string | null
+          billable?: boolean
+          billing_amount?: number | null
+          billing_percent?: number | null
+          billing_type?: string | null
+          charge_entry_id?: string | null
+          charge_generated?: boolean
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          service_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee?: string | null
+          billable?: boolean
+          billing_amount?: number | null
+          billing_percent?: number | null
+          billing_type?: string | null
+          charge_entry_id?: string | null
+          charge_generated?: boolean
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          service_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_milestones_charge_entry_id_fkey"
+            columns: ["charge_entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_milestones_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_price_history: {
         Row: {
           created_at: string | null
