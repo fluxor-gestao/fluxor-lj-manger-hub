@@ -14,7 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { toast } from "sonner";
-import { Upload, CheckCircle, XCircle, Link2, ArrowLeftRight, Search, ArrowLeft, Pencil, Trash2, Building2, Banknote, Plus, RotateCcw, EyeOff } from "lucide-react";
+import { Upload, CheckCircle, XCircle, Link2, ArrowLeftRight, Search, ArrowLeft, Pencil, Trash2, Building2, Banknote, Plus, RotateCcw, EyeOff, Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { parseOfx, type ParsedOfxTx } from "@/lib/parseOfx";
 import { parseBankStatementPdfLocal } from "@/lib/bankParsers";
 import { NovoLancamentoDialog, type NovoLancamentoPrefill } from "@/components/financeiro/NovoLancamentoDialog";
