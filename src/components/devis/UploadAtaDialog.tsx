@@ -223,7 +223,66 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           setMatchMode("new");
         }
       }
-      setStep(4);
+      
+      // Auto-confirm based on analysis results
+      let clientId = p.client_id;
+      if (!clientId) {
+        const docNorm = normalize(p.client.document);
+        const emailNorm = (p.client.email || "").toLowerCase().trim();
+        const exact = clients.find(
+          (cl: any) =>
+            (docNorm && normalize(cl.document) === docNorm) ||
+            (emailNorm && (cl.email || "").toLowerCase().trim() === emailNorm),
+        );
+        if (exact) {
+          clientId = exact.id;
+        }
+      }
+
+      // Se não encontrou cliente exato, ainda precisamos criar um ou deixar o usuário escolher?
+      // O critério de aceite diz: "clientes existentes ou opção de cadastrar novo"
+      // Se a IA não vinculou, e não achamos exato, vamos para o Step 4 apenas para decidir o cliente?
+      // "Remover a tela intermediária... redirecionar automaticamente"
+      // Vou tentar criar o cliente se não existir e for seguro (tem nome).
+      
+      if (!clientId && p.client.name) {
+        const { data: newClient, error: clientErr } = await supabase
+          .from("clients")
+          .insert({
+            name: p.client.name,
+            email: p.client.email || null,
+            phone: p.client.phone || null,
+            document: p.client.document || null,
+            type: (p.client.type || "PJ") as "PF" | "PJ",
+            address: p.client.address || null,
+            city: p.client.city || null,
+            notes: p.client.notes || null,
+          })
+          .select("id")
+          .single();
+        
+        if (!clientErr && newClient) {
+          clientId = newClient.id;
+          toast.success("Novo cliente cadastrado automaticamente");
+        }
+      }
+
+      if (clientId) {
+        const finalPayload = {
+          ...p,
+          meeting: { ...p.meeting, date: finalDate || format(new Date(), "yyyy-MM-dd") },
+          devis: { 
+            ...p.devis, 
+            responsible_sectors: p.devis.responsible_sectors || (p.devis.responsible_sector ? [p.devis.responsible_sector] : []),
+            responsible_sector: p.devis.responsible_sectors?.[0] || p.devis.responsible_sector || ""
+          }
+        };
+        onConfirm({ client_id: clientId, payload: finalPayload });
+        handleClose(false);
+      } else {
+        // Fallback para o Step 4 apenas se não conseguirmos resolver o cliente automaticamente
+        setStep(4);
+      }
     } catch (e: any) {
       clearInterval(interval);
       toast.error(e.message || "Falha ao analisar a ata");
