@@ -454,11 +454,6 @@ function Gestao() {
 );
 }
 
-export function formatDevisCodeLocal(devisNumber: string | null | undefined, fallbackId?: string): string {
-  if (devisNumber && devisNumber.trim().length > 0) return devisNumber;
-  return "Cód. Pendente";
-}
-
 export const Route = createFileRoute("/_authenticated/gestao")({
   component: Gestao,
 });
