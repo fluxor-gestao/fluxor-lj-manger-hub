@@ -528,7 +528,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                     </div>
                     <p className="text-muted-foreground line-clamp-2 italic">{item.description}</p>
                     
-                    {item.title.includes("[NÃO CADASTRADO]") ? (
+                    {!item.is_catalog_item || item.title.includes("[NÃO CADASTRADO]") ? (
                       <Badge variant="destructive" className="text-[9px] py-0 h-4">Item não existe no catálogo</Badge>
                     ) : item.confidence !== undefined && (
                       <div className="flex items-center gap-2 mt-1">
