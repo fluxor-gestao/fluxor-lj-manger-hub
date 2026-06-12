@@ -1252,7 +1252,7 @@ export default function BIComercial() {
                       "hover:bg-slate-50"
                     )}>
                       <TableCell className="font-medium text-slate-900 group-hover/row:text-primary transition-colors">{r.cliente}</TableCell>
-                      <TableCell className="max-w-[220px] truncate text-slate-500 font-mono text-[10px]">{formatDevisCode(r.numero, r.id)}</TableCell>
+                      <TableCell className="max-w-[220px] truncate text-slate-500 font-mono text-[10px]">{r.numero}</TableCell>
                       <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white">{STATUS_LABELS[r.status] ?? r.status}</Badge></TableCell>
                       <TableCell className="text-right text-slate-900 font-bold">{BRL(r.valor)}</TableCell>
                       <TableCell className="text-slate-500 text-xs">{r.criada}</TableCell>
