@@ -168,18 +168,12 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
 
     try {
       const b64 = await fileToBase64(file);
-      const { data: officialAreas } = await supabase
-        .from("business_areas")
-        .select("slug, label")
-        .eq("is_active", true);
-
       const { data, error } = await supabase.functions.invoke("analyze-meeting-report", {
         body: {
           file_base64: b64,
           file_name: file.name,
           mime_type: file.type,
           language_hint: langHint,
-          official_areas: officialAreas,
         },
       });
       
