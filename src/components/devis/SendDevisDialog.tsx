@@ -85,20 +85,27 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
   }, [open, client?.email, client?.name, devisNumber, language]);
 
   const handleSend = async () => {
+    if (sending) return; // bloqueia clique duplo
+    setErrorMsg(null);
+    setStep(1); // Validando proposta
+
     const recipients = to
       .split(/[,;]/)
       .map((s) => s.trim())
       .filter(Boolean);
     if (recipients.length === 0) {
+      setStep(0);
       toast.error("Informe ao menos um destinatário");
       return;
     }
     if (!subject.trim() || !message.trim()) {
+      setStep(0);
       toast.error("Assunto e mensagem são obrigatórios");
       return;
     }
     if (!isProposalComplete(devis?.proposal_structure)) {
       const missing = getMissingClauses(devis?.proposal_structure);
+      setStep(0);
       toast.error(`Proposta incompleta — regere a proposta. Cláusulas faltantes: ${missing.join(", ")}`);
       return;
     }
@@ -113,12 +120,15 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
     const root = createRoot(host);
 
     try {
+      setStep(2); // Gerando link
       let effectiveDevis: any = devis;
       try {
         effectiveDevis = await ensureDevisBilingual(devis);
       } catch (e: any) {
         console.warn("ensureDevisBilingual falhou — enviando monolíngue:", e?.message);
       }
+
+      setStep(3); // Preparando e-mail (renderiza PDF)
       await new Promise<void>((resolve) => {
         root.render(<DevisPdfTemplate devis={effectiveDevis} client={client} />);
         setTimeout(resolve, 800);
@@ -127,7 +137,7 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
       const filename = `Devis-${devisNumber}-${safeName}.pdf`;
       const { base64 } = await generateDevisPdfBase64(host, filename);
 
-      // Envia via edge function (Resend) — uma chamada por destinatário
+      setStep(4); // Enviando
       let lastError: string | null = null;
       for (const recipient of recipients) {
         const { data, error } = await supabase.functions.invoke("send-devis-proposal", {
@@ -150,19 +160,25 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
       }
       if (lastError) throw new Error(lastError);
 
+      setStep(5); // Concluído
       toast.success("Proposta enviada ao cliente!");
       queryClient.invalidateQueries({ queryKey: ["devis"] });
       queryClient.invalidateQueries({ queryKey: ["devis", devis.id] });
-      onOpenChange(false);
-
+      setTimeout(() => {
+        onOpenChange(false);
+        setStep(0);
+      }, 900);
     } catch (e: any) {
-      toast.error(e.message || "Erro ao enviar proposta");
+      const msg = e?.message || "Erro ao enviar proposta";
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       root.unmount();
       host.remove();
       setSending(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
