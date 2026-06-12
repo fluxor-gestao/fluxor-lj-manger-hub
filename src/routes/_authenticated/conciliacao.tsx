@@ -747,14 +747,27 @@ function Conciliacao() {
           <Button variant="outline" onClick={() => window.history.back()}>
             <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
           </Button>
-          <label className="cursor-pointer">
-            <Button variant="outline" asChild>
-              <span><Upload className="h-4 w-4 mr-2" /> Upload Extrato (PDF ou OFX)</span>
-            </Button>
-            <input type="file" accept=".ofx,.pdf,application/pdf" className="hidden" onChange={handleUpload} />
-
-          </label>
-          <Button onClick={() => suggestMatches.mutate()} disabled={suggestMatches.isPending}>
+          <div className="flex flex-col gap-1">
+            <label className="cursor-pointer">
+              <Button variant="outline" asChild disabled={isUploading}>
+                <span>
+                  {isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                  {isUploading ? "Processando..." : "Upload Extrato (PDF ou OFX)"}
+                </span>
+              </Button>
+              <input type="file" accept=".ofx,.pdf,application/pdf" className="hidden" onChange={handleUpload} disabled={isUploading} />
+            </label>
+            {uploadProgress && (
+              <div className="w-full space-y-1">
+                <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <span>{uploadProgress.step}</span>
+                  <span>{uploadProgress.progress}%</span>
+                </div>
+                <Progress value={uploadProgress.progress} className="h-1" />
+              </div>
+            )}
+          </div>
+          <Button onClick={() => suggestMatches.mutate()} disabled={suggestMatches.isPending || isUploading}>
             <Link2 className="h-4 w-4 mr-2" /> Sugerir Conciliações
           </Button>
         </div>
