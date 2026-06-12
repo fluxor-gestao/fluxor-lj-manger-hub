@@ -88,7 +88,7 @@ function Gestao() {
     queryFn: async () => {
       let qb = supabase
         .from("devis")
-        .select("status, total_amount, created_at, accepted_at, service_type, devis_number, id");
+        .select("status, total_amount, business_unit, created_at, accepted_at, service_type, devis_number, id");
 
       if (companyCode) qb = qb.eq("business_unit", companyCode);
       
@@ -97,6 +97,18 @@ function Gestao() {
       return data ?? [];
     }
   });
+
+  const { data: opsData } = useQuery({
+    queryKey: ["ceo-central-ops", companyCode],
+    queryFn: async () => {
+      let qb = supabase.from("services").select("status, business_unit, actual_end_date");
+      if (companyCode) qb = qb.eq("business_unit", companyCode);
+      const { data, error } = await qb;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
 
   // --- ANALYTICS ---
 
