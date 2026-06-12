@@ -585,44 +585,8 @@ function Comercial() {
     navigate({ to: `/comercial/devis/${newDevis.id}` });
   };
 
-  const handleCodeConfirmed = ({ prefix, devis_number, service_type }: { prefix: ServicePrefix; devis_number: string; service_type: string }) => {
-    if (!pendingAta) return;
-    const { client_id, payload } = pendingAta;
-    const total = payload.devis.total_amount || 0;
-    const meetingDate = payload.meeting.date ? new Date(payload.meeting.date + "T00:00:00") : undefined;
-    setDevisForm({
-      client_id,
-      meeting_date: isNaN(meetingDate?.getTime() ?? NaN) ? undefined : meetingDate,
-      commercial_responsible: user?.id || "",
-      meeting_summary: payload.meeting.summary || "",
-      meeting_report: payload.meeting.report || "",
-      status: "reuniao_realizada",
-      total_amount: total ? String(total) : "",
-      down_payment_amount: total ? String((total * 0.5).toFixed(2)) : "",
-      notes: "",
-      title: payload.devis.title || "",
-      devis_number,
-      service_type,
-      source_language: payload.detected_language || "pt",
-      business_unit: prefix as CompanyCode,
-      responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
-        ? (payload.devis.responsible_sector as string)
-        : "",
-      responsible_sectors: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
-        ? [payload.devis.responsible_sector as string]
-          : [],
-      down_payment_percentage: "50",
-    });
-    setAiAccepted({
-      service_type: payload.devis.service_type || service_type,
-      responsible_sector: payload.devis.responsible_sector || "",
-      responsible_sectors: payload.devis.responsible_sector ? [payload.devis.responsible_sector] : [],
-      scope_description: payload.devis.scope_description || "",
-      proposal_structure: payload.devis.proposal_structure || "",
-    });
-    setAiSuggestions(null);
-    setCodePreviewOpen(false);
-    setPendingAta(null);
+  // handleCodeConfirmed foi removido pois o fluxo via Ata agora é direto e automático.
+
     setDevisDialogOpen(true);
     toast.success(`Devis ${devis_number} pré-preenchido. Revise e salve.`);
   };
