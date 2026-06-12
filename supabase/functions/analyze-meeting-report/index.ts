@@ -1,4 +1,6 @@
 // Analisa ata de reunião (PDF/imagem/texto) e extrai cliente + estrutura de devis — OpenAI
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -8,7 +10,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { file_base64, file_name, mime_type, language_hint, official_areas } = await req.json();
+    const { file_base64, file_name, mime_type, language_hint } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
     if (!file_base64) throw new Error("file_base64 é obrigatório");
