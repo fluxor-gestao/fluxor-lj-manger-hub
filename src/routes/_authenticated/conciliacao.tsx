@@ -86,15 +86,18 @@ function Conciliacao() {
     },
   });
 
-  // Upload PDF/OFX handler
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const ext = file.name.toLowerCase().split(".").pop();
+    if (!file || isUploading) return;
+    setIsUploading(true);
+    setUploadProgress({ step: "Upload do arquivo", progress: 10 });
 
+    const ext = file.name.toLowerCase().split(".").pop();
     if (ext !== "ofx" && ext !== "pdf") {
       toast.error("Formato inválido. Envie um extrato em PDF ou OFX.");
       e.target.value = "";
+      setIsUploading(false);
+      setUploadProgress(null);
       return;
     }
 
@@ -102,40 +105,40 @@ function Conciliacao() {
 
     try {
       if (ext === "ofx") {
+        setUploadProgress({ step: "Leitura do extrato", progress: 30 });
         const text = await file.text();
         transactions = parseOfx(text);
         if (transactions.length === 0) {
           toast.error("Nenhuma transação encontrada no OFX.");
           e.target.value = "";
+          setIsUploading(false);
+          setUploadProgress(null);
           return;
         }
       } else {
-        // PDF: 1) tenta extração 100% local (sem custo de IA, sem timeout)
-        const toastId = toast.loading("Lendo PDF do extrato...");
+        setUploadProgress({ step: "Leitura do extrato", progress: 20 });
         const buf = await file.arrayBuffer();
+        
+        setUploadProgress({ step: "Interpretação do layout", progress: 40 });
         let localText = "";
         try {
-          const local = await parseBankStatementPdfLocal(buf);
+          // Passamos o buffer para evitar problemas de "detached buffer" ao reusar
+          const local = await parseBankStatementPdfLocal(buf.slice(0));
           localText = local.text;
           if (local.transactions.length > 0) {
             transactions = local.transactions;
-            toast.dismiss(toastId);
             toast.success(`Extrato lido localmente (${local.layout}) — ${local.transactions.length} lançamentos.`);
           }
         } catch (err) {
           console.warn("Falha na extração local do PDF:", err);
         }
 
-        // 2) Fallback IA — manda só o TEXTO (muito mais barato/rápido que o PDF inteiro)
         if (transactions.length === 0) {
-          toast.dismiss(toastId);
-          const aiToastId = toast.loading("Layout não reconhecido — usando IA para interpretar o extrato...");
-
+          setUploadProgress({ step: "Fallback IA para interpretar extrato", progress: 60 });
           let payload: Record<string, unknown> = { fileName: file.name };
           if (localText && localText.length > 100) {
             payload.text = localText;
           } else {
-            // último recurso: manda o PDF em base64 (PDFs muito antigos / sem texto)
             let binary = "";
             const bytes = new Uint8Array(buf);
             const chunk = 0x8000;
@@ -145,92 +148,89 @@ function Conciliacao() {
             payload.fileBase64 = btoa(binary);
           }
 
-          const { data, error } = await supabase.functions.invoke("parse-bank-statement-pdf", { body: payload });
-          toast.dismiss(aiToastId);
+          try {
+            const { data, error } = await supabase.functions.invoke("parse-bank-statement-pdf", { body: payload });
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
 
-          if (error) {
-            const isAiCreditError = error.message.includes("402") || error.message.toLowerCase().includes("créditos de ia");
+            transactions = (data?.transactions ?? []) as ParsedOfxTx[];
+            if (transactions.length === 0) {
+              throw new Error("Nenhuma transação reconhecida no PDF.");
+            }
+            if (data?.source === "manual") {
+              toast.warning("Extrato lido em modo manual (IA indisponível).");
+            }
+          } catch (err: any) {
+            const isAiCreditError = err.message?.includes("402") || err.message?.toLowerCase().includes("créditos de ia");
             toast.error(
               isAiCreditError
                 ? "Créditos de IA esgotados e o PDF não pôde ser lido. Envie o extrato em OFX."
-                : `Erro ao processar PDF: ${error.message}`,
+                : `Erro ao processar PDF: ${err.message}`,
             );
             e.target.value = "";
+            setIsUploading(false);
+            setUploadProgress(null);
             return;
-          }
-          if (data?.error) {
-            toast.error(data.error);
-            e.target.value = "";
-            return;
-          }
-          transactions = (data?.transactions ?? []) as ParsedOfxTx[];
-          if (transactions.length === 0) {
-            toast.error(
-              "Nenhuma transação reconhecida no PDF. Pode ser um extrato escaneado (imagem) ou um layout não suportado. Tente exportar como OFX/CSV.",
-            );
-            e.target.value = "";
-            return;
-          }
-          if (data?.source === "manual") {
-            toast.warning("Extrato lido em modo manual (IA indisponível). Revise os lançamentos antes de conciliar.");
           }
         }
       }
-    } catch (err: any) {
-      toast.error(`Erro ao ler arquivo: ${err.message ?? err}`);
-      e.target.value = "";
-      return;
-    }
 
-    // Create import batch
-    const { data: batch, error: batchError } = await supabase.from("import_batches").insert({
-      file_name: file.name,
-      source_kind: "extrato_bancario",
-      row_count: transactions.length,
-      imported_by: user?.id,
-      status: "processando" as const,
-    }).select().single();
+      setUploadProgress({ step: "Geração dos lançamentos", progress: 80 });
+      const { data: batch, error: batchError } = await supabase.from("import_batches").insert({
+        file_name: file.name,
+        source_kind: "extrato_bancario",
+        row_count: transactions.length,
+        imported_by: user?.id,
+        status: "processando" as const,
+      }).select().single();
 
-    if (batchError || !batch) {
-      toast.error("Erro ao criar lote de importação");
-      return;
-    }
+      if (batchError || !batch) throw new Error("Erro ao criar lote de importação");
 
-    let successCount = 0;
-    const errors: string[] = [];
+      let successCount = 0;
+      const errors: string[] = [];
 
-    for (let i = 0; i < transactions.length; i++) {
-      const t = transactions[i];
-      try {
-        const rawAmount = Number(t.amount);
-        const derivedDirection = t.direction || (rawAmount < 0 ? "saida" : "entrada");
-        const { error } = await supabase.from("bank_statement_entries").insert({
-          transaction_date: t.date,
-          description: t.description,
-          amount: Math.abs(rawAmount),
-          direction: derivedDirection,
-          import_batch_id: batch.id,
-          raw_payload: { source: ext, index: i, raw: (t as any).raw ?? null },
-        });
-        if (error) throw error;
-        successCount++;
-      } catch (err: any) {
-        errors.push(`Transação ${i + 1}: ${err.message}`);
+      for (let i = 0; i < transactions.length; i++) {
+        const t = transactions[i];
+        try {
+          const rawAmount = Number(t.amount);
+          const derivedDirection = t.direction || (rawAmount < 0 ? "saida" : "entrada");
+          const { error } = await supabase.from("bank_statement_entries").insert({
+            transaction_date: t.date,
+            description: t.description,
+            amount: Math.abs(rawAmount),
+            direction: derivedDirection,
+            import_batch_id: batch.id,
+            raw_payload: { source: ext, index: i, raw: (t as any).raw ?? null },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          errors.push(`Transação ${i + 1}: ${err.message}`);
+        }
       }
+
+      await supabase.from("import_batches").update({
+        status: errors.length === 0 ? "concluido" as const : "parcial" as const,
+        success_count: successCount,
+        error_count: errors.length,
+        error_log: errors.length > 0 ? errors : null,
+      }).eq("id", batch.id);
+
+      setUploadProgress({ step: "Concluído", progress: 100 });
+      toast.success(`Importação concluída: ${successCount} transações`);
+      
+      // Invalidar queries para atualizar a UI sem reload
+      queryClient.invalidateQueries({ queryKey: ["bank-statements"] });
+      queryClient.invalidateQueries({ queryKey: ["import-batches"] });
+
+    } catch (err: any) {
+      toast.error(`Erro: ${err.message ?? err}`);
+    } finally {
+      setIsUploading(false);
+      setTimeout(() => setUploadProgress(null), 1000);
+      e.target.value = "";
     }
-
-    // Update batch
-    await supabase.from("import_batches").update({
-      status: errors.length === 0 ? "concluido" as const : "parcial" as const,
-      success_count: successCount,
-      error_count: errors.length,
-      error_log: errors.length > 0 ? errors : null,
-    }).eq("id", batch.id);
-
-    toast.success(`Importação concluída: ${successCount} transações${errors.length > 0 ? `, ${errors.length} erros` : ""}`);
-    queryClient.invalidateQueries({ queryKey: ["bank-statements"] });
-    e.target.value = "";
-  }, [user, queryClient]);
+  }, [user, queryClient, isUploading]);
 
   // Suggest matches
   const suggestMatches = useMutation({
