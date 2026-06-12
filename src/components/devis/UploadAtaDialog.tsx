@@ -203,18 +203,23 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
       setMeetingDate(finalDate);
       setSelectedAreas(p.devis.responsible_sectors || (p.devis.responsible_sector ? [p.devis.responsible_sector] : []));
       
-      const docNorm = normalize(p.client.document);
-      const emailNorm = (p.client.email || "").toLowerCase().trim();
-      const exact = clients.find(
-        (cl: any) =>
-          (docNorm && normalize(cl.document) === docNorm) ||
-          (emailNorm && (cl.email || "").toLowerCase().trim() === emailNorm),
-      );
-      if (exact) {
+      if (p.client_id) {
         setMatchMode("existing");
-        setSelectedClientId(exact.id);
+        setSelectedClientId(p.client_id);
       } else {
-        setMatchMode("new");
+        const docNorm = normalize(p.client.document);
+        const emailNorm = (p.client.email || "").toLowerCase().trim();
+        const exact = clients.find(
+          (cl: any) =>
+            (docNorm && normalize(cl.document) === docNorm) ||
+            (emailNorm && (cl.email || "").toLowerCase().trim() === emailNorm),
+        );
+        if (exact) {
+          setMatchMode("existing");
+          setSelectedClientId(exact.id);
+        } else {
+          setMatchMode("new");
+        }
       }
       setStep(4);
     } catch (e: any) {
