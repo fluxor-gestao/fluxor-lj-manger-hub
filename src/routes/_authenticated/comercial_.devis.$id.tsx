@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import { ArrowLeft, Pencil, Save, X, CalendarIcon, Sparkles, Loader2, Link as Li
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { STATUS_LABELS as statusLabels, STATUS_BADGE_CLASSES as devisStatusColors, requiresValidation } from "@/lib/devisStatus";
+import { STATUS_LABELS as statusLabels, STATUS_BADGE_CLASSES as devisStatusColors, requiresValidation, PIPELINE_STATUSES } from "@/lib/devisStatus";
 import AISuggestionsBlock, { type AISuggestions } from "@/components/devis/AISuggestionsBlock";
 import ValidationChecklist from "@/components/devis/ValidationChecklist";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
@@ -431,6 +431,9 @@ function DevisDetail() {
                   <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
                 )}
               </div>
+              <Badge variant="outline" className={cn("text-xs font-semibold", devisStatusColors[devis.status])}>
+                {statusLabels[devis.status] || devis.status}
+              </Badge>
             </p>
           </div>
         </div>
@@ -612,6 +615,40 @@ function DevisDetail() {
                 ) : (
                   <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Status do Devis */}
+          <div>
+            <Label>Status do Devis</Label>
+            {editing ? (
+              <Select 
+                value={form.status ?? ""} 
+                onValueChange={(v) => setForm({ ...form, status: v })}
+              >
+                <SelectTrigger className={cn(devisStatusColors[form.status])}>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Fluxo Kanban</SelectLabel>
+                    {PIPELINE_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        <div className="flex items-center gap-2">
+                          <div className={cn("w-2 h-2 rounded-full", devisStatusColors[s]?.split(" ")[1]?.replace("text-", "bg-"))} />
+                          {statusLabels[s]}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="mt-1">
+                <Badge variant="outline" className={cn("text-sm font-semibold", devisStatusColors[devis.status])}>
+                  {statusLabels[devis.status] || devis.status}
+                </Badge>
               </div>
             )}
           </div>
