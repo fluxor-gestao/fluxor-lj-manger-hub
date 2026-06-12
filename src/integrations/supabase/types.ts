@@ -256,6 +256,44 @@ export type Database = {
         }
         Relationships: []
       }
+      changelog_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          type: Database["public"]["Enums"]["changelog_entry_type"]
+          updated_at: string
+          version_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          type: Database["public"]["Enums"]["changelog_entry_type"]
+          updated_at?: string
+          version_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          type?: Database["public"]["Enums"]["changelog_entry_type"]
+          updated_at?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "changelog_entries_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "system_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           active: boolean
@@ -2075,6 +2113,15 @@ export type Database = {
           read_ct: number
         }[]
       }
+      release_system_version: {
+        Args: {
+          _release_date?: string
+          _release_name: string
+          _summary: string
+          _version: string
+        }
+        Returns: string
+      }
       validate_api_key: {
         Args: { _key_hash: string }
         Returns: {
@@ -2093,6 +2140,7 @@ export type Database = {
         | "gestao"
         | "bi_viewer"
         | "gerencial"
+      changelog_entry_type: "ajuste" | "melhoria" | "implementacao"
       conciliation_status: "pendente" | "conciliado" | "divergente" | "ignorado"
       devis_status:
         | "rascunho"
@@ -2264,6 +2312,7 @@ export const Constants = {
         "bi_viewer",
         "gerencial",
       ],
+      changelog_entry_type: ["ajuste", "melhoria", "implementacao"],
       conciliation_status: ["pendente", "conciliado", "divergente", "ignorado"],
       devis_status: [
         "rascunho",
