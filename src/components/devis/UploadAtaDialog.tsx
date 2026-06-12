@@ -513,6 +513,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   <p className="font-medium font-mono text-primary">{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(payload.devis.total_amount || 0)}</p>
                 </div>
               </div>
+            </Card>
             <Card className="p-4 space-y-3">
               <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4" /> Itens e Compatibilidade</h3>
               <div className="space-y-3">
