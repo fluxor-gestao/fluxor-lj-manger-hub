@@ -130,7 +130,7 @@ async function POST({ request }: { request: Request }) {
     });
   }
 
-  const { error } = await supabaseAdmin.from("changelog_entries").insert(toInsert);
+  const { error } = await supabaseAdmin.from("changelog_entries").insert(toInsert as any);
   if (error) {
     console.error("[github-webhook] insert error", error);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
