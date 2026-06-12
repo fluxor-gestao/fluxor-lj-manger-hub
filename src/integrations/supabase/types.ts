@@ -1905,6 +1905,13 @@ export type Database = {
         Args: { _from?: string; _to?: string }
         Returns: Json
       }
+      check_service_duplicates: {
+        Args: never
+        Returns: {
+          count: number
+          devis_id: string
+        }[]
+      }
       create_devis_initial_charge: {
         Args: { _devis_id: string }
         Returns: undefined
