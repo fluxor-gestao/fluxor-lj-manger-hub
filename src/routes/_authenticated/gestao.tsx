@@ -307,6 +307,14 @@ function Gestao() {
           icon={Target}
           color="violet"
         />
+        <StatCard 
+          title="Receita Prevista" 
+          value={BRL(receitaPrevista)} 
+          subValue="Em aberto a receber"
+          icon={Calendar}
+          color="sky"
+        />
+
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
