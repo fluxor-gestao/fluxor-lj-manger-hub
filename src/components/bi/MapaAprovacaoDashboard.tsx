@@ -79,19 +79,36 @@ type DevisData = {
   business_unit: string | null;
   responsible_sector: string | null;
   created_at: string;
+  target_region_city: string | null;
+  target_region_state: string | null;
+  target_region_country: string | null;
+  target_region_lat: number | null;
+  target_region_lng: number | null;
+  target_region_notes: string | null;
   client: {
     id: string;
     name: string;
+    trade_name?: string | null;
+    type?: string | null;
     city: string | null;
+    state?: string | null;
     country: string | null;
     address: string | null;
     latitude: number | null;
     longitude: number | null;
     company: string | null;
     location_status: string | null;
+    document?: string | null;
   };
   areas: { area_slug: string }[];
 };
+
+const ACCEPTED_STATUSES = ["aceita", "aprovado", "convertido", "entrada_recebida", "enviado_para_operacao"];
+const REJECTED_STATUSES = ["rejeitada", "rejeitado"];
+const SENT_STATUSES = ["enviada_ao_cliente", "aguardando_aceite", "enviado"];
+const isAccepted = (s: string) => ACCEPTED_STATUSES.includes(s);
+const isRejected = (s: string) => REJECTED_STATUSES.includes(s);
+const isSent = (s: string) => SENT_STATUSES.includes(s);
 
 export default function MapaAprovacaoDashboard() {
   const navigate = useNavigate();
@@ -107,9 +124,9 @@ export default function MapaAprovacaoDashboard() {
   });
 
   const { data: devisList = [], isLoading } = useQuery({
-    queryKey: ["mapa-aprovacao", filters],
+    queryKey: ["mapa-aprovacao"],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("devis")
         .select(`
           id, 
@@ -121,17 +138,16 @@ export default function MapaAprovacaoDashboard() {
           business_unit, 
           responsible_sector,
           created_at,
-          client:clients(id, name, trade_name, city, country, address, latitude, longitude, company, location_status),
+          target_region_city,
+          target_region_state,
+          target_region_country,
+          target_region_lat,
+          target_region_lng,
+          target_region_notes,
+          client:clients(id, name, trade_name, type, city, state, country, address, latitude, longitude, company, location_status, document),
           areas:devis_service_areas(area_slug)
         `);
-
-      if (filters.status !== "all") {
-        query = query.eq("status", filters.status as any);
-      }
-      
-      const { data, error } = await query;
       if (error) throw error;
-      
       return (data as any[] || []).map(d => ({
         ...d,
         client: d.client || { name: "Cliente não identificado" }
@@ -178,6 +194,11 @@ export default function MapaAprovacaoDashboard() {
 
   const filteredDevis = useMemo(() => {
     return devisList.filter(d => {
+      if (filters.status !== "all") {
+        if (filters.status === "aceita" && !isAccepted(d.status)) return false;
+        if (filters.status === "rejeitada" && !isRejected(d.status)) return false;
+        if (filters.status === "enviada_ao_cliente" && !isSent(d.status)) return false;
+      }
       if (filters.city && !d.client.city?.toLowerCase().includes(filters.city.toLowerCase())) return false;
       if (filters.country !== "all" && d.client.country !== filters.country) return false;
       if (filters.locationStatus !== "all" && d.client.location_status !== filters.locationStatus) return false;
@@ -185,30 +206,61 @@ export default function MapaAprovacaoDashboard() {
     });
   }, [devisList, filters]);
 
-  const stats = useMemo(() => {
-    const totalClients = new Set(devisList.map(d => d.client.id)).size;
-    const locatedClients = new Set(devisList.filter(d => d.client.location_status === 'localizada').map(d => d.client.id)).size;
-    const pendingClients = totalClients - locatedClients;
+  // Empresas (clients with company) sem localização — pendentes
+  const empresasPendentes = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; company: string | null; city: string | null; country: string | null; devisCount: number }>();
+    devisList.forEach(d => {
+      const c = d.client;
+      if (!c?.id) return;
+      const hasLocation = c.latitude !== null && c.longitude !== null;
+      if (hasLocation) return;
+      if (!c.company && !c.city) return; // truly "empresa" — tem company info mas sem geo
+      const cur = map.get(c.id);
+      if (cur) cur.devisCount++;
+      else map.set(c.id, { id: c.id, name: c.name, company: c.company || null, city: c.city, country: c.country, devisCount: 1 });
+    });
+    return Array.from(map.values());
+  }, [devisList]);
 
+  // Clientes (PF — sem company) sem localização
+  const clientesPFSemLocal = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; devisCount: number }>();
+    devisList.forEach(d => {
+      const c = d.client;
+      if (!c?.id) return;
+      if (c.latitude !== null && c.longitude !== null) return;
+      if (c.company) return; // PJ vai pra "empresas pendentes"
+      const cur = map.get(c.id);
+      if (cur) cur.devisCount++;
+      else map.set(c.id, { id: c.id, name: c.name, devisCount: 1 });
+    });
+    return Array.from(map.values());
+  }, [devisList]);
+
+  const stats = useMemo(() => {
+    const totalClients = new Set(devisList.map(d => d.client.id).filter(Boolean)).size;
+    const locatedClients = new Set(
+      devisList.filter(d => d.client.latitude !== null && d.client.longitude !== null).map(d => d.client.id)
+    ).size;
+    const pendingClients = totalClients - locatedClients;
     return { totalClients, locatedClients, pendingClients };
   }, [devisList]);
 
   const kpis = useMemo(() => {
     const total = filteredDevis.length;
-    const aceitos = filteredDevis.filter(d => ["aceita", "aprovado", "convertido"].includes(d.status)).length;
-    const valorAceito = filteredDevis.filter(d => ["aceita", "aprovado", "convertido"].includes(d.status)).reduce((acc, d) => acc + (d.total_amount || 0), 0);
-    const taxa = total > 0 ? aceitos / total : 0;
+    const aceitos = filteredDevis.filter(d => isAccepted(d.status)).length;
+    const valorAceito = filteredDevis.filter(d => isAccepted(d.status)).reduce((acc, d) => acc + (d.total_amount || 0), 0);
     const ticketMedio = aceitos > 0 ? valorAceito / aceitos : 0;
 
     return [
-      { label: "Clientes Mapeados", value: stats.locatedClients, icon: Users, color: "text-blue-400" },
-      { label: "Sem Localização", value: stats.pendingClients, icon: AlertCircle, color: "text-rose-400" },
-      { label: "Devis Enviados", value: total, icon: FileText, color: "text-indigo-400" },
-      { label: "Devis Aceitos", value: aceitos, icon: CheckCircle2, color: "text-emerald-400" },
-      { label: "Total Aceito", value: BRL(valorAceito), icon: DollarSign, color: "text-amber-400" },
-      { label: "Ticket Médio", value: BRL(ticketMedio), icon: Target, color: "text-rose-400" },
+      { label: "Clientes Mapeados", value: stats.locatedClients, icon: Users, color: "text-blue-600" },
+      { label: "Sem Localização", value: stats.pendingClients, icon: AlertCircle, color: "text-rose-600" },
+      { label: "Devis no recorte", value: total, icon: FileText, color: "text-indigo-600" },
+      { label: "Devis Aceitos", value: aceitos, icon: CheckCircle2, color: "text-emerald-600" },
+      { label: "Total Aceito", value: BRL(valorAceito), icon: DollarSign, color: "text-amber-600" },
+      { label: "Ticket Médio", value: BRL(ticketMedio), icon: Target, color: "text-rose-600" },
     ];
-  }, [filteredDevis]);
+  }, [filteredDevis, stats]);
 
   const regionsStats = useMemo(() => {
     const map = new Map<string, { total: number; aceitos: number; valor: number }>();
@@ -217,7 +269,7 @@ export default function MapaAprovacaoDashboard() {
       if (!map.has(region)) map.set(region, { total: 0, aceitos: 0, valor: 0 });
       const stats = map.get(region)!;
       stats.total++;
-      if (["aceita", "aprovado", "convertido"].includes(d.status)) {
+      if (isAccepted(d.status)) {
         stats.aceitos++;
         stats.valor += (d.total_amount || 0);
       }
@@ -355,7 +407,47 @@ export default function MapaAprovacaoDashboard() {
               ))}
             </div>
           </Card>
+
+          {empresasPendentes.length > 0 && (
+            <Card className="bg-white border-amber-200 p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm mb-3">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                Empresas sem localização
+                <Badge variant="outline" className="ml-auto text-[10px] border-amber-300 text-amber-700">{empresasPendentes.length}</Badge>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-auto">
+                {empresasPendentes.slice(0, 20).map(e => (
+                  <div key={e.id} className="text-[11px] border-b border-slate-100 pb-1.5 last:border-0">
+                    <div className="font-semibold text-slate-800 truncate">{e.company || e.name}</div>
+                    <div className="text-slate-500 flex justify-between">
+                      <span className="truncate">{e.city || 'sem cidade'}{e.country ? `, ${e.country}` : ''}</span>
+                      <span className="text-amber-700 font-bold ml-2">{e.devisCount} devis</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {clientesPFSemLocal.length > 0 && (
+            <Card className="bg-white border-slate-200 p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm mb-3">
+                <Users className="h-4 w-4 text-slate-500" />
+                Clientes PF sem localização
+                <Badge variant="outline" className="ml-auto text-[10px]">{clientesPFSemLocal.length}</Badge>
+              </div>
+              <div className="space-y-1 max-h-40 overflow-auto">
+                {clientesPFSemLocal.slice(0, 20).map(c => (
+                  <div key={c.id} className="flex justify-between text-[11px] border-b border-slate-100 pb-1 last:border-0">
+                    <span className="truncate text-slate-700">{c.name}</span>
+                    <span className="text-slate-500 ml-2">{c.devisCount}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
+
 
         <div className="lg:col-span-3 min-h-[600px] relative rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
           <MapContainer center={[38.7223, -9.1393]} zoom={6} style={{ height: '100%', width: '100%' }}>
@@ -376,6 +468,33 @@ export default function MapaAprovacaoDashboard() {
                     iconAnchor: [5, 5]
                   })}
                 />
+              );
+            })}
+
+            {viewMode === 'markers' && filteredDevis.map((d) => {
+              if (d.target_region_lat === null || d.target_region_lng === null) return null;
+              const color = STATUS_COLORS[d.status] || "#64748B";
+              return (
+                <Marker
+                  key={`tr-${d.id}`}
+                  position={[Number(d.target_region_lat), Number(d.target_region_lng)]}
+                  icon={L.divIcon({
+                    className: 'custom-icon',
+                    html: `<div style="width:14px;height:14px;transform:rotate(45deg);background:${color};border:2px solid white;box-shadow:0 0 8px ${color};"></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                  })}
+                >
+                  <Popup>
+                    <div className="p-1 min-w-[160px]">
+                      <p className="text-[9px] uppercase font-bold text-slate-500">Região de investimento</p>
+                      <p className="font-bold text-sm">{d.target_region_city || '—'}{d.target_region_state ? `, ${d.target_region_state}` : ''}</p>
+                      <p className="text-[10px] text-slate-500">{d.target_region_country || ''}</p>
+                      <p className="text-[10px] mt-1">Devis {formatDevisCode(d.devis_number, d.id)} · {BRL(d.total_amount || 0)}</p>
+                      {d.target_region_notes && <p className="text-[10px] text-slate-600 mt-1 italic">{d.target_region_notes}</p>}
+                    </div>
+                  </Popup>
+                </Marker>
               );
             })}
 

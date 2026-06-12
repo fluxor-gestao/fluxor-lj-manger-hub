@@ -499,6 +499,12 @@ export type Database = {
           service_type: string | null
           source_language: string
           status: Database["public"]["Enums"]["devis_status"]
+          target_region_city: string | null
+          target_region_country: string | null
+          target_region_lat: number | null
+          target_region_lng: number | null
+          target_region_notes: string | null
+          target_region_state: string | null
           title: string
           title_secondary: string | null
           total_amount: number
@@ -550,6 +556,12 @@ export type Database = {
           service_type?: string | null
           source_language?: string
           status?: Database["public"]["Enums"]["devis_status"]
+          target_region_city?: string | null
+          target_region_country?: string | null
+          target_region_lat?: number | null
+          target_region_lng?: number | null
+          target_region_notes?: string | null
+          target_region_state?: string | null
           title: string
           title_secondary?: string | null
           total_amount?: number
@@ -601,6 +613,12 @@ export type Database = {
           service_type?: string | null
           source_language?: string
           status?: Database["public"]["Enums"]["devis_status"]
+          target_region_city?: string | null
+          target_region_country?: string | null
+          target_region_lat?: number | null
+          target_region_lng?: number | null
+          target_region_notes?: string | null
+          target_region_state?: string | null
           title?: string
           title_secondary?: string | null
           total_amount?: number
