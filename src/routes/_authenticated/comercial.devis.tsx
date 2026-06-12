@@ -587,9 +587,6 @@ function Comercial() {
 
   // handleCodeConfirmed foi removido pois o fluxo via Ata agora é direto e automático.
 
-    setDevisDialogOpen(true);
-    toast.success(`Devis ${devis_number} pré-preenchido. Revise e salve.`);
-  };
 
   const openEditClient = (c: any) => {
     setClientForm({
