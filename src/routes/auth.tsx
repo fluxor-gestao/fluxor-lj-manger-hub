@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import { appVersion } from "@/config/appVersion";
 import logo from "@/assets/logo.svg";
 
@@ -20,6 +21,18 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const { data: currentVersion } = useQuery({
+    queryKey: ["current-system-version"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("system_versions")
+        .select("version")
+        .eq("is_current", true)
+        .maybeSingle();
+      return data?.version || appVersion.version;
+    },
+  });
 
   useEffect(() => {
     if (user) navigate({ to: "/hub", replace: true });
@@ -71,7 +84,7 @@ function AuthPage() {
           </form>
           <div className="mt-6 text-center">
             <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
-              v{appVersion.version}
+              v{currentVersion || appVersion.version}
             </span>
           </div>
         </CardContent>
