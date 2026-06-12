@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Calculator, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Save, Calculator, CheckCircle2, Loader2, AlertCircle, PieChart } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -67,6 +67,16 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
   const totalCalculated = useMemo(() => {
     return pricingItems.reduce((sum, item) => sum + Number(item.total_price), 0);
   }, [pricingItems]);
+
+  const apportionment = useMemo(() => {
+    const map: Record<string, number> = {};
+    pricingItems.forEach(item => {
+      const sp = servicePrices.find(s => s.id === item.service_price_id);
+      const unit = sp?.business_unit || "Não definida";
+      map[unit] = (map[unit] || 0) + Number(item.total_price);
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [pricingItems, servicePrices]);
 
   const updateStatus = useMutation({
     mutationFn: async (newStatus: string) => {
