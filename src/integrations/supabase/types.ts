@@ -262,6 +262,7 @@ export type Database = {
           created_by: string | null
           description: string
           id: string
+          source_ref: string | null
           type: Database["public"]["Enums"]["changelog_entry_type"]
           updated_at: string
           version_id: string | null
@@ -271,6 +272,7 @@ export type Database = {
           created_by?: string | null
           description: string
           id?: string
+          source_ref?: string | null
           type: Database["public"]["Enums"]["changelog_entry_type"]
           updated_at?: string
           version_id?: string | null
@@ -280,6 +282,7 @@ export type Database = {
           created_by?: string | null
           description?: string
           id?: string
+          source_ref?: string | null
           type?: Database["public"]["Enums"]["changelog_entry_type"]
           updated_at?: string
           version_id?: string | null
