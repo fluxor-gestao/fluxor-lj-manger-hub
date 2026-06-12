@@ -1632,18 +1632,7 @@ function Admin() {
         </TabsContent>
 
         <TabsContent value="diagnostics" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Integridade do Sistema
-              </CardTitle>
-              <CardDescription>Detecção proativa de registros órfãos, inconsistências de fluxo e dados duplicados.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SystemDiagnostics />
-            </CardContent>
-          </Card>
+          <SystemDiagnostics />
         </TabsContent>
 
         <TabsContent value="updates" className="space-y-6">
