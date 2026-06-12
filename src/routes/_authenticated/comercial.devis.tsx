@@ -488,57 +488,102 @@ function Comercial() {
     }
   };
 
-  // Pending payload entre o upload de ata e o diálogo de código
-  const [pendingAta, setPendingAta] = useState<ConfirmedAtaResult | null>(null);
-  const [codePreviewOpen, setCodePreviewOpen] = useState(false);
 
-  const handleAtaConfirm = (result: ConfirmedAtaResult) => {
+  const handleAtaConfirm = async (result: ConfirmedAtaResult) => {
     queryClient.invalidateQueries({ queryKey: ["clients"] });
-    setPendingAta(result);
-    setCodePreviewOpen(true);
-  };
+    
+    // Agora o fluxo é direto: criar rascunho e redirecionar
+    const { client_id, payload } = result;
+    const client = clientsById[client_id];
+    
+    // 1. Inferir prefixo e tipo de serviço
+    const prefix = inferServicePrefix(
+      payload.devis.service_type, 
+      payload.devis.responsible_sector, 
+      payload.devis.title,
+      payload.devis.scope_description
+    );
+    
+    // 2. Buscar próximo número de Devis
+    const { data: devisNumber, error: numberErr } = await supabase.rpc("next_devis_number", { _prefix: prefix });
+    if (numberErr) {
+      toast.error("Erro ao gerar número do Devis");
+      return;
+    }
 
-  const handleCodeConfirmed = ({ prefix, devis_number, service_type }: { prefix: ServicePrefix; devis_number: string; service_type: string }) => {
-    if (!pendingAta) return;
-    const { client_id, payload } = pendingAta;
     const total = payload.devis.total_amount || 0;
-    const meetingDate = payload.meeting.date ? new Date(payload.meeting.date + "T00:00:00") : undefined;
-    setDevisForm({
+    const meetingDate = payload.meeting.date ? payload.meeting.date : format(new Date(), "yyyy-MM-dd");
+    
+    // 3. Criar o Devis no banco
+    const insertPayload: any = {
       client_id,
-      meeting_date: isNaN(meetingDate?.getTime() ?? NaN) ? undefined : meetingDate,
-      commercial_responsible: user?.id || "",
-      meeting_summary: payload.meeting.summary || "",
-      meeting_report: payload.meeting.report || "",
+      meeting_date: meetingDate,
+      deadline_date: meetingDate,
+      commercial_responsible: user?.id || null,
+      meeting_summary: payload.meeting.summary || null,
+      meeting_report: payload.meeting.report || null,
       status: "reuniao_realizada",
-      total_amount: total ? String(total) : "",
-      down_payment_amount: total ? String((total * 0.5).toFixed(2)) : "",
-      notes: "",
-      title: payload.devis.title || "",
-      devis_number,
-      service_type,
+      total_amount: total,
+      down_payment_amount: total * 0.5,
+      title: payload.devis.title || (client ? `Devis ${client.name}` : "Novo Devis"),
+      devis_number: devisNumber,
+      service_type: payload.devis.service_type || prefix,
       source_language: payload.detected_language || "pt",
       business_unit: prefix as CompanyCode,
       responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
         ? (payload.devis.responsible_sector as string)
-        : "",
-      responsible_sectors: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
-        ? [payload.devis.responsible_sector as string]
-          : [],
-      down_payment_percentage: "50",
-    });
-    setAiAccepted({
-      service_type: payload.devis.service_type || service_type,
-      responsible_sector: payload.devis.responsible_sector || "",
-      responsible_sectors: payload.devis.responsible_sector ? [payload.devis.responsible_sector] : [],
-      scope_description: payload.devis.scope_description || "",
-      proposal_structure: payload.devis.proposal_structure || "",
-    });
-    setAiSuggestions(null);
-    setCodePreviewOpen(false);
-    setPendingAta(null);
-    setDevisDialogOpen(true);
-    toast.success(`Devis ${devis_number} pré-preenchido. Revise e salve.`);
+        : null,
+      scope_description: payload.devis.scope_description || null,
+      proposal_structure: payload.devis.proposal_structure || null,
+    };
+
+    const { data: newDevis, error: devisErr } = await supabase
+      .from("devis")
+      .insert(insertPayload)
+      .select("id")
+      .single();
+
+    if (devisErr) {
+      toast.error("Erro ao criar Devis: " + devisErr.message);
+      return;
+    }
+
+    // 4. Inserir Áreas
+    const areas = payload.devis.responsible_sectors || (payload.devis.responsible_sector ? [payload.devis.responsible_sector] : []);
+    if (areas.length > 0) {
+      const areaPayload = areas.map(slug => ({
+        devis_id: newDevis.id,
+        area_slug: slug
+      }));
+      await supabase.from("devis_service_areas").insert(areaPayload);
+    }
+
+    // 5. Inserir Itens de Precificação Sugeridos
+    if (payload.devis.suggested_pricing_items && payload.devis.suggested_pricing_items.length > 0) {
+      // Buscar todos os service_prices para vincular corretamente
+      const { data: servicePrices } = await supabase.from("service_prices").select("id, name");
+      
+      const pricingPayload = payload.devis.suggested_pricing_items.map(item => {
+        const matchingPrice = servicePrices?.find(s => s.name.toLowerCase() === item.service_name.toLowerCase());
+        return {
+          devis_id: newDevis.id,
+          service_price_id: matchingPrice?.id || null,
+          name: item.service_name,
+          unit_price: item.unit_price,
+          total_price: item.unit_price * item.quantity,
+          quantity: item.quantity,
+        };
+      });
+
+      await supabase.from("devis_pricing_items").insert(pricingPayload);
+    }
+
+    toast.success("Devis criado com sucesso!");
+    navigate({ to: `/comercial/devis/${newDevis.id}` });
   };
+
+  // handleCodeConfirmed foi removido pois o fluxo via Ata agora é direto e automático.
+
 
   const openEditClient = (c: any) => {
     setClientForm({
@@ -974,22 +1019,6 @@ function Comercial() {
             }}
           />
 
-          <DevisCodePreviewDialog
-            open={codePreviewOpen}
-            onOpenChange={(o) => {
-              setCodePreviewOpen(o);
-              if (!o) setPendingAta(null);
-            }}
-            clientName={pendingAta ? clientsById[pendingAta.client_id]?.name : undefined}
-            initialPrefix={inferServicePrefix(
-              pendingAta?.payload.devis.service_type,
-              pendingAta?.payload.devis.responsible_sector,
-              pendingAta?.payload.devis.scope_description,
-              pendingAta?.payload.meeting.report,
-            )}
-            serviceTypeHint={pendingAta?.payload.devis.service_type}
-            onConfirm={handleCodeConfirmed}
-          />
 
           {view === "kanban" ? (
             <DevisKanban
