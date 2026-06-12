@@ -154,6 +154,7 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
           <TableHeader>
             <TableRow className="bg-muted/10">
               <TableHead className="py-3">Serviço</TableHead>
+              <TableHead className="py-3">Área / Empresa</TableHead>
               <TableHead className="text-right">Qtd</TableHead>
               <TableHead className="text-right">Unitário</TableHead>
               <TableHead className="text-right">Total</TableHead>
@@ -162,30 +163,73 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
           </TableHeader>
           <TableBody>
             {isLoadingItems ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-6"><Loader2 className="h-4 w-4 animate-spin mx-auto" /></TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-6"><Loader2 className="h-4 w-4 animate-spin mx-auto" /></TableCell></TableRow>
             ) : pricingItems.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground text-sm italic">Nenhum item de precificação adicionado.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-sm italic">Nenhum item de precificação adicionado.</TableCell></TableRow>
             ) : (
-              pricingItems.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <div className="font-medium text-sm">{item.name}</div>
-                    <div className="text-[10px] text-muted-foreground line-clamp-1">{item.description}</div>
-                  </TableCell>
-                  <TableCell className="text-right text-xs">{item.quantity}</TableCell>
-                  <TableCell className="text-right text-xs font-mono">
-                    {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.unit_price)}
-                  </TableCell>
-                  <TableCell className="text-right text-sm font-semibold font-mono">
-                    {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.total_price)}
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => removeItem.mutate(item.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              pricingItems.map((item) => {
+                const sp = servicePrices.find(s => s.id === item.service_price_id);
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <div className="font-medium text-sm">{item.name}</div>
+                      <div className="text-[10px] text-muted-foreground line-clamp-1">{item.description}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1">
+                          {sp?.business_unit && <Badge variant="outline" className="text-[8px] h-3.5 px-1 uppercase">{sp.business_unit}</Badge>}
+                          {sp?.responsible_sector && <Badge variant="secondary" className="text-[8px] h-3.5 px-1">{sp.responsible_sector}</Badge>}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right text-xs">
+                      <div className="flex items-center justify-end gap-1">
+                        <Input 
+                          type="number" 
+                          className="w-12 h-7 text-[10px] px-1 py-0 text-right" 
+                          defaultValue={item.quantity}
+                          onBlur={async (e) => {
+                            const val = Number(e.target.value);
+                            if (val > 0 && val !== item.quantity) {
+                              const newTotal = val * Number(item.unit_price);
+                              await supabase.from("devis_pricing_items").update({ quantity: val, total_price: newTotal }).eq("id", item.id);
+                              queryClient.invalidateQueries({ queryKey: ["devis-pricing-items", devisId] });
+                            }
+                          }}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right text-xs font-mono">
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-[10px] text-muted-foreground">R$</span>
+                        <Input 
+                          type="number" 
+                          step="0.01"
+                          className="w-20 h-7 text-[10px] px-1 py-0 text-right" 
+                          defaultValue={Number(item.unit_price).toFixed(2)}
+                          onBlur={async (e) => {
+                            const val = Number(e.target.value);
+                            if (val >= 0 && val !== Number(item.unit_price)) {
+                              const newTotal = val * item.quantity;
+                              await supabase.from("devis_pricing_items").update({ unit_price: val, total_price: newTotal }).eq("id", item.id);
+                              queryClient.invalidateQueries({ queryKey: ["devis-pricing-items", devisId] });
+                            }
+                          }}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right text-sm font-semibold font-mono">
+                      {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.total_price)}
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => removeItem.mutate(item.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
