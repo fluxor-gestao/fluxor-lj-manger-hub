@@ -146,10 +146,23 @@ Sua saída deve ser um objeto JSON estruturado contendo o idioma, dados do clien
                           title: { type: "string" }, 
                           description: { type: "string" }, 
                           amount: { type: "number" },
-                          confidence: { type: "number" }
+                          confidence: { type: "number" },
+                          is_catalog_item: { type: "boolean", description: "Verdadeiro se o item foi encontrado no CATÁLOGO DE SERVIÇOS." }
                         },
-                        required: ["letter", "title", "description", "amount", "confidence"],
+                        required: ["letter", "title", "description", "amount", "confidence", "is_catalog_item"],
                       },
+                    },
+                    suggested_pricing_items: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          service_name: { type: "string" },
+                          quantity: { type: "number" },
+                          unit_price: { type: "number" }
+                        },
+                        required: ["service_name", "quantity", "unit_price"]
+                      }
                     },
                     total_amount: { type: "number" }, deadline_date: { type: "string" },
                   },
