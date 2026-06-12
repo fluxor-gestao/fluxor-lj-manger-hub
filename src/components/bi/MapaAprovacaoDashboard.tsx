@@ -107,9 +107,9 @@ export default function MapaAprovacaoDashboard() {
   });
 
   const { data: devisList = [], isLoading } = useQuery({
-    queryKey: ["mapa-aprovacao", filters],
+    queryKey: ["mapa-aprovacao"],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("devis")
         .select(`
           id, 
@@ -121,17 +121,16 @@ export default function MapaAprovacaoDashboard() {
           business_unit, 
           responsible_sector,
           created_at,
-          client:clients(id, name, trade_name, city, country, address, latitude, longitude, company, location_status),
+          target_region_city,
+          target_region_state,
+          target_region_country,
+          target_region_lat,
+          target_region_lng,
+          target_region_notes,
+          client:clients(id, name, trade_name, type, city, state, country, address, latitude, longitude, company, location_status, document),
           areas:devis_service_areas(area_slug)
         `);
-
-      if (filters.status !== "all") {
-        query = query.eq("status", filters.status as any);
-      }
-      
-      const { data, error } = await query;
       if (error) throw error;
-      
       return (data as any[] || []).map(d => ({
         ...d,
         client: d.client || { name: "Cliente não identificado" }
