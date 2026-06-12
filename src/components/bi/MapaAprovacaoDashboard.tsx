@@ -194,12 +194,64 @@ export default function MapaAprovacaoDashboard() {
 
   const filteredDevis = useMemo(() => {
     return devisList.filter(d => {
+      if (filters.status !== "all") {
+        if (filters.status === "aceita" && !isAccepted(d.status)) return false;
+        if (filters.status === "rejeitada" && !isRejected(d.status)) return false;
+        if (filters.status === "enviada_ao_cliente" && !isSent(d.status)) return false;
+      }
       if (filters.city && !d.client.city?.toLowerCase().includes(filters.city.toLowerCase())) return false;
       if (filters.country !== "all" && d.client.country !== filters.country) return false;
       if (filters.locationStatus !== "all" && d.client.location_status !== filters.locationStatus) return false;
       return true;
     });
   }, [devisList, filters]);
+
+  // Empresas (clients with company) sem localização — pendentes
+  const empresasPendentes = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; company: string | null; city: string | null; country: string | null; devisCount: number }>();
+    devisList.forEach(d => {
+      const c = d.client;
+      if (!c?.id) return;
+      const hasLocation = c.latitude !== null && c.longitude !== null;
+      if (hasLocation) return;
+      if (!c.company && !c.city) return; // truly "empresa" — tem company info mas sem geo
+      const cur = map.get(c.id);
+      if (cur) cur.devisCount++;
+      else map.set(c.id, { id: c.id, name: c.name, company: c.company || null, city: c.city, country: c.country, devisCount: 1 });
+    });
+    return Array.from(map.values());
+  }, [devisList]);
+
+  // Clientes (PF — sem company) sem localização
+  const clientesPFSemLocal = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; devisCount: number }>();
+    devisList.forEach(d => {
+      const c = d.client;
+      if (!c?.id) return;
+      if (c.latitude !== null && c.longitude !== null) return;
+      if (c.company) return; // PJ vai pra "empresas pendentes"
+      const cur = map.get(c.id);
+      if (cur) cur.devisCount++;
+      else map.set(c.id, { id: c.id, name: c.name, devisCount: 1 });
+    });
+    return Array.from(map.values());
+  }, [devisList]);
+
+  const stats = useMemo(() => {
+    const totalClients = new Set(devisList.map(d => d.client.id).filter(Boolean)).size;
+    const locatedClients = new Set(
+      devisList.filter(d => d.client.latitude !== null && d.client.longitude !== null).map(d => d.client.id)
+    ).size;
+    const pendingClients = totalClients - locatedClients;
+    return { totalClients, locatedClients, pendingClients };
+  }, [devisList]);
+
+  const kpis = useMemo(() => {
+    const total = filteredDevis.length;
+    const aceitos = filteredDevis.filter(d => isAccepted(d.status)).length;
+    const valorAceito = filteredDevis.filter(d => isAccepted(d.status)).reduce((acc, d) => acc + (d.total_amount || 0), 0);
+    const taxa = total > 0 ? aceitos / total : 0;
+    const ticketMedio = aceitos > 0 ? valorAceito / aceitos : 0;
 
   const stats = useMemo(() => {
     const totalClients = new Set(devisList.map(d => d.client.id)).size;
