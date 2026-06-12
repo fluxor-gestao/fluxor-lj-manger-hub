@@ -269,7 +269,7 @@ export default function MapaAprovacaoDashboard() {
       if (!map.has(region)) map.set(region, { total: 0, aceitos: 0, valor: 0 });
       const stats = map.get(region)!;
       stats.total++;
-      if (["aceita", "aprovado", "convertido"].includes(d.status)) {
+      if (isAccepted(d.status)) {
         stats.aceitos++;
         stats.valor += (d.total_amount || 0);
       }
