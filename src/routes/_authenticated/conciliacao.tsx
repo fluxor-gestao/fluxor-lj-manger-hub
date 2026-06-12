@@ -60,7 +60,19 @@ function Conciliacao() {
   const { data: financialEntries = [] } = useQuery({
     queryKey: ["financial-entries-conciliation"],
     queryFn: async () => {
-      const { data } = await supabase.from("financial_entries").select("*").eq("conciliation_status", "pendente").order("entry_date", { ascending: false }).limit(200);
+      // Buscamos apenas registros pendentes e válidos (não excluídos logicamente ou obsoletos)
+      const { data } = await supabase
+        .from("financial_entries")
+        .select(`
+          *,
+          devis:devis_id (
+            devis_number,
+            id
+          )
+        `)
+        .eq("conciliation_status", "pendente")
+        .order("entry_date", { ascending: false })
+        .limit(300);
       return data ?? [];
     },
   });
