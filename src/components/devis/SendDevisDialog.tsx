@@ -207,8 +207,67 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
           <div>
             <Label>Link de aceite (incluído como botão no e-mail)</Label>
             <Input value={acceptUrl} readOnly className="font-mono text-xs" />
-          </div>
         </div>
+
+        {(step > 0 || errorMsg) && (
+          <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Progresso do envio
+            </p>
+            <ol className="space-y-1.5">
+              {STEPS.map((label, idx) => {
+                const n = idx + 1;
+                const done = step > n || step === 5;
+                const active = step === n && !errorMsg;
+                const failed = !!errorMsg && step === n;
+                return (
+                  <li key={label} className="flex items-center gap-2 text-sm">
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                        failed
+                          ? "bg-rose-100 text-rose-700"
+                          : done
+                          ? "bg-emerald-100 text-emerald-700"
+                          : active
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-slate-200 text-slate-500"
+                      }`}
+                    >
+                      {failed ? (
+                        <AlertCircle className="h-3 w-3" />
+                      ) : done ? (
+                        <Check className="h-3 w-3" />
+                      ) : active ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        n
+                      )}
+                    </span>
+                    <span
+                      className={
+                        failed
+                          ? "text-rose-700 font-medium"
+                          : done
+                          ? "text-slate-700"
+                          : active
+                          ? "text-slate-900 font-medium"
+                          : "text-slate-400"
+                      }
+                    >
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+            {errorMsg && (
+              <div className="mt-2 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-700">
+                {errorMsg}
+              </div>
+            )}
+          </div>
+        )}
+
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={sending}>
