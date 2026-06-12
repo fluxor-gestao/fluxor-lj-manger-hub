@@ -931,16 +931,17 @@ function Admin() {
         </Button>
       </div>
 
-      <Tabs defaultValue="users">
-        <TabsList>
-          <TabsTrigger value="users"><Users className="h-4 w-4 mr-2" />Usuários</TabsTrigger>
-          <TabsTrigger value="logs"><ScrollText className="h-4 w-4 mr-2" />Logs</TabsTrigger>
-          <TabsTrigger value="settings"><Settings className="h-4 w-4 mr-2" />Opções do Sistema</TabsTrigger>
-          <TabsTrigger value="units"><Building2 className="h-4 w-4 mr-2" />Unidades</TabsTrigger>
-          <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
-          <TabsTrigger value="commercial-settings"><FileSpreadsheet className="h-4 w-4 mr-2" />Configs Comerciais</TabsTrigger>
-          <TabsTrigger value="updates"><History className="h-4 w-4 mr-2" />Atualizações</TabsTrigger>
-          <TabsTrigger value="backup"><Database className="h-4 w-4 mr-2" />Backup Geral</TabsTrigger>
+      <Tabs defaultValue="users" className="space-y-6">
+        <TabsList className="bg-slate-100 border border-slate-200 p-1 h-auto flex flex-wrap gap-1">
+          <TabsTrigger value="users" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Users className="h-3.5 w-3.5" />Usuários</TabsTrigger>
+          <TabsTrigger value="diagnostics" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Activity className="h-3.5 w-3.5" />Diagnóstico</TabsTrigger>
+          <TabsTrigger value="logs" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><ScrollText className="h-3.5 w-3.5" />Logs</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Settings className="h-3.5 w-3.5" />Opções</TabsTrigger>
+          <TabsTrigger value="units" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Building2 className="h-3.5 w-3.5" />Unidades</TabsTrigger>
+          <TabsTrigger value="areas" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Briefcase className="h-3.5 w-3.5" />Áreas</TabsTrigger>
+          <TabsTrigger value="commercial-settings" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><FileSpreadsheet className="h-3.5 w-3.5" />Comercial</TabsTrigger>
+          <TabsTrigger value="updates" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><History className="h-3.5 w-3.5" />Versões</TabsTrigger>
+          <TabsTrigger value="backup" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Database className="h-3.5 w-3.5" />Backup</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
