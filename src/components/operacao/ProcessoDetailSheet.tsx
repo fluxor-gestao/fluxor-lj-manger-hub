@@ -291,7 +291,7 @@ export function ProcessoDetailSheet({
           </TabsContent>
 
           <TabsContent value="tasks" className="mt-4">
-            <ProcessoTarefas />
+            <ProcessoTarefas service={service} />
           </TabsContent>
 
           <TabsContent value="comments" className="mt-4">
