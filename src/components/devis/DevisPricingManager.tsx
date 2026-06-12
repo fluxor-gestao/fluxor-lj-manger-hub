@@ -244,18 +244,41 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
           </TableBody>
         </Table>
 
-        <div className="p-4 bg-muted/5 flex flex-col sm:flex-row items-center justify-between gap-4 border-t">
-          <div className="flex flex-col">
+        <div className="p-4 bg-muted/5 grid grid-cols-1 md:grid-cols-2 gap-6 border-t">
+          <div className="flex flex-col justify-center">
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Total Precificado</span>
             <span className="text-xl font-bold font-mono text-primary">
               {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalCalculated)}
             </span>
           </div>
           
-          <div className="flex gap-2">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <PieChart className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Rateio por Unidade</span>
+            </div>
+            <div className="space-y-2">
+              {apportionment.map(([unit, val]) => (
+                <div key={unit} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[9px] h-4 px-1.5 uppercase font-mono">{unit}</Badge>
+                    <span className="text-muted-foreground">({Math.round((val / (totalCalculated || 1)) * 100)}%)</span>
+                  </div>
+                  <span className="font-semibold font-mono">{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val)}</span>
+                </div>
+              ))}
+              {apportionment.length === 0 && (
+                <div className="text-[10px] text-muted-foreground italic">Nenhum serviço vinculado.</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-muted/30 flex flex-col sm:flex-row items-center justify-between gap-4 border-t">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 gap-2">
+                <Button variant="outline" size="sm" className="h-9 gap-2 w-full sm:w-auto">
                   <Plus className="h-4 w-4" /> Adicionar Serviço
                 </Button>
               </DialogTrigger>
@@ -273,7 +296,10 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
                       <SelectContent>
                         {servicePrices.map(s => (
                           <SelectItem key={s.id} value={s.id}>
-                            {s.name} ({new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(s.price)})
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <span>{s.name}</span>
+                              <Badge variant="outline" className="text-[9px] uppercase font-mono">{s.business_unit || "—"}</Badge>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -288,9 +314,11 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+          </div>
 
+          <div className="flex gap-2 w-full sm:w-auto justify-end">
             {pricingStatus !== "aprovada" && pricingItems.length > 0 && (
-              <Button size="sm" className="h-9 gap-2 bg-emerald-600 hover:bg-emerald-700" onClick={() => updateStatus.mutate("aprovada")}>
+              <Button size="sm" className="h-9 gap-2 bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto" onClick={() => updateStatus.mutate("aprovada")}>
                 <CheckCircle2 className="h-4 w-4" /> Aprovar e Aplicar
               </Button>
             )}
