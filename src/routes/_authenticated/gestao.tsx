@@ -88,7 +88,7 @@ function Gestao() {
     queryFn: async () => {
       let qb = supabase
         .from("devis")
-        .select("status, total_amount, created_at, accepted_at, service_type, devis_number, id");
+        .select("status, total_amount, business_unit, created_at, accepted_at, service_type, devis_number, id");
 
       if (companyCode) qb = qb.eq("business_unit", companyCode);
       
@@ -97,6 +97,18 @@ function Gestao() {
       return data ?? [];
     }
   });
+
+  const { data: opsData } = useQuery({
+    queryKey: ["ceo-central-ops", companyCode],
+    queryFn: async () => {
+      let qb = supabase.from("services").select("status, business_unit, actual_end_date");
+      if (companyCode) qb = qb.eq("business_unit", companyCode);
+      const { data, error } = await qb;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
 
   // --- ANALYTICS ---
 
@@ -142,13 +154,41 @@ function Gestao() {
     
     const ACCEPTED = ["aceita", "aprovado", "convertido", "cobranca_pendente", "entrada_recebida", "enviado_para_operacao"];
     const total = commercialData.length;
-    const aceitas = commercialData.filter(d => ACCEPTED.includes(d.status || "")).length;
-    const valorAceito = commercialData.filter(d => ACCEPTED.includes(d.status || "")).reduce((a, b) => a + Number(b.total_amount || 0), 0);
+    const aceitasArr = commercialData.filter(d => ACCEPTED.includes(d.status || ""));
+    const aceitas = aceitasArr.length;
+    const valorAceito = aceitasArr.reduce((a, b) => a + Number(b.total_amount || 0), 0);
     const taxaConv = total > 0 ? aceitas / total : 0;
     const ticketMedio = aceitas > 0 ? valorAceito / aceitas : 0;
 
-    return { total, aceitas, valorAceito, taxaConv, ticketMedio };
+    const porUnidade = new Map<string, number>();
+    for (const d of aceitasArr) {
+      const bu = d.business_unit || "—";
+      porUnidade.set(bu, (porUnidade.get(bu) || 0) + Number(d.total_amount || 0));
+    }
+    const receitaPorUnidade = Array.from(porUnidade.entries())
+      .map(([bu, value]) => ({ bu, value }))
+      .sort((a, b) => b.value - a.value);
+
+    return { total, aceitas, valorAceito, taxaConv, ticketMedio, receitaPorUnidade };
   }, [commercialData]);
+
+  const ops = useMemo(() => {
+    if (!opsData) return { andamento: 0, concluidas: 0, total: 0 };
+    const ACTIVE = ["pendente", "em_andamento", "aguardando_cliente"];
+    let andamento = 0, concluidas = 0;
+    for (const s of opsData) {
+      if (s.status === "concluido") concluidas++;
+      else if (ACTIVE.includes(s.status || "")) andamento++;
+    }
+    return { andamento, concluidas, total: opsData.length };
+  }, [opsData]);
+
+  const receitaPrevista = useMemo(() => {
+    if (!financialData) return 0;
+    return financialData
+      .filter((r) => r.entry_type === "receita")
+      .reduce((a, r) => a + Number(r.open_amount || 0), 0);
+  }, [financialData]);
 
   const dreChartData = useMemo(() => {
     if (!agg) return [];
@@ -156,6 +196,7 @@ function Gestao() {
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
   }, [agg]);
+
 
   if (loadingFin || loadingCom) {
     return (
@@ -266,6 +307,14 @@ function Gestao() {
           icon={Target}
           color="violet"
         />
+        <StatCard 
+          title="Receita Prevista" 
+          value={BRL(receitaPrevista)} 
+          subValue="Em aberto a receber"
+          icon={Calendar}
+          color="sky"
+        />
+
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -395,54 +444,91 @@ function Gestao() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="shadow-sm border-slate-200/60 group hover:border-primary/20 transition-all cursor-pointer">
+          <Card className="shadow-sm border-slate-200/60 group hover:border-primary/20 transition-all cursor-pointer" onClick={() => navigate({ to: "/comercial/devis" })}>
             <CardContent className="p-5 flex items-center gap-4">
               <div className="p-3 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors">
                 <ShoppingCart className="h-6 w-6 text-blue-600" />
               </div>
               <div>
                 <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Comercial</p>
-                <p className="text-sm font-black text-slate-900">{comm?.aceitas} Fechamentos</p>
+                <p className="text-sm font-black text-slate-900">{comm?.aceitas ?? 0} Fechamentos</p>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="shadow-sm border-slate-200/60 group hover:border-primary/20 transition-all cursor-pointer">
+          <Card className="shadow-sm border-slate-200/60 group hover:border-primary/20 transition-all cursor-pointer" onClick={() => navigate({ to: "/operacao" })}>
             <CardContent className="p-5 flex items-center gap-4">
               <div className="p-3 bg-emerald-50 rounded-xl group-hover:bg-emerald-100 transition-colors">
                 <Briefcase className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
                 <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Operação</p>
-                <p className="text-sm font-black text-slate-900">14 Em andamento</p>
+                <p className="text-sm font-black text-slate-900">{ops.andamento} em andamento</p>
+                <p className="text-[10px] text-slate-500">{ops.concluidas} concluídas</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-slate-200/60 group hover:border-primary/20 transition-all cursor-pointer">
+          <Card className="shadow-sm border-slate-200/60 group hover:border-primary/20 transition-all cursor-pointer" onClick={() => navigate({ to: "/financeiro/contas-a-receber" })}>
             <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3 bg-violet-50 rounded-xl group-hover:bg-violet-100 transition-colors">
-                <Building2 className="h-6 w-6 text-violet-600" />
+              <div className="p-3 bg-amber-50 rounded-xl group-hover:bg-amber-100 transition-colors">
+                <Wallet className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Unidades</p>
-                <p className="text-sm font-black text-slate-900">5 Negócios Ativos</p>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Cobranças vencidas</p>
+                <p className="text-sm font-black text-slate-900">{BRL(agg?.vencido ?? 0)}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-slate-200/60 group hover:border-primary/20 transition-all cursor-pointer">
+          <Card className="shadow-sm border-slate-200/60 group hover:border-primary/20 transition-all cursor-pointer" onClick={() => navigate({ to: "/conciliacao" })}>
             <CardContent className="p-5 flex items-center gap-4">
               <div className="p-3 bg-slate-900 rounded-xl group-hover:bg-black transition-colors">
                 <Target className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Metas 2026</p>
-                <p className="text-sm font-black text-slate-900">68% Concluído</p>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Conciliação</p>
+                <p className="text-sm font-black text-slate-900">Acessar</p>
               </div>
             </CardContent>
           </Card>
       </div>
+
+      {/* RECEITA POR UNIDADE */}
+      <Card className="shadow-sm border-slate-200/60">
+        <CardHeader className="border-b border-slate-50 bg-slate-50/30 p-4">
+          <CardTitle className="text-base font-black flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-violet-600" /> Receita por Unidade de Negócio
+          </CardTitle>
+          <CardDescription className="text-[10px] uppercase font-bold tracking-wider mt-1">
+            Devis aceitos por unidade
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          {comm?.receitaPorUnidade && comm.receitaPorUnidade.length > 0 ? (
+            <div className="space-y-3">
+              {comm.receitaPorUnidade.map((u) => {
+                const max = comm.receitaPorUnidade[0].value || 1;
+                const pct = (u.value / max) * 100;
+                return (
+                  <div key={u.bu} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-slate-700">{u.bu}</span>
+                      <span className="text-slate-900">{BRL(u.value)}</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-violet-500 to-blue-500 rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400 italic">Sem dados de receita por unidade.</p>
+          )}
+        </CardContent>
+      </Card>
+
     </TabsContent>
     <TabsContent value="dre" className="mt-0 border-none p-0">
       <DREGerencial />
