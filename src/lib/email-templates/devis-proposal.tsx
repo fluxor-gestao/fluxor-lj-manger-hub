@@ -163,37 +163,18 @@ const ctaHelp: React.CSSProperties = {
   color: "#4b5563",
   textAlign: "center" as const,
 };
-const acceptBtn: React.CSSProperties = {
-  backgroundColor: "#16a34a",
-  color: "#ffffff",
-  padding: "13px 28px",
-  borderRadius: "6px",
-  textDecoration: "none",
-  fontWeight: 600,
-  fontFamily: "Arial, sans-serif",
-  fontSize: "14px",
-};
-const rejectBtn: React.CSSProperties = {
-  backgroundColor: "#ffffff",
-  color: "#dc2626",
-  padding: "12px 28px",
-  border: "1px solid #dc2626",
-  borderRadius: "6px",
-  textDecoration: "none",
-  fontWeight: 600,
-  fontFamily: "Arial, sans-serif",
-  fontSize: "14px",
-};
-const pdfBtn: React.CSSProperties = {
+const viewBtn: React.CSSProperties = {
   backgroundColor: "#0f172a",
   color: "#ffffff",
-  padding: "11px 22px",
+  padding: "14px 32px",
   borderRadius: "6px",
   textDecoration: "none",
   fontWeight: 600,
   fontFamily: "Arial, sans-serif",
-  fontSize: "13px",
+  fontSize: "14px",
+  display: "inline-block",
 };
+
 const divider: React.CSSProperties = {
   border: "none",
   borderTop: "1px solid #e5e7eb",
