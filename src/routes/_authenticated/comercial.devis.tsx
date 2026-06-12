@@ -489,13 +489,100 @@ function Comercial() {
   };
 
   // Pending payload entre o upload de ata e o diálogo de código
-  const [pendingAta, setPendingAta] = useState<ConfirmedAtaResult | null>(null);
   const [codePreviewOpen, setCodePreviewOpen] = useState(false);
+  const [pendingAta, setPendingAta] = useState<ConfirmedAtaResult | null>(null);
 
-  const handleAtaConfirm = (result: ConfirmedAtaResult) => {
+  const handleAtaConfirm = async (result: ConfirmedAtaResult) => {
     queryClient.invalidateQueries({ queryKey: ["clients"] });
-    setPendingAta(result);
-    setCodePreviewOpen(true);
+    
+    // Agora o fluxo é direto: criar rascunho e redirecionar
+    const { client_id, payload } = result;
+    const client = clientsById[client_id];
+    
+    // 1. Inferir prefixo e tipo de serviço
+    const prefix = inferServicePrefix(
+      payload.devis.service_type, 
+      payload.devis.responsible_sector, 
+      payload.devis.title,
+      payload.devis.scope_description
+    );
+    
+    // 2. Buscar próximo número de Devis
+    const { data: devisNumber, error: numberErr } = await supabase.rpc("next_devis_number", { _prefix: prefix });
+    if (numberErr) {
+      toast.error("Erro ao gerar número do Devis");
+      return;
+    }
+
+    const total = payload.devis.total_amount || 0;
+    const meetingDate = payload.meeting.date ? payload.meeting.date : format(new Date(), "yyyy-MM-dd");
+    
+    // 3. Criar o Devis no banco
+    const insertPayload: any = {
+      client_id,
+      meeting_date: meetingDate,
+      deadline_date: meetingDate,
+      commercial_responsible: user?.id || null,
+      meeting_summary: payload.meeting.summary || null,
+      meeting_report: payload.meeting.report || null,
+      status: "reuniao_realizada",
+      total_amount: total,
+      down_payment_amount: total * 0.5,
+      title: payload.devis.title || (client ? `Devis ${client.name}` : "Novo Devis"),
+      devis_number: devisNumber,
+      service_type: payload.devis.service_type || prefix,
+      source_language: payload.detected_language || "pt",
+      business_unit: prefix as CompanyCode,
+      responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
+        ? (payload.devis.responsible_sector as string)
+        : null,
+      scope_description: payload.devis.scope_description || null,
+      proposal_structure: payload.devis.proposal_structure || null,
+    };
+
+    const { data: newDevis, error: devisErr } = await supabase
+      .from("devis")
+      .insert(insertPayload)
+      .select("id")
+      .single();
+
+    if (devisErr) {
+      toast.error("Erro ao criar Devis: " + devisErr.message);
+      return;
+    }
+
+    // 4. Inserir Áreas
+    const areas = payload.devis.responsible_sectors || (payload.devis.responsible_sector ? [payload.devis.responsible_sector] : []);
+    if (areas.length > 0) {
+      const areaPayload = areas.map(slug => ({
+        devis_id: newDevis.id,
+        area_slug: slug
+      }));
+      await supabase.from("devis_service_areas").insert(areaPayload);
+    }
+
+    // 5. Inserir Itens de Precificação Sugeridos
+    if (payload.devis.suggested_pricing_items && payload.devis.suggested_pricing_items.length > 0) {
+      // Buscar todos os service_prices para vincular corretamente
+      const { data: servicePrices } = await supabase.from("service_prices").select("id, name");
+      
+      const pricingPayload = payload.devis.suggested_pricing_items.map(item => {
+        const matchingPrice = servicePrices?.find(s => s.name.toLowerCase() === item.service_name.toLowerCase());
+        return {
+          devis_id: newDevis.id,
+          service_price_id: matchingPrice?.id || null,
+          name: item.service_name,
+          unit_price: item.unit_price,
+          total_price: item.unit_price * item.quantity,
+          quantity: item.quantity,
+        };
+      });
+
+      await supabase.from("devis_pricing_items").insert(pricingPayload);
+    }
+
+    toast.success("Devis criado com sucesso!");
+    navigate({ to: `/comercial/devis/${newDevis.id}` });
   };
 
   const handleCodeConfirmed = ({ prefix, devis_number, service_type }: { prefix: ServicePrefix; devis_number: string; service_type: string }) => {
