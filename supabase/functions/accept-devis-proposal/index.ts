@@ -14,10 +14,11 @@ const json = (body: unknown, status = 200) =>
   });
 
 const PREVIEW_FIELDS =
-  "title, total_amount, down_payment_amount, deadline_date, scope_description, proposal_structure, accepted_at, rejected_at, client_id, source_language, secondary_language, title_secondary, scope_description_secondary, proposal_structure_secondary, business_unit";
+  "id, devis_number, title, total_amount, down_payment_amount, deadline_date, scope_description, proposal_structure, accepted_at, rejected_at, client_id, source_language, secondary_language, title_secondary, scope_description_secondary, proposal_structure_secondary, business_unit, responsible_sector, initial_charge_generated";
 
 function previewPayload(devis: any, clientName: string | null) {
   return {
+    id: devis.id,
     title: devis.title,
     client_name: clientName,
     total_amount: Number(devis.total_amount) || 0,
@@ -116,9 +117,11 @@ Deno.serve(async (req) => {
       }
 
       // Default: accept
-      if (devis.accepted_at || devis.rejected_at) {
+      if (devis.accepted_at) {
         return json(previewPayload(devis, clientName));
       }
+
+      // 1. Atualizar o Devis para Aceito
       const { data: updated, error: upErr } = await admin
         .from("devis")
         .update({
@@ -129,10 +132,94 @@ Deno.serve(async (req) => {
         .eq("accept_token", token)
         .select(PREVIEW_FIELDS)
         .maybeSingle();
+
       if (upErr) {
         console.error("accept update error", upErr);
         return json({ error: "Erro ao registrar aceite" }, 500);
       }
+
+      console.log(`Devis ${updated.devis_number} aceito. Iniciando automações...`);
+
+      // 2. Gerar lançamento financeiro previsto (Cobrança Inicial)
+      if (!updated.initial_charge_generated) {
+        try {
+          // Verificar duplicidade antes de inserir
+          const { data: existingEntry } = await admin
+            .from("financial_entries")
+            .select("id")
+            .eq("devis_id", updated.id)
+            .eq("source_type", "devis")
+            .maybeSingle();
+
+          if (existingEntry) {
+            console.log(`Lançamento financeiro já existe para o Devis ${updated.devis_number}.`);
+          } else {
+            const entryDate = new Date().toISOString().slice(0, 10);
+            const { error: entryErr } = await admin.from("financial_entries").insert({
+              entry_date: entryDate,
+              competence_date: entryDate,
+              competence_month: entryDate.slice(0, 7),
+              business_unit: updated.business_unit,
+              movement_description: `Entrada (50%) - Devis ${updated.devis_number}`,
+              amount_in: Number(updated.down_payment_amount) || 0,
+              entry_type: "receita",
+              source_type: "devis",
+              conciliation_status: "pendente",
+              client_id: updated.client_id,
+              devis_id: updated.id,
+              devis_number: updated.devis_number,
+              payment_status: "aberto",
+              open_amount: Number(updated.down_payment_amount) || 0,
+              due_date: entryDate, // Vencimento imediato para entrada
+            });
+
+            if (entryErr) {
+              console.error("Erro ao criar lançamento financeiro:", entryErr);
+            } else {
+              console.log(`Lançamento financeiro criado para o Devis ${updated.devis_number}.`);
+              // Marcar como gerado no Devis
+              await admin.from("devis").update({ initial_charge_generated: true }).eq("id", updated.id);
+            }
+          }
+        } catch (e) {
+          console.error("Exceção ao processar financeiro:", e);
+        }
+      }
+
+      // 3. Criar operação/processo operacional
+      try {
+        // Verificar duplicidade antes de inserir
+        const { data: existingService } = await admin
+          .from("services")
+          .select("id")
+          .eq("devis_id", updated.id)
+          .maybeSingle();
+
+        if (existingService) {
+          console.log(`Operação já existe para o Devis ${updated.devis_number}.`);
+        } else {
+          const { error: serviceErr } = await admin.from("services").insert({
+            title: updated.title,
+            description: updated.scope_description,
+            business_unit: updated.business_unit,
+            responsible_sector: updated.responsible_sector,
+            client_id: updated.client_id,
+            devis_id: updated.id,
+            status: "a_iniciar",
+            start_date: new Date().toISOString().slice(0, 10),
+            expected_end_date: updated.deadline_date,
+          });
+
+          if (serviceErr) {
+            console.error("Erro ao criar operação:", serviceErr);
+          } else {
+            console.log(`Operação criada para o Devis ${updated.devis_number}.`);
+          }
+        }
+      } catch (e) {
+        console.error("Exceção ao processar operação:", e);
+      }
+
       return json(previewPayload(updated, clientName));
     }
 

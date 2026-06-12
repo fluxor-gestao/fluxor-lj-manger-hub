@@ -508,16 +508,12 @@ function DevisDetail() {
       {devis.accepted_at && !linkedService && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <Loader2 className="h-5 w-5 text-amber-600 animate-spin" />
             <div className="text-sm">
-              <span className="font-semibold text-amber-700 dark:text-amber-400">Conversão para operação pendente</span>
-              <p className="text-muted-foreground">Esta proposta foi aceita. Clique no botão ao lado para iniciar a execução operacional.</p>
+              <span className="font-semibold text-amber-700 dark:text-amber-400">Processando automações de aceite...</span>
+              <p className="text-muted-foreground">Aguarde enquanto o sistema gera a cobrança inicial e cria o processo operacional.</p>
             </div>
           </div>
-          <Button onClick={() => createService.mutate()} disabled={createService.isPending}>
-            {createService.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-            Criar processo operacional
-          </Button>
         </div>
       )}
 
