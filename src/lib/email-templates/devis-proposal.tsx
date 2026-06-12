@@ -75,32 +75,12 @@ const DevisProposalEmail = ({
           {acceptUrl ? (
             <Section style={ctaSection}>
               <Text style={ctaHelp}>{t.cta_help}</Text>
-              <table role="presentation" align="center" cellPadding={0} cellSpacing={0}>
-                <tbody>
-                  <tr>
-                    <td style={{ padding: "0 6px" }}>
-                      <Button href={acceptUrl} style={acceptBtn}>
-                        {t.accept}
-                      </Button>
-                    </td>
-                    <td style={{ padding: "0 6px" }}>
-                      <Button href={acceptUrl} style={rejectBtn}>
-                        {t.reject}
-                      </Button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </Section>
-          ) : null}
-
-          {pdfUrl ? (
-            <Section style={{ textAlign: "center", padding: "0 36px 24px" }}>
-              <Button href={pdfUrl} style={pdfBtn}>
-                📎 {t.pdf}
+              <Button href={acceptUrl} style={viewBtn}>
+                {t.view}
               </Button>
             </Section>
           ) : null}
+
 
           <Section style={{ padding: "0 36px 24px" }}>
             <Hr style={divider} />
