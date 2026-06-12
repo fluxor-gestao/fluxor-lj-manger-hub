@@ -14,7 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar, Database, Download, ShieldAlert, Loader2 } from "lucide-react";
+import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar, Database, Download, ShieldAlert, Loader2, Activity } from "lucide-react";
+import { SystemDiagnostics } from "@/components/admin/SystemDiagnostics";
 import { DevisSequenceManager } from "@/components/devis/DevisSequenceManager";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1627,6 +1628,21 @@ function Admin() {
 
         <TabsContent value="backup" className="max-w-4xl mx-auto py-4">
           <BackupManager />
+        </TabsContent>
+
+        <TabsContent value="diagnostics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                Integridade do Sistema
+              </CardTitle>
+              <CardDescription>Detecção proativa de registros órfãos, inconsistências de fluxo e dados duplicados.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SystemDiagnostics />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="updates" className="space-y-6">
