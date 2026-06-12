@@ -316,7 +316,10 @@ function Gestao() {
             <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4">
                <div className="space-y-1">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Op. Líquida</p>
-                 <p className="text-sm font-black text-slate-900">{BRL(agg?.resMes ?? 0)}</p>
+                  <p className="text-sm font-black text-slate-900">{BRL(agg?.resMes ?? 0)}</p>
+                  {financialData?.filter(r => r.devis_number).slice(0, 1).map(r => (
+                    <p key="ref" className="text-[9px] text-slate-400 font-mono mt-1">Ref: {r.devis_number}</p>
+                  ))}
                </div>
                <div className="space-y-1">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">EBITDA Est.</p>

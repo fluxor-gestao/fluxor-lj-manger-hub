@@ -1400,7 +1400,9 @@ export default function BIFinanceiro() {
                       "hover:bg-slate-50"
                     )}>
                       <TableCell className="text-slate-600 text-xs">{r.data}</TableCell>
-                      <TableCell className="max-w-[300px] truncate text-slate-900 font-medium">{r.descricao}</TableCell>
+                      <TableCell className="max-w-[300px] truncate text-slate-900 font-medium">
+                        {formatMovementDescription(r.descricao, null, null)}
+                      </TableCell>
                       <TableCell className="text-right font-bold text-slate-900">{BRL(r.valor)}</TableCell>
                       <TableCell className="text-slate-600 text-xs">{r.conta}</TableCell>
                       <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600 bg-white">{r.status}</Badge></TableCell>
