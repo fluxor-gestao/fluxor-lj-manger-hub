@@ -14,7 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar, Database, Download, ShieldAlert, Loader2 } from "lucide-react";
+import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar, Database, Download, ShieldAlert, Loader2, Activity } from "lucide-react";
+import { SystemDiagnostics } from "@/components/admin/SystemDiagnostics";
 import { DevisSequenceManager } from "@/components/devis/DevisSequenceManager";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -930,16 +931,17 @@ function Admin() {
         </Button>
       </div>
 
-      <Tabs defaultValue="users">
-        <TabsList>
-          <TabsTrigger value="users"><Users className="h-4 w-4 mr-2" />Usuários</TabsTrigger>
-          <TabsTrigger value="logs"><ScrollText className="h-4 w-4 mr-2" />Logs</TabsTrigger>
-          <TabsTrigger value="settings"><Settings className="h-4 w-4 mr-2" />Opções do Sistema</TabsTrigger>
-          <TabsTrigger value="units"><Building2 className="h-4 w-4 mr-2" />Unidades</TabsTrigger>
-          <TabsTrigger value="areas"><Briefcase className="h-4 w-4 mr-2" />Áreas de Negócio</TabsTrigger>
-          <TabsTrigger value="commercial-settings"><FileSpreadsheet className="h-4 w-4 mr-2" />Configs Comerciais</TabsTrigger>
-          <TabsTrigger value="updates"><History className="h-4 w-4 mr-2" />Atualizações</TabsTrigger>
-          <TabsTrigger value="backup"><Database className="h-4 w-4 mr-2" />Backup Geral</TabsTrigger>
+      <Tabs defaultValue="users" className="space-y-6" value={new URLSearchParams(window.location.search).get('tab') || 'users'} onValueChange={(v) => (window.location.href = `/admin?tab=${v}`)}>
+        <TabsList className="bg-slate-100 border border-slate-200 p-1 h-auto flex flex-wrap gap-1">
+          <TabsTrigger value="users" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Users className="h-3.5 w-3.5" />Usuários</TabsTrigger>
+          <TabsTrigger value="diagnostics" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Activity className="h-3.5 w-3.5" />Diagnóstico</TabsTrigger>
+          <TabsTrigger value="logs" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><ScrollText className="h-3.5 w-3.5" />Logs</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Settings className="h-3.5 w-3.5" />Opções</TabsTrigger>
+          <TabsTrigger value="units" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Building2 className="h-3.5 w-3.5" />Unidades</TabsTrigger>
+          <TabsTrigger value="areas" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Briefcase className="h-3.5 w-3.5" />Áreas</TabsTrigger>
+          <TabsTrigger value="commercial-settings" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><FileSpreadsheet className="h-3.5 w-3.5" />Comercial</TabsTrigger>
+          <TabsTrigger value="updates" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><History className="h-3.5 w-3.5" />Versões</TabsTrigger>
+          <TabsTrigger value="backup" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Database className="h-3.5 w-3.5" />Backup</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -1627,6 +1629,10 @@ function Admin() {
 
         <TabsContent value="backup" className="max-w-4xl mx-auto py-4">
           <BackupManager />
+        </TabsContent>
+
+        <TabsContent value="diagnostics" className="space-y-4">
+          <SystemDiagnostics />
         </TabsContent>
 
         <TabsContent value="updates" className="space-y-6">

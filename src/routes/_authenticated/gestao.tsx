@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompany } from "@/contexts/CompanyContext";
@@ -61,6 +61,7 @@ function StatCard({ title, value, subValue, icon: Icon, trend, trendValue, color
 }
 
 function Gestao() {
+  const navigate = useNavigate();
   const { filterCode: companyCode, activeLabel } = useCompany();
   const [timeframe, setTimeframe] = useState<"month" | "year">("month");
 
@@ -385,7 +386,7 @@ function Gestao() {
               </div>
             </div>
             <div className="p-4 bg-slate-50/50 border-t border-slate-100">
-               <Button variant="link" className="p-0 h-auto text-[10px] uppercase font-black tracking-widest text-primary hover:no-underline">
+               <Button variant="link" className="p-0 h-auto text-[10px] uppercase font-black tracking-widest text-primary hover:no-underline" onClick={() => navigate({ to: "/admin", search: { tab: "diagnostics" } })}>
                  Ver todos os diagnósticos <ChevronRight className="h-3 w-3 ml-1" />
                </Button>
             </div>
