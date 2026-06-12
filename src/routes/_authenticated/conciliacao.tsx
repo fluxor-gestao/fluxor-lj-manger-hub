@@ -43,6 +43,8 @@ function Conciliacao() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [filterDre, setFilterDre] = useState("todos");
+  const [uploadProgress, setUploadProgress] = useState<{ step: string; progress: number } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Fetch bank statement entries
   const { data: statements = [] } = useQuery({
