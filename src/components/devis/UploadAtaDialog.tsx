@@ -513,6 +513,35 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
                   <p className="font-medium font-mono text-primary">{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(payload.devis.total_amount || 0)}</p>
                 </div>
               </div>
+            <Card className="p-4 space-y-3">
+              <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4" /> Itens e Compatibilidade</h3>
+              <div className="space-y-3">
+                {payload.devis.scope_items.map((item, idx) => (
+                  <div key={idx} className="p-2 border rounded text-xs space-y-1 bg-muted/20">
+                    <div className="flex justify-between items-start">
+                      <span className="font-semibold">{item.letter}) {item.title}</span>
+                      <span className="font-mono text-primary font-bold">
+                        {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.amount)}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground line-clamp-2 italic">{item.description}</p>
+                    
+                    {item.title.includes("[NÃO CADASTRADO]") ? (
+                      <Badge variant="destructive" className="text-[9px] py-0 h-4">Item não existe no catálogo</Badge>
+                    ) : item.confidence !== undefined && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="h-1 flex-1 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className={cn("h-full transition-all", item.confidence > 0.8 ? "bg-green-500" : item.confidence > 0.5 ? "bg-yellow-500" : "bg-red-500")} 
+                            style={{ width: `${item.confidence * 100}%` }} 
+                          />
+                        </div>
+                        <span className="text-[9px] font-medium text-muted-foreground">Match: {Math.round(item.confidence * 100)}%</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </Card>
 
             <DialogFooter className="gap-2">
