@@ -63,6 +63,17 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [step, setStep] = useState<number>(0); // 0 idle, 1..5 etapas
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const STEPS = [
+    "Validando proposta",
+    "Gerando link",
+    "Preparando e-mail",
+    "Enviando",
+    "Concluído",
+  ];
+
 
   useEffect(() => {
     if (!open) return;
