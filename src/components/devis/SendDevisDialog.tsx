@@ -207,7 +207,10 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
           <div>
             <Label>Link de aceite (incluído como botão no e-mail)</Label>
             <Input value={acceptUrl} readOnly className="font-mono text-xs" />
+          </div>
         </div>
+
+
 
         {(step > 0 || errorMsg) && (
           <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-2">
