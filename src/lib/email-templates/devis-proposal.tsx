@@ -17,38 +17,30 @@ type Lang = "pt" | "fr" | "en" | "es";
 
 const I18N: Record<
   Lang,
-  { tagline: string; cta_help: string; accept: string; reject: string; pdf: string }
+  { tagline: string; cta_help: string; view: string }
 > = {
   pt: {
     tagline: "ADVOCACIA & CONSULTORIA INTERNACIONAL",
-    cta_help: "Você pode aceitar ou recusar a proposta clicando nos botões abaixo.",
-    accept: "Aceitar Proposta",
-    reject: "Recusar",
-    pdf: "Baixar Proposta (PDF)",
+    cta_help: "Clique no botão abaixo para visualizar a proposta e decidir aceitar ou recusar.",
+    view: "Visualizar proposta",
   },
   fr: {
     tagline: "AVOCATS & CONSEIL INTERNATIONAL",
-    cta_help:
-      "Vous pouvez accepter ou refuser la proposition en cliquant sur les boutons ci-dessous.",
-    accept: "Accepter la Proposition",
-    reject: "Refuser",
-    pdf: "Télécharger la proposition (PDF)",
+    cta_help: "Cliquez sur le bouton ci-dessous pour consulter la proposition et décider.",
+    view: "Voir la proposition",
   },
   en: {
     tagline: "INTERNATIONAL LAW & CONSULTING",
-    cta_help: "You can accept or reject the proposal by clicking the buttons below.",
-    accept: "Accept Proposal",
-    reject: "Reject",
-    pdf: "Download Proposal (PDF)",
+    cta_help: "Click the button below to view the proposal and decide.",
+    view: "View proposal",
   },
   es: {
     tagline: "ABOGADOS & CONSULTORÍA INTERNACIONAL",
-    cta_help: "Puede aceptar o rechazar la propuesta haciendo clic en los botones a continuación.",
-    accept: "Aceptar la Propuesta",
-    reject: "Rechazar",
-    pdf: "Descargar Propuesta (PDF)",
+    cta_help: "Haga clic en el botón a continuación para ver la propuesta y decidir.",
+    view: "Ver propuesta",
   },
 };
+
 
 interface DevisProposalProps {
   messageText?: string;
