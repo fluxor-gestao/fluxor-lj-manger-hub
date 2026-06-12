@@ -431,6 +431,33 @@ export default function MapaAprovacaoDashboard() {
               );
             })}
 
+            {viewMode === 'markers' && filteredDevis.map((d) => {
+              if (d.target_region_lat === null || d.target_region_lng === null) return null;
+              const color = STATUS_COLORS[d.status] || "#64748B";
+              return (
+                <Marker
+                  key={`tr-${d.id}`}
+                  position={[Number(d.target_region_lat), Number(d.target_region_lng)]}
+                  icon={L.divIcon({
+                    className: 'custom-icon',
+                    html: `<div style="width:14px;height:14px;transform:rotate(45deg);background:${color};border:2px solid white;box-shadow:0 0 8px ${color};"></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                  })}
+                >
+                  <Popup>
+                    <div className="p-1 min-w-[160px]">
+                      <p className="text-[9px] uppercase font-bold text-slate-500">Região de investimento</p>
+                      <p className="font-bold text-sm">{d.target_region_city || '—'}{d.target_region_state ? `, ${d.target_region_state}` : ''}</p>
+                      <p className="text-[10px] text-slate-500">{d.target_region_country || ''}</p>
+                      <p className="text-[10px] mt-1">Devis {formatDevisCode(d.devis_number, d.id)} · {BRL(d.total_amount || 0)}</p>
+                      {d.target_region_notes && <p className="text-[10px] text-slate-600 mt-1 italic">{d.target_region_notes}</p>}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+
             {viewMode === 'regions' && regionsStats.map((reg, idx) => {
               const first = filteredDevis.find(d => d.client.city === reg.name && d.client.latitude);
               if (!first || !first.client.latitude) return null;
