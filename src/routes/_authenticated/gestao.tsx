@@ -154,13 +154,41 @@ function Gestao() {
     
     const ACCEPTED = ["aceita", "aprovado", "convertido", "cobranca_pendente", "entrada_recebida", "enviado_para_operacao"];
     const total = commercialData.length;
-    const aceitas = commercialData.filter(d => ACCEPTED.includes(d.status || "")).length;
-    const valorAceito = commercialData.filter(d => ACCEPTED.includes(d.status || "")).reduce((a, b) => a + Number(b.total_amount || 0), 0);
+    const aceitasArr = commercialData.filter(d => ACCEPTED.includes(d.status || ""));
+    const aceitas = aceitasArr.length;
+    const valorAceito = aceitasArr.reduce((a, b) => a + Number(b.total_amount || 0), 0);
     const taxaConv = total > 0 ? aceitas / total : 0;
     const ticketMedio = aceitas > 0 ? valorAceito / aceitas : 0;
 
-    return { total, aceitas, valorAceito, taxaConv, ticketMedio };
+    const porUnidade = new Map<string, number>();
+    for (const d of aceitasArr) {
+      const bu = d.business_unit || "—";
+      porUnidade.set(bu, (porUnidade.get(bu) || 0) + Number(d.total_amount || 0));
+    }
+    const receitaPorUnidade = Array.from(porUnidade.entries())
+      .map(([bu, value]) => ({ bu, value }))
+      .sort((a, b) => b.value - a.value);
+
+    return { total, aceitas, valorAceito, taxaConv, ticketMedio, receitaPorUnidade };
   }, [commercialData]);
+
+  const ops = useMemo(() => {
+    if (!opsData) return { andamento: 0, concluidas: 0, total: 0 };
+    const ACTIVE = ["pendente", "em_andamento", "aguardando_cliente"];
+    let andamento = 0, concluidas = 0;
+    for (const s of opsData) {
+      if (s.status === "concluido") concluidas++;
+      else if (ACTIVE.includes(s.status || "")) andamento++;
+    }
+    return { andamento, concluidas, total: opsData.length };
+  }, [opsData]);
+
+  const receitaPrevista = useMemo(() => {
+    if (!financialData) return 0;
+    return financialData
+      .filter((r) => r.entry_type === "receita")
+      .reduce((a, r) => a + Number(r.open_amount || 0), 0);
+  }, [financialData]);
 
   const dreChartData = useMemo(() => {
     if (!agg) return [];
@@ -168,6 +196,7 @@ function Gestao() {
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
   }, [agg]);
+
 
   if (loadingFin || loadingCom) {
     return (
