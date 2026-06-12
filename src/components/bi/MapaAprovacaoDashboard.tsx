@@ -79,19 +79,36 @@ type DevisData = {
   business_unit: string | null;
   responsible_sector: string | null;
   created_at: string;
+  target_region_city: string | null;
+  target_region_state: string | null;
+  target_region_country: string | null;
+  target_region_lat: number | null;
+  target_region_lng: number | null;
+  target_region_notes: string | null;
   client: {
     id: string;
     name: string;
+    trade_name?: string | null;
+    type?: string | null;
     city: string | null;
+    state?: string | null;
     country: string | null;
     address: string | null;
     latitude: number | null;
     longitude: number | null;
     company: string | null;
     location_status: string | null;
+    document?: string | null;
   };
   areas: { area_slug: string }[];
 };
+
+const ACCEPTED_STATUSES = ["aceita", "aprovado", "convertido", "entrada_recebida", "enviado_para_operacao"];
+const REJECTED_STATUSES = ["rejeitada", "rejeitado"];
+const SENT_STATUSES = ["enviada_ao_cliente", "aguardando_aceite", "enviado"];
+const isAccepted = (s: string) => ACCEPTED_STATUSES.includes(s);
+const isRejected = (s: string) => REJECTED_STATUSES.includes(s);
+const isSent = (s: string) => SENT_STATUSES.includes(s);
 
 export default function MapaAprovacaoDashboard() {
   const navigate = useNavigate();
