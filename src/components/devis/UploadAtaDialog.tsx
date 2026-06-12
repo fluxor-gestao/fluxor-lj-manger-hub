@@ -35,7 +35,8 @@ export type AnalyzedDevis = {
   responsible_sectors: string[];
   scope_description: string;
   proposal_structure: string;
-  scope_items: { letter: string; title: string; description: string; amount: number; confidence?: number }[];
+  scope_items: { letter: string; title: string; description: string; amount: number; confidence?: number; is_catalog_item?: boolean }[];
+  suggested_pricing_items?: { service_name: string; quantity: number; unit_price: number }[];
   total_amount: number;
   deadline_date: string;
 };
