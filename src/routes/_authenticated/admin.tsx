@@ -931,7 +931,7 @@ function Admin() {
         </Button>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-6" value={new URLSearchParams(window.location.search).get('tab') || 'users'} onValueChange={(v) => navigate({ to: '/admin', search: { tab: v } })}>
+      <Tabs defaultValue="users" className="space-y-6" value={new URLSearchParams(window.location.search).get('tab') || 'users'} onValueChange={(v) => (window.location.href = `/admin?tab=${v}`)}>
         <TabsList className="bg-slate-100 border border-slate-200 p-1 h-auto flex flex-wrap gap-1">
           <TabsTrigger value="users" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Users className="h-3.5 w-3.5" />Usuários</TabsTrigger>
           <TabsTrigger value="diagnostics" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Activity className="h-3.5 w-3.5" />Diagnóstico</TabsTrigger>
