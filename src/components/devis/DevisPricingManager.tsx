@@ -188,11 +188,11 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
                         <Input 
                           type="number" 
                           className="w-12 h-7 text-[10px] px-1 py-0 text-right" 
-                          defaultValue={item.quantity}
+                          defaultValue={item.quantity || 1}
                           onBlur={async (e) => {
                             const val = Number(e.target.value);
                             if (val > 0 && val !== item.quantity) {
-                              const newTotal = val * Number(item.unit_price);
+                              const newTotal = val * Number(item.unit_price || 0);
                               await supabase.from("devis_pricing_items").update({ quantity: val, total_price: newTotal }).eq("id", item.id);
                               queryClient.invalidateQueries({ queryKey: ["devis-pricing-items", devisId] });
                             }
@@ -207,11 +207,11 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
                           type="number" 
                           step="0.01"
                           className="w-20 h-7 text-[10px] px-1 py-0 text-right" 
-                          defaultValue={Number(item.unit_price).toFixed(2)}
+                          defaultValue={Number(item.unit_price || 0).toFixed(2)}
                           onBlur={async (e) => {
                             const val = Number(e.target.value);
-                            if (val >= 0 && val !== Number(item.unit_price)) {
-                              const newTotal = val * item.quantity;
+                            if (val >= 0 && val !== Number(item.unit_price || 0)) {
+                              const newTotal = val * (item.quantity || 1);
                               await supabase.from("devis_pricing_items").update({ unit_price: val, total_price: newTotal }).eq("id", item.id);
                               queryClient.invalidateQueries({ queryKey: ["devis-pricing-items", devisId] });
                             }
