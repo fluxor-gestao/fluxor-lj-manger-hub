@@ -22,6 +22,18 @@ function AuthPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const { data: currentVersion } = useQuery({
+    queryKey: ["current-system-version"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("system_versions")
+        .select("version")
+        .eq("is_current", true)
+        .maybeSingle();
+      return data?.version || appVersion.version;
+    },
+  });
+
   useEffect(() => {
     if (user) navigate({ to: "/hub", replace: true });
   }, [user, navigate]);
