@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar, Database, Download, ShieldAlert, Loader2, Activity } from "lucide-react";
 import { SystemDiagnostics } from "@/components/admin/SystemDiagnostics";
+import { ChangelogManager } from "@/components/admin/ChangelogManager";
 import { DevisSequenceManager } from "@/components/devis/DevisSequenceManager";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1636,6 +1637,7 @@ function Admin() {
         </TabsContent>
 
         <TabsContent value="updates" className="space-y-6">
+          <ChangelogManager />
           {(() => {
             const { data: versions = [], isLoading } = useQuery({
               queryKey: ["system-versions"],
