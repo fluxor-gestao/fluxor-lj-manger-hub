@@ -26,6 +26,7 @@ import { Pagination } from "@/components/Pagination";
 import { rangeFor } from "@/lib/pagination";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
+import { formatDevisCode, formatMovementDescription } from "@/lib/formatDevis";
 
 const PAGE_SIZE = 50;
 
