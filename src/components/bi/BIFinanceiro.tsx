@@ -1,5 +1,6 @@
 import { useMemo, useState, cloneElement } from "react";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Area,
