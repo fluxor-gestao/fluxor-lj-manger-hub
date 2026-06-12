@@ -27,6 +27,7 @@ import { Route as AuthenticatedFinanceiroIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedComercialIndexRouteImport } from './routes/_authenticated/comercial.index'
 import { Route as PropostaAceiteTokenRouteImport } from './routes/proposta.aceite.$token'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiPublicGithubWebhookRouteImport } from './routes/api/public/github-webhook'
 import { Route as ApiPublicBiOperacaoRouteImport } from './routes/api/public/bi-operacao'
 import { Route as ApiPublicBiKpisOperacaoRouteImport } from './routes/api/public/bi-kpis-operacao'
 import { Route as ApiPublicBiKpisFinanceiroRouteImport } from './routes/api/public/bi-kpis-financeiro'
@@ -141,6 +142,11 @@ const PropostaAceiteTokenRoute = PropostaAceiteTokenRouteImport.update({
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicGithubWebhookRoute = ApiPublicGithubWebhookRouteImport.update({
+  id: '/api/public/github-webhook',
+  path: '/api/public/github-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicBiOperacaoRoute = ApiPublicBiOperacaoRouteImport.update({
@@ -310,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/api/public/bi-kpis-financeiro': typeof ApiPublicBiKpisFinanceiroRoute
   '/api/public/bi-kpis-operacao': typeof ApiPublicBiKpisOperacaoRoute
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
+  '/api/public/github-webhook': typeof ApiPublicGithubWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
   '/comercial/': typeof AuthenticatedComercialIndexRoute
@@ -350,6 +357,7 @@ export interface FileRoutesByTo {
   '/api/public/bi-kpis-financeiro': typeof ApiPublicBiKpisFinanceiroRoute
   '/api/public/bi-kpis-operacao': typeof ApiPublicBiKpisOperacaoRoute
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
+  '/api/public/github-webhook': typeof ApiPublicGithubWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
   '/comercial': typeof AuthenticatedComercialIndexRoute
@@ -394,6 +402,7 @@ export interface FileRoutesById {
   '/api/public/bi-kpis-financeiro': typeof ApiPublicBiKpisFinanceiroRoute
   '/api/public/bi-kpis-operacao': typeof ApiPublicBiKpisOperacaoRoute
   '/api/public/bi-operacao': typeof ApiPublicBiOperacaoRoute
+  '/api/public/github-webhook': typeof ApiPublicGithubWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/proposta/aceite/$token': typeof PropostaAceiteTokenRoute
   '/_authenticated/comercial/': typeof AuthenticatedComercialIndexRoute
@@ -438,6 +447,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-kpis-financeiro'
     | '/api/public/bi-kpis-operacao'
     | '/api/public/bi-operacao'
+    | '/api/public/github-webhook'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
     | '/comercial/'
@@ -478,6 +488,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-kpis-financeiro'
     | '/api/public/bi-kpis-operacao'
     | '/api/public/bi-operacao'
+    | '/api/public/github-webhook'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
     | '/comercial'
@@ -521,6 +532,7 @@ export interface FileRouteTypes {
     | '/api/public/bi-kpis-financeiro'
     | '/api/public/bi-kpis-operacao'
     | '/api/public/bi-operacao'
+    | '/api/public/github-webhook'
     | '/lovable/email/suppression'
     | '/proposta/aceite/$token'
     | '/_authenticated/comercial/'
@@ -544,6 +556,7 @@ export interface RootRouteChildren {
   ApiPublicBiKpisFinanceiroRoute: typeof ApiPublicBiKpisFinanceiroRoute
   ApiPublicBiKpisOperacaoRoute: typeof ApiPublicBiKpisOperacaoRoute
   ApiPublicBiOperacaoRoute: typeof ApiPublicBiOperacaoRoute
+  ApiPublicGithubWebhookRoute: typeof ApiPublicGithubWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PropostaAceiteTokenRoute: typeof PropostaAceiteTokenRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -677,6 +690,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/suppression'
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/github-webhook': {
+      id: '/api/public/github-webhook'
+      path: '/api/public/github-webhook'
+      fullPath: '/api/public/github-webhook'
+      preLoaderRoute: typeof ApiPublicGithubWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/bi-operacao': {
@@ -943,6 +963,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBiKpisFinanceiroRoute: ApiPublicBiKpisFinanceiroRoute,
   ApiPublicBiKpisOperacaoRoute: ApiPublicBiKpisOperacaoRoute,
   ApiPublicBiOperacaoRoute: ApiPublicBiOperacaoRoute,
+  ApiPublicGithubWebhookRoute: ApiPublicGithubWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PropostaAceiteTokenRoute: PropostaAceiteTokenRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
