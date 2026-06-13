@@ -164,5 +164,6 @@ export function NovoProcessoDialog() {
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
