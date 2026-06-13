@@ -594,6 +594,14 @@ function ContasAPagarPage() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+
+        <TabsContent value="cronograma" className="mt-0">
+          <PaymentScheduler />
+        </TabsContent>
+      </Tabs>
+
+
 
 
 
