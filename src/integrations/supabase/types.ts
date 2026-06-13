@@ -1574,6 +1574,7 @@ export type Database = {
       }
       historical_indicators: {
         Row: {
+          area_slug: string | null
           business_unit: string | null
           created_at: string | null
           id: string
@@ -1581,10 +1582,12 @@ export type Database = {
           month: number
           revenue_amount: number
           service_name: string | null
+          source: string | null
           updated_at: string | null
           year: number
         }
         Insert: {
+          area_slug?: string | null
           business_unit?: string | null
           created_at?: string | null
           id?: string
@@ -1592,10 +1595,12 @@ export type Database = {
           month: number
           revenue_amount?: number
           service_name?: string | null
+          source?: string | null
           updated_at?: string | null
           year: number
         }
         Update: {
+          area_slug?: string | null
           business_unit?: string | null
           created_at?: string | null
           id?: string
@@ -1603,6 +1608,7 @@ export type Database = {
           month?: number
           revenue_amount?: number
           service_name?: string | null
+          source?: string | null
           updated_at?: string | null
           year?: number
         }
