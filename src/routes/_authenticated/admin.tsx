@@ -1637,7 +1637,7 @@ function Admin() {
         </TabsContent>
 
         <TabsContent value="updates" className="space-y-6">
-          <ChangelogManager />
+
           {(() => {
             const { data: versions = [], isLoading } = useQuery({
               queryKey: ["system-versions"],
