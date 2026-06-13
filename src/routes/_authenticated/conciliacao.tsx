@@ -397,11 +397,46 @@ function Conciliacao() {
     onError: (err: any) => toast.error(`Erro ao atualizar: ${err.message ?? err}`),
   });
 
+  // Helper: remove financial_entries auto-created por conciliação que ficaram órfãos
+  const cleanupOrphanAutoEntries = async (financialEntryIds: string[]) => {
+    const unique = Array.from(new Set(financialEntryIds.filter(Boolean)));
+    if (unique.length === 0) return;
+    const { data: candidates } = await supabase
+      .from("financial_entries")
+      .select("id")
+      .in("id", unique)
+      .eq("created_via_conciliation", true as any);
+    const toCheck = (candidates ?? []).map((c: any) => c.id);
+    if (toCheck.length === 0) return;
+    const { data: stillMatched } = await supabase
+      .from("conciliation_matches")
+      .select("financial_entry_id")
+      .in("financial_entry_id", toCheck);
+    const { data: stillPaid } = await supabase
+      .from("financial_payments")
+      .select("financial_entry_id")
+      .in("financial_entry_id", toCheck);
+    const keep = new Set<string>([
+      ...((stillMatched ?? []).map((m: any) => m.financial_entry_id)),
+      ...((stillPaid ?? []).map((p: any) => p.financial_entry_id)),
+    ]);
+    const toDelete = toCheck.filter((id) => !keep.has(id));
+    if (toDelete.length > 0) {
+      await supabase.from("financial_entries").delete().in("id", toDelete);
+    }
+  };
+
   const deleteEntry = useMutation({
     mutationFn: async (entry: BankStatementEntry) => {
       if (entry.conciliation_status === "conciliado") {
         throw new Error("Lançamento conciliado. Rejeite a conciliação antes de excluir.");
       }
+      // Coleta financial_entries vinculados antes de remover os matches
+      const { data: linked } = await supabase
+        .from("conciliation_matches")
+        .select("financial_entry_id")
+        .eq("bank_statement_entry_id", entry.id);
+      const linkedFeIds = (linked ?? []).map((m: any) => m.financial_entry_id);
       // Remove related matches first
       const { error: mErr } = await supabase
         .from("conciliation_matches")
@@ -410,12 +445,14 @@ function Conciliacao() {
       if (mErr) throw mErr;
       const { error } = await supabase.from("bank_statement_entries").delete().eq("id", entry.id);
       if (error) throw error;
+      await cleanupOrphanAutoEntries(linkedFeIds);
     },
     onSuccess: () => {
       toast.success("Lançamento excluído");
       setDeletingEntry(null);
       queryClient.invalidateQueries({ queryKey: ["bank-statements"] });
       queryClient.invalidateQueries({ queryKey: ["conciliation-matches"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-entries"] });
     },
     onError: (err: any) => {
       toast.error(err.message ?? "Erro ao excluir");
@@ -428,6 +465,11 @@ function Conciliacao() {
   const deleteAllEntries = useMutation({
     mutationFn: async (ids: string[]) => {
       if (ids.length === 0) throw new Error("Nenhum lançamento para excluir.");
+      const { data: linked } = await supabase
+        .from("conciliation_matches")
+        .select("financial_entry_id")
+        .in("bank_statement_entry_id", ids);
+      const linkedFeIds = (linked ?? []).map((m: any) => m.financial_entry_id);
       const { error: mErr } = await supabase
         .from("conciliation_matches")
         .delete()
@@ -438,6 +480,7 @@ function Conciliacao() {
         .delete()
         .in("id", ids);
       if (error) throw error;
+      await cleanupOrphanAutoEntries(linkedFeIds);
       return ids.length;
     },
     onSuccess: (count) => {
@@ -445,12 +488,14 @@ function Conciliacao() {
       setConfirmDeleteAll(false);
       queryClient.invalidateQueries({ queryKey: ["bank-statements"] });
       queryClient.invalidateQueries({ queryKey: ["conciliation-matches"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-entries"] });
     },
     onError: (err: any) => {
       toast.error(err.message ?? "Erro ao excluir lançamentos");
       setConfirmDeleteAll(false);
     },
   });
+
 
   // ---- Paired layout: filters, helpers, mutations ----
   const [pairFilter, setPairFilter] = useState<string>("todos");
