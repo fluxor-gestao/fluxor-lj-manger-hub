@@ -340,6 +340,17 @@ function ContasAPagarPage() {
         </div>
       </div>
 
+      <Tabs defaultValue="contas" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:inline-flex">
+          <TabsTrigger value="contas">
+            <ListChecks className="h-4 w-4 mr-2" /> Contas a Pagar
+          </TabsTrigger>
+          <TabsTrigger value="cronograma">
+            <CalendarClock className="h-4 w-4 mr-2" /> Cronograma de Pagamentos
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="contas" className="space-y-6 mt-0">
       {/* KPI cards */}
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
         <KpiCard tone="primary" icon={<Wallet className="h-4 w-4" />} label="Total em aberto" value={fmt(metrics.totalAberto)} />
