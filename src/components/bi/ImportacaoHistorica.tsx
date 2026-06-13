@@ -197,26 +197,47 @@ export function ImportacaoHistorica() {
 
       try {
         if (preview.type === "indicators") {
-          for (const row of preview.data) {
-            const payload = {
-              year: parseInt(row.Ano),
-              month: parseInt(row.Mês),
-              service_name: row.Serviço || "Geral",
-              revenue_amount: parseFloat(row.Receita || 0),
-              business_unit: row.Unidade || null,
-              import_log_id: log.id
+          const rows = preview.rows || [];
+          // Importa apenas linhas com área encontrada no catálogo. Pendentes ficam de fora.
+          for (const r of rows) {
+            if (r.status !== "encontrado" || !r.area_slug) continue;
+            const payload: any = {
+              year: r.year,
+              month: r.month,
+              service_name: r.service_name,
+              revenue_amount: r.revenue_amount,
+              business_unit: r.business_unit,
+              area_slug: r.area_slug,
+              source: HISTORICAL_SOURCE,
+              import_log_id: log.id,
             };
 
             if (strategy === "update") {
-              const { error } = await supabase
+              // upsert manual: tenta update primeiro pela chave (ano+mês+área+fonte); se não existir, insere
+              const { data: existing } = await supabase
                 .from("historical_indicators")
-                .upsert(payload, { onConflict: "year,month,service_name,business_unit" });
-              if (error) throw error;
+                .select("id")
+                .eq("year", r.year)
+                .eq("month", r.month)
+                .eq("area_slug", r.area_slug)
+                .eq("source", HISTORICAL_SOURCE)
+                .maybeSingle();
+              if (existing?.id) {
+                const { error } = await supabase
+                  .from("historical_indicators")
+                  .update(payload)
+                  .eq("id", existing.id);
+                if (error) throw error;
+              } else {
+                const { error } = await supabase
+                  .from("historical_indicators")
+                  .insert(payload);
+                if (error && error.code !== "23505") throw error;
+              }
             } else {
               const { error } = await supabase
                 .from("historical_indicators")
                 .insert(payload);
-              // Ignore unique constraint errors if strategy is 'ignore'
               if (error && error.code !== "23505") throw error;
             }
           }
