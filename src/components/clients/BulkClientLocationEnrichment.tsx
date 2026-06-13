@@ -78,11 +78,13 @@ export default function BulkClientLocationEnrichment({ open, onOpenChange, onCom
           if (!isRunning) break;
           
           setCurrentClientName(client.company || client.name);
-          
+          const cnpjDigits = (client.document || "").replace(/\D+/g, "");
+          console.log(`[BulkEnrich] processando id=${client.id} cnpj=${cnpjDigits || "—"} nome=${client.company || client.name}`);
+
           try {
             const { data, error: enrichError } = await supabase.functions.invoke("enrich-client-location", {
               body: {
-                cnpj: client.document,
+                cnpj: cnpjDigits.length === 14 ? cnpjDigits : undefined,
                 name: client.company || client.name,
               },
             });
@@ -110,6 +112,7 @@ export default function BulkClientLocationEnrichment({ open, onOpenChange, onCom
                 .eq("id", client.id);
 
               if (updateError) throw updateError;
+              console.log(`[BulkEnrich] OK id=${client.id} -> ${data.city}/${data.state} lat=${data.latitude} lon=${data.longitude}`);
               
               setStats(prev => ({ ...prev, processed: prev.processed + 1, found: prev.found + 1 }));
             } else {
