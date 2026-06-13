@@ -52,7 +52,7 @@ export function useSystemSettings() {
       const { data, error } = await supabase
         .from("system_settings")
         .select("settings")
-        .eq("key", "general")
+        .eq("category", "general")
         .maybeSingle();
       if (error) throw error;
       const saved = (data?.settings ?? {}) as Partial<SystemSettingsData>;
