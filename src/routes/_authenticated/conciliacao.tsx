@@ -18,6 +18,7 @@ import { Upload, CheckCircle, XCircle, Link2, ArrowLeftRight, Search, ArrowLeft,
 import { Progress } from "@/components/ui/progress";
 import { parseOfx, type ParsedOfxTx } from "@/lib/parseOfx";
 import { parseBankStatementPdfLocal } from "@/lib/bankParsers";
+import { computeEntryHash, computeFileHash } from "@/lib/bankStatementDedup";
 import { NovoLancamentoDialog, type NovoLancamentoPrefill } from "@/components/financeiro/NovoLancamentoDialog";
 
 type BankStatementEntry = {
