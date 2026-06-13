@@ -133,6 +133,7 @@ export type Database = {
           bank_account_id: string | null
           conciliation_status: Database["public"]["Enums"]["conciliation_status"]
           created_at: string
+          dedup_hash: string | null
           description: string | null
           direction: string | null
           document_number: string | null
@@ -147,6 +148,7 @@ export type Database = {
           bank_account_id?: string | null
           conciliation_status?: Database["public"]["Enums"]["conciliation_status"]
           created_at?: string
+          dedup_hash?: string | null
           description?: string | null
           direction?: string | null
           document_number?: string | null
@@ -161,6 +163,7 @@ export type Database = {
           bank_account_id?: string | null
           conciliation_status?: Database["public"]["Enums"]["conciliation_status"]
           created_at?: string
+          dedup_hash?: string | null
           description?: string | null
           direction?: string | null
           document_number?: string | null
@@ -1612,8 +1615,11 @@ export type Database = {
       }
       import_batches: {
         Row: {
+          bank_account_id: string | null
+          duplicate_count: number | null
           error_count: number | null
           error_log: Json | null
+          file_hash: string | null
           file_name: string
           id: string
           imported_at: string
@@ -1624,8 +1630,11 @@ export type Database = {
           success_count: number | null
         }
         Insert: {
+          bank_account_id?: string | null
+          duplicate_count?: number | null
           error_count?: number | null
           error_log?: Json | null
+          file_hash?: string | null
           file_name: string
           id?: string
           imported_at?: string
@@ -1636,8 +1645,11 @@ export type Database = {
           success_count?: number | null
         }
         Update: {
+          bank_account_id?: string | null
+          duplicate_count?: number | null
           error_count?: number | null
           error_log?: Json | null
+          file_hash?: string | null
           file_name?: string
           id?: string
           imported_at?: string
@@ -1647,7 +1659,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["import_status"]
           success_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "import_batches_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       import_logs: {
         Row: {
