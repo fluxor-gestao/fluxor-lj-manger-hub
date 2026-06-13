@@ -116,3 +116,12 @@
 .animate-progress-indeterminate {
   animation: progress-indeterminate 1.5s ease-in-out infinite;
 }
+
+/* Compact mode (Opções → Preferências Gerais → "Modo compacto da interface") */
+:root[data-compact] main { padding: 1rem !important; }
+:root[data-compact] .space-y-6 > * + * { margin-top: 1rem; }
+:root[data-compact] .space-y-4 > * + * { margin-top: 0.625rem; }
+:root[data-compact] .p-6 { padding: 1rem; }
+:root[data-compact] .p-4 { padding: 0.625rem; }
+:root[data-compact] .py-4 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+:root[data-compact] .gap-4 { gap: 0.625rem; }

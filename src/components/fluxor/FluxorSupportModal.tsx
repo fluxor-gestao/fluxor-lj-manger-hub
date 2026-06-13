@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { sendTicket, type FluxorTicketPayload } from "@/lib/fluxorMonitor/fluxorMonitorClient";
 
 type Props = {
@@ -31,7 +32,9 @@ type Props = {
 
 export function FluxorSupportModal({ open, onOpenChange }: Props) {
   const { user } = useAuth();
+  const { settings } = useSystemSettings();
   const currentPath = useRouterState({ select: (s) => s.location.href });
+
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -150,6 +153,14 @@ export function FluxorSupportModal({ open, onOpenChange }: Props) {
             <div>
               <span className="font-medium">Usuário:</span> {user?.email ?? "anônimo"}
             </div>
+            {settings.supportEmail && (
+              <div>
+                <span className="font-medium">Contato direto:</span>{" "}
+                <a href={`mailto:${settings.supportEmail}`} className="underline hover:text-foreground">
+                  {settings.supportEmail}
+                </a>
+              </div>
+            )}
           </div>
 
           <DialogFooter>

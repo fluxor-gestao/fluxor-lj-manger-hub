@@ -1589,22 +1589,8 @@ function Admin() {
               </CardContent>
             </Card>
 
-            <Card className="overflow-hidden border-muted bg-gradient-to-br from-background to-secondary/40">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <SlidersHorizontal className="h-5 w-5 text-primary" />
-                  Integrações Futuras
-                </CardTitle>
-                <CardDescription>Chaves de ativação para recursos integrados futuros.</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-3 sm:grid-cols-2">
-                <div className="flex items-center justify-between rounded-md border bg-background/70 p-3"><Label>E-mail transacional</Label><Switch checked={systemSettings.transactionalEmailEnabled} onCheckedChange={(checked) => updateSetting("transactionalEmailEnabled", checked)} /></div>
-                <div className="flex items-center justify-between rounded-md border bg-background/70 p-3"><Label>WhatsApp</Label><Switch checked={systemSettings.whatsappEnabled} onCheckedChange={(checked) => updateSetting("whatsappEnabled", checked)} /></div>
-                <div className="flex items-center justify-between rounded-md border bg-background/70 p-3"><Label>Importação bancária</Label><Switch checked={systemSettings.bankImportEnabled} onCheckedChange={(checked) => updateSetting("bankImportEnabled", checked)} /></div>
-                <div className="flex items-center justify-between rounded-md border bg-background/70 p-3"><Label>Webhooks</Label><Switch checked={systemSettings.webhooksEnabled} onCheckedChange={(checked) => updateSetting("webhooksEnabled", checked)} /></div>
-                <div className="flex items-center justify-between rounded-md border bg-background/70 p-3"><Label>BI externo</Label><Switch checked={systemSettings.externalBiEnabled} onCheckedChange={(checked) => updateSetting("externalBiEnabled", checked)} /></div>
-              </CardContent>
-            </Card>
+            {/* Seção "Integrações Futuras" removida — toggles não tinham efeito prático.
+                Quando cada integração tiver backend real, reativar individualmente. */}
           </div>
 
           <div className="flex justify-end">

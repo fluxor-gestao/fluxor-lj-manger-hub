@@ -16,6 +16,7 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 import logoBanner from "@/assets/logo-banner.png";
 import {
   Sidebar,
@@ -61,6 +62,8 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, hasRole, refreshRole, signOut } = useAuth();
+  const { settings } = useSystemSettings();
+
 
   const { data: currentVersion, isLoading: loadingVersion } = useQuery({
     queryKey: ["current-system-version"],
@@ -91,13 +94,22 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-1">
           {collapsed ? (
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary">
-              <span className="text-xs font-bold text-sidebar-primary-foreground">LJ</span>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary" title={settings.companyName || "Lundgaard Jensen"}>
+              <span className="text-xs font-bold text-sidebar-primary-foreground">
+                {(settings.companyName || "LJ").slice(0, 2).toUpperCase()}
+              </span>
             </div>
           ) : (
-            <img src={logoBanner} alt="Lundgaard Jensen" className="h-auto w-[160px]" />
+            <>
+              <img src={logoBanner} alt={settings.companyName || "Lundgaard Jensen"} className="h-auto w-[160px]" />
+              {settings.systemDisplayName && (
+                <span className="text-[10px] font-medium uppercase tracking-widest text-sidebar-foreground/50">
+                  {settings.systemDisplayName}
+                </span>
+              )}
+            </>
           )}
         </div>
       </SidebarHeader>
