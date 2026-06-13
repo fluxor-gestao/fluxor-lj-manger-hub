@@ -51,21 +51,33 @@ export default function ClientLocationEnrichment({
 
   const handleSearch = async (query?: string) => {
     setLoading(true);
-    setResults(null);
+    setResults(null); // limpa resultado anterior antes de nova busca
+
+    const cnpjDigits = (clientDocument || "").replace(/\D+/g, "");
+    const useCnpj = !query && cnpjDigits.length > 0;
+
+    if (useCnpj && cnpjDigits.length !== 14) {
+      setLoading(false);
+      toast.error("CNPJ inválido — precisa ter 14 dígitos.");
+      return;
+    }
+
     try {
+      console.log(`[ClientLocationEnrichment] busca clientId=${clientId} cnpj=${useCnpj ? cnpjDigits : "—"} query=${query || "—"}`);
       const { data, error } = await supabase.functions.invoke("enrich-client-location", {
         body: {
-          cnpj: !query ? clientDocument : undefined,
+          cnpj: useCnpj ? cnpjDigits : undefined,
           name: query || clientCompany || clientName,
         },
       });
 
       if (error) throw error;
-      if (!data || Object.keys(data).length === 0) {
-        toast.error("Nenhuma localização encontrada.");
+      if (!data || data.error || Object.keys(data).length === 0) {
+        toast.error(data?.error || "Nenhuma localização encontrada.");
         return;
       }
 
+      console.log(`[ClientLocationEnrichment] resultado clientId=${clientId}`, data);
       setResults(data as EnrichmentResult);
     } catch (e: any) {
       console.error(e);
