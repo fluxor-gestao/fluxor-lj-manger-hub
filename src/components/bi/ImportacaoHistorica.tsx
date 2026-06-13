@@ -86,6 +86,25 @@ export function ImportacaoHistorica() {
     }
   });
 
+  const { data: areasCatalog } = useQuery({
+    queryKey: ["business-areas-catalog"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_areas")
+        .select("slug, label, name, business_unit, is_active");
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const areasBySlug = useMemo(() => {
+    const map: Record<string, { label: string; business_unit: string | null }> = {};
+    (areasCatalog || []).forEach((a: any) => {
+      map[a.slug] = { label: a.label || a.name, business_unit: a.business_unit ?? null };
+    });
+    return map;
+  }, [areasCatalog]);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "indicators" | "expenses") => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -119,7 +138,29 @@ export function ImportacaoHistorica() {
           }
         }
 
-        setPreview({ type, fileName: file.name, data });
+        let rows: PreviewRow[] | undefined;
+        let pendingCount = 0;
+        if (type === "indicators") {
+          rows = (data as any[]).map((row) => {
+            const service = String(row.Serviço || row.Servico || "Geral");
+            const slug = resolveAreaSlug(service);
+            const catalogEntry = slug ? areasBySlug[slug] : null;
+            const status: "encontrado" | "pendente" = catalogEntry ? "encontrado" : "pendente";
+            if (status === "pendente") pendingCount++;
+            return {
+              year: parseInt(row.Ano),
+              month: parseInt(row.Mês),
+              service_name: service,
+              revenue_amount: parseFloat(row.Receita || 0),
+              business_unit: row.Unidade || catalogEntry?.business_unit || null,
+              area_slug: catalogEntry ? slug : null,
+              area_label: catalogEntry?.label ?? null,
+              status,
+            };
+          });
+        }
+
+        setPreview({ type, fileName: file.name, data, rows, pendingCount });
         setImportMode(type);
       } catch (err) {
         console.error(err);
@@ -130,6 +171,7 @@ export function ImportacaoHistorica() {
     };
     reader.readAsBinaryString(file);
   };
+
 
   const importMutation = useMutation({
     mutationFn: async ({ strategy }: { strategy: "update" | "ignore" }) => {
