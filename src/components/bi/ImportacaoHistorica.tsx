@@ -19,10 +19,50 @@ import { cn } from "@/lib/utils";
 const BRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n || 0);
 
+// Mapeamento fixo do nome de serviço da planilha "Indicadores 3 anos LJ"
+// para o slug da área já existente no catálogo. NÃO cria área nova.
+const SERVICE_TO_AREA_SLUG: Record<string, string> = {
+  "adv. civel": "civil",
+  "adv. cível": "civil",
+  "adv. intern.": "internacional",
+  "adv. internacional": "internacional",
+  "adv. ambiental": "advocacia_ambiental",
+  "adv. imobiliaria": "advocacia_imobiliaria",
+  "adv. imobiliária": "advocacia_imobiliaria",
+  "adm. mensal fixo": "administracao_mensal_fixo",
+  "adm. mensal var.": "administracao_mensal_variavel",
+  "adm. mensal variavel": "administracao_mensal_variavel",
+  "adm. mensal variável": "administracao_mensal_variavel",
+  "contab. fixo": "contabilidade_fixo",
+  "contab. var.": "contabilidade_variavel",
+  "contab. variavel": "contabilidade_variavel",
+  "contab. variável": "contabilidade_variavel",
+  "topografia": "topografia",
+};
+const normalizeService = (s: string) =>
+  String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+const resolveAreaSlug = (service: string) =>
+  SERVICE_TO_AREA_SLUG[normalizeService(service)] ?? null;
+
+const HISTORICAL_SOURCE = "planilha_lj";
+
+interface PreviewRow {
+  year: number;
+  month: number;
+  service_name: string;
+  revenue_amount: number;
+  business_unit: string | null;
+  area_slug: string | null;
+  area_label: string | null;
+  status: "encontrado" | "pendente";
+}
+
 interface ImportPreview {
   type: "indicators" | "expenses";
   fileName: string;
   data: any[];
+  rows?: PreviewRow[];
+  pendingCount?: number;
 }
 
 export function ImportacaoHistorica() {
