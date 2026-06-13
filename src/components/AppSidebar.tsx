@@ -16,6 +16,7 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 import logoBanner from "@/assets/logo-banner.png";
 import {
   Sidebar,
@@ -61,6 +62,8 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, hasRole, refreshRole, signOut } = useAuth();
+  const { settings } = useSystemSettings();
+
 
   const { data: currentVersion, isLoading: loadingVersion } = useQuery({
     queryKey: ["current-system-version"],
