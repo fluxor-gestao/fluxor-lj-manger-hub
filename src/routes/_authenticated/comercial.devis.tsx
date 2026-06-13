@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { Plus, FileText, Eye, Pencil, Trash2, CalendarIcon, Filter, LayoutGrid, List, Sparkles, Loader2, Upload, ArrowLeft, Send, Clock, CheckCircle2, HelpCircle, Search } from "lucide-react";
+import { Plus, FileText, Eye, Pencil, Trash2, CalendarIcon, Filter, LayoutGrid, List, Sparkles, Loader2, Upload, ArrowLeft, Send, Clock, CheckCircle2, HelpCircle, Search, ClipboardList } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,7 @@ type AISuggestions = BaseAISuggestions & {
   responsible_sectors?: string[];
 };
 import UploadAtaDialog, { type ConfirmedAtaResult } from "@/components/devis/UploadAtaDialog";
+import RoteiroComercialDialog from "@/components/devis/RoteiroComercialDialog";
 import DevisCodePreviewDialog, { inferServicePrefix, type ServicePrefix } from "@/components/devis/DevisCodePreviewDialog";
 import ClientLocationEnrichment from "@/components/clients/ClientLocationEnrichment";
 import BulkClientLocationEnrichment from "@/components/clients/BulkClientLocationEnrichment";
@@ -136,6 +137,7 @@ function Comercial() {
   const [aiAccepted, setAiAccepted] = useState<Partial<AISuggestions>>({});
   const [generating, setGenerating] = useState(false);
   const [uploadAtaOpen, setUploadAtaOpen] = useState(false);
+  const [roteiroOpen, setRoteiroOpen] = useState(false);
   const [enrichmentOpen, setEnrichmentOpen] = useState(false);
   const [bulkEnrichmentOpen, setBulkEnrichmentOpen] = useState(false);
   const [selectedClientToEnrich, setSelectedClientToEnrich] = useState<any>(null);
@@ -785,6 +787,9 @@ function Comercial() {
               <Button variant="outline" onClick={() => setUploadAtaOpen(true)}>
                 <Upload className="h-4 w-4 mr-2" /> Upload de Relatório / Ata
               </Button>
+              <Button variant="outline" onClick={() => setRoteiroOpen(true)}>
+                <ClipboardList className="h-4 w-4 mr-2" /> Roteiro Comercial
+              </Button>
               <Dialog
                 open={devisDialogOpen}
                 onOpenChange={(o) => {
@@ -997,7 +1002,12 @@ function Comercial() {
             onConfirm={handleAtaConfirm}
           />
 
-          <ClientLocationEnrichment 
+          <RoteiroComercialDialog
+            open={roteiroOpen}
+            onOpenChange={setRoteiroOpen}
+          />
+
+          <ClientLocationEnrichment
             open={enrichmentOpen}
             onOpenChange={setEnrichmentOpen}
             clientId={selectedClientToEnrich?.id}
