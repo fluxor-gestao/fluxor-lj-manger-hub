@@ -31,6 +31,7 @@ type AISuggestions = BaseAISuggestions & {
   responsible_sectors?: string[];
 };
 import UploadAtaDialog, { type ConfirmedAtaResult } from "@/components/devis/UploadAtaDialog";
+import RoteiroComercialDialog from "@/components/devis/RoteiroComercialDialog";
 import DevisCodePreviewDialog, { inferServicePrefix, type ServicePrefix } from "@/components/devis/DevisCodePreviewDialog";
 import ClientLocationEnrichment from "@/components/clients/ClientLocationEnrichment";
 import BulkClientLocationEnrichment from "@/components/clients/BulkClientLocationEnrichment";
