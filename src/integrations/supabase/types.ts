@@ -470,6 +470,80 @@ export type Database = {
           },
         ]
       }
+      conversation_participants: {
+        Row: {
+          area: Database["public"]["Enums"]["app_role"] | null
+          conversation_id: string
+          created_at: string
+          id: string
+          last_read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          area?: Database["public"]["Enums"]["app_role"] | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          last_read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          area?: Database["public"]["Enums"]["app_role"] | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          last_read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          area: Database["public"]["Enums"]["app_role"] | null
+          context_id: string | null
+          context_label: string | null
+          context_type: string | null
+          created_at: string
+          created_by: string
+          id: string
+          title: string | null
+          type: Database["public"]["Enums"]["conversation_type"]
+          updated_at: string
+        }
+        Insert: {
+          area?: Database["public"]["Enums"]["app_role"] | null
+          context_id?: string | null
+          context_label?: string | null
+          context_type?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          title?: string | null
+          type?: Database["public"]["Enums"]["conversation_type"]
+          updated_at?: string
+        }
+        Update: {
+          area?: Database["public"]["Enums"]["app_role"] | null
+          context_id?: string | null
+          context_label?: string | null
+          context_type?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          title?: string | null
+          type?: Database["public"]["Enums"]["conversation_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cost_centers: {
         Row: {
           active: boolean
@@ -1608,6 +1682,44 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           active: boolean
@@ -2098,6 +2210,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_conversation_participant: {
+        Args: { _conv: string; _user: string }
+        Returns: boolean
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -2145,6 +2261,7 @@ export type Database = {
         | "gerencial"
       changelog_entry_type: "ajuste" | "melhoria" | "implementacao"
       conciliation_status: "pendente" | "conciliado" | "divergente" | "ignorado"
+      conversation_type: "direct" | "area" | "context"
       devis_status:
         | "rascunho"
         | "enviado"
@@ -2317,6 +2434,7 @@ export const Constants = {
       ],
       changelog_entry_type: ["ajuste", "melhoria", "implementacao"],
       conciliation_status: ["pendente", "conciliado", "divergente", "ignorado"],
+      conversation_type: ["direct", "area", "context"],
       devis_status: [
         "rascunho",
         "enviado",
