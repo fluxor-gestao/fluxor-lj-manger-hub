@@ -1,21 +1,26 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, ChevronDown, FileText, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NovaFaturaAvulsaDialog } from "@/components/operacao/NovaFaturaAvulsaDialog";
 
 export function NovoProcessoDialog() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [faOpen, setFaOpen] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -76,13 +81,32 @@ export function NovoProcessoDialog() {
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm">
+    <>
+      <div className="inline-flex rounded-md overflow-hidden border border-primary/40">
+        <Button size="sm" className="rounded-none" onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4" />
           Novo processo
         </Button>
-      </DialogTrigger>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" className="rounded-none border-l border-primary-foreground/20 px-2">
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={() => setOpen(true)}>
+              <Briefcase className="h-4 w-4 mr-2" /> Novo processo
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setFaOpen(true)}>
+              <FileText className="h-4 w-4 mr-2" /> Nova Fatura Avulsa (FA)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <NovaFaturaAvulsaDialog open={faOpen} onOpenChange={setFaOpen} />
+
+      <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Novo processo</DialogTitle>
@@ -140,5 +164,6 @@ export function NovoProcessoDialog() {
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

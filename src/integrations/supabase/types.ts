@@ -2021,14 +2021,23 @@ export type Database = {
           actual_end_date: string | null
           assigned_to: string | null
           business_unit: string | null
+          client_company_snapshot: string | null
           client_id: string | null
           created_at: string
           description: string | null
           devis_id: string | null
           expected_end_date: string | null
+          fa_amount: number | null
+          fa_attachment_name: string | null
+          fa_attachment_url: string | null
+          fa_due_date: string | null
+          fa_number: string | null
           final_charge_generated: boolean | null
           id: string
+          is_fa: boolean
+          origin: string
           responsible_sector: string | null
+          service_price_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["service_status"]
           title: string
@@ -2038,14 +2047,23 @@ export type Database = {
           actual_end_date?: string | null
           assigned_to?: string | null
           business_unit?: string | null
+          client_company_snapshot?: string | null
           client_id?: string | null
           created_at?: string
           description?: string | null
           devis_id?: string | null
           expected_end_date?: string | null
+          fa_amount?: number | null
+          fa_attachment_name?: string | null
+          fa_attachment_url?: string | null
+          fa_due_date?: string | null
+          fa_number?: string | null
           final_charge_generated?: boolean | null
           id?: string
+          is_fa?: boolean
+          origin?: string
           responsible_sector?: string | null
+          service_price_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["service_status"]
           title: string
@@ -2055,14 +2073,23 @@ export type Database = {
           actual_end_date?: string | null
           assigned_to?: string | null
           business_unit?: string | null
+          client_company_snapshot?: string | null
           client_id?: string | null
           created_at?: string
           description?: string | null
           devis_id?: string | null
           expected_end_date?: string | null
+          fa_amount?: number | null
+          fa_attachment_name?: string | null
+          fa_attachment_url?: string | null
+          fa_due_date?: string | null
+          fa_number?: string | null
           final_charge_generated?: boolean | null
           id?: string
+          is_fa?: boolean
+          origin?: string
           responsible_sector?: string | null
+          service_price_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["service_status"]
           title?: string
@@ -2313,6 +2340,7 @@ export type Database = {
         Returns: number
       }
       next_devis_number: { Args: { _prefix: string }; Returns: string }
+      next_fa_number: { Args: never; Returns: string }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
