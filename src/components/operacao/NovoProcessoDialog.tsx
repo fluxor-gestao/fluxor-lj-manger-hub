@@ -20,6 +20,7 @@ export function NovoProcessoDialog() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [faOpen, setFaOpen] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
