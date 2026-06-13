@@ -38,6 +38,8 @@ import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import { RegisterPaymentDialog, type PayableEntry } from "@/components/financeiro/RegisterPaymentDialog";
 import { useCompany } from "@/contexts/CompanyContext";
 import { ActiveCompanyBanner } from "@/components/ActiveCompanyBanner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PaymentScheduler } from "@/components/financeiro/PaymentScheduler";
 
 type Coverage = "coberto" | "apertado" | "sem";
 const COVERAGE_LABEL: Record<Coverage, string> = {
