@@ -81,13 +81,32 @@ export function NovoProcessoDialog() {
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm">
+    <>
+      <div className="inline-flex rounded-md overflow-hidden border border-primary/40">
+        <Button size="sm" className="rounded-none" onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4" />
           Novo processo
         </Button>
-      </DialogTrigger>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" className="rounded-none border-l border-primary-foreground/20 px-2">
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={() => setOpen(true)}>
+              <Briefcase className="h-4 w-4 mr-2" /> Novo processo
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setFaOpen(true)}>
+              <FileText className="h-4 w-4 mr-2" /> Nova Fatura Avulsa (FA)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <NovaFaturaAvulsaDialog open={faOpen} onOpenChange={setFaOpen} />
+
+      <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Novo processo</DialogTitle>
