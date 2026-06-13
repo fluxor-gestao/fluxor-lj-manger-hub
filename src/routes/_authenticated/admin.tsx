@@ -1623,6 +1623,8 @@ function Admin() {
         </TabsContent>
 
         <TabsContent value="updates" className="space-y-6">
+          <PendingChangelogPanel />
+
 
           {(() => {
             const { data: versions = [], isLoading } = useQuery({
