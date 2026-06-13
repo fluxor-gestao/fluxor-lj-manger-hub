@@ -42,18 +42,16 @@ function classify(message: string): { type: EntryType; description: string } | n
     if (type) return { type, description: rest };
   }
 
-  // Heurística fallback
+  // Heurística fallback — qualquer commit que não seja ignorado vira entry
   const lower = firstLine.toLowerCase();
-  if (/\b(fix|bug|corrige|corrigi|ajuste|ajusta)\b/.test(lower)) {
+  if (/\b(fix|bug|corrige|corrigi|ajuste|ajusta|hotfix|patch)\b/.test(lower)) {
     return { type: "ajuste", description: firstLine };
   }
-  if (/\b(refactor|refatora|melhora|improve|perf|otimiza|style|ui|ux)\b/.test(lower)) {
+  if (/\b(refactor|refatora|melhora|improve|perf|otimiza|style|ui|ux|design)\b/.test(lower)) {
     return { type: "melhoria", description: firstLine };
   }
-  if (/\b(add|adiciona|cria|novo|nova|implementa|feat)\b/.test(lower)) {
-    return { type: "implementacao", description: firstLine };
-  }
-  return null;
+  // Default: trata como implementação para não perder histórico
+  return { type: "implementacao", description: firstLine };
 }
 
 async function POST({ request }: { request: Request }) {
@@ -136,7 +134,19 @@ async function POST({ request }: { request: Request }) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 
-  return new Response(JSON.stringify({ ok: true, inserted: toInsert.length }), {
+  // Auto-release: cria automaticamente uma nova versão (bump de patch) com os entries recém-inseridos
+  const firstSubject = toInsert[0]?.description?.slice(0, 100) ?? "Atualização automática";
+  const summary =
+    toInsert.length === 1
+      ? firstSubject
+      : `${toInsert.length} alterações neste release. Primeira: ${firstSubject}`;
+  const { data: releaseId, error: releaseErr } = await supabaseAdmin.rpc(
+    "auto_release_changelog" as any,
+    { _summary: summary, _release_name: "Atualização automática" },
+  );
+  if (releaseErr) console.error("[github-webhook] auto_release error", releaseErr);
+
+  return new Response(JSON.stringify({ ok: true, inserted: toInsert.length, release_id: releaseId ?? null }), {
     headers: { "Content-Type": "application/json" },
   });
 }

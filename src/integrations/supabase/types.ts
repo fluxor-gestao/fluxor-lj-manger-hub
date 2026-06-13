@@ -2268,6 +2268,10 @@ export type Database = {
     }
     Functions: {
       auto_advance_sent_devis: { Args: never; Returns: undefined }
+      auto_release_changelog: {
+        Args: { _release_name?: string; _summary?: string }
+        Returns: string
+      }
       bi_kpis_comercial: {
         Args: { _from?: string; _to?: string }
         Returns: Json
