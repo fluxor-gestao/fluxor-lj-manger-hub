@@ -50,8 +50,10 @@ const managementItems: NavItem[] = [
   { title: "Gestão", url: "/gestao", icon: Building2, roles: ["admin"] },
   { title: "BI / Business Intelligence", url: "/bi", icon: BarChart3, roles: ["comercial", "financeiro", "operacao"] },
   { title: "Opções / Usuários", url: "/admin", icon: Shield, roles: ["admin"] },
+  { title: "Central de Mensagens", url: "/mensagens", icon: MessageSquare },
   { title: "Central de Ajuda", url: "/ajuda", icon: HelpCircle },
 ];
+
 
 export function AppSidebar() {
   const { state } = useSidebar();
