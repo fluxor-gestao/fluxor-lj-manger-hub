@@ -807,6 +807,11 @@ function Conciliacao() {
       return;
     }
     try {
+      // Marca a fe recém-criada como auto-criada via conciliação (para cleanup posterior)
+      await supabase
+        .from("financial_entries")
+        .update({ created_via_conciliation: true } as any)
+        .eq("id", firstEntryId);
       const { data: fe, error } = await supabase
         .from("financial_entries")
         .select("*")
@@ -814,6 +819,7 @@ function Conciliacao() {
         .single();
       if (error) throw error;
       await conciliatePair.mutateAsync({ stmt: createTarget, fe });
+
     } catch (e: any) {
       toast.error(`Erro ao conciliar: ${e.message ?? e}`);
     } finally {
