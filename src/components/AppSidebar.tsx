@@ -7,9 +7,11 @@ import {
   BarChart3,
   Shield,
   HelpCircle,
+  MessageSquare,
   LogOut,
   Loader2,
 } from "lucide-react";
+
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
