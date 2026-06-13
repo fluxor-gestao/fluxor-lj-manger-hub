@@ -1770,6 +1770,72 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_planner: {
+        Row: {
+          account: string | null
+          amount: number
+          attachment_name: string | null
+          attachment_type: string | null
+          attachment_url: string | null
+          business_unit: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          dre_group: string | null
+          due_date: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          status: string
+          supplier_id: string | null
+          supplier_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account?: string | null
+          amount?: number
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          business_unit?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          dre_group?: string | null
+          due_date: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account?: string | null
+          amount?: number
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          business_unit?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          dre_group?: string | null
+          due_date?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
