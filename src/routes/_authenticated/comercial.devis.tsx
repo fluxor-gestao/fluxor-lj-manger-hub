@@ -1002,7 +1002,12 @@ function Comercial() {
             onConfirm={handleAtaConfirm}
           />
 
-          <ClientLocationEnrichment 
+          <RoteiroComercialDialog
+            open={roteiroOpen}
+            onOpenChange={setRoteiroOpen}
+          />
+
+          <ClientLocationEnrichment
             open={enrichmentOpen}
             onOpenChange={setEnrichmentOpen}
             clientId={selectedClientToEnrich?.id}
