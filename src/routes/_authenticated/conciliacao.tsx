@@ -537,8 +537,9 @@ function Conciliacao() {
           entry_type: "transferencia" as any,
           source_type: "manual" as const,
           conciliation_status: "conciliado" as const,
+          created_via_conciliation: true,
           user_id: user?.id,
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;
@@ -553,6 +554,7 @@ function Conciliacao() {
       });
       await supabase.from("bank_statement_entries").update({ conciliation_status: "conciliado" as const }).eq("id", stmt.id);
     },
+
     onSuccess: () => {
       toast.success("Marcado como transferência interna");
       queryClient.invalidateQueries();
