@@ -19,10 +19,50 @@ import { cn } from "@/lib/utils";
 const BRL = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n || 0);
 
+// Mapeamento fixo do nome de serviço da planilha "Indicadores 3 anos LJ"
+// para o slug da área já existente no catálogo. NÃO cria área nova.
+const SERVICE_TO_AREA_SLUG: Record<string, string> = {
+  "adv. civel": "civil",
+  "adv. cível": "civil",
+  "adv. intern.": "internacional",
+  "adv. internacional": "internacional",
+  "adv. ambiental": "advocacia_ambiental",
+  "adv. imobiliaria": "advocacia_imobiliaria",
+  "adv. imobiliária": "advocacia_imobiliaria",
+  "adm. mensal fixo": "administracao_mensal_fixo",
+  "adm. mensal var.": "administracao_mensal_variavel",
+  "adm. mensal variavel": "administracao_mensal_variavel",
+  "adm. mensal variável": "administracao_mensal_variavel",
+  "contab. fixo": "contabilidade_fixo",
+  "contab. var.": "contabilidade_variavel",
+  "contab. variavel": "contabilidade_variavel",
+  "contab. variável": "contabilidade_variavel",
+  "topografia": "topografia",
+};
+const normalizeService = (s: string) =>
+  String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+const resolveAreaSlug = (service: string) =>
+  SERVICE_TO_AREA_SLUG[normalizeService(service)] ?? null;
+
+const HISTORICAL_SOURCE = "planilha_lj";
+
+interface PreviewRow {
+  year: number;
+  month: number;
+  service_name: string;
+  revenue_amount: number;
+  business_unit: string | null;
+  area_slug: string | null;
+  area_label: string | null;
+  status: "encontrado" | "pendente";
+}
+
 interface ImportPreview {
   type: "indicators" | "expenses";
   fileName: string;
   data: any[];
+  rows?: PreviewRow[];
+  pendingCount?: number;
 }
 
 export function ImportacaoHistorica() {
@@ -45,6 +85,25 @@ export function ImportacaoHistorica() {
       return (data || []) as any[];
     }
   });
+
+  const { data: areasCatalog } = useQuery({
+    queryKey: ["business-areas-catalog"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_areas")
+        .select("slug, label, name, business_unit, is_active");
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const areasBySlug = useMemo(() => {
+    const map: Record<string, { label: string; business_unit: string | null }> = {};
+    (areasCatalog || []).forEach((a: any) => {
+      map[a.slug] = { label: a.label || a.name, business_unit: a.business_unit ?? null };
+    });
+    return map;
+  }, [areasCatalog]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "indicators" | "expenses") => {
     const file = e.target.files?.[0];
@@ -79,7 +138,29 @@ export function ImportacaoHistorica() {
           }
         }
 
-        setPreview({ type, fileName: file.name, data });
+        let rows: PreviewRow[] | undefined;
+        let pendingCount = 0;
+        if (type === "indicators") {
+          rows = (data as any[]).map((row) => {
+            const service = String(row.Serviço || row.Servico || "Geral");
+            const slug = resolveAreaSlug(service);
+            const catalogEntry = slug ? areasBySlug[slug] : null;
+            const status: "encontrado" | "pendente" = catalogEntry ? "encontrado" : "pendente";
+            if (status === "pendente") pendingCount++;
+            return {
+              year: parseInt(row.Ano),
+              month: parseInt(row.Mês),
+              service_name: service,
+              revenue_amount: parseFloat(row.Receita || 0),
+              business_unit: row.Unidade || catalogEntry?.business_unit || null,
+              area_slug: catalogEntry ? slug : null,
+              area_label: catalogEntry?.label ?? null,
+              status,
+            };
+          });
+        }
+
+        setPreview({ type, fileName: file.name, data, rows, pendingCount });
         setImportMode(type);
       } catch (err) {
         console.error(err);
@@ -90,6 +171,7 @@ export function ImportacaoHistorica() {
     };
     reader.readAsBinaryString(file);
   };
+
 
   const importMutation = useMutation({
     mutationFn: async ({ strategy }: { strategy: "update" | "ignore" }) => {
@@ -115,26 +197,47 @@ export function ImportacaoHistorica() {
 
       try {
         if (preview.type === "indicators") {
-          for (const row of preview.data) {
-            const payload = {
-              year: parseInt(row.Ano),
-              month: parseInt(row.Mês),
-              service_name: row.Serviço || "Geral",
-              revenue_amount: parseFloat(row.Receita || 0),
-              business_unit: row.Unidade || null,
-              import_log_id: log.id
+          const rows = preview.rows || [];
+          // Importa apenas linhas com área encontrada no catálogo. Pendentes ficam de fora.
+          for (const r of rows) {
+            if (r.status !== "encontrado" || !r.area_slug) continue;
+            const payload: any = {
+              year: r.year,
+              month: r.month,
+              service_name: r.service_name,
+              revenue_amount: r.revenue_amount,
+              business_unit: r.business_unit,
+              area_slug: r.area_slug,
+              source: HISTORICAL_SOURCE,
+              import_log_id: log.id,
             };
 
             if (strategy === "update") {
-              const { error } = await supabase
+              // upsert manual: tenta update primeiro pela chave (ano+mês+área+fonte); se não existir, insere
+              const { data: existing } = await supabase
                 .from("historical_indicators")
-                .upsert(payload, { onConflict: "year,month,service_name,business_unit" });
-              if (error) throw error;
+                .select("id")
+                .eq("year", r.year)
+                .eq("month", r.month)
+                .eq("area_slug", r.area_slug)
+                .eq("source", HISTORICAL_SOURCE)
+                .maybeSingle();
+              if (existing?.id) {
+                const { error } = await supabase
+                  .from("historical_indicators")
+                  .update(payload)
+                  .eq("id", existing.id);
+                if (error) throw error;
+              } else {
+                const { error } = await supabase
+                  .from("historical_indicators")
+                  .insert(payload);
+                if (error && error.code !== "23505") throw error;
+              }
             } else {
               const { error } = await supabase
                 .from("historical_indicators")
                 .insert(payload);
-              // Ignore unique constraint errors if strategy is 'ignore'
               if (error && error.code !== "23505") throw error;
             }
           }
@@ -267,42 +370,95 @@ export function ImportacaoHistorica() {
             </Button>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="max-h-[300px] overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {preview.data[0] && Object.keys(preview.data[0]).map(key => (
-                      <TableHead key={key} className="text-[10px] font-bold uppercase">{key}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {preview.data.slice(0, 5).map((row, i) => (
-                    <TableRow key={i}>
-                      {Object.values(row).map((val: any, j) => (
-                        <TableCell key={j} className="text-xs font-medium">
-                          {typeof val === 'number' && val > 100 ? BRL(val) : val}
+            <div className="max-h-[360px] overflow-auto">
+              {preview.type === "indicators" && preview.rows ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[10px] font-bold uppercase">Serviço (planilha)</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase">Área no sistema</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase">Competência</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase">Valor</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase text-right">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {preview.rows.slice(0, 30).map((r, i) => (
+                      <TableRow key={i} className={cn(r.status === "pendente" && "bg-amber-50/40")}>
+                        <TableCell className="text-xs font-medium">{r.service_name}</TableCell>
+                        <TableCell className="text-xs font-bold">
+                          {r.area_label ?? <span className="text-amber-600 italic">— sem mapeamento —</span>}
                         </TableCell>
+                        <TableCell className="text-xs font-medium text-slate-500">
+                          {String(r.month).padStart(2, "0")}/{r.year}
+                        </TableCell>
+                        <TableCell className="text-xs font-bold">{BRL(r.revenue_amount)}</TableCell>
+                        <TableCell className="text-right">
+                          {r.status === "encontrado" ? (
+                            <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] uppercase font-black">Encontrado</Badge>
+                          ) : (
+                            <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[9px] uppercase font-black">Pendente</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {preview.rows.length > 30 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4 bg-slate-50/50">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            + {preview.rows.length - 30} linhas ocultas no preview
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {preview.data[0] && Object.keys(preview.data[0]).map(key => (
+                        <TableHead key={key} className="text-[10px] font-bold uppercase">{key}</TableHead>
                       ))}
                     </TableRow>
-                  ))}
-                  {preview.data.length > 5 && (
-                    <TableRow>
-                      <TableCell colSpan={99} className="text-center py-4 bg-slate-50/50">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          + {preview.data.length - 5} registros ocultos no preview
-                        </p>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {preview.data.slice(0, 5).map((row, i) => (
+                      <TableRow key={i}>
+                        {Object.values(row).map((val: any, j) => (
+                          <TableCell key={j} className="text-xs font-medium">
+                            {typeof val === 'number' && val > 100 ? BRL(val) : val}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                    {preview.data.length > 5 && (
+                      <TableRow>
+                        <TableCell colSpan={99} className="text-center py-4 bg-slate-50/50">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            + {preview.data.length - 5} registros ocultos no preview
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </div>
             <div className="p-6 bg-slate-50/30 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
-                <AlertTriangle className="h-4 w-4" />
-                <p className="text-xs font-bold">Escolha como tratar registros existentes:</p>
-              </div>
+              {preview.type === "indicators" && (preview.pendingCount ?? 0) > 0 ? (
+                <div className="flex items-center gap-2 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">
+                  <AlertTriangle className="h-4 w-4" />
+                  <p className="text-xs font-bold">
+                    {preview.pendingCount} linha(s) pendente(s) — sem área correspondente no catálogo. Serão ignoradas na importação.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
+                  <AlertTriangle className="h-4 w-4" />
+                  <p className="text-xs font-bold">Escolha como tratar registros existentes:</p>
+                </div>
+              )}
               <div className="flex gap-3">
                 <Button 
                   variant="outline" 
