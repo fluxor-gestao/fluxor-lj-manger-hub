@@ -50,6 +50,7 @@ import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authent
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicFluxorMonitorSplatRouteImport } from './routes/api/public/fluxor-monitor.$'
 import { Route as AuthenticatedComercialDevisIdRouteImport } from './routes/_authenticated/comercial_.devis.$id'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -276,6 +277,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicFluxorMonitorSplatRoute =
+  ApiPublicFluxorMonitorSplatRouteImport.update({
+    id: '/api/public/fluxor-monitor/$',
+    path: '/api/public/fluxor-monitor/$',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedComercialDevisIdRoute =
   AuthenticatedComercialDevisIdRouteImport.update({
     id: '/comercial_/devis/$id',
@@ -322,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/comercial/': typeof AuthenticatedComercialIndexRoute
   '/financeiro/': typeof AuthenticatedFinanceiroIndexRoute
   '/comercial/devis/$id': typeof AuthenticatedComercialDevisIdRoute
+  '/api/public/fluxor-monitor/$': typeof ApiPublicFluxorMonitorSplatRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -363,6 +371,7 @@ export interface FileRoutesByTo {
   '/comercial': typeof AuthenticatedComercialIndexRoute
   '/financeiro': typeof AuthenticatedFinanceiroIndexRoute
   '/comercial/devis/$id': typeof AuthenticatedComercialDevisIdRoute
+  '/api/public/fluxor-monitor/$': typeof ApiPublicFluxorMonitorSplatRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -408,6 +417,7 @@ export interface FileRoutesById {
   '/_authenticated/comercial/': typeof AuthenticatedComercialIndexRoute
   '/_authenticated/financeiro/': typeof AuthenticatedFinanceiroIndexRoute
   '/_authenticated/comercial_/devis/$id': typeof AuthenticatedComercialDevisIdRoute
+  '/api/public/fluxor-monitor/$': typeof ApiPublicFluxorMonitorSplatRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/comercial/'
     | '/financeiro/'
     | '/comercial/devis/$id'
+    | '/api/public/fluxor-monitor/$'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -494,6 +505,7 @@ export interface FileRouteTypes {
     | '/comercial'
     | '/financeiro'
     | '/comercial/devis/$id'
+    | '/api/public/fluxor-monitor/$'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -538,6 +550,7 @@ export interface FileRouteTypes {
     | '/_authenticated/comercial/'
     | '/_authenticated/financeiro/'
     | '/_authenticated/comercial_/devis/$id'
+    | '/api/public/fluxor-monitor/$'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -559,6 +572,7 @@ export interface RootRouteChildren {
   ApiPublicGithubWebhookRoute: typeof ApiPublicGithubWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PropostaAceiteTokenRoute: typeof PropostaAceiteTokenRoute
+  ApiPublicFluxorMonitorSplatRoute: typeof ApiPublicFluxorMonitorSplatRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -853,6 +867,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/fluxor-monitor/$': {
+      id: '/api/public/fluxor-monitor/$'
+      path: '/api/public/fluxor-monitor/$'
+      fullPath: '/api/public/fluxor-monitor/$'
+      preLoaderRoute: typeof ApiPublicFluxorMonitorSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/comercial_/devis/$id': {
       id: '/_authenticated/comercial_/devis/$id'
       path: '/comercial/devis/$id'
@@ -966,6 +987,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicGithubWebhookRoute: ApiPublicGithubWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PropostaAceiteTokenRoute: PropostaAceiteTokenRoute,
+  ApiPublicFluxorMonitorSplatRoute: ApiPublicFluxorMonitorSplatRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
