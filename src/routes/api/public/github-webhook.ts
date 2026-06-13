@@ -42,18 +42,16 @@ function classify(message: string): { type: EntryType; description: string } | n
     if (type) return { type, description: rest };
   }
 
-  // Heurística fallback
+  // Heurística fallback — qualquer commit que não seja ignorado vira entry
   const lower = firstLine.toLowerCase();
-  if (/\b(fix|bug|corrige|corrigi|ajuste|ajusta)\b/.test(lower)) {
+  if (/\b(fix|bug|corrige|corrigi|ajuste|ajusta|hotfix|patch)\b/.test(lower)) {
     return { type: "ajuste", description: firstLine };
   }
-  if (/\b(refactor|refatora|melhora|improve|perf|otimiza|style|ui|ux)\b/.test(lower)) {
+  if (/\b(refactor|refatora|melhora|improve|perf|otimiza|style|ui|ux|design)\b/.test(lower)) {
     return { type: "melhoria", description: firstLine };
   }
-  if (/\b(add|adiciona|cria|novo|nova|implementa|feat)\b/.test(lower)) {
-    return { type: "implementacao", description: firstLine };
-  }
-  return null;
+  // Default: trata como implementação para não perder histórico
+  return { type: "implementacao", description: firstLine };
 }
 
 async function POST({ request }: { request: Request }) {
