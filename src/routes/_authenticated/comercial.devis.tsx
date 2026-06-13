@@ -787,6 +787,9 @@ function Comercial() {
               <Button variant="outline" onClick={() => setUploadAtaOpen(true)}>
                 <Upload className="h-4 w-4 mr-2" /> Upload de Relatório / Ata
               </Button>
+              <Button variant="outline" onClick={() => setRoteiroOpen(true)}>
+                <ClipboardList className="h-4 w-4 mr-2" /> Roteiro Comercial
+              </Button>
               <Dialog
                 open={devisDialogOpen}
                 onOpenChange={(o) => {
