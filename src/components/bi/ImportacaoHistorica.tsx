@@ -370,42 +370,95 @@ export function ImportacaoHistorica() {
             </Button>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="max-h-[300px] overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {preview.data[0] && Object.keys(preview.data[0]).map(key => (
-                      <TableHead key={key} className="text-[10px] font-bold uppercase">{key}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {preview.data.slice(0, 5).map((row, i) => (
-                    <TableRow key={i}>
-                      {Object.values(row).map((val: any, j) => (
-                        <TableCell key={j} className="text-xs font-medium">
-                          {typeof val === 'number' && val > 100 ? BRL(val) : val}
+            <div className="max-h-[360px] overflow-auto">
+              {preview.type === "indicators" && preview.rows ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[10px] font-bold uppercase">Serviço (planilha)</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase">Área no sistema</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase">Competência</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase">Valor</TableHead>
+                      <TableHead className="text-[10px] font-bold uppercase text-right">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {preview.rows.slice(0, 30).map((r, i) => (
+                      <TableRow key={i} className={cn(r.status === "pendente" && "bg-amber-50/40")}>
+                        <TableCell className="text-xs font-medium">{r.service_name}</TableCell>
+                        <TableCell className="text-xs font-bold">
+                          {r.area_label ?? <span className="text-amber-600 italic">— sem mapeamento —</span>}
                         </TableCell>
+                        <TableCell className="text-xs font-medium text-slate-500">
+                          {String(r.month).padStart(2, "0")}/{r.year}
+                        </TableCell>
+                        <TableCell className="text-xs font-bold">{BRL(r.revenue_amount)}</TableCell>
+                        <TableCell className="text-right">
+                          {r.status === "encontrado" ? (
+                            <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] uppercase font-black">Encontrado</Badge>
+                          ) : (
+                            <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[9px] uppercase font-black">Pendente</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {preview.rows.length > 30 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4 bg-slate-50/50">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            + {preview.rows.length - 30} linhas ocultas no preview
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {preview.data[0] && Object.keys(preview.data[0]).map(key => (
+                        <TableHead key={key} className="text-[10px] font-bold uppercase">{key}</TableHead>
                       ))}
                     </TableRow>
-                  ))}
-                  {preview.data.length > 5 && (
-                    <TableRow>
-                      <TableCell colSpan={99} className="text-center py-4 bg-slate-50/50">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          + {preview.data.length - 5} registros ocultos no preview
-                        </p>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {preview.data.slice(0, 5).map((row, i) => (
+                      <TableRow key={i}>
+                        {Object.values(row).map((val: any, j) => (
+                          <TableCell key={j} className="text-xs font-medium">
+                            {typeof val === 'number' && val > 100 ? BRL(val) : val}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                    {preview.data.length > 5 && (
+                      <TableRow>
+                        <TableCell colSpan={99} className="text-center py-4 bg-slate-50/50">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            + {preview.data.length - 5} registros ocultos no preview
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </div>
             <div className="p-6 bg-slate-50/30 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
-                <AlertTriangle className="h-4 w-4" />
-                <p className="text-xs font-bold">Escolha como tratar registros existentes:</p>
-              </div>
+              {preview.type === "indicators" && (preview.pendingCount ?? 0) > 0 ? (
+                <div className="flex items-center gap-2 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">
+                  <AlertTriangle className="h-4 w-4" />
+                  <p className="text-xs font-bold">
+                    {preview.pendingCount} linha(s) pendente(s) — sem área correspondente no catálogo. Serão ignoradas na importação.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
+                  <AlertTriangle className="h-4 w-4" />
+                  <p className="text-xs font-bold">Escolha como tratar registros existentes:</p>
+                </div>
+              )}
               <div className="flex gap-3">
                 <Button 
                   variant="outline" 
