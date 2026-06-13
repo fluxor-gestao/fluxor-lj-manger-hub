@@ -777,6 +777,8 @@ function Conciliacao() {
         open_amount: Number(openAfter.toFixed(2)),
         payment_status: status,
       }).eq("id", m.financial_entry_id);
+      // Se a fe foi auto-criada pela conciliação e agora está sem matches/baixas, removê-la.
+      await cleanupOrphanAutoEntries([m.financial_entry_id]);
     },
     onSuccess: () => {
       toast.success("Conciliação desfeita");
@@ -784,6 +786,7 @@ function Conciliacao() {
     },
     onError: (e: any) => toast.error(`Erro: ${e.message ?? e}`),
   });
+
 
   // Mark statement as ignored (uses 'divergente' status)
   const ignoreEntry = useMutation({
