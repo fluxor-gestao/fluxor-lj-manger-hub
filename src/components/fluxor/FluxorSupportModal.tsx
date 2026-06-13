@@ -31,7 +31,7 @@ type Props = {
 
 export function FluxorSupportModal({ open, onOpenChange }: Props) {
   const { user } = useAuth();
-  const currentPath = useRouterState({ select: (s) => s.location.pathname + s.location.search });
+  const currentPath = useRouterState({ select: (s) => s.location.href });
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
