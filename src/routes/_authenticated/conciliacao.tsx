@@ -18,6 +18,7 @@ import { Upload, CheckCircle, XCircle, Link2, ArrowLeftRight, Search, ArrowLeft,
 import { Progress } from "@/components/ui/progress";
 import { parseOfx, type ParsedOfxTx } from "@/lib/parseOfx";
 import { parseBankStatementPdfLocal } from "@/lib/bankParsers";
+import { computeEntryHash, computeFileHash } from "@/lib/bankStatementDedup";
 import { NovoLancamentoDialog, type NovoLancamentoPrefill } from "@/components/financeiro/NovoLancamentoDialog";
 
 type BankStatementEntry = {
@@ -189,17 +190,24 @@ function Conciliacao() {
       }
 
       setUploadProgress({ step: "Geração dos lançamentos", progress: 80 });
+
+      // Hash do arquivo (para histórico/idempotência futura)
+      let fileHash: string | null = null;
+      try { fileHash = await computeFileHash(file); } catch { /* opcional */ }
+
       const { data: batch, error: batchError } = await supabase.from("import_batches").insert({
         file_name: file.name,
         source_kind: "extrato_bancario",
         row_count: transactions.length,
         imported_by: user?.id,
         status: "processando" as const,
-      }).select().single();
+        file_hash: fileHash,
+      } as any).select().single();
 
       if (batchError || !batch) throw new Error("Erro ao criar lote de importação");
 
       let successCount = 0;
+      let duplicateCount = 0;
       const errors: string[] = [];
 
       for (let i = 0; i < transactions.length; i++) {
@@ -207,15 +215,49 @@ function Conciliacao() {
         try {
           const rawAmount = Number(t.amount);
           const derivedDirection = t.direction || (rawAmount < 0 ? "saida" : "entrada");
+          const absAmount = Math.abs(rawAmount);
+          const documentNumber = (t as any).raw?.fitid ?? null;
+
+          const dedupHash = await computeEntryHash({
+            bankAccountId: null,
+            date: t.date,
+            amount: absAmount,
+            direction: derivedDirection,
+            description: t.description,
+            documentNumber,
+          });
+
+          // Verifica se já existe — não sobrescreve nenhuma movimentação existente
+          const { data: existing } = await supabase
+            .from("bank_statement_entries")
+            .select("id")
+            .eq("dedup_hash", dedupHash)
+            .maybeSingle();
+
+          if (existing) {
+            duplicateCount++;
+            continue;
+          }
+
           const { error } = await supabase.from("bank_statement_entries").insert({
             transaction_date: t.date,
             description: t.description,
-            amount: Math.abs(rawAmount),
+            amount: absAmount,
             direction: derivedDirection,
             import_batch_id: batch.id,
+            document_number: documentNumber,
+            dedup_hash: dedupHash,
             raw_payload: { source: ext, index: i, raw: (t as any).raw ?? null },
-          });
-          if (error) throw error;
+          } as any);
+
+          if (error) {
+            // Conflito no índice único = duplicada (corrida entre uploads simultâneos)
+            if ((error as any).code === "23505") {
+              duplicateCount++;
+              continue;
+            }
+            throw error;
+          }
           successCount++;
         } catch (err: any) {
           errors.push(`Transação ${i + 1}: ${err.message}`);
@@ -226,15 +268,20 @@ function Conciliacao() {
         status: errors.length === 0 ? "concluido" as const : "parcial" as const,
         success_count: successCount,
         error_count: errors.length,
+        duplicate_count: duplicateCount,
         error_log: errors.length > 0 ? errors : null,
-      }).eq("id", batch.id);
+      } as any).eq("id", batch.id);
 
       setUploadProgress({ step: "Concluído", progress: 100 });
-      toast.success(`Importação concluída: ${successCount} transações`);
-      
+      toast.success(
+        `Extrato processado: ${transactions.length} lidas · ${successCount} novas · ${duplicateCount} duplicadas ignoradas · ${errors.length} erros`,
+        { duration: 6000 },
+      );
+
       // Invalidar queries para atualizar a UI sem reload
       queryClient.invalidateQueries({ queryKey: ["bank-statements"] });
       queryClient.invalidateQueries({ queryKey: ["import-batches"] });
+      queryClient.invalidateQueries({ queryKey: ["conciliation-matches"] });
 
     } catch (err: any) {
       toast.error(`Erro: ${err.message ?? err}`);
