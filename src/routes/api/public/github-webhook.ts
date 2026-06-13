@@ -136,7 +136,19 @@ async function POST({ request }: { request: Request }) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 
-  return new Response(JSON.stringify({ ok: true, inserted: toInsert.length }), {
+  // Auto-release: cria automaticamente uma nova versão (bump de patch) com os entries recém-inseridos
+  const firstSubject = toInsert[0]?.description?.slice(0, 100) ?? "Atualização automática";
+  const summary =
+    toInsert.length === 1
+      ? firstSubject
+      : `${toInsert.length} alterações neste release. Primeira: ${firstSubject}`;
+  const { data: releaseId, error: releaseErr } = await supabaseAdmin.rpc(
+    "auto_release_changelog" as any,
+    { _summary: summary, _release_name: "Atualização automática" },
+  );
+  if (releaseErr) console.error("[github-webhook] auto_release error", releaseErr);
+
+  return new Response(JSON.stringify({ ok: true, inserted: toInsert.length, release_id: releaseId ?? null }), {
     headers: { "Content-Type": "application/json" },
   });
 }
