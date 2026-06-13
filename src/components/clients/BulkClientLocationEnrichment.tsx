@@ -112,6 +112,7 @@ export default function BulkClientLocationEnrichment({ open, onOpenChange, onCom
                 .eq("id", client.id);
 
               if (updateError) throw updateError;
+              console.log(`[BulkEnrich] OK id=${client.id} -> ${data.city}/${data.state} lat=${data.latitude} lon=${data.longitude}`);
               
               setStats(prev => ({ ...prev, processed: prev.processed + 1, found: prev.found + 1 }));
             } else {
