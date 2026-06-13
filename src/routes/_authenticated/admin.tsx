@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Users, ScrollText, Plus, Pencil, Trash2, Settings, Building2, BriefcaseBusiness, WalletCards, ShieldCheck, Save, Bell, Palette, Hash, SlidersHorizontal, KeyRound, Briefcase, ListTodo, FileSpreadsheet, History, CheckCircle2, AlertCircle, Sparkles, Calendar, Database, Download, ShieldAlert, Loader2, Activity } from "lucide-react";
 import { SystemDiagnostics } from "@/components/admin/SystemDiagnostics";
+import { PendingChangelogPanel } from "@/components/admin/PendingChangelogPanel";
 
 import { DevisSequenceManager } from "@/components/devis/DevisSequenceManager";
 import { toast } from "sonner";
