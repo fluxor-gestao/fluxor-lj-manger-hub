@@ -1208,6 +1208,7 @@ export type Database = {
           cost_center_id: string | null
           counterparty_name: string | null
           created_at: string
+          created_via_conciliation: boolean
           currency: string
           devis_id: string | null
           devis_number: string | null
@@ -1261,6 +1262,7 @@ export type Database = {
           cost_center_id?: string | null
           counterparty_name?: string | null
           created_at?: string
+          created_via_conciliation?: boolean
           currency?: string
           devis_id?: string | null
           devis_number?: string | null
@@ -1314,6 +1316,7 @@ export type Database = {
           cost_center_id?: string | null
           counterparty_name?: string | null
           created_at?: string
+          created_via_conciliation?: boolean
           currency?: string
           devis_id?: string | null
           devis_number?: string | null
