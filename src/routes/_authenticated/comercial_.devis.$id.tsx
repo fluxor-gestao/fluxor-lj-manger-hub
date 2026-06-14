@@ -347,7 +347,7 @@ function DevisDetail() {
   if (!devis) return <div className="text-muted-foreground">Devis não encontrado.</div>;
 
   const sourceLang = (devis as any).source_language || "pt";
-  const LANG_LABELS: Record<string, string> = { pt: "Português", fr: "Francês", en: "Inglês", es: "Espanhol" };
+  const LANG_LABELS: Record<string, string> = { pt: "Português", fr: "Francês", en: "Inglês", es: "Espanhol", de: "Alemão" };
 
   const handleToggleTranslate = async () => {
     if (viewLang === "pt") {
