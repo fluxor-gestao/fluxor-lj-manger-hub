@@ -451,15 +451,11 @@ export function FaturaPreviewDialog({
               </Button>
               <Button
                 className="w-full justify-start"
-                onClick={sendInvoice}
+                onClick={openConfirmDialog}
                 disabled={isSending}
               >
-                {isSending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4 mr-2" />
-                )}
-                {isSending ? "Enviando..." : "Enviar Cobrança"}
+                <Send className="h-4 w-4 mr-2" />
+                Enviar Cobrança
               </Button>
               <Button variant="outline" className="w-full justify-start" disabled>
                 <Download className="h-4 w-4 mr-2" /> Baixar PDF · Em breve
