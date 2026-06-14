@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 Sua tarefa é analisar uma Ata de Reunião e extrair dados estruturados para criar uma proposta (Devis).
 
 REGRA CRÍTICA DE IDIOMA:
-- Determine o idioma final (campo "detected_language": pt, fr, en ou es).
+- Determine o idioma final (campo "detected_language": pt, fr, en, es ou de).
 - TODOS os campos textuais de saída devem estar 100% nesse mesmo idioma.
 - Se o relatório estiver em francês ou inglês, traduza as descrições e títulos para o idioma detectado (geralmente pt-BR).
 
