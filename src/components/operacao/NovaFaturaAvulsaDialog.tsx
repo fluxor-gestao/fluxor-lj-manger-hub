@@ -41,7 +41,8 @@ export function NovaFaturaAvulsaDialog({
 
   const [clientId, setClientId] = useState("");
   const [clientCompany, setClientCompany] = useState("");
-  const [businessUnit, setBusinessUnit] = useState("");
+  const [businessUnits, setBusinessUnits] = useState<string[]>([]);
+  const [unitsOpen, setUnitsOpen] = useState(false);
   const [responsibleSector, setResponsibleSector] = useState("");
   const [servicePriceId, setServicePriceId] = useState<string>("");
   const [title, setTitle] = useState("");
@@ -51,6 +52,8 @@ export function NovaFaturaAvulsaDialog({
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [previewNumber, setPreviewNumber] = useState<string>("");
+
+  const primaryUnit = businessUnits[0] ?? "";
 
   const { data: clients = [] } = useQuery({
     queryKey: ["fa-clients"],
