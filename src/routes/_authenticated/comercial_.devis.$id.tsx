@@ -179,7 +179,22 @@ function DevisDetail() {
         validation_sector_defined: !!form.validation_sector_defined,
         validation_amount_confirmed: !!form.validation_amount_confirmed,
         validation_deadline_defined: !!form.validation_deadline_defined,
+        source_language: form.source_language || (devis as any)?.source_language || "pt",
       };
+      // Se o idioma do cliente mudou, limpa a tradução secundária para forçar nova geração
+      const prevLang = (devis as any)?.source_language || "pt";
+      const newLang = payload.source_language;
+      if (prevLang !== newLang) {
+        Object.assign(payload, {
+          secondary_language: null,
+          title_secondary: null,
+          scope_description_secondary: null,
+          proposal_structure_secondary: null,
+          payment_terms_secondary: null,
+          scope_items_secondary: null,
+          assumptions_secondary: null,
+        });
+      }
       const { error } = await supabase.from("devis").update(payload).eq("id", id!);
       if (error) throw error;
 
