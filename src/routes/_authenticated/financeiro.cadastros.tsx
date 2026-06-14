@@ -140,7 +140,27 @@ function FinancialSetup() {
                           <div className="text-xs text-muted-foreground">{acc.bank || "—"} · Ag: {acc.agency || "—"} / Cc: {acc.account_number || "—"}</div>
                         </TableCell>
                         <TableCell>
-                          <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{acc.business_unit || "Todas"}</span>
+                          {(() => {
+                            const units: string[] = Array.isArray(acc.business_units) && acc.business_units.length > 0
+                              ? acc.business_units
+                              : (acc.business_unit ? [acc.business_unit] : []);
+                            if (units.length === 0) {
+                              return <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">Todas</span>;
+                            }
+                            return (
+                              <div className="flex flex-wrap gap-1">
+                                {units.map((u) => {
+                                  const c = COMPANY_LIST.find((x) => x.code === u);
+                                  return (
+                                    <span key={u} className="text-xs px-2 py-0.5 rounded bg-muted">
+                                      <span className="font-mono mr-1 text-muted-foreground">{u}</span>
+                                      {c?.short ?? u}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
                         </TableCell>
                         <TableCell className="text-xs">{acc.pix_key || "—"}</TableCell>
                         <TableCell>
