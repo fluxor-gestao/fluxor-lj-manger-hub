@@ -230,6 +230,24 @@ function DevisDetail() {
         proposal_structure: p.proposal_structure ?? "",
         suggested_pricing_items: p.suggested_pricing_items || [],
       });
+
+      // Normalizar áreas sugeridas pela IA contra o catálogo da unidade ativa
+      const rawAreas = (p.responsible_sectors as string[] | undefined)
+        || (p.responsible_sector ? [p.responsible_sector as string] : []);
+      if (rawAreas.length > 0 && form.business_unit) {
+        const { valid } = await resolveAreasForUnit(form.business_unit, rawAreas);
+        if (valid.length > 0) {
+          setSelectedAreas((prev) => {
+            const merged = new Set([...prev, ...valid]);
+            return Array.from(merged);
+          });
+          // Persistir a sugestão original para indicador visual no seletor
+          (devis as any).ai_suggested_area_slugs = Array.from(
+            new Set([...((devis as any)?.ai_suggested_area_slugs ?? []), ...valid]),
+          );
+        }
+      }
+
       if (p.total_amount && !form.total_amount) {
         const total = String(p.total_amount);
         const down = String((Number(p.total_amount) * 0.5).toFixed(2));
