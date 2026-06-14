@@ -582,6 +582,7 @@ export type Database = {
           accept_token: string
           accepted_at: string | null
           accepted_ip: string | null
+          additional_business_units: string[]
           ai_suggested_area_slugs: string[]
           approved_at: string | null
           assumptions_secondary: Json | null
@@ -640,6 +641,7 @@ export type Database = {
           accept_token?: string
           accepted_at?: string | null
           accepted_ip?: string | null
+          additional_business_units?: string[]
           ai_suggested_area_slugs?: string[]
           approved_at?: string | null
           assumptions_secondary?: Json | null
@@ -698,6 +700,7 @@ export type Database = {
           accept_token?: string
           accepted_at?: string | null
           accepted_ip?: string | null
+          additional_business_units?: string[]
           ai_suggested_area_slugs?: string[]
           approved_at?: string | null
           assumptions_secondary?: Json | null
