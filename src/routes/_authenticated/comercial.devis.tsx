@@ -638,8 +638,8 @@ function Comercial() {
           <Button variant="ghost" size="icon" asChild title="Central de Ajuda — Comercial">
             <Link to="/ajuda/comercial"><HelpCircle className="h-5 w-5" /></Link>
           </Button>
-          <Button variant="outline" onClick={() => window.history.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
+          <Button variant="outline" asChild>
+            <Link to="/comercial"><ArrowLeft className="h-4 w-4 mr-2" /> Voltar</Link>
           </Button>
         </div>
       </div>
