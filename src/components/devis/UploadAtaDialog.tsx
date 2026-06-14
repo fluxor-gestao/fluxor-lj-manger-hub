@@ -102,6 +102,8 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
   const [progress, setProgress] = useState(0);
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
   const [meetingDate, setMeetingDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [pendingResult, setPendingResult] = useState<ConfirmedAtaResult | null>(null);
+  const [showCodeDialog, setShowCodeDialog] = useState(false);
 
   const reset = () => {
     setStep(1);
@@ -116,6 +118,13 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
     setSelectedClientId("");
     setCreating(false);
     setProgress(0);
+    setPendingResult(null);
+    setShowCodeDialog(false);
+  };
+
+  const requestDevisCode = (result: ConfirmedAtaResult) => {
+    setPendingResult(result);
+    setShowCodeDialog(true);
   };
 
   const handleClose = (o: boolean) => {
