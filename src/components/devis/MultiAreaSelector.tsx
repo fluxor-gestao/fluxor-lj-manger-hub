@@ -106,9 +106,13 @@ export function MultiAreaSelector({
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
-          {allAreas.length === 0 ? (
+          {!companyCode ? (
             <div className="text-sm text-muted-foreground p-2 text-center">
-              Nenhuma área disponível.
+              Selecione a empresa para listar as áreas.
+            </div>
+          ) : allAreas.length === 0 ? (
+            <div className="text-sm text-muted-foreground p-2 text-center">
+              Nenhuma área cadastrada para esta unidade.
             </div>
           ) : (
             allAreas.map((area) => (
@@ -129,6 +133,11 @@ export function MultiAreaSelector({
                 >
                   {area.label}
                 </Label>
+                {suggestedSet.has(area.slug) && (
+                  <Badge variant="outline" className="h-5 text-[9px] uppercase font-bold border-primary/40 text-primary gap-1 px-1.5">
+                    <Sparkles className="h-2.5 w-2.5" /> IA
+                  </Badge>
+                )}
                 {selectedAreas.includes(area.slug) && onMainAreaChange && (
                   <Button
                     size="sm"
