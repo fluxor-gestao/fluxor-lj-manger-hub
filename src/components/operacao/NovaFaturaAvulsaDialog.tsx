@@ -41,6 +41,7 @@ export function NovaFaturaAvulsaDialog({
   const qc = useQueryClient();
 
   const [clientId, setClientId] = useState("");
+  const [clientOpen, setClientOpen] = useState(false);
   const [clientCompany, setClientCompany] = useState("");
   const [businessUnits, setBusinessUnits] = useState<string[]>([]);
   const [unitsOpen, setUnitsOpen] = useState(false);
