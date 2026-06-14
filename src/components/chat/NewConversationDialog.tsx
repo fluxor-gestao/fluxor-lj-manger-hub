@@ -10,6 +10,8 @@ import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { createDirectConversation, createAreaConversation } from "@/lib/chat/api";
 import { useChat } from "./ChatProvider";
+import { usePresence } from "@/hooks/usePresence";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const AREAS: AppRole[] = ["admin", "comercial", "financeiro", "operacao"];
@@ -24,6 +26,7 @@ export function NewConversationDialog({
   const { user } = useAuth();
   const qc = useQueryClient();
   const { setActiveConversationId } = useChat();
+  const onlineSet = usePresence();
   const [mode, setMode] = useState<"direct" | "area">("direct");
 
   const [users, setUsers] = useState<{ user_id: string; full_name: string | null; email: string | null }[]>([]);
@@ -100,18 +103,30 @@ export function NewConversationDialog({
               {filteredUsers.length === 0 ? (
                 <div className="p-3 text-sm text-muted-foreground text-center">Nenhum usuário</div>
               ) : (
-                filteredUsers.map((u) => (
-                  <button
-                    key={u.user_id}
-                    onClick={() => setSelectedUser(u.user_id)}
-                    className={`w-full text-left px-3 py-2 hover:bg-muted text-sm ${
-                      selectedUser === u.user_id ? "bg-muted" : ""
-                    }`}
-                  >
-                    <div className="font-medium">{u.full_name || u.email}</div>
-                    {u.full_name && <div className="text-xs text-muted-foreground">{u.email}</div>}
-                  </button>
-                ))
+                filteredUsers.map((u) => {
+                  const isOnline = onlineSet.has(u.user_id);
+                  return (
+                    <button
+                      key={u.user_id}
+                      onClick={() => setSelectedUser(u.user_id)}
+                      className={`w-full text-left px-3 py-2 hover:bg-muted text-sm flex items-center gap-2 ${
+                        selectedUser === u.user_id ? "bg-muted" : ""
+                      }`}
+                    >
+                      <span
+                        className={cn(
+                          "h-2 w-2 rounded-full shrink-0",
+                          isOnline ? "bg-emerald-500" : "bg-muted-foreground/40",
+                        )}
+                        title={isOnline ? "Online" : "Offline"}
+                      />
+                      <span className="flex-1 min-w-0">
+                        <span className="font-medium block truncate">{u.full_name || u.email}</span>
+                        {u.full_name && <span className="text-xs text-muted-foreground block truncate">{u.email}</span>}
+                      </span>
+                    </button>
+                  );
+                })
               )}
             </div>
           </TabsContent>

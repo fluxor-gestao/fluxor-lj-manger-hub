@@ -15,6 +15,13 @@ export type Conversation = {
   updated_at: string;
 };
 
+export type MessageAttachment = {
+  path: string;
+  name: string;
+  size: number;
+  mime: string;
+};
+
 export type Message = {
   id: string;
   conversation_id: string;
@@ -23,6 +30,7 @@ export type Message = {
   created_at: string;
   edited_at: string | null;
   deleted_at: string | null;
+  attachments?: MessageAttachment[];
 };
 
 export type Participant = {
