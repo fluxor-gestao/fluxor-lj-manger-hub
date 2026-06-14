@@ -8,7 +8,7 @@ const corsHeaders = {
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function buildHtml(messageText: string, invoiceNumber: string, openAmount: string, dueDate: string) {
+function buildHtml(messageText: string, invoiceNumber: string, openAmount: string, dueDate: string, trackingPixelUrl?: string) {
   return `<!doctype html>
 <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;color:#1f2937">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0">
@@ -47,6 +47,7 @@ function buildHtml(messageText: string, invoiceNumber: string, openAmount: strin
       </table>
     </td></tr>
   </table>
+  ${trackingPixelUrl ? `<img src="${trackingPixelUrl}" width="1" height="1" alt="" style="display:block;border:0;outline:none;width:1px;height:1px" />` : ""}
 </body></html>`;
 }
 
@@ -65,7 +66,8 @@ Deno.serve(async (req) => {
     const { entry_id, to, subject, message_text, invoice_number, open_amount, due_date } = await req.json();
     if (!to || !subject || !message_text || !entry_id) throw new Error("Parâmetros inválidos");
 
-    const htmlBody = buildHtml(message_text, invoice_number, open_amount, due_date);
+    const trackingPixelUrl = `${SUPABASE_URL}/functions/v1/track-email-open?id=${encodeURIComponent(entry_id)}`;
+    const htmlBody = buildHtml(message_text, invoice_number, open_amount, due_date, trackingPixelUrl);
 
     const payload: any = {
       from: FROM_EMAIL,
