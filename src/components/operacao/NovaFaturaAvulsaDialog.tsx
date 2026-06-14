@@ -256,17 +256,55 @@ export function NovaFaturaAvulsaDialog({
         <div className="grid gap-3 sm:grid-cols-2 py-2">
           <div className="sm:col-span-2 space-y-1.5">
             <Label>Cliente *</Label>
-            <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger><SelectValue placeholder="Selecione o cliente..." /></SelectTrigger>
-              <SelectContent className="max-h-72">
-                {clients.map((c: any) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}{c.company ? ` — ${c.company}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={clientOpen} onOpenChange={setClientOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={clientOpen}
+                  className="w-full justify-between font-normal"
+                >
+                  <span className={cn("truncate", !selectedClient && "text-muted-foreground")}>
+                    {selectedClient
+                      ? `${(selectedClient as any).name}${(selectedClient as any).company ? ` — ${(selectedClient as any).company}` : ""}`
+                      : "Selecione o cliente..."}
+                  </span>
+                  <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command
+                  filter={(value, search) => {
+                    return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                  }}
+                >
+                  <CommandInput placeholder="Buscar por nome ou empresa..." />
+                  <CommandList>
+                    <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
+                    <CommandGroup>
+                      {clients.map((c: any) => (
+                        <CommandItem
+                          key={c.id}
+                          value={`${c.name} ${c.company ?? ""}`}
+                          onSelect={() => {
+                            setClientId(c.id);
+                            setClientOpen(false);
+                          }}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", clientId === c.id ? "opacity-100" : "opacity-0")} />
+                          <span className="truncate">
+                            {c.name}{c.company ? <span className="text-muted-foreground"> — {c.company}</span> : null}
+                          </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
+
 
           <div className="sm:col-span-2 space-y-1.5">
             <Label>Empresa do cliente (opcional)</Label>
