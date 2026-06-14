@@ -118,7 +118,7 @@ function FinancialSetup() {
                 <CardTitle>Contas de Pagamento / Bancárias</CardTitle>
                 <CardDescription>Contas oficiais para recebimentos e pagamentos</CardDescription>
               </div>
-              <AccountDialog onSave={(acc) => saveAccount.mutate(acc)} />
+              <AccountDialog onSave={(acc) => saveAccount.mutateAsync(acc)} />
             </CardHeader>
             <CardContent>
               {loadingAccounts ? <LoadingState /> : (
