@@ -18,11 +18,12 @@ import { generateDevisPdfBase64 } from "@/lib/exportDevisPdf";
 import { ensureDevisBilingual } from "@/lib/ensureDevisBilingual";
 import { getMissingClauses, isProposalComplete } from "@/lib/validateProposal";
 
-type Lang = "pt" | "fr" | "en" | "es";
+type Lang = "pt" | "fr" | "en" | "es" | "de";
 
 function detectLanguage(text?: string | null): Lang {
   if (!text) return "pt";
   const t = text.toLowerCase();
+  if (/\b(und|der|die|das|nicht|sehr geehrte|mit freundlichen)\b/.test(t) && /[äöüß]/.test(t)) return "de";
   if (/\bhonoraires|prestation|client\b/.test(t) && /[éèàç]/.test(text)) return "fr";
   if (/\bhonorarios|prestación|cliente\b/.test(t) && /[ñáéíóú]/.test(text)) return "es";
   if (/\bfees|scope|client\b/.test(t) && !/[áéíóúçãõ]/.test(text)) return "en";
@@ -38,6 +39,8 @@ const DEFAULT_MESSAGE: Record<Lang, (client: string, devisNum: string) => string
     `Dear ${c},\n\nAs discussed, please find attached proposal ${n} from Lundgaard Jensen International Law & Consulting.\n\nTo accept the proposal quickly and securely, click the "Accept Proposal" button below.\n\nWe remain at your disposal.\n\nBest regards,\nLundgaard Jensen Team`,
   es: (c, n) =>
     `Estimado(a) ${c},\n\nSegún lo conversado, adjuntamos la propuesta ${n} de Lundgaard Jensen Abogados y Consultoría Internacional.\n\nPara aceptar la propuesta de forma rápida y segura, haga clic en el botón "Aceptar la Propuesta" a continuación.\n\nQuedamos a su disposición.\n\nAtentamente,\nEquipo Lundgaard Jensen`,
+  de: (c, n) =>
+    `Sehr geehrte(r) ${c},\n\nwie besprochen, übersenden wir Ihnen anbei das Angebot ${n} von Lundgaard Jensen Internationale Anwaltskanzlei und Beratung.\n\nUm das Angebot schnell und sicher anzunehmen, klicken Sie bitte auf die Schaltfläche "Angebot annehmen" unten.\n\nWir stehen Ihnen jederzeit zur Verfügung.\n\nMit freundlichen Grüßen,\nIhr Lundgaard Jensen Team`,
 };
 
 interface Props {
@@ -51,7 +54,7 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
   const queryClient = useQueryClient();
   const language = useMemo<Lang>(() => {
     const src = (devis?.source_language || "").toLowerCase();
-    if (src === "pt" || src === "fr" || src === "en" || src === "es") return src as Lang;
+    if (src === "pt" || src === "fr" || src === "en" || src === "es" || src === "de") return src as Lang;
     return detectLanguage(devis?.proposal_structure);
   }, [devis?.source_language, devis?.proposal_structure]);
   const publicBase =

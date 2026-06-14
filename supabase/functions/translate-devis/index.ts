@@ -9,6 +9,7 @@ const LANG_NAME: Record<string, string> = {
   fr: "français",
   en: "English",
   es: "español",
+  de: "Deutsch",
 };
 
 const STRUCTURED_KEYS = new Set([

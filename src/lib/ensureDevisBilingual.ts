@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-type Lang = "pt" | "fr" | "en" | "es";
+type Lang = "pt" | "fr" | "en" | "es" | "de";
 
 /**
  * Garante que o devis tenha campos traduzidos para o idioma do cliente
@@ -10,6 +10,7 @@ type Lang = "pt" | "fr" | "en" | "es";
  */
 export async function ensureDevisBilingual(devis: any): Promise<any> {
   const target = (devis?.source_language || "pt") as Lang;
+  if (!["pt", "fr", "en", "es", "de"].includes(target)) return devis;
   // cliente brasileiro: nada a traduzir
   if (target === "pt") return devis;
 

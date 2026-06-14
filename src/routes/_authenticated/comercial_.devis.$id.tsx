@@ -179,7 +179,22 @@ function DevisDetail() {
         validation_sector_defined: !!form.validation_sector_defined,
         validation_amount_confirmed: !!form.validation_amount_confirmed,
         validation_deadline_defined: !!form.validation_deadline_defined,
+        source_language: form.source_language || (devis as any)?.source_language || "pt",
       };
+      // Se o idioma do cliente mudou, limpa a tradução secundária para forçar nova geração
+      const prevLang = (devis as any)?.source_language || "pt";
+      const newLang = payload.source_language;
+      if (prevLang !== newLang) {
+        Object.assign(payload, {
+          secondary_language: null,
+          title_secondary: null,
+          scope_description_secondary: null,
+          proposal_structure_secondary: null,
+          payment_terms_secondary: null,
+          scope_items_secondary: null,
+          assumptions_secondary: null,
+        });
+      }
       const { error } = await supabase.from("devis").update(payload).eq("id", id!);
       if (error) throw error;
 
@@ -221,6 +236,7 @@ function DevisDetail() {
           total_amount: Number(form.total_amount) || undefined,
           deadline_date: form.deadline_date ? format(form.deadline_date, "yyyy-MM-dd") : undefined,
           business_unit: form.business_unit,
+          source_language: form.source_language || (devis as any)?.source_language || "pt",
           tier,
         },
       });
@@ -346,7 +362,7 @@ function DevisDetail() {
   if (!devis) return <div className="text-muted-foreground">Devis não encontrado.</div>;
 
   const sourceLang = (devis as any).source_language || "pt";
-  const LANG_LABELS: Record<string, string> = { pt: "Português", fr: "Francês", en: "Inglês", es: "Espanhol" };
+  const LANG_LABELS: Record<string, string> = { pt: "Português", fr: "Francês", en: "Inglês", es: "Espanhol", de: "Alemão" };
 
   const handleToggleTranslate = async () => {
     if (viewLang === "pt") {
@@ -777,6 +793,38 @@ function DevisDetail() {
               </div>
             )}
           </div>
+
+          {/* Idioma nativo da proposta (cliente) */}
+          <div>
+            <Label>Idioma do cliente</Label>
+            {editing ? (
+              <Select
+                value={form.source_language || "pt"}
+                onValueChange={(v) => setForm({ ...form, source_language: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(LANG_LABELS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="font-medium mt-1 flex items-center gap-2">
+                <Languages className="h-4 w-4 text-muted-foreground" />
+                {LANG_LABELS[sourceLang] || sourceLang}
+              </p>
+            )}
+            {editing && (
+              <p className="text-xs text-muted-foreground mt-1">
+                A proposta é escrita no idioma do cliente; use "Traduzir para Português" para revisão interna.
+              </p>
+            )}
+          </div>
+
+
 
           {/* Data Reunião */}
           <div>

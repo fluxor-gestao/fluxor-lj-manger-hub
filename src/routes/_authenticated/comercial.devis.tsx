@@ -465,6 +465,7 @@ function Comercial() {
           meeting_report: devisForm.meeting_report,
           client_name: client?.name,
           total_amount: Number(devisForm.total_amount) || undefined,
+          source_language: devisForm.source_language || "pt",
         },
       });
       if (error) throw error;
