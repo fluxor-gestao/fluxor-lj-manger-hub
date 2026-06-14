@@ -1,4 +1,4 @@
-import { AlertOctagon, MoreHorizontal, FileText } from "lucide-react";
+import { AlertOctagon, MoreHorizontal, FileText, Trash2 } from "lucide-react";
 import { formatDevisCode } from "@/lib/formatDevis";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
