@@ -1,34 +1,42 @@
-## Objetivo
+## Diagnóstico
 
-Após a tela "3. Análise IA" do `UploadAtaDialog`, abrir a tela de escolha de **código do Devis (prefixo GE/CO/AM/IM/DE + sequencial)** que já existe (`DevisCodePreviewDialog`). Só depois da confirmação dessa tela é que o rascunho é criado e o usuário é redirecionado para a tela de estrutura geral (fluxo atual).
+- `MultiAreaSelector` já lê de `business_areas` filtrando por `business_unit`, mas também faz merge com áreas legadas hardcoded em `src/lib/businessAreas.ts` (`BUSINESS_AREAS`). Isso polui as sugestões e quebra a regra de "tudo deve vir da tabela Áreas".
+- A IA (`generate-devis-proposal`, `analyze-meeting-report`) devolve `responsible_sector(s)` em texto livre (ex.: "Advocacia Imobiliária", "Internacional"). Esses valores são gravados em `devis_service_areas.area_slug` como vieram, então:
+  - se não baterem com um `slug` real de `business_areas`, eles **não aparecem marcados** no seletor da unidade (o usuário vê "Selecionar áreas..." mesmo com áreas já vinculadas);
+  - badges no topo do Devis acabam mostrando rótulos "soltos" sem vínculo real com a unidade.
+- Não há indicação visual de quais áreas foram **sugeridas pela IA** vs. selecionadas manualmente.
 
-Nada do fluxo existente é removido — apenas inserimos uma etapa entre o que já roda hoje.
+## O que vamos fazer
 
-## Mudanças
+### 1. Seletor passa a ser 100% baseado em `business_areas`
+`src/components/devis/MultiAreaSelector.tsx`
+- Remover o merge com `getAreasFor(companyCode)`; usar apenas os registros ativos de `business_areas` da unidade.
+- Mensagem clara quando `companyCode` está vazio: "Selecione a empresa para listar as áreas".
+- Aceitar nova prop opcional `suggestedAreas?: string[]` para marcar visualmente itens vindos da IA (chip "Sugerida pela IA" na linha do popover).
 
-### 1. `src/components/devis/UploadAtaDialog.tsx`
-- Acrescentar estado `pendingResult: ConfirmedAtaResult | null` e `showCodeDialog: boolean`.
-- No final de `handleAnalyze` (e no `handleConfirm` do step 4), **substituir** a chamada direta `onConfirm({ client_id, payload })` por:
-  - guardar `{ client_id, payload }` em `pendingResult`
-  - abrir o `DevisCodePreviewDialog` (`showCodeDialog = true`)
-- Importar `DevisCodePreviewDialog` + `inferServicePrefix` e renderizá-lo dentro do componente. `initialPrefix` é calculado a partir de `payload.devis.service_type / responsible_sector / title / scope_description` (mesma lógica que hoje vive no parent).
-- No `onConfirm` do `DevisCodePreviewDialog`, chamar `props.onConfirm({ ...pendingResult, devis_code: { prefix, devis_number, service_type } })` e fechar tudo.
-- Atualizar o breadcrumb visual do dialog para refletir a nova etapa, sem quebrar layout: `1. Upload → 2. Confirmação → 3. Análise IA → 4. Código → 5. Revisão` (o step 5 continua sendo o fallback atual de revisão manual, hoje numerado como 4).
+### 2. Normalizar saídas da IA contra `business_areas`
+Novo helper `src/lib/areaResolver.ts`:
+- `resolveAreasForUnit(unit, rawList): Promise<{ valid: string[]; unknown: string[] }>`
+- Busca `business_areas` (active, unit) e tenta casar cada item por: slug exato → label/name exato (normalizado) → `includes` parcial. Só retorna slugs presentes na tabela.
 
-### 2. `src/components/devis/UploadAtaDialog.tsx` – tipo
-- Estender `ConfirmedAtaResult` com campo opcional:
-  ```ts
-  devis_code?: { prefix: string; devis_number: string; service_type: string }
-  ```
+Aplicar em:
+- `src/routes/_authenticated/comercial.devis.tsx` → `handleAtaConfirm`: antes de `insert` em `devis_service_areas`, passar `payload.devis.responsible_sectors` pelo resolver. Salvar **apenas slugs válidos**. Guardar a lista resolvida também em `devis.ai_suggested_area_slugs` (nova coluna).
+- `src/routes/_authenticated/comercial_.devis.$id.tsx` → `handleGenerate`: ao receber sugestão da IA, resolver `responsible_sector(s)` contra a unidade do form e refletir no estado `aiSuggestions`/`selectedAreas` (pré-seleção, sem sobrescrever escolhas manuais já presentes).
 
-### 3. `src/routes/_authenticated/comercial.devis.tsx` – `handleAtaConfirm`
-- Se `result.devis_code` estiver presente: pular `inferServicePrefix` e `supabase.rpc("next_devis_number")` e usar os valores escolhidos pelo usuário (`prefix`, `devis_number`, `service_type`) na montagem do `insertPayload`.
-- Se ausente (segurança / compatibilidade): manter o caminho atual exatamente como está.
+### 3. Pré-seleção + abertura para alterar
+- Na tela do Devis, ao entrar em edição, `selectedAreas` já vem de `devis_service_areas` (mantido). Adicional: passar `suggestedAreas={devis.ai_suggested_area_slugs ?? []}` ao `MultiAreaSelector` para o usuário ver "Sugerida pela IA" e ter liberdade de desmarcar / marcar outras da tabela.
 
-### 4. Versionamento
-- Após a alteração, chamar `supabase.rpc('log_change', { _type: 'ajuste', _description: 'Upload de Ata: reinserida etapa de escolha do código do Devis (prefixo + sequencial) antes de criar o rascunho' })`.
+### 4. Instruir a IA a escolher só do catálogo
+- `supabase/functions/analyze-meeting-report/index.ts` e `supabase/functions/generate-devis-proposal/index.ts`: incluir no prompt a lista `slug — label` das áreas ativas da unidade e exigir que o modelo retorne **somente slugs dessa lista** em `responsible_sectors`. (Resolver na etapa 2 continua como rede de segurança.)
+
+### 5. Migração de banco
+- Adicionar `ai_suggested_area_slugs text[] NOT NULL DEFAULT '{}'::text[]` em `public.devis` (nullable opcional). Sem alterar políticas existentes.
+
+### 6. Versionamento
+- `supabase.rpc('log_change', { _type: 'ajuste', _description: 'Áreas Responsáveis do Devis: passam a vir exclusivamente da tabela business_areas, com sugestões da IA pré-selecionadas e validadas' })`.
 
 ## O que NÃO muda
-- `DevisCodePreviewDialog` permanece intacto (já tem seletor de prefixo, próximo sequencial editável e preview do código).
-- Toda a criação do Devis, inserção de áreas, redirect para `comercial/devis/:id`, e as telas "Estrutura geral" continuam idênticas.
-- O fallback do step "Revisão" (quando a IA não consegue resolver cliente) continua funcionando — apenas passa pelo novo step de código antes de finalizar.
+- Tabela `business_areas` e a tela "Áreas" continuam intactas.
+- `responsible_sector` (área principal singular) segue sendo o primeiro slug válido.
+- `BUSINESS_AREAS` hardcoded é mantido em `businessAreas.ts` somente para `findArea`/`areaLabel` legados (badges de devis antigos), mas não é mais oferecido no seletor.
+- Demais campos do Devis, fluxo de upload de Ata e tela de criação do código não são tocados.

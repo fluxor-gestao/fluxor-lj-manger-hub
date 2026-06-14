@@ -1,0 +1,1 @@
+ALTER TABLE public.devis ADD COLUMN IF NOT EXISTS ai_suggested_area_slugs text[] NOT NULL DEFAULT '{}'::text[];
