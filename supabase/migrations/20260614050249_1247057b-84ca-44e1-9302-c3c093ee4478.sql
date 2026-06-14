@@ -1,0 +1,1 @@
+SELECT log_change('ajuste', 'Envio de cobrança agora abre diálogo de confirmação com dados do cliente (nome, e-mail, telefone) editáveis; resolve cliente via devis quando o lançamento não tem client_id.');

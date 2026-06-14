@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Copy, Send, Download, X, CreditCard, Building2, Loader2, Info } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Copy, Send, Download, X, CreditCard, Building2, Loader2, Info, User, Mail, Phone, CheckCircle2 } from "lucide-react";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import logo from "@/assets/logo.svg";
 import type { CobrancaRow } from "./CobrancaDetailSheet";
@@ -63,6 +64,11 @@ export function FaturaPreviewDialog({
   const [isSending, setIsSending] = useState(false);
   const [selectedMethodId, setSelectedMethodId] = useState<string>("");
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loadingRecipient, setLoadingRecipient] = useState(false);
+  const [recipient, setRecipient] = useState<{ name: string; email: string; phone: string; document: string }>({
+    name: "", email: "", phone: "", document: "",
+  });
 
   const cliente = row?.client?.name || row?.counterparty_name || "Cliente";
   const total = Number(row?.total_brl ?? row?.amount_in ?? 0);
@@ -135,25 +141,64 @@ export function FaturaPreviewDialog({
 
   const invoiceNumber = `FAT-${row.id.slice(0, 8).toUpperCase()}`;
 
-  const sendInvoice = async () => {
+  const openConfirmDialog = async () => {
     if (!row) return;
-    
-    // Buscar o e-mail do cliente se não estiver disponível
-    let targetEmail = (row as any).client?.email;
-    
-    if (!targetEmail && row.client_id) {
-      const { data: clientData } = await supabase
-        .from("clients")
-        .select("email")
-        .eq("id", row.client_id)
-        .single();
-      targetEmail = clientData?.email;
-    }
+    setLoadingRecipient(true);
+    setConfirmOpen(true);
+    try {
+      let clientId = row.client_id as string | null | undefined;
+      let name = (row as any).client?.name || row.counterparty_name || "";
+      let email = (row as any).client?.email || "";
+      let phone = (row as any).client?.phone || "";
+      let document = (row as any).client?.document || "";
 
-    if (!targetEmail) {
-      toast.error("E-mail do cliente não encontrado", {
-        description: "Configure o e-mail no cadastro do cliente antes de enviar."
-      });
+      // Fallback 1: via devis
+      if ((!clientId || !email) && row.devis_id) {
+        const { data: devis } = await supabase
+          .from("devis")
+          .select("client_id")
+          .eq("id", row.devis_id)
+          .maybeSingle();
+        if (devis?.client_id) clientId = devis.client_id;
+      }
+
+      // Fallback 2: por nome da contraparte
+      if (!clientId && row.counterparty_name) {
+        const { data: byName } = await supabase
+          .from("clients")
+          .select("id")
+          .ilike("name", row.counterparty_name)
+          .limit(1)
+          .maybeSingle();
+        if (byName?.id) clientId = byName.id;
+      }
+
+      if (clientId) {
+        const { data: cli } = await supabase
+          .from("clients")
+          .select("name, email, phone, document")
+          .eq("id", clientId)
+          .maybeSingle();
+        if (cli) {
+          name = cli.name || name;
+          email = cli.email || email;
+          phone = (cli as any).phone || phone;
+          document = (cli as any).document || document;
+        }
+      }
+
+      setRecipient({ name: name || "", email: email || "", phone: phone || "", document: document || "" });
+    } catch (err) {
+      console.error("Erro ao resolver dados do cliente:", err);
+    } finally {
+      setLoadingRecipient(false);
+    }
+  };
+
+  const confirmAndSend = async () => {
+    if (!row) return;
+    if (!recipient.email || !/^\S+@\S+\.\S+$/.test(recipient.email)) {
+      toast.error("E-mail inválido", { description: "Informe um e-mail válido para o envio." });
       return;
     }
 
@@ -162,7 +207,9 @@ export function FaturaPreviewDialog({
       const { data, error } = await supabase.functions.invoke("send-invoice-email", {
         body: {
           entry_id: row.id,
-          to: targetEmail,
+          to: recipient.email,
+          recipient_name: recipient.name,
+          recipient_phone: recipient.phone,
           subject: `Cobrança disponível - ${invoiceNumber}`,
           message_text: message,
           invoice_number: invoiceNumber,
@@ -175,8 +222,11 @@ export function FaturaPreviewDialog({
 
       if (error) throw error;
 
-      toast.success("Cobrança enviada com sucesso!");
+      toast.success("Cobrança enviada com sucesso!", {
+        description: `Enviada para ${recipient.email}`,
+      });
       queryClient.invalidateQueries({ queryKey: ["contas-a-receber"] });
+      setConfirmOpen(false);
       onOpenChange(false);
     } catch (err: any) {
       console.error("Error sending invoice:", err);
@@ -401,15 +451,11 @@ export function FaturaPreviewDialog({
               </Button>
               <Button
                 className="w-full justify-start"
-                onClick={sendInvoice}
+                onClick={openConfirmDialog}
                 disabled={isSending}
               >
-                {isSending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4 mr-2" />
-                )}
-                {isSending ? "Enviando..." : "Enviar Cobrança"}
+                <Send className="h-4 w-4 mr-2" />
+                Enviar Cobrança
               </Button>
               <Button variant="outline" className="w-full justify-start" disabled>
                 <Download className="h-4 w-4 mr-2" /> Baixar PDF · Em breve
@@ -430,6 +476,91 @@ export function FaturaPreviewDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Confirmação dos dados do destinatário */}
+      <Dialog open={confirmOpen} onOpenChange={(o) => !isSending && setConfirmOpen(o)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Send className="h-4 w-4 text-primary" /> Confirmar envio da cobrança
+            </DialogTitle>
+            <DialogDescription>
+              Revise os dados do cliente antes de enviar. Você pode editar qualquer campo abaixo.
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingRecipient ? (
+            <div className="flex items-center justify-center py-10 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando dados do cliente...
+            </div>
+          ) : (
+            <div className="space-y-3 py-2">
+              <div className="rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                Fatura <span className="font-semibold text-foreground">{invoiceNumber}</span> · {fmt(open_)}
+              </div>
+
+              <div>
+                <Label className="text-xs flex items-center gap-1.5 mb-1.5">
+                  <User className="h-3.5 w-3.5" /> Nome do cliente
+                </Label>
+                <Input
+                  value={recipient.name}
+                  onChange={(e) => setRecipient((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs flex items-center gap-1.5 mb-1.5">
+                  <Mail className="h-3.5 w-3.5" /> E-mail para envio *
+                </Label>
+                <Input
+                  type="email"
+                  value={recipient.email}
+                  onChange={(e) => setRecipient((p) => ({ ...p, email: e.target.value }))}
+                  placeholder="cliente@email.com"
+                  className={!recipient.email ? "border-destructive/50" : ""}
+                />
+                {!recipient.email && (
+                  <p className="text-[11px] text-destructive mt-1">
+                    Cliente sem e-mail cadastrado. Informe um e-mail para o envio.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label className="text-xs flex items-center gap-1.5 mb-1.5">
+                  <Phone className="h-3.5 w-3.5" /> Telefone (opcional)
+                </Label>
+                <Input
+                  value={recipient.phone}
+                  onChange={(e) => setRecipient((p) => ({ ...p, phone: e.target.value }))}
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+
+              {recipient.document && (
+                <p className="text-[11px] text-muted-foreground">
+                  Documento: <span className="font-mono">{recipient.document}</span>
+                </p>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="ghost" onClick={() => setConfirmOpen(false)} disabled={isSending}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmAndSend} disabled={isSending || loadingRecipient || !recipient.email}>
+              {isSending ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando...</>
+              ) : (
+                <><CheckCircle2 className="h-4 w-4 mr-2" /> Confirmar e enviar</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
