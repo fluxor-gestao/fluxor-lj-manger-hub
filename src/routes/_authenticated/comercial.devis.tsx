@@ -526,7 +526,16 @@ function Comercial() {
 
     const total = payload.devis.total_amount || 0;
     const meetingDate = payload.meeting.date ? payload.meeting.date : format(new Date(), "yyyy-MM-dd");
-    
+
+    // Normalizar áreas sugeridas pela IA contra a tabela `business_areas` da unidade.
+    const rawAreas = payload.devis.responsible_sectors
+      || (payload.devis.responsible_sector ? [payload.devis.responsible_sector] : []);
+    const { valid: resolvedAreas, unknown: unknownAreas } = await resolveAreasForUnit(prefix, rawAreas);
+    if (unknownAreas.length > 0) {
+      console.warn("[handleAtaConfirm] áreas ignoradas (fora do catálogo):", unknownAreas);
+    }
+    const mainArea = resolvedAreas[0] || null;
+
     // 3. Criar o Devis no banco
     const insertPayload: any = {
       client_id,
@@ -543,11 +552,10 @@ function Comercial() {
       service_type: serviceType,
       source_language: payload.detected_language || "pt",
       business_unit: prefix as CompanyCode,
-      responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
-        ? (payload.devis.responsible_sector as string)
-        : null,
+      responsible_sector: mainArea,
       scope_description: payload.devis.scope_description || null,
       proposal_structure: payload.devis.proposal_structure || null,
+      ai_suggested_area_slugs: resolvedAreas,
     };
 
     const { data: newDevis, error: devisErr } = await supabase
@@ -561,15 +569,15 @@ function Comercial() {
       return;
     }
 
-    // 4. Inserir Áreas
-    const areas = payload.devis.responsible_sectors || (payload.devis.responsible_sector ? [payload.devis.responsible_sector] : []);
-    if (areas.length > 0) {
-      const areaPayload = areas.map(slug => ({
+    // 4. Inserir Áreas (apenas slugs válidos do catálogo)
+    if (resolvedAreas.length > 0) {
+      const areaPayload = resolvedAreas.map(slug => ({
         devis_id: newDevis.id,
-        area_slug: slug
+        area_slug: slug,
       }));
       await supabase.from("devis_service_areas").insert(areaPayload);
     }
+
 
     // 5. Inserir Itens de Precificação Sugeridos
     if (payload.devis.suggested_pricing_items && payload.devis.suggested_pricing_items.length > 0) {
