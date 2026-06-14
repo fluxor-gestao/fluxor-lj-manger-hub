@@ -430,79 +430,82 @@ function DevisDetail() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/comercial/devis" })}>
+      <div className="space-y-4">
+        {/* Linha 1: voltar + ações */}
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/comercial/devis" })} className="shrink-0">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold font-display">{(devis?.title ?? "")}</h1>
-            <p className="text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
-              <span>Detalhes do devis</span>
-              <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{formatDevisCode(devis.devis_number, devis.id)}</span>
-              <CompanyBadge code={(devis as any)?.business_unit} />
-              <div className="flex flex-wrap gap-1">
-                {devis.devis_service_areas?.length > 0 ? (
-                  devis.devis_service_areas.map((a: any) => (
-                    <AreaBadge key={a.area_slug} companyCode={(devis as any)?.business_unit} areaSlug={a.area_slug} />
-                  ))
-                ) : (
-                  <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
+          <div className="flex flex-wrap gap-2 justify-end ml-auto">
+            {editing ? (
+              <>
+                <Button variant="outline" onClick={() => { setEditing(false); setAiSuggestions(null); const total = devis.total_amount ?? 0; const down = devis.down_payment_amount ?? 0; const pct = total > 0 ? Math.round((down / total) * 100) : 50; setForm({ ...devis, meeting_date: devis.meeting_date ? parseISO(devis.meeting_date) : undefined, deadline_date: devis.deadline_date ? parseISO(devis.deadline_date) : undefined, total_amount: String(total || ""), down_payment_amount: String(down || ""), down_payment_percentage: String(pct) }); }}>
+                  <X className="h-4 w-4 mr-2" /> Cancelar
+                </Button>
+                <Button onClick={() => update.mutate()} disabled={update.isPending}>
+                  <Save className="h-4 w-4 mr-2" /> Salvar
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant={viewLang === "pt" ? "default" : "outline"}
+                  onClick={handleToggleTranslate}
+                  disabled={translating}
+                  title={`Idioma nativo: ${LANG_LABELS[sourceLang] || sourceLang}`}
+                >
+                  {translating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Languages className="h-4 w-4 mr-2" />}
+                  {viewLang === "pt"
+                    ? `Ver no original (${LANG_LABELS[sourceLang] || sourceLang})`
+                    : "Traduzir para Português"}
+                </Button>
+                {devis.validated_at && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const url = `${window.location.origin}/proposta/aceite/${devis.accept_token}`;
+                      navigator.clipboard.writeText(url);
+                      toast.success("Link de aceite copiado!");
+                    }}
+                  >
+                    <LinkIcon className="h-4 w-4 mr-2" /> Copiar link de aceite
+                  </Button>
                 )}
-              </div>
-              <Badge variant="outline" className={cn("text-xs font-semibold", devisStatusColors[devis.status])}>
-                {statusLabels[devis.status] || devis.status}
-              </Badge>
-            </p>
+                <Button variant="outline" onClick={handleExportPdf}>
+                  <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
+                </Button>
+                {!!devis.validated_at &&
+                  ["pronta_para_envio", "rascunho", "reuniao_realizada", "proposta_em_geracao", "aguardando_validacao", "enviado"].includes(devis.status) && (
+                  <Button onClick={() => setSendOpen(true)} className="bg-green-600 hover:bg-green-700">
+                    <Send className="h-4 w-4 mr-2" /> Enviar ao cliente
+                  </Button>
+                )}
+                <Button onClick={() => setEditing(true)}><Pencil className="h-4 w-4 mr-2" /> Editar</Button>
+              </>
+            )}
           </div>
         </div>
-        <div className="flex gap-2">
-          {editing ? (
-            <>
-              <Button variant="outline" onClick={() => { setEditing(false); setAiSuggestions(null); const total = devis.total_amount ?? 0; const down = devis.down_payment_amount ?? 0; const pct = total > 0 ? Math.round((down / total) * 100) : 50; setForm({ ...devis, meeting_date: devis.meeting_date ? parseISO(devis.meeting_date) : undefined, deadline_date: devis.deadline_date ? parseISO(devis.deadline_date) : undefined, total_amount: String(total || ""), down_payment_amount: String(down || ""), down_payment_percentage: String(pct) }); }}>
-                <X className="h-4 w-4 mr-2" /> Cancelar
-              </Button>
-              <Button onClick={() => update.mutate()} disabled={update.isPending}>
-                <Save className="h-4 w-4 mr-2" /> Salvar
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant={viewLang === "pt" ? "default" : "outline"}
-                onClick={handleToggleTranslate}
-                disabled={translating}
-                title={`Idioma nativo: ${LANG_LABELS[sourceLang] || sourceLang}`}
-              >
-                {translating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Languages className="h-4 w-4 mr-2" />}
-                {viewLang === "pt"
-                  ? `Ver no original (${LANG_LABELS[sourceLang] || sourceLang})`
-                  : "Traduzir para Português"}
-              </Button>
-              {devis.validated_at && (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const url = `${window.location.origin}/proposta/aceite/${devis.accept_token}`;
-                    navigator.clipboard.writeText(url);
-                    toast.success("Link de aceite copiado!");
-                  }}
-                >
-                  <LinkIcon className="h-4 w-4 mr-2" /> Copiar link de aceite
-                </Button>
+
+        {/* Linha 2: título e metadados em largura total */}
+        <div>
+          <h1 className="text-3xl font-bold font-display leading-tight break-words">{(devis?.title ?? "")}</h1>
+          <div className="text-muted-foreground mt-2 flex items-center gap-2 flex-wrap">
+            <span>Detalhes do devis</span>
+            <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">{formatDevisCode(devis.devis_number, devis.id)}</span>
+            <CompanyBadge code={(devis as any)?.business_unit} />
+            <div className="flex flex-wrap gap-1">
+              {devis.devis_service_areas?.length > 0 ? (
+                devis.devis_service_areas.map((a: any) => (
+                  <AreaBadge key={a.area_slug} companyCode={(devis as any)?.business_unit} areaSlug={a.area_slug} />
+                ))
+              ) : (
+                <AreaBadge companyCode={(devis as any)?.business_unit} areaSlug={(devis as any)?.responsible_sector} />
               )}
-              <Button variant="outline" onClick={handleExportPdf}>
-                <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
-              </Button>
-              {!!devis.validated_at &&
-                ["pronta_para_envio", "rascunho", "reuniao_realizada", "proposta_em_geracao", "aguardando_validacao", "enviado"].includes(devis.status) && (
-                <Button onClick={() => setSendOpen(true)} className="bg-green-600 hover:bg-green-700">
-                  <Send className="h-4 w-4 mr-2" /> Enviar ao cliente
-                </Button>
-              )}
-              <Button onClick={() => setEditing(true)}><Pencil className="h-4 w-4 mr-2" /> Editar</Button>
-            </>
-          )}
+            </div>
+            <Badge variant="outline" className={cn("text-xs font-semibold", devisStatusColors[devis.status])}>
+              {statusLabels[devis.status] || devis.status}
+            </Badge>
+          </div>
         </div>
       </div>
 
