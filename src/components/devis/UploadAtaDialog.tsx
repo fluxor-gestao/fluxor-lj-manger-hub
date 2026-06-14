@@ -356,8 +356,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           responsible_sector: selectedAreas[0] || ""
         }
       };
-      onConfirm({ client_id: clientId, payload: finalPayload });
-      handleClose(false);
+      requestDevisCode({ client_id: clientId, payload: finalPayload });
     } catch (e: any) {
       toast.error(e.message || "Falha ao confirmar");
     } finally {
