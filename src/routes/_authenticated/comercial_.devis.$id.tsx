@@ -221,6 +221,7 @@ function DevisDetail() {
           total_amount: Number(form.total_amount) || undefined,
           deadline_date: form.deadline_date ? format(form.deadline_date, "yyyy-MM-dd") : undefined,
           business_unit: form.business_unit,
+          source_language: form.source_language || (devis as any)?.source_language || "pt",
           tier,
         },
       });
