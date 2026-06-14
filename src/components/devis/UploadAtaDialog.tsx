@@ -289,8 +289,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
             responsible_sector: p.devis.responsible_sectors?.[0] || p.devis.responsible_sector || ""
           }
         };
-        onConfirm({ client_id: clientId, payload: finalPayload });
-        handleClose(false);
+        requestDevisCode({ client_id: clientId, payload: finalPayload });
       } else {
         // Fallback para o Step 4 apenas se não conseguirmos resolver o cliente automaticamente
         setStep(4);
