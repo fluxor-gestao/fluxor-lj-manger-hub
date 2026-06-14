@@ -116,7 +116,7 @@ export function MultiAreaSelector({
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
-          {!companyCode ? (
+          {effectiveCodes.length === 0 ? (
             <div className="text-sm text-muted-foreground p-2 text-center">
               Selecione a empresa para listar as áreas.
             </div>
