@@ -114,15 +114,13 @@ export function NovaFaturaAvulsaDialog({
   });
 
   const { data: prices = [] } = useQuery({
-    queryKey: ["fa-service-prices-all", businessUnits.join(",")],
+    queryKey: ["fa-service-prices-all"],
     enabled: open,
     queryFn: async () => {
-      let q = supabase
+      const { data, error } = await supabase
         .from("service_prices")
         .select("id, name, price, description, business_unit, responsible_sector")
         .order("name");
-      if (businessUnits.length > 0) q = q.in("business_unit", businessUnits);
-      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
