@@ -175,7 +175,8 @@ export function NovaFaturaAvulsaDialog({
         .insert({
           title: `[${fa_number}] ${title.trim()}`,
           description: description.trim() || null,
-          business_unit: businessUnit || null,
+          business_unit: primaryUnit || null,
+          additional_business_units: businessUnits.slice(1),
           responsible_sector: responsibleSector || null,
           client_id: clientId,
           expected_end_date: dueDate,
