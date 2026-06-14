@@ -141,9 +141,6 @@ export function FaturaPreviewDialog({
 
   const invoiceNumber = `FAT-${row.id.slice(0, 8).toUpperCase()}`;
 
-  const sendInvoice = async () => {
-    if (!row) return;
-    
   const openConfirmDialog = async () => {
     if (!row) return;
     setLoadingRecipient(true);
