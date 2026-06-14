@@ -206,7 +206,7 @@ export function NovaFaturaAvulsaDialog({
         payment_status: "aberto",
         open_amount: amt,
         paid_amount: 0,
-        document_reference: svc.id,
+        document_reference: fa_number,
         client_id: clientId,
         area_slug: responsibleSector || null,
         notes: `Origem: Fatura Avulsa (FA) — Aguardando envio${clientCompany ? `\nEmpresa: ${clientCompany}` : ""}`,
