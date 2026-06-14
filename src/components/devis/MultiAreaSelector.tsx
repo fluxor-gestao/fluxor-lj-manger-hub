@@ -3,10 +3,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, X, Loader2 } from "lucide-react";
+import { ChevronDown, X, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AreaBadge } from "@/components/AreaBadge";
-import { getAreasFor } from "@/lib/businessAreas";
 import type { CompanyCode } from "@/lib/companyCodes";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +19,8 @@ interface MultiAreaSelectorProps {
   className?: string;
   mainArea?: string;
   onMainAreaChange?: (slug: string) => void;
+  /** Slugs sugeridos pela IA — apenas para sinalização visual. */
+  suggestedAreas?: string[];
 }
 
 export function MultiAreaSelector({
@@ -30,11 +31,9 @@ export function MultiAreaSelector({
   className,
   mainArea,
   onMainAreaChange,
+  suggestedAreas = [],
 }: MultiAreaSelectorProps) {
-  // 1. Áreas fixas do arquivo lib
-  const legacyAreas = getAreasFor(companyCode as CompanyCode);
-
-  // 2. Áreas dinâmicas do banco de dados (apenas ativas para esta unidade)
+  // Fonte única: tabela `business_areas` (ativas) filtrada pela unidade.
   const { data: dbAreas = [], isLoading } = useQuery({
     queryKey: ["business-areas", "active", companyCode],
     queryFn: async () => {
@@ -52,19 +51,13 @@ export function MultiAreaSelector({
     enabled: !!companyCode,
   });
 
-  // 3. Mescla as áreas (priorizando DB e evitando duplicatas por slug)
-  const allAreas = useMemo(() => {
-    const combined = [...dbAreas.map(a => ({ slug: a.slug, label: a.label || a.name }))];
-    
-    // Adiciona áreas legadas que ainda não estão no DB (opcional, para transição suave)
-    legacyAreas.forEach(la => {
-      if (!combined.some(ca => ca.slug === la.slug)) {
-        combined.push(la);
-      }
-    });
-    
-    return combined;
-  }, [dbAreas, legacyAreas]);
+  const allAreas = useMemo(
+    () => dbAreas.map((a: any) => ({ slug: a.slug, label: a.label || a.name })),
+    [dbAreas],
+  );
+
+  const suggestedSet = useMemo(() => new Set(suggestedAreas), [suggestedAreas]);
+
 
   const toggleArea = (slug: string) => {
     if (selectedAreas.includes(slug)) {
@@ -113,9 +106,13 @@ export function MultiAreaSelector({
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
-          {allAreas.length === 0 ? (
+          {!companyCode ? (
             <div className="text-sm text-muted-foreground p-2 text-center">
-              Nenhuma área disponível.
+              Selecione a empresa para listar as áreas.
+            </div>
+          ) : allAreas.length === 0 ? (
+            <div className="text-sm text-muted-foreground p-2 text-center">
+              Nenhuma área cadastrada para esta unidade.
             </div>
           ) : (
             allAreas.map((area) => (
@@ -136,6 +133,11 @@ export function MultiAreaSelector({
                 >
                   {area.label}
                 </Label>
+                {suggestedSet.has(area.slug) && (
+                  <Badge variant="outline" className="h-5 text-[9px] uppercase font-bold border-primary/40 text-primary gap-1 px-1.5">
+                    <Sparkles className="h-2.5 w-2.5" /> IA
+                  </Badge>
+                )}
                 {selectedAreas.includes(area.slug) && onMainAreaChange && (
                   <Button
                     size="sm"
