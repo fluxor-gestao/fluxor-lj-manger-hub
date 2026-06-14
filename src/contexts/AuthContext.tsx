@@ -63,16 +63,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
+      // Ignora eventos que não alteram identidade — evita re-render/flicker
+      // de "Verificando acesso..." em refresh de token ou foco de aba.
+      if (event === "TOKEN_REFRESHED") {
+        setSession(session);
+        return;
+      }
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED" && event !== "INITIAL_SESSION") {
+        return;
+      }
+      const nextUserId = session?.user?.id ?? null;
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser((prev) => (prev?.id === nextUserId ? prev : (session?.user ?? null)));
       if (session?.user) {
-        setRoleLoading(true);
-        setTimeout(() => {
-          if (mounted) fetchRoles(session.user.id);
-        }, 0);
-      } else {
+        // Só refaz fetch de roles se mudou de usuário
+        setUser((prev) => {
+          if (prev?.id !== session.user.id) {
+            setRoleLoading(true);
+            setTimeout(() => { if (mounted) fetchRoles(session.user.id); }, 0);
+          }
+          return prev?.id === session.user.id ? prev : session.user;
+        });
+      } else if (event === "SIGNED_OUT") {
         setRoles([]);
         setRoleLoading(false);
       }
