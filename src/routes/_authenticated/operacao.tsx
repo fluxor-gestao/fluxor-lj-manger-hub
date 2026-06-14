@@ -145,6 +145,10 @@ function OperacaoPage() {
     onSuccess: (_d, id) => {
       toast.success("Processo excluído");
       qc.invalidateQueries({ queryKey: ["operacao-services"] });
+      qc.invalidateQueries({ queryKey: ["financial_entries"] });
+      qc.invalidateQueries({ queryKey: ["payment_planner"] });
+      qc.invalidateQueries({ queryKey: ["contas-a-receber"] });
+      qc.invalidateQueries({ queryKey: ["central-financeira"] });
       if (detail && detail.id === id) setDetail(null);
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao excluir"),
