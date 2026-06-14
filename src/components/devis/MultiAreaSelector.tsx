@@ -98,7 +98,7 @@ export function MultiAreaSelector({
               selectedAreas.map((slug) => (
                 <div key={slug} className="relative group/badge">
                   <AreaBadge 
-                    companyCode={companyCode as CompanyCode} 
+                    companyCode={(unitBySlug.get(slug) || effectiveCodes[0]) as CompanyCode} 
                     areaSlug={slug}
                     className={cn(
                       "mr-1", 
