@@ -171,6 +171,9 @@ function DevisDetail() {
         scope_description: form.scope_description || null,
         proposal_structure: form.proposal_structure || null,
         business_unit: form.business_unit,
+        additional_business_units: Array.isArray(form.additional_business_units)
+          ? form.additional_business_units.filter((c: string) => !!c && c !== form.business_unit)
+          : [],
         validation_client_confirmed: !!form.validation_client_confirmed,
         validation_service_confirmed: !!form.validation_service_confirmed,
         validation_sector_defined: !!form.validation_sector_defined,
