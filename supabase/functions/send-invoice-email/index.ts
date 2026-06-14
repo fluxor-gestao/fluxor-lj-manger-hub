@@ -47,6 +47,7 @@ function buildHtml(messageText: string, invoiceNumber: string, openAmount: strin
       </table>
     </td></tr>
   </table>
+  ${trackingPixelUrl ? `<img src="${trackingPixelUrl}" width="1" height="1" alt="" style="display:block;border:0;outline:none;width:1px;height:1px" />` : ""}
 </body></html>`;
 }
 
