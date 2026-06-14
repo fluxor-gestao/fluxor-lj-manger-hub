@@ -13,6 +13,8 @@ import { useMemo } from "react";
 
 interface MultiAreaSelectorProps {
   companyCode: CompanyCode | "";
+  /** Lista opcional de empresas (substitui `companyCode` quando informada). */
+  companyCodes?: string[];
   selectedAreas: string[];
   onChange: (areas: string[]) => void;
   placeholder?: string;
@@ -25,6 +27,7 @@ interface MultiAreaSelectorProps {
 
 export function MultiAreaSelector({
   companyCode,
+  companyCodes,
   selectedAreas,
   onChange,
   placeholder = "Selecionar áreas...",
@@ -33,22 +36,29 @@ export function MultiAreaSelector({
   onMainAreaChange,
   suggestedAreas = [],
 }: MultiAreaSelectorProps) {
-  // Fonte única: tabela `business_areas` (ativas) filtrada pela unidade.
+  // Resolve a lista efetiva de empresas: prioriza `companyCodes`, senão usa `companyCode`.
+  const effectiveCodes = useMemo(() => {
+    const fromArr = (companyCodes ?? []).filter(Boolean) as string[];
+    if (fromArr.length > 0) return Array.from(new Set(fromArr));
+    return companyCode ? [companyCode] : [];
+  }, [companyCodes, companyCode]);
+
+  // Fonte única: tabela `business_areas` (ativas) filtrada pelas unidades.
   const { data: dbAreas = [], isLoading } = useQuery({
-    queryKey: ["business-areas", "active", companyCode],
+    queryKey: ["business-areas", "active", effectiveCodes.join(",")],
     queryFn: async () => {
-      if (!companyCode) return [];
+      if (effectiveCodes.length === 0) return [];
       const { data, error } = await supabase
         .from("business_areas")
         .select("*")
         .eq("is_active", true)
-        .eq("business_unit", companyCode)
+        .in("business_unit", effectiveCodes)
         .order("display_order", { ascending: true })
         .order("label", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
-    enabled: !!companyCode,
+    enabled: effectiveCodes.length > 0,
   });
 
   const allAreas = useMemo(
