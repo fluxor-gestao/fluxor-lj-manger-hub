@@ -9,15 +9,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Calculator, CheckCircle2, Loader2, AlertCircle, PieChart } from "lucide-react";
+import { Plus, Trash2, Calculator, CheckCircle2, Loader2, AlertCircle, PieChart } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { COMPANY_LIST, COMPANY_SHORT, type CompanyCode, isCompanyCode } from "@/lib/companyCodes";
 
 interface DevisPricingManagerProps {
   devisId: string;
   currentTotal: number;
   pricingStatus: string;
   onTotalUpdate: (newTotal: number) => void;
+  /** Empresas envolvidas no Devis (principal + adicionais). Usado para o seletor de empresa por item e para o rateio. */
+  selectedCompanies?: string[];
 }
 
 export const PRICING_STATUS_LABELS: Record<string, string> = {
@@ -34,10 +37,16 @@ export const PRICING_STATUS_COLORS: Record<string, string> = {
   aprovada: "bg-emerald-100 text-emerald-700 border-emerald-200",
 };
 
-export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTotalUpdate }: DevisPricingManagerProps) {
+export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTotalUpdate, selectedCompanies }: DevisPricingManagerProps) {
   const queryClient = useQueryClient();
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+
+  const companyOptions = useMemo<CompanyCode[]>(() => {
+    const list = (selectedCompanies ?? []).filter(isCompanyCode) as CompanyCode[];
+    // Sem empresas definidas no Devis, deixa todas como opção (fallback seguro).
+    return list.length > 0 ? Array.from(new Set(list)) : COMPANY_LIST.map((c) => c.code);
+  }, [selectedCompanies]);
 
   const { data: pricingItems = [], isLoading: isLoadingItems } = useQuery({
     queryKey: ["devis-pricing-items", devisId],
@@ -64,28 +73,52 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
     },
   });
 
+  // Empresa efetiva por item: override em devis_pricing_items.business_unit; fallback service_prices.business_unit
+  const effectiveUnitOf = (item: any): string => {
+    if (item.business_unit) return item.business_unit;
+    const sp = servicePrices.find((s) => s.id === item.service_price_id);
+    return sp?.business_unit || "";
+  };
+
   const totalCalculated = useMemo(() => {
     return pricingItems.reduce((sum, item) => sum + Number(item.total_price), 0);
   }, [pricingItems]);
 
+  // Rateio: sempre exibe uma linha por empresa selecionada no Devis + bucket "Não definida" se houver itens sem empresa.
   const apportionment = useMemo(() => {
     const map: Record<string, number> = {};
-    pricingItems.forEach(item => {
-      const sp = servicePrices.find(s => s.id === item.service_price_id);
-      const unit = sp?.business_unit || "Não definida";
-      map[unit] = (map[unit] || 0) + Number(item.total_price);
+    for (const code of companyOptions) map[code] = 0;
+    let undefinedSum = 0;
+    pricingItems.forEach((item) => {
+      const unit = effectiveUnitOf(item);
+      const val = Number(item.total_price) || 0;
+      if (unit && map[unit] !== undefined) {
+        map[unit] += val;
+      } else if (unit) {
+        map[unit] = (map[unit] || 0) + val;
+      } else {
+        undefinedSum += val;
+      }
     });
-    return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [pricingItems, servicePrices]);
+    const rows: { unit: string; value: number; label: string }[] = Object.entries(map).map(([unit, value]) => ({
+      unit,
+      value,
+      label: isCompanyCode(unit) ? `${unit} · ${COMPANY_SHORT[unit]}` : unit,
+    }));
+    if (undefinedSum > 0) {
+      rows.push({ unit: "__undef__", value: undefinedSum, label: "Não definida" });
+    }
+    return rows;
+  }, [pricingItems, companyOptions, servicePrices]);
 
   const updateStatus = useMutation({
     mutationFn: async (newStatus: string) => {
       const { error } = await supabase
         .from("devis")
-        .update({ 
+        .update({
           pricing_status: newStatus,
           pricing_total: totalCalculated,
-          total_amount: newStatus === "aprovada" ? totalCalculated : undefined
+          total_amount: newStatus === "aprovada" ? totalCalculated : undefined,
         })
         .eq("id", devisId);
       if (error) throw error;
@@ -102,8 +135,12 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
 
   const addItem = useMutation({
     mutationFn: async (serviceId: string) => {
-      const service = servicePrices.find(s => s.id === serviceId);
+      const service = servicePrices.find((s) => s.id === serviceId);
       if (!service) return;
+      const defaultUnit =
+        service.business_unit && companyOptions.includes(service.business_unit as CompanyCode)
+          ? service.business_unit
+          : companyOptions[0] || service.business_unit || null;
 
       const { error } = await supabase
         .from("devis_pricing_items")
@@ -114,7 +151,8 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
           description: service.description,
           unit_price: service.price,
           total_price: service.price,
-          quantity: 1
+          quantity: 1,
+          business_unit: defaultUnit,
         });
       if (error) throw error;
     },
@@ -129,12 +167,21 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
     },
   });
 
+  const updateItemUnit = async (itemId: string, unit: string) => {
+    const { error } = await supabase
+      .from("devis_pricing_items")
+      .update({ business_unit: unit })
+      .eq("id", itemId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["devis-pricing-items", devisId] });
+  };
+
   const removeItem = useMutation({
     mutationFn: async (itemId: string) => {
-      const { error } = await supabase
-        .from("devis_pricing_items")
-        .delete()
-        .eq("id", itemId);
+      const { error } = await supabase.from("devis_pricing_items").delete().eq("id", itemId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -163,8 +210,8 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/10">
+              <TableHead className="py-3 w-[200px]">Empresa Responsável</TableHead>
               <TableHead className="py-3">Serviço</TableHead>
-              <TableHead className="py-3">Área / Empresa</TableHead>
               <TableHead className="text-right">Qtd</TableHead>
               <TableHead className="text-right">Unitário</TableHead>
               <TableHead className="text-right">Total</TableHead>
@@ -178,26 +225,44 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-sm italic">Nenhum item de precificação adicionado.</TableCell></TableRow>
             ) : (
               pricingItems.map((item) => {
-                const sp = servicePrices.find(s => s.id === item.service_price_id);
+                const sp = servicePrices.find((s) => s.id === item.service_price_id);
+                const currentUnit = effectiveUnitOf(item);
                 return (
                   <TableRow key={item.id}>
                     <TableCell>
-                      <div className="font-medium text-sm">{item.name}</div>
-                      <div className="text-[10px] text-muted-foreground line-clamp-1">{item.description}</div>
+                      <div className="flex flex-col gap-1">
+                        <Select value={currentUnit || ""} onValueChange={(v) => updateItemUnit(item.id, v)}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Selecionar empresa..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {companyOptions.map((code) => (
+                              <SelectItem key={code} value={code}>
+                                <span className="flex items-center gap-2">
+                                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{code}</span>
+                                  {COMPANY_SHORT[code]}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {sp?.category && (
+                          <span className="text-[9px] text-muted-foreground italic">Categoria: {sp.category}</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1">
-                          {sp?.business_unit && <Badge variant="outline" className="text-[8px] h-3.5 px-1 uppercase">{sp.business_unit}</Badge>}
-                          {sp?.responsible_sector && <Badge variant="secondary" className="text-[8px] h-3.5 px-1">{sp.responsible_sector}</Badge>}
-                        </div>
-                      </div>
+                      <div className="font-medium text-sm">{item.name}</div>
+                      <div className="text-[10px] text-muted-foreground line-clamp-1">{item.description}</div>
+                      {sp?.responsible_sector && (
+                        <Badge variant="secondary" className="text-[8px] h-3.5 px-1 mt-1">{sp.responsible_sector}</Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-right text-xs">
                       <div className="flex items-center justify-end gap-1">
-                        <Input 
-                          type="number" 
-                          className="w-12 h-7 text-[10px] px-1 py-0 text-right" 
+                        <Input
+                          type="number"
+                          className="w-12 h-7 text-[10px] px-1 py-0 text-right"
                           defaultValue={item.quantity || 1}
                           onBlur={async (e) => {
                             const val = Number(e.target.value);
@@ -213,10 +278,10 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
                     <TableCell className="text-right text-xs font-mono">
                       <div className="flex items-center justify-end gap-1">
                         <span className="text-[10px] text-muted-foreground">R$</span>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           step="0.01"
-                          className="w-20 h-7 text-[10px] px-1 py-0 text-right" 
+                          className="w-20 h-7 text-[10px] px-1 py-0 text-right"
                           defaultValue={Number(item.unit_price || 0).toFixed(2)}
                           onBlur={async (e) => {
                             const val = Number(e.target.value);
@@ -251,24 +316,33 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
               {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalCalculated)}
             </span>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex items-center gap-2 mb-2">
               <PieChart className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Rateio por Unidade</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Rateio por Empresa</span>
             </div>
             <div className="space-y-2">
-              {apportionment.map(([unit, val]) => (
-                <div key={unit} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[9px] h-4 px-1.5 uppercase font-mono">{unit}</Badge>
-                    <span className="text-muted-foreground">({Math.round((val / (totalCalculated || 1)) * 100)}%)</span>
-                  </div>
-                  <span className="font-semibold font-mono">{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val)}</span>
-                </div>
-              ))}
-              {apportionment.length === 0 && (
-                <div className="text-[10px] text-muted-foreground italic">Nenhum serviço vinculado.</div>
+              {apportionment.length === 0 ? (
+                <div className="text-[10px] text-muted-foreground italic">Nenhuma empresa selecionada na proposta.</div>
+              ) : (
+                apportionment.map((row) => {
+                  const pct = totalCalculated > 0 ? Math.round((row.value / totalCalculated) * 100) : 0;
+                  return (
+                    <div key={row.unit} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[9px] h-4 px-1.5 uppercase font-mono">{row.label}</Badge>
+                          <span className="text-muted-foreground">({pct}%)</span>
+                        </div>
+                        <span className="font-semibold font-mono">{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(row.value)}</span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                        <div className="h-full bg-primary/70 transition-all" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
@@ -294,7 +368,7 @@ export function DevisPricingManager({ devisId, currentTotal, pricingStatus, onTo
                         <SelectValue placeholder="Escolha um serviço..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {servicePrices.map(s => (
+                        {servicePrices.map((s) => (
                           <SelectItem key={s.id} value={s.id}>
                             <div className="flex items-center justify-between w-full gap-4">
                               <span>{s.name}</span>
