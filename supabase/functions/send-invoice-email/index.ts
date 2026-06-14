@@ -66,7 +66,8 @@ Deno.serve(async (req) => {
     const { entry_id, to, subject, message_text, invoice_number, open_amount, due_date } = await req.json();
     if (!to || !subject || !message_text || !entry_id) throw new Error("Parâmetros inválidos");
 
-    const htmlBody = buildHtml(message_text, invoice_number, open_amount, due_date);
+    const trackingPixelUrl = `${SUPABASE_URL}/functions/v1/track-email-open?id=${encodeURIComponent(entry_id)}`;
+    const htmlBody = buildHtml(message_text, invoice_number, open_amount, due_date, trackingPixelUrl);
 
     const payload: any = {
       from: FROM_EMAIL,
