@@ -6,32 +6,33 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Lang = "pt" | "fr" | "en" | "es";
+type Lang = "pt" | "fr" | "en" | "es" | "de";
 
-const I18N: Record<Lang, { tagline: string; cta_help: string; accept: string; reject: string }> = {
+const I18N: Record<Lang, { tagline: string; cta_help: string; view: string }> = {
   pt: {
     tagline: "ADVOCACIA & CONSULTORIA INTERNACIONAL",
-    cta_help: "Você pode aceitar ou recusar a proposta clicando nos botões abaixo.",
-    accept: "Aceitar Proposta",
-    reject: "Recusar",
+    cta_help: "Acesse a proposta completa para revisar os detalhes e, se desejar, aceitá-la ou recusá-la.",
+    view: "Visualizar proposta",
   },
   fr: {
     tagline: "AVOCATS & CONSEIL INTERNATIONAL",
-    cta_help: "Vous pouvez accepter ou refuser la proposition en cliquant sur les boutons ci-dessous.",
-    accept: "Accepter la Proposition",
-    reject: "Refuser",
+    cta_help: "Accédez à la proposition complète pour consulter les détails et, si vous le souhaitez, l'accepter ou la refuser.",
+    view: "Voir la proposition",
   },
   en: {
     tagline: "INTERNATIONAL LAW & CONSULTING",
-    cta_help: "You can accept or reject the proposal by clicking the buttons below.",
-    accept: "Accept Proposal",
-    reject: "Reject",
+    cta_help: "Open the full proposal to review the details and, if you wish, accept or reject it.",
+    view: "View proposal",
   },
   es: {
     tagline: "ABOGADOS & CONSULTORÍA INTERNACIONAL",
-    cta_help: "Puede aceptar o rechazar la propuesta haciendo clic en los botones a continuación.",
-    accept: "Aceptar la Propuesta",
-    reject: "Rechazar",
+    cta_help: "Acceda a la propuesta completa para revisar los detalles y, si lo desea, aceptarla o rechazarla.",
+    view: "Ver propuesta",
+  },
+  de: {
+    tagline: "INTERNATIONALE ANWALTSKANZLEI & BERATUNG",
+    cta_help: "Öffnen Sie das vollständige Angebot, um die Details zu prüfen und es bei Bedarf anzunehmen oder abzulehnen.",
+    view: "Angebot ansehen",
   },
 };
 
@@ -39,31 +40,29 @@ const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const BIZ_UNIT_LABELS: Record<string, Record<Lang, string>> = {
-  DE: { pt: "ADVOCACIA & CONSULTORIA INTERNACIONAL", fr: "AVOCATS & CONSEIL INTERNATIONAL", en: "INTERNATIONAL LAW & CONSULTING", es: "ABOGADOS & CONSULTORÍA INTERNACIONAL" },
-  CO: { pt: "CONTABILIDADE INTERNACIONAL", fr: "COMPTABILITÉ INTERNATIONALE", en: "INTERNATIONAL ACCOUNTING", es: "CONTABILIDAD INTERNACIONAL" },
-  AM: { pt: "CONSULTORIA AMBIENTAL", fr: "CONSEIL ENVIRONNEMENTAL", en: "ENVIRONMENTAL CONSULTING", es: "CONSULTORÍA AMBIENTAL" },
-  IM: { pt: "CONSULTORIA IMOBILIÁRIA", fr: "CONSEIL IMMOBILIER", en: "REAL ESTATE CONSULTING", es: "CONSULTORÍA INMOBILIARIA" },
-  GE: { pt: "GESTÃO INTERNACIONAL", fr: "GESTION INTERNATIONALE", en: "INTERNATIONAL MANAGEMENT", es: "GESTIÓN INTERNACIONAL" },
+  DE: { pt: "ADVOCACIA & CONSULTORIA INTERNACIONAL", fr: "AVOCATS & CONSEIL INTERNATIONAL", en: "INTERNATIONAL LAW & CONSULTING", es: "ABOGADOS & CONSULTORÍA INTERNACIONAL", de: "INTERNATIONALE ANWALTSKANZLEI & BERATUNG" },
+  CO: { pt: "CONTABILIDADE INTERNACIONAL", fr: "COMPTABILITÉ INTERNATIONALE", en: "INTERNATIONAL ACCOUNTING", es: "CONTABILIDAD INTERNACIONAL", de: "INTERNATIONALE BUCHHALTUNG" },
+  AM: { pt: "CONSULTORIA AMBIENTAL", fr: "CONSEIL ENVIRONNEMENTAL", en: "ENVIRONMENTAL CONSULTING", es: "CONSULTORÍA AMBIENTAL", de: "UMWELTBERATUNG" },
+  IM: { pt: "CONSULTORIA IMOBILIÁRIA", fr: "CONSEIL IMMOBILIER", en: "REAL ESTATE CONSULTING", es: "CONSULTORÍA INMOBILIARIA", de: "IMMOBILIENBERATUNG" },
+  GE: { pt: "GESTÃO INTERNACIONAL", fr: "GESTION INTERNATIONALE", en: "INTERNATIONAL MANAGEMENT", es: "GESTIÓN INTERNACIONAL", de: "INTERNATIONALES MANAGEMENT" },
 };
 
 function buildHtml(messageText: string, acceptUrl: string | undefined, lang: Lang, businessUnit: string = "DE") {
   const t = I18N[lang] ?? I18N.pt;
   const unitTagline = BIZ_UNIT_LABELS[businessUnit]?.[lang] || BIZ_UNIT_LABELS.DE[lang];
-  
+
   const ctaBlock = acceptUrl
     ? `
       <p style="margin:28px 0 14px;text-align:center;font-size:13px;color:#4b5563">${t.cta_help}</p>
       <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:0 auto">
         <tr>
           <td style="padding:0 6px">
-            <a href="${acceptUrl}" style="display:inline-block;background:#16a34a;color:#ffffff;padding:13px 28px;border-radius:6px;text-decoration:none;font-weight:600;font-family:Arial,sans-serif;font-size:14px">${t.accept}</a>
-          </td>
-          <td style="padding:0 6px">
-            <a href="${acceptUrl}" style="display:inline-block;background:#ffffff;color:#dc2626;padding:12px 28px;border:1px solid #dc2626;border-radius:6px;text-decoration:none;font-weight:600;font-family:Arial,sans-serif;font-size:14px">${t.reject}</a>
+            <a href="${acceptUrl}" style="display:inline-block;background:#1e40af;color:#ffffff;padding:13px 32px;border-radius:6px;text-decoration:none;font-weight:600;font-family:Arial,sans-serif;font-size:14px">${t.view}</a>
           </td>
         </tr>
       </table>`
     : "";
+
 
   return `<!doctype html>
 <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;color:#1f2937">
@@ -108,7 +107,7 @@ Deno.serve(async (req) => {
     const { devis_id, to, subject, message_text, pdf_base64, pdf_filename, accept_url, language, business_unit } = await req.json();
     if (!to?.length || !subject || !message_text) throw new Error("Parâmetros inválidos");
 
-    const lang: Lang = (["pt", "fr", "en", "es"].includes(language) ? language : "pt") as Lang;
+    const lang: Lang = (["pt", "fr", "en", "es", "de"].includes(language) ? language : "pt") as Lang;
     const htmlBody = buildHtml(message_text, accept_url, lang, business_unit);
 
     const payload: any = {
@@ -116,7 +115,7 @@ Deno.serve(async (req) => {
       to,
       subject,
       html: htmlBody,
-      text: message_text + (accept_url ? `\n\n${I18N[lang].accept}: ${accept_url}` : ""),
+      text: message_text + (accept_url ? `\n\n${I18N[lang].view}: ${accept_url}` : ""),
     };
     if (pdf_base64 && pdf_filename) {
       payload.attachments = [{ filename: pdf_filename, content: pdf_base64 }];

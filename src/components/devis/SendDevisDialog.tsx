@@ -32,15 +32,15 @@ function detectLanguage(text?: string | null): Lang {
 
 const DEFAULT_MESSAGE: Record<Lang, (client: string, devisNum: string) => string> = {
   pt: (c, n) =>
-    `Prezado(a) ${c},\n\nConforme conversado, segue em anexo a proposta ${n} da Lundgaard Jensen Advocacia e Consultoria Internacional.\n\nPara aceitar a proposta de forma rápida e segura, clique no botão "Aceitar Proposta" abaixo.\n\nPermanecemos à disposição.\n\nAtenciosamente,\nEquipe Lundgaard Jensen`,
+    `Prezado(a) ${c},\n\nConforme conversado, segue em anexo a proposta ${n} da Lundgaard Jensen Advocacia e Consultoria Internacional.\n\nPara visualizar a proposta completa e, se desejar, aceitá-la ou recusá-la, clique no botão "Visualizar proposta" abaixo.\n\nPermanecemos à disposição.\n\nAtenciosamente,\nEquipe Lundgaard Jensen`,
   fr: (c, n) =>
-    `Cher/Chère ${c},\n\nComme convenu, veuillez trouver ci-joint la proposition ${n} de Lundgaard Jensen Avocats et Conseil International.\n\nPour accepter la proposition de manière rapide et sécurisée, cliquez sur le bouton "Accepter la Proposition" ci-dessous.\n\nNous restons à votre disposition.\n\nCordialement,\nÉquipe Lundgaard Jensen`,
+    `Cher/Chère ${c},\n\nComme convenu, veuillez trouver ci-joint la proposition ${n} de Lundgaard Jensen Avocats et Conseil International.\n\nPour consulter la proposition complète et, si vous le souhaitez, l'accepter ou la refuser, cliquez sur le bouton « Voir la proposition » ci-dessous.\n\nNous restons à votre disposition.\n\nCordialement,\nÉquipe Lundgaard Jensen`,
   en: (c, n) =>
-    `Dear ${c},\n\nAs discussed, please find attached proposal ${n} from Lundgaard Jensen International Law & Consulting.\n\nTo accept the proposal quickly and securely, click the "Accept Proposal" button below.\n\nWe remain at your disposal.\n\nBest regards,\nLundgaard Jensen Team`,
+    `Dear ${c},\n\nAs discussed, please find attached proposal ${n} from Lundgaard Jensen International Law & Consulting.\n\nTo review the full proposal and, if you wish, accept or reject it, click the "View proposal" button below.\n\nWe remain at your disposal.\n\nBest regards,\nLundgaard Jensen Team`,
   es: (c, n) =>
-    `Estimado(a) ${c},\n\nSegún lo conversado, adjuntamos la propuesta ${n} de Lundgaard Jensen Abogados y Consultoría Internacional.\n\nPara aceptar la propuesta de forma rápida y segura, haga clic en el botón "Aceptar la Propuesta" a continuación.\n\nQuedamos a su disposición.\n\nAtentamente,\nEquipo Lundgaard Jensen`,
+    `Estimado(a) ${c},\n\nSegún lo conversado, adjuntamos la propuesta ${n} de Lundgaard Jensen Abogados y Consultoría Internacional.\n\nPara ver la propuesta completa y, si lo desea, aceptarla o rechazarla, haga clic en el botón "Ver propuesta" a continuación.\n\nQuedamos a su disposición.\n\nAtentamente,\nEquipo Lundgaard Jensen`,
   de: (c, n) =>
-    `Sehr geehrte(r) ${c},\n\nwie besprochen, übersenden wir Ihnen anbei das Angebot ${n} von Lundgaard Jensen Internationale Anwaltskanzlei und Beratung.\n\nUm das Angebot schnell und sicher anzunehmen, klicken Sie bitte auf die Schaltfläche "Angebot annehmen" unten.\n\nWir stehen Ihnen jederzeit zur Verfügung.\n\nMit freundlichen Grüßen,\nIhr Lundgaard Jensen Team`,
+    `Sehr geehrte(r) ${c},\n\nwie besprochen, übersenden wir Ihnen anbei das Angebot ${n} von Lundgaard Jensen Internationale Anwaltskanzlei und Beratung.\n\nUm das vollständige Angebot anzusehen und es bei Bedarf anzunehmen oder abzulehnen, klicken Sie bitte auf die Schaltfläche „Angebot ansehen" unten.\n\nWir stehen Ihnen jederzeit zur Verfügung.\n\nMit freundlichen Grüßen,\nIhr Lundgaard Jensen Team`,
 };
 
 interface Props {
