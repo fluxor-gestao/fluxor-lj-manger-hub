@@ -64,6 +64,11 @@ export function FaturaPreviewDialog({
   const [isSending, setIsSending] = useState(false);
   const [selectedMethodId, setSelectedMethodId] = useState<string>("");
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loadingRecipient, setLoadingRecipient] = useState(false);
+  const [recipient, setRecipient] = useState<{ name: string; email: string; phone: string; document: string }>({
+    name: "", email: "", phone: "", document: "",
+  });
 
   const cliente = row?.client?.name || row?.counterparty_name || "Cliente";
   const total = Number(row?.total_brl ?? row?.amount_in ?? 0);
