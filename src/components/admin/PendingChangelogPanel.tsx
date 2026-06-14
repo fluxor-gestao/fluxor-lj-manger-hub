@@ -59,7 +59,7 @@ export function PendingChangelogPanel() {
             Alterações pendentes
           </CardTitle>
           <CardDescription>
-            Cada push no GitHub vira automaticamente uma nova versão (bump de patch). Use o botão abaixo apenas se precisar liberar agora.
+            Cada alteração feita no Lovable já gera automaticamente uma nova versão. Esta lista mostra apenas entradas ainda não promovidas — use o botão ao lado para liberar um lote manualmente, se necessário.
           </CardDescription>
         </div>
         <Button
