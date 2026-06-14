@@ -76,20 +76,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       const nextUserId = session?.user?.id ?? null;
       setSession(session);
-      setUser((prev) => (prev?.id === nextUserId ? prev : (session?.user ?? null)));
-      if (session?.user) {
-        // Só refaz fetch de roles se mudou de usuário
-        setUser((prev) => {
-          if (prev?.id !== session.user.id) {
-            setRoleLoading(true);
-            setTimeout(() => { if (mounted) fetchRoles(session.user.id); }, 0);
-          }
-          return prev?.id === session.user.id ? prev : session.user;
-        });
-      } else if (event === "SIGNED_OUT") {
-        setRoles([]);
-        setRoleLoading(false);
-      }
+      setUser((prev) => {
+        const prevId = prev?.id ?? null;
+        if (prevId === nextUserId) return prev; // sem mudança de identidade — não re-renderiza filhos
+        // Mudou de usuário (ou logou/deslogou)
+        if (nextUserId) {
+          setRoleLoading(true);
+          setTimeout(() => { if (mounted) fetchRoles(nextUserId); }, 0);
+        } else {
+          setRoles([]);
+          setRoleLoading(false);
+        }
+        return session?.user ?? null;
+      });
       setLoading(false);
     });
 
