@@ -46,7 +46,14 @@ import { Route as AuthenticatedComercialMapaAprovacaoRouteImport } from './route
 import { Route as AuthenticatedComercialDevisRouteImport } from './routes/_authenticated/comercial.devis'
 import { Route as AuthenticatedComercialClientesRouteImport } from './routes/_authenticated/comercial.clientes'
 import { Route as AuthenticatedComercialAreasRouteImport } from './routes/_authenticated/comercial.areas'
+import { Route as AuthenticatedAjudaOperacaoRouteImport } from './routes/_authenticated/ajuda_.operacao'
+import { Route as AuthenticatedAjudaMensagensRouteImport } from './routes/_authenticated/ajuda_.mensagens'
+import { Route as AuthenticatedAjudaGestaoRouteImport } from './routes/_authenticated/ajuda_.gestao'
+import { Route as AuthenticatedAjudaFinanceiroRouteImport } from './routes/_authenticated/ajuda_.financeiro'
+import { Route as AuthenticatedAjudaConciliacaoRouteImport } from './routes/_authenticated/ajuda_.conciliacao'
 import { Route as AuthenticatedAjudaComercialRouteImport } from './routes/_authenticated/ajuda_.comercial'
+import { Route as AuthenticatedAjudaBiRouteImport } from './routes/_authenticated/ajuda_.bi'
+import { Route as AuthenticatedAjudaAdminRouteImport } from './routes/_authenticated/ajuda_.admin'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin_.api-keys'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -253,12 +260,52 @@ const AuthenticatedComercialAreasRoute =
     path: '/areas',
     getParentRoute: () => AuthenticatedComercialRoute,
   } as any)
+const AuthenticatedAjudaOperacaoRoute =
+  AuthenticatedAjudaOperacaoRouteImport.update({
+    id: '/ajuda_/operacao',
+    path: '/ajuda/operacao',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAjudaMensagensRoute =
+  AuthenticatedAjudaMensagensRouteImport.update({
+    id: '/ajuda_/mensagens',
+    path: '/ajuda/mensagens',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAjudaGestaoRoute =
+  AuthenticatedAjudaGestaoRouteImport.update({
+    id: '/ajuda_/gestao',
+    path: '/ajuda/gestao',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAjudaFinanceiroRoute =
+  AuthenticatedAjudaFinanceiroRouteImport.update({
+    id: '/ajuda_/financeiro',
+    path: '/ajuda/financeiro',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAjudaConciliacaoRoute =
+  AuthenticatedAjudaConciliacaoRouteImport.update({
+    id: '/ajuda_/conciliacao',
+    path: '/ajuda/conciliacao',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAjudaComercialRoute =
   AuthenticatedAjudaComercialRouteImport.update({
     id: '/ajuda_/comercial',
     path: '/ajuda/comercial',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAjudaBiRoute = AuthenticatedAjudaBiRouteImport.update({
+  id: '/ajuda_/bi',
+  path: '/ajuda/bi',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAjudaAdminRoute = AuthenticatedAjudaAdminRouteImport.update({
+  id: '/ajuda_/admin',
+  path: '/ajuda/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminApiKeysRoute =
   AuthenticatedAdminApiKeysRouteImport.update({
     id: '/admin_/api-keys',
@@ -312,7 +359,14 @@ export interface FileRoutesByFullPath {
   '/operacao': typeof AuthenticatedOperacaoRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/ajuda/admin': typeof AuthenticatedAjudaAdminRoute
+  '/ajuda/bi': typeof AuthenticatedAjudaBiRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/ajuda/conciliacao': typeof AuthenticatedAjudaConciliacaoRoute
+  '/ajuda/financeiro': typeof AuthenticatedAjudaFinanceiroRoute
+  '/ajuda/gestao': typeof AuthenticatedAjudaGestaoRoute
+  '/ajuda/mensagens': typeof AuthenticatedAjudaMensagensRoute
+  '/ajuda/operacao': typeof AuthenticatedAjudaOperacaoRoute
   '/comercial/areas': typeof AuthenticatedComercialAreasRoute
   '/comercial/clientes': typeof AuthenticatedComercialClientesRoute
   '/comercial/devis': typeof AuthenticatedComercialDevisRoute
@@ -355,7 +409,14 @@ export interface FileRoutesByTo {
   '/operacao': typeof AuthenticatedOperacaoRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/ajuda/admin': typeof AuthenticatedAjudaAdminRoute
+  '/ajuda/bi': typeof AuthenticatedAjudaBiRoute
   '/ajuda/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/ajuda/conciliacao': typeof AuthenticatedAjudaConciliacaoRoute
+  '/ajuda/financeiro': typeof AuthenticatedAjudaFinanceiroRoute
+  '/ajuda/gestao': typeof AuthenticatedAjudaGestaoRoute
+  '/ajuda/mensagens': typeof AuthenticatedAjudaMensagensRoute
+  '/ajuda/operacao': typeof AuthenticatedAjudaOperacaoRoute
   '/comercial/areas': typeof AuthenticatedComercialAreasRoute
   '/comercial/clientes': typeof AuthenticatedComercialClientesRoute
   '/comercial/devis': typeof AuthenticatedComercialDevisRoute
@@ -402,7 +463,14 @@ export interface FileRoutesById {
   '/_authenticated/operacao': typeof AuthenticatedOperacaoRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/admin_/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/_authenticated/ajuda_/admin': typeof AuthenticatedAjudaAdminRoute
+  '/_authenticated/ajuda_/bi': typeof AuthenticatedAjudaBiRoute
   '/_authenticated/ajuda_/comercial': typeof AuthenticatedAjudaComercialRoute
+  '/_authenticated/ajuda_/conciliacao': typeof AuthenticatedAjudaConciliacaoRoute
+  '/_authenticated/ajuda_/financeiro': typeof AuthenticatedAjudaFinanceiroRoute
+  '/_authenticated/ajuda_/gestao': typeof AuthenticatedAjudaGestaoRoute
+  '/_authenticated/ajuda_/mensagens': typeof AuthenticatedAjudaMensagensRoute
+  '/_authenticated/ajuda_/operacao': typeof AuthenticatedAjudaOperacaoRoute
   '/_authenticated/comercial/areas': typeof AuthenticatedComercialAreasRoute
   '/_authenticated/comercial/clientes': typeof AuthenticatedComercialClientesRoute
   '/_authenticated/comercial/devis': typeof AuthenticatedComercialDevisRoute
@@ -449,7 +517,14 @@ export interface FileRouteTypes {
     | '/operacao'
     | '/email/unsubscribe'
     | '/admin/api-keys'
+    | '/ajuda/admin'
+    | '/ajuda/bi'
     | '/ajuda/comercial'
+    | '/ajuda/conciliacao'
+    | '/ajuda/financeiro'
+    | '/ajuda/gestao'
+    | '/ajuda/mensagens'
+    | '/ajuda/operacao'
     | '/comercial/areas'
     | '/comercial/clientes'
     | '/comercial/devis'
@@ -492,7 +567,14 @@ export interface FileRouteTypes {
     | '/operacao'
     | '/email/unsubscribe'
     | '/admin/api-keys'
+    | '/ajuda/admin'
+    | '/ajuda/bi'
     | '/ajuda/comercial'
+    | '/ajuda/conciliacao'
+    | '/ajuda/financeiro'
+    | '/ajuda/gestao'
+    | '/ajuda/mensagens'
+    | '/ajuda/operacao'
     | '/comercial/areas'
     | '/comercial/clientes'
     | '/comercial/devis'
@@ -538,7 +620,14 @@ export interface FileRouteTypes {
     | '/_authenticated/operacao'
     | '/email/unsubscribe'
     | '/_authenticated/admin_/api-keys'
+    | '/_authenticated/ajuda_/admin'
+    | '/_authenticated/ajuda_/bi'
     | '/_authenticated/ajuda_/comercial'
+    | '/_authenticated/ajuda_/conciliacao'
+    | '/_authenticated/ajuda_/financeiro'
+    | '/_authenticated/ajuda_/gestao'
+    | '/_authenticated/ajuda_/mensagens'
+    | '/_authenticated/ajuda_/operacao'
     | '/_authenticated/comercial/areas'
     | '/_authenticated/comercial/clientes'
     | '/_authenticated/comercial/devis'
@@ -851,11 +940,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComercialAreasRouteImport
       parentRoute: typeof AuthenticatedComercialRoute
     }
+    '/_authenticated/ajuda_/operacao': {
+      id: '/_authenticated/ajuda_/operacao'
+      path: '/ajuda/operacao'
+      fullPath: '/ajuda/operacao'
+      preLoaderRoute: typeof AuthenticatedAjudaOperacaoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ajuda_/mensagens': {
+      id: '/_authenticated/ajuda_/mensagens'
+      path: '/ajuda/mensagens'
+      fullPath: '/ajuda/mensagens'
+      preLoaderRoute: typeof AuthenticatedAjudaMensagensRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ajuda_/gestao': {
+      id: '/_authenticated/ajuda_/gestao'
+      path: '/ajuda/gestao'
+      fullPath: '/ajuda/gestao'
+      preLoaderRoute: typeof AuthenticatedAjudaGestaoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ajuda_/financeiro': {
+      id: '/_authenticated/ajuda_/financeiro'
+      path: '/ajuda/financeiro'
+      fullPath: '/ajuda/financeiro'
+      preLoaderRoute: typeof AuthenticatedAjudaFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ajuda_/conciliacao': {
+      id: '/_authenticated/ajuda_/conciliacao'
+      path: '/ajuda/conciliacao'
+      fullPath: '/ajuda/conciliacao'
+      preLoaderRoute: typeof AuthenticatedAjudaConciliacaoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/ajuda_/comercial': {
       id: '/_authenticated/ajuda_/comercial'
       path: '/ajuda/comercial'
       fullPath: '/ajuda/comercial'
       preLoaderRoute: typeof AuthenticatedAjudaComercialRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ajuda_/bi': {
+      id: '/_authenticated/ajuda_/bi'
+      path: '/ajuda/bi'
+      fullPath: '/ajuda/bi'
+      preLoaderRoute: typeof AuthenticatedAjudaBiRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ajuda_/admin': {
+      id: '/_authenticated/ajuda_/admin'
+      path: '/ajuda/admin'
+      fullPath: '/ajuda/admin'
+      preLoaderRoute: typeof AuthenticatedAjudaAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin_/api-keys': {
@@ -968,7 +1106,14 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMensagensRoute: typeof AuthenticatedMensagensRoute
   AuthenticatedOperacaoRoute: typeof AuthenticatedOperacaoRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
+  AuthenticatedAjudaAdminRoute: typeof AuthenticatedAjudaAdminRoute
+  AuthenticatedAjudaBiRoute: typeof AuthenticatedAjudaBiRoute
   AuthenticatedAjudaComercialRoute: typeof AuthenticatedAjudaComercialRoute
+  AuthenticatedAjudaConciliacaoRoute: typeof AuthenticatedAjudaConciliacaoRoute
+  AuthenticatedAjudaFinanceiroRoute: typeof AuthenticatedAjudaFinanceiroRoute
+  AuthenticatedAjudaGestaoRoute: typeof AuthenticatedAjudaGestaoRoute
+  AuthenticatedAjudaMensagensRoute: typeof AuthenticatedAjudaMensagensRoute
+  AuthenticatedAjudaOperacaoRoute: typeof AuthenticatedAjudaOperacaoRoute
   AuthenticatedComercialDevisIdRoute: typeof AuthenticatedComercialDevisIdRoute
 }
 
@@ -984,7 +1129,14 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMensagensRoute: AuthenticatedMensagensRoute,
   AuthenticatedOperacaoRoute: AuthenticatedOperacaoRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
+  AuthenticatedAjudaAdminRoute: AuthenticatedAjudaAdminRoute,
+  AuthenticatedAjudaBiRoute: AuthenticatedAjudaBiRoute,
   AuthenticatedAjudaComercialRoute: AuthenticatedAjudaComercialRoute,
+  AuthenticatedAjudaConciliacaoRoute: AuthenticatedAjudaConciliacaoRoute,
+  AuthenticatedAjudaFinanceiroRoute: AuthenticatedAjudaFinanceiroRoute,
+  AuthenticatedAjudaGestaoRoute: AuthenticatedAjudaGestaoRoute,
+  AuthenticatedAjudaMensagensRoute: AuthenticatedAjudaMensagensRoute,
+  AuthenticatedAjudaOperacaoRoute: AuthenticatedAjudaOperacaoRoute,
   AuthenticatedComercialDevisIdRoute: AuthenticatedComercialDevisIdRoute,
 }
 
