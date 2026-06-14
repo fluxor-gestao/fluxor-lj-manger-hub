@@ -766,6 +766,28 @@ function BackupManager() {
 function Admin() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window === "undefined") return "users";
+    return new URLSearchParams(window.location.search).get("tab") || "users";
+  });
+
+  // Sync com botão voltar/avançar do navegador
+  useEffect(() => {
+    const onPop = () => {
+      const t = new URLSearchParams(window.location.search).get("tab") || "users";
+      setActiveTab(t);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const handleTabChange = (v: string) => {
+    setActiveTab(v);
+    const url = `/admin?tab=${v}`;
+    if (typeof window !== "undefined" && window.location.pathname + window.location.search !== url) {
+      window.history.replaceState(null, "", url);
+    }
+  };
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<{ user_id: string; currentRole: string } | null>(null);
@@ -933,7 +955,7 @@ function Admin() {
         </Button>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-6" value={new URLSearchParams(window.location.search).get('tab') || 'users'} onValueChange={(v) => (window.location.href = `/admin?tab=${v}`)}>
+      <Tabs className="space-y-6" value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="bg-slate-100 border border-slate-200 p-1 h-auto flex flex-wrap gap-1">
           <TabsTrigger value="users" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Users className="h-3.5 w-3.5" />Usuários</TabsTrigger>
           <TabsTrigger value="diagnostics" className="gap-2 px-4 py-2 font-bold uppercase text-[10px] tracking-widest"><Activity className="h-3.5 w-3.5" />Diagnóstico</TabsTrigger>
