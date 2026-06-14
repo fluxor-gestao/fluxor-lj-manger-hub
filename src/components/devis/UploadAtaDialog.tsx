@@ -44,7 +44,7 @@ export type AnalyzedDevis = {
 };
 
 export type AnalyzedPayload = {
-  detected_language: "pt" | "fr" | "en" | "es";
+  detected_language: "pt" | "fr" | "en" | "es" | "de";
   client_id?: string;
   client: AnalyzedClient;
   meeting: { date: string; summary: string; report: string };
