@@ -32,24 +32,41 @@ type Row = {
   client: { name: string } | null;
   supplier: { name: string } | null;
   devis_id?: string | null;
+  notes?: string | null;
 };
 
 const COLS =
-  "id, due_date, competence_date, entry_date, movement_description, counterparty_name, amount_in, amount_out, total_brl, paid_amount, open_amount, payment_status, client_id, supplier_id, devis_id, client:clients(name), supplier:suppliers(name)";
+  "id, due_date, competence_date, entry_date, movement_description, counterparty_name, amount_in, amount_out, total_brl, paid_amount, open_amount, payment_status, client_id, supplier_id, devis_id, notes, client:clients(name), supplier:suppliers(name)";
 
-function statusOf(r: Row): "pago" | "parcial" | "vencido" | "aberto" {
+type DerivedStatus = "pago" | "parcial" | "vencido" | "visualizada" | "enviada" | "aguardando";
+
+function statusOf(r: Row): DerivedStatus {
   if (r.payment_status === "pago" || (r.open_amount ?? 0) <= 0.0049) return "pago";
   if (r.payment_status === "parcial" || (Number(r.paid_amount ?? 0) > 0 && Number(r.open_amount ?? 0) > 0)) return "parcial";
   const today = new Date().toISOString().slice(0, 10);
   if (r.due_date && r.due_date < today) return "vencido";
-  return "aberto";
+  const notes = r.notes ?? "";
+  if (notes.includes("Cliente visualizou")) return "visualizada";
+  if (notes.includes("Cobrança enviada por e-mail")) return "enviada";
+  return "aguardando";
 }
 
-const statusBadge: Record<string, string> = {
+const statusBadge: Record<DerivedStatus, string> = {
   pago: "bg-success/15 text-success border-success/30",
   parcial: "bg-warning/15 text-warning border-warning/30",
   vencido: "bg-destructive/15 text-destructive border-destructive/30",
-  aberto: "bg-muted text-muted-foreground border-border",
+  visualizada: "bg-primary/15 text-primary border-primary/30",
+  enviada: "bg-blue-500/15 text-blue-600 border-blue-500/30 dark:text-blue-400",
+  aguardando: "bg-muted text-muted-foreground border-border",
+};
+
+const statusLabel: Record<DerivedStatus, string> = {
+  pago: "Pago",
+  parcial: "Parcial",
+  vencido: "Vencido",
+  visualizada: "Visualizada",
+  enviada: "Enviada",
+  aguardando: "Aguardando envio",
 };
 
 export function ContasTable({ kind }: { kind: Kind }) {
