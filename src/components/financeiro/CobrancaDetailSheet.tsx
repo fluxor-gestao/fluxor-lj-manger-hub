@@ -111,10 +111,12 @@ function buildTimeline(r: CobrancaRow): Step[] {
     description: "Envio da cobrança ao cliente",
     icon: Mail, state: r.notes?.includes("Cobrança enviada por e-mail") ? "done" : "pending",
   };
+  const viewedMatch = r.notes?.match(/\[Sistema\] Cliente visualizou a cobrança em ([^\n.]+)/);
   const viewed: Step = {
     key: "viewed", label: "Cliente visualizou",
-    description: "Confirmação de leitura",
-    icon: Eye, state: "pending",
+    description: viewedMatch ? `Visualizado em ${viewedMatch[1].trim()}` : "Confirmação de leitura",
+    icon: Eye, state: viewedMatch ? "done" : "pending",
+    at: viewedMatch ? viewedMatch[1].trim() : undefined,
   };
 
   const reminder: Step = (() => {
