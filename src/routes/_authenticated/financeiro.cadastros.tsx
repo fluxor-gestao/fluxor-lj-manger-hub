@@ -221,23 +221,61 @@ function FinancialSetup() {
   );
 }
 
-function AccountDialog({ account, onSave }: { account?: any, onSave: (acc: any) => void }) {
-  const [form, setForm] = useState(account || { 
-    name: "", 
-    bank: "", 
-    agency: "", 
-    account_number: "", 
-    pix_key: "", 
-    pix_type: "cpf",
-    holder_name: "",
-    holder_document: "",
-    business_unit: "",
-    is_active: true,
-    notes: ""
-  });
+function AccountDialog({ account, onSave }: { account?: any, onSave: (acc: any) => Promise<any> | any }) {
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const buildInitial = () => {
+    const base = account ? { ...account } : {
+      name: "", bank: "", agency: "", account_number: "",
+      pix_key: "", pix_type: "cpf",
+      holder_name: "", holder_document: "",
+      business_unit: "", business_units: [] as string[],
+      is_active: true, notes: ""
+    };
+    if (!Array.isArray(base.business_units)) {
+      base.business_units = base.business_unit ? [base.business_unit] : [];
+    }
+    return base;
+  };
+  const [form, setForm] = useState<any>(buildInitial);
+  const [unitsOpen, setUnitsOpen] = useState(false);
+
+  const handleOpenChange = (o: boolean) => {
+    setOpen(o);
+    if (o) setForm(buildInitial());
+  };
+
+  const toggleUnit = (code: string) => {
+    setForm((prev: any) => {
+      const cur: string[] = Array.isArray(prev.business_units) ? prev.business_units : [];
+      const next = cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code];
+      return { ...prev, business_units: next, business_unit: next[0] ?? "" };
+    });
+  };
+
+  const handleSave = async () => {
+    if (!form.name?.trim()) {
+      toast.error("Informe o nome identificador da conta");
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = { ...form };
+      // Normalize: keep both columns in sync; empty array means "Todas"
+      const units: string[] = Array.isArray(payload.business_units) ? payload.business_units : [];
+      payload.business_units = units;
+      payload.business_unit = units[0] ?? null;
+      await onSave(payload);
+      setOpen(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const selectedUnits: string[] = Array.isArray(form.business_units) ? form.business_units : [];
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {account ? (
           <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
@@ -259,14 +297,57 @@ function AccountDialog({ account, onSave }: { account?: any, onSave: (acc: any) 
             <Input value={form.bank} onChange={e => setForm({ ...form, bank: e.target.value })} />
           </div>
           <div className="space-y-2">
-            <Label>Unidade Vinculada</Label>
-            <Select value={form.business_unit} onValueChange={v => setForm({ ...form, business_unit: v })}>
-              <SelectTrigger><SelectValue placeholder="Todas as unidades" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as unidades</SelectItem>
-                {COMPANY_LIST.map(c => <SelectItem key={c.code} value={c.code}>{c.short}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <Label>Unidades Vinculadas</Label>
+            <Dialog open={unitsOpen} onOpenChange={setUnitsOpen}>
+              <DialogTrigger asChild>
+                <Button type="button" variant="outline"
+                  className="w-full justify-between font-normal h-auto min-h-10 py-2">
+                  <div className="flex flex-wrap gap-1 items-center text-left">
+                    {selectedUnits.length === 0 ? (
+                      <span className="text-muted-foreground text-sm">Todas as unidades</span>
+                    ) : selectedUnits.map((code) => {
+                      const c = COMPANY_LIST.find((x) => x.code === code);
+                      return (
+                        <span key={code} className="text-xs px-2 py-0.5 rounded bg-muted">
+                          <span className="font-mono mr-1 text-muted-foreground">{code}</span>
+                          {c?.name ?? code}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Selecionar unidades</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-1 py-2 max-h-80 overflow-auto">
+                  {COMPANY_LIST.map((c) => {
+                    const checked = selectedUnits.includes(c.code);
+                    return (
+                      <button type="button" key={c.code}
+                        onClick={() => toggleUnit(c.code)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm hover:bg-accent text-left ${checked ? "bg-accent/60" : ""}`}>
+                        <span className={`h-4 w-4 rounded border flex items-center justify-center text-[10px] ${checked ? "bg-primary border-primary text-primary-foreground" : "border-input"}`}>
+                          {checked ? "✓" : ""}
+                        </span>
+                        <span className="font-mono text-[11px] text-muted-foreground">{c.code}</span>
+                        <span className="flex-1">{c.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <DialogFooter>
+                  <Button variant="ghost" onClick={() => setForm({ ...form, business_units: [], business_unit: "" })}>
+                    Limpar (todas)
+                  </Button>
+                  <Button onClick={() => setUnitsOpen(false)}>Concluir</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <p className="text-[11px] text-muted-foreground">
+              Vazio = disponível para todas as unidades.
+            </p>
           </div>
           <div className="space-y-2">
             <Label>Agência</Label>
@@ -307,13 +388,17 @@ function AccountDialog({ account, onSave }: { account?: any, onSave: (acc: any) 
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" type="button" onClick={() => {}}>Cancelar</Button>
-          <Button onClick={() => onSave(form)}>Salvar</Button>
+          <Button variant="outline" type="button" onClick={() => setOpen(false)} disabled={saving}>Cancelar</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Salvar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 function SimpleSetupCard({ title, description, items, table, loading, showKind }: any) {
   const queryClient = useQueryClient();
