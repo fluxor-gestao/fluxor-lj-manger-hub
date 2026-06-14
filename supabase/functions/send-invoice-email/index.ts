@@ -8,7 +8,7 @@ const corsHeaders = {
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function buildHtml(messageText: string, invoiceNumber: string, openAmount: string, dueDate: string) {
+function buildHtml(messageText: string, invoiceNumber: string, openAmount: string, dueDate: string, trackingPixelUrl?: string) {
   return `<!doctype html>
 <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;color:#1f2937">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0">
