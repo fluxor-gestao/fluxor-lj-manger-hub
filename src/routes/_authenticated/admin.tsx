@@ -685,14 +685,22 @@ function BackupManager() {
               Dados Incluídos
             </h4>
             <ul className="text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
-              <li>• Clientes & Áreas</li>
-              <li>• Devis & Propostas</li>
-              <li>• Mapa de Aprovação</li>
-              <li>• Tarefas & Comentários</li>
-              <li>• Financeiro & Lançamentos</li>
-              <li>• Contas a Receber/Pagar</li>
-              <li>• Histórico de E-mails</li>
+              <li>• Clientes, Áreas e Unidades</li>
+              <li>• Devis, Itens & Áreas</li>
+              <li>• Serviços & Precificação</li>
+              <li>• Marcos & Histórico de preços</li>
+              <li>• Lançamentos Financeiros</li>
+              <li>• Pagamentos & Alocações</li>
+              <li>• Contas, Categorias, Centros</li>
+              <li>• Extratos & Conciliações</li>
+              <li>• Importações & Lotes</li>
+              <li>• Conversas & Mensagens</li>
+              <li>• E-mails enviados/suprimidos</li>
               <li>• Metadados de Anexos</li>
+              <li>• Logs de Auditoria</li>
+              <li>• Configurações & Versões</li>
+              <li>• Usuários & Papéis</li>
+              <li>• API Keys (mascaradas)</li>
             </ul>
           </div>
           <div className="space-y-2">
