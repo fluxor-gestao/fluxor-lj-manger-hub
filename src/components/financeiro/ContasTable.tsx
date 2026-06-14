@@ -172,7 +172,7 @@ export function ContasTable({ kind }: { kind: Kind }) {
                   {fmt(open)}
                 </TableCell>
                 <TableCell className="py-1.5">
-                  <Badge variant="outline" className={statusBadge[st]}>{st}</Badge>
+                  <Badge variant="outline" className={statusBadge[st]}>{statusLabel[st]}</Badge>
                 </TableCell>
               </TableRow>
             );
