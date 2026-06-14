@@ -10,6 +10,7 @@ type Lang = "pt" | "fr" | "en" | "es" | "de";
  */
 export async function ensureDevisBilingual(devis: any): Promise<any> {
   const target = (devis?.source_language || "pt") as Lang;
+  if (!["pt", "fr", "en", "es", "de"].includes(target)) return devis;
   // cliente brasileiro: nada a traduzir
   if (target === "pt") return devis;
 
