@@ -117,11 +117,21 @@ Deno.serve(async (req) => {
     // No frontend, a esteira é baseada em document_reference. Vamos marcar que foi enviado.
     
     // Adicionar log nas notas
-    const { data: entry } = await admin.from("financial_entries").select("notes").eq("id", entry_id).single();
+    const { data: entry } = await admin.from("financial_entries").select("notes, document_reference").eq("id", entry_id).single();
     const newNote = `\n[Sistema] Cobrança enviada por e-mail em ${new Date().toLocaleString('pt-BR')} para ${to}.`;
     updateData.notes = (entry?.notes || "") + newNote;
 
     await admin.from("financial_entries").update(updateData).eq("id", entry_id);
+
+    // Se for Fatura Avulsa (document_reference começa com "FA"), avança o devis-espelho para "enviada_ao_cliente"
+    const docRef = entry?.document_reference;
+    if (docRef && /^FA/i.test(docRef)) {
+      await admin
+        .from("devis")
+        .update({ status: "enviada_ao_cliente", sent_at: now })
+        .eq("devis_number", docRef)
+        .eq("is_fa", true);
+    }
 
     return new Response(JSON.stringify({ ok: true, id: sendResult.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
