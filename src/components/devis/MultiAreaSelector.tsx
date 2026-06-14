@@ -62,9 +62,14 @@ export function MultiAreaSelector({
   });
 
   const allAreas = useMemo(
-    () => dbAreas.map((a: any) => ({ slug: a.slug, label: a.label || a.name })),
+    () => dbAreas.map((a: any) => ({ slug: a.slug, label: a.label || a.name, unit: a.business_unit as string })),
     [dbAreas],
   );
+  const unitBySlug = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const a of allAreas) m.set(a.slug, a.unit);
+    return m;
+  }, [allAreas]);
 
   const suggestedSet = useMemo(() => new Set(suggestedAreas), [suggestedAreas]);
 
