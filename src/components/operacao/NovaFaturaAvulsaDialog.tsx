@@ -201,7 +201,7 @@ export function NovaFaturaAvulsaDialog({
       const { error: feErr } = await supabase.from("financial_entries").insert({
         entry_date: todayStr(),
         competence_month: todayStr().slice(0, 7),
-        business_unit: businessUnit || null,
+        business_unit: primaryUnit || null,
         movement_description: `Fatura Avulsa ${fa_number} — ${title.trim()}`,
         counterparty_name: clientCompany || clientName,
         amount_in: amt,
