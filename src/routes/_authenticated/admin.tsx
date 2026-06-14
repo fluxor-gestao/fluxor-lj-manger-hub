@@ -766,6 +766,28 @@ function BackupManager() {
 function Admin() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window === "undefined") return "users";
+    return new URLSearchParams(window.location.search).get("tab") || "users";
+  });
+
+  // Sync com botão voltar/avançar do navegador
+  useEffect(() => {
+    const onPop = () => {
+      const t = new URLSearchParams(window.location.search).get("tab") || "users";
+      setActiveTab(t);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const handleTabChange = (v: string) => {
+    setActiveTab(v);
+    const url = `/admin?tab=${v}`;
+    if (typeof window !== "undefined" && window.location.pathname + window.location.search !== url) {
+      window.history.replaceState(null, "", url);
+    }
+  };
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<{ user_id: string; currentRole: string } | null>(null);
