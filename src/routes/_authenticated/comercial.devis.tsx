@@ -498,19 +498,29 @@ function Comercial() {
     const { client_id, payload } = result;
     const client = clientsById[client_id];
     
-    // 1. Inferir prefixo e tipo de serviço
-    const prefix = inferServicePrefix(
-      payload.devis.service_type, 
-      payload.devis.responsible_sector, 
-      payload.devis.title,
-      payload.devis.scope_description
-    );
-    
-    // 2. Buscar próximo número de Devis
-    const { data: devisNumber, error: numberErr } = await supabase.rpc("next_devis_number", { _prefix: prefix });
-    if (numberErr) {
-      toast.error("Erro ao gerar número do Devis");
-      return;
+    // 1. Inferir prefixo e tipo de serviço (ou usar o que o usuário escolheu na tela de Código)
+    let prefix: string;
+    let devisNumber: string;
+    let serviceType: string;
+
+    if (result.devis_code) {
+      prefix = result.devis_code.prefix;
+      devisNumber = result.devis_code.devis_number;
+      serviceType = result.devis_code.service_type;
+    } else {
+      prefix = inferServicePrefix(
+        payload.devis.service_type,
+        payload.devis.responsible_sector,
+        payload.devis.title,
+        payload.devis.scope_description,
+      );
+      const { data: nextNum, error: numberErr } = await supabase.rpc("next_devis_number", { _prefix: prefix });
+      if (numberErr) {
+        toast.error("Erro ao gerar número do Devis");
+        return;
+      }
+      devisNumber = nextNum as string;
+      serviceType = payload.devis.service_type || prefix;
     }
 
     const total = payload.devis.total_amount || 0;
@@ -529,7 +539,7 @@ function Comercial() {
       down_payment_amount: total * 0.5,
       title: payload.devis.title || (client ? `Devis ${client.name}` : "Novo Devis"),
       devis_number: devisNumber,
-      service_type: payload.devis.service_type || prefix,
+      service_type: serviceType,
       source_language: payload.detected_language || "pt",
       business_unit: prefix as CompanyCode,
       responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)

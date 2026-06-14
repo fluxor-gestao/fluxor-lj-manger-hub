@@ -17,6 +17,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { LogoGlobeAnimation } from "../LogoGlobeAnimation";
 import FilePreview from "./FilePreview";
+import DevisCodePreviewDialog, { inferServicePrefix } from "./DevisCodePreviewDialog";
 
 export type AnalyzedClient = {
   name: string;
@@ -53,6 +54,7 @@ export type AnalyzedPayload = {
 export type ConfirmedAtaResult = {
   client_id: string;
   payload: AnalyzedPayload;
+  devis_code?: { prefix: string; devis_number: string; service_type: string };
 };
 
 interface Props {
@@ -100,6 +102,8 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
   const [progress, setProgress] = useState(0);
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
   const [meetingDate, setMeetingDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [pendingResult, setPendingResult] = useState<ConfirmedAtaResult | null>(null);
+  const [showCodeDialog, setShowCodeDialog] = useState(false);
 
   const reset = () => {
     setStep(1);
@@ -114,6 +118,13 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
     setSelectedClientId("");
     setCreating(false);
     setProgress(0);
+    setPendingResult(null);
+    setShowCodeDialog(false);
+  };
+
+  const requestDevisCode = (result: ConfirmedAtaResult) => {
+    setPendingResult(result);
+    setShowCodeDialog(true);
   };
 
   const handleClose = (o: boolean) => {
@@ -278,8 +289,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
             responsible_sector: p.devis.responsible_sectors?.[0] || p.devis.responsible_sector || ""
           }
         };
-        onConfirm({ client_id: clientId, payload: finalPayload });
-        handleClose(false);
+        requestDevisCode({ client_id: clientId, payload: finalPayload });
       } else {
         // Fallback para o Step 4 apenas se não conseguirmos resolver o cliente automaticamente
         setStep(4);
@@ -346,8 +356,7 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           responsible_sector: selectedAreas[0] || ""
         }
       };
-      onConfirm({ client_id: clientId, payload: finalPayload });
-      handleClose(false);
+      requestDevisCode({ client_id: clientId, payload: finalPayload });
     } catch (e: any) {
       toast.error(e.message || "Falha ao confirmar");
     } finally {
@@ -364,14 +373,16 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4 flex-wrap">
           <span className={cn(step >= 1 && "text-primary font-medium")}>1. Upload</span>
           <span>→</span>
           <span className={cn(step >= 2 && "text-primary font-medium")}>2. Confirmação</span>
           <span>→</span>
           <span className={cn(step >= 3 && "text-primary font-medium")}>3. Análise IA</span>
           <span>→</span>
-          <span className={cn(step >= 4 && "text-primary font-medium")}>4. Revisão</span>
+          <span className={cn((showCodeDialog || step >= 4) && "text-primary font-medium")}>4. Código</span>
+          <span>→</span>
+          <span className={cn(step >= 4 && "text-primary font-medium")}>5. Revisão</span>
         </div>
 
         {step === 1 && (
@@ -595,6 +606,31 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </div>
         )}
       </DialogContent>
+
+      {pendingResult && (
+        <DevisCodePreviewDialog
+          open={showCodeDialog}
+          onOpenChange={(o) => {
+            setShowCodeDialog(o);
+            if (!o) setPendingResult(null);
+          }}
+          clientName={pendingResult.payload.client?.name}
+          initialPrefix={inferServicePrefix(
+            pendingResult.payload.devis.service_type,
+            pendingResult.payload.devis.responsible_sector,
+            pendingResult.payload.devis.title,
+            pendingResult.payload.devis.scope_description,
+          )}
+          serviceTypeHint={pendingResult.payload.devis.service_type}
+          onConfirm={({ prefix, devis_number, service_type }) => {
+            const result = pendingResult;
+            setShowCodeDialog(false);
+            setPendingResult(null);
+            onConfirm({ ...result, devis_code: { prefix, devis_number, service_type } });
+            handleClose(false);
+          }}
+        />
+      )}
     </Dialog>
   );
 }
