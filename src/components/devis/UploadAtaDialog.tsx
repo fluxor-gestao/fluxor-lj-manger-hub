@@ -606,6 +606,31 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </div>
         )}
       </DialogContent>
+
+      {pendingResult && (
+        <DevisCodePreviewDialog
+          open={showCodeDialog}
+          onOpenChange={(o) => {
+            setShowCodeDialog(o);
+            if (!o) setPendingResult(null);
+          }}
+          clientName={pendingResult.payload.client?.name}
+          initialPrefix={inferServicePrefix(
+            pendingResult.payload.devis.service_type,
+            pendingResult.payload.devis.responsible_sector,
+            pendingResult.payload.devis.title,
+            pendingResult.payload.devis.scope_description,
+          )}
+          serviceTypeHint={pendingResult.payload.devis.service_type}
+          onConfirm={({ prefix, devis_number, service_type }) => {
+            const result = pendingResult;
+            setShowCodeDialog(false);
+            setPendingResult(null);
+            onConfirm({ ...result, devis_code: { prefix, devis_number, service_type } });
+            handleClose(false);
+          }}
+        />
+      )}
     </Dialog>
   );
 }
