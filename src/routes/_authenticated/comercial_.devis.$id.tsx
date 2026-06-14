@@ -584,7 +584,9 @@ function DevisDetail() {
                   companyCode={form.business_unit}
                   selectedAreas={selectedAreas}
                   onChange={setSelectedAreas}
+                  suggestedAreas={(devis as any)?.ai_suggested_area_slugs ?? []}
                 />
+
               </div>
             ) : (
               <div className="mt-1 flex flex-wrap gap-1">
