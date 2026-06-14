@@ -137,6 +137,26 @@ function OperacaoPage() {
     onError: (e: any) => toast.error(e.message ?? "Erro ao atualizar"),
   });
 
+  const deleteService = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("services").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, id) => {
+      toast.success("Processo excluído");
+      qc.invalidateQueries({ queryKey: ["operacao-services"] });
+      if (detail && detail.id === id) setDetail(null);
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao excluir"),
+  });
+
+  const handleDelete = (s: ServiceLike) => {
+    const label = s.title || "este processo";
+    if (window.confirm(`Excluir "${label}"? Esta ação não pode ser desfeita.`)) {
+      deleteService.mutate(s.id);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -204,6 +224,7 @@ function OperacaoPage() {
           services={filtered}
           onChangeStatus={(id, status) => updateStatus.mutate({ id, status })}
           onOpenDetail={(s) => setDetail(s)}
+          onDelete={handleDelete}
         />
       )}
 

@@ -1,4 +1,4 @@
-import { AlertOctagon, MoreHorizontal, FileText } from "lucide-react";
+import { AlertOctagon, MoreHorizontal, FileText, Trash2 } from "lucide-react";
 import { formatDevisCode } from "@/lib/formatDevis";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -52,10 +52,12 @@ export function OperacaoLista({
   services,
   onChangeStatus,
   onOpenDetail,
+  onDelete,
 }: {
   services: ServiceLike[];
   onChangeStatus: (id: string, status: OpStatus) => void;
   onOpenDetail: (s: ServiceLike) => void;
+  onDelete?: (s: ServiceLike) => void;
 }) {
   return (
     <Card>
@@ -164,6 +166,18 @@ export function OperacaoLista({
                       >
                         Cancelar
                       </DropdownMenuItem>
+                      {onDelete && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => onDelete(s)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
