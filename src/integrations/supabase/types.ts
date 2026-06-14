@@ -2340,6 +2340,10 @@ export type Database = {
         Args: { _conv: string; _user: string }
         Returns: boolean
       }
+      log_change: {
+        Args: { _description: string; _type: string }
+        Returns: Json
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
