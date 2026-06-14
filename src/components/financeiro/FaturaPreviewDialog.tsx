@@ -476,6 +476,91 @@ export function FaturaPreviewDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Confirmação dos dados do destinatário */}
+      <Dialog open={confirmOpen} onOpenChange={(o) => !isSending && setConfirmOpen(o)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Send className="h-4 w-4 text-primary" /> Confirmar envio da cobrança
+            </DialogTitle>
+            <DialogDescription>
+              Revise os dados do cliente antes de enviar. Você pode editar qualquer campo abaixo.
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingRecipient ? (
+            <div className="flex items-center justify-center py-10 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando dados do cliente...
+            </div>
+          ) : (
+            <div className="space-y-3 py-2">
+              <div className="rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                Fatura <span className="font-semibold text-foreground">{invoiceNumber}</span> · {fmt(open_)}
+              </div>
+
+              <div>
+                <Label className="text-xs flex items-center gap-1.5 mb-1.5">
+                  <User className="h-3.5 w-3.5" /> Nome do cliente
+                </Label>
+                <Input
+                  value={recipient.name}
+                  onChange={(e) => setRecipient((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs flex items-center gap-1.5 mb-1.5">
+                  <Mail className="h-3.5 w-3.5" /> E-mail para envio *
+                </Label>
+                <Input
+                  type="email"
+                  value={recipient.email}
+                  onChange={(e) => setRecipient((p) => ({ ...p, email: e.target.value }))}
+                  placeholder="cliente@email.com"
+                  className={!recipient.email ? "border-destructive/50" : ""}
+                />
+                {!recipient.email && (
+                  <p className="text-[11px] text-destructive mt-1">
+                    Cliente sem e-mail cadastrado. Informe um e-mail para o envio.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label className="text-xs flex items-center gap-1.5 mb-1.5">
+                  <Phone className="h-3.5 w-3.5" /> Telefone (opcional)
+                </Label>
+                <Input
+                  value={recipient.phone}
+                  onChange={(e) => setRecipient((p) => ({ ...p, phone: e.target.value }))}
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+
+              {recipient.document && (
+                <p className="text-[11px] text-muted-foreground">
+                  Documento: <span className="font-mono">{recipient.document}</span>
+                </p>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="ghost" onClick={() => setConfirmOpen(false)} disabled={isSending}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmAndSend} disabled={isSending || loadingRecipient || !recipient.email}>
+              {isSending ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando...</>
+              ) : (
+                <><CheckCircle2 className="h-4 w-4 mr-2" /> Confirmar e enviar</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
