@@ -49,13 +49,21 @@ function FinancialSetup() {
   // Mutations
   const saveAccount = useMutation({
     mutationFn: async (acc: any) => {
-      if (acc.id) return await supabase.from("financial_accounts").update(acc).eq("id", acc.id);
+      if (acc.id) {
+        const { id, ...rest } = acc;
+        return await supabase.from("financial_accounts").update(rest).eq("id", id);
+      }
       return await supabase.from("financial_accounts").insert(acc);
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
+      if ((res as any)?.error) {
+        toast.error((res as any).error.message || "Erro ao salvar conta");
+        return;
+      }
       toast.success("Conta salva!");
       queryClient.invalidateQueries({ queryKey: ["financial_accounts"] });
-    }
+    },
+    onError: (e: any) => toast.error(e?.message || "Erro ao salvar conta"),
   });
 
   const deleteAccount = useMutation({
