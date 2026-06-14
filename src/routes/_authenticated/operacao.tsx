@@ -224,6 +224,7 @@ function OperacaoPage() {
           services={filtered}
           onChangeStatus={(id, status) => updateStatus.mutate({ id, status })}
           onOpenDetail={(s) => setDetail(s)}
+          onDelete={handleDelete}
         />
       )}
 
