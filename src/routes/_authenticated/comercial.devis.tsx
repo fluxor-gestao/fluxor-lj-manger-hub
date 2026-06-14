@@ -1086,7 +1086,12 @@ function Comercial() {
                     <TableRow key={d.id} className="cursor-pointer" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
                       <TableCell className="font-medium">
                         <div className="flex flex-col">
-                          <span>{clientsById[d.client_id]?.name || "—"}</span>
+                          <span className="flex items-center gap-1.5">
+                            {d.is_fa && (
+                              <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold">FA</Badge>
+                            )}
+                            {clientsById[d.client_id]?.name || "—"}
+                          </span>
                           <span className="text-[10px] font-mono text-muted-foreground">{formatDevisCode(d.devis_number, d.id)}</span>
                         </div>
                       </TableCell>
