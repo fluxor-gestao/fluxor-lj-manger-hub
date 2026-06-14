@@ -598,6 +598,7 @@ export type Database = {
           final_charge_generated: boolean | null
           id: string
           initial_charge_generated: boolean | null
+          is_fa: boolean
           meeting_date: string | null
           meeting_report: string | null
           meeting_summary: string | null
@@ -657,6 +658,7 @@ export type Database = {
           final_charge_generated?: boolean | null
           id?: string
           initial_charge_generated?: boolean | null
+          is_fa?: boolean
           meeting_date?: string | null
           meeting_report?: string | null
           meeting_summary?: string | null
@@ -716,6 +718,7 @@ export type Database = {
           final_charge_generated?: boolean | null
           id?: string
           initial_charge_generated?: boolean | null
+          is_fa?: boolean
           meeting_date?: string | null
           meeting_report?: string | null
           meeting_summary?: string | null

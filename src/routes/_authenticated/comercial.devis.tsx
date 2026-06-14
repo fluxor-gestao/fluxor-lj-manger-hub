@@ -170,7 +170,7 @@ function Comercial() {
     queryFn: async () => {
       const qb = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, pricing_status, pricing_total, devis_service_areas(area_slug)") as any;
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, pricing_status, pricing_total, is_fa, devis_service_areas(area_slug)") as any;
       
       let q = qb.order("created_at", { ascending: false }).range(0, SUMMARY_HARD_CAP - 1);
 
@@ -191,7 +191,7 @@ function Comercial() {
       const [from, to] = rangeFor(devisPage, DEVIS_PAGE_SIZE);
       let q = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, responsible_sector, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible, pricing_status, pricing_total, devis_service_areas(area_slug)", { count: "exact" })
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, responsible_sector, client_id, created_at, sent_at, accepted_at, deadline_date, meeting_date, commercial_responsible, pricing_status, pricing_total, is_fa, devis_service_areas(area_slug)", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to);
       if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
@@ -1086,7 +1086,12 @@ function Comercial() {
                     <TableRow key={d.id} className="cursor-pointer" onClick={() => navigate({ to: "/comercial/devis/$id", params: { id: d.id } })}>
                       <TableCell className="font-medium">
                         <div className="flex flex-col">
-                          <span>{clientsById[d.client_id]?.name || "—"}</span>
+                          <span className="flex items-center gap-1.5">
+                            {d.is_fa && (
+                              <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold">FA</Badge>
+                            )}
+                            {clientsById[d.client_id]?.name || "—"}
+                          </span>
                           <span className="text-[10px] font-mono text-muted-foreground">{formatDevisCode(d.devis_number, d.id)}</span>
                         </div>
                       </TableCell>
