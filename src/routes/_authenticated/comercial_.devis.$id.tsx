@@ -577,20 +577,59 @@ function DevisDetail() {
           <div>
             <Label>Empresa responsável *</Label>
             {editing ? (
-              <Select
-                value={form.business_unit ?? ""}
-                onValueChange={(v) => setForm({ ...form, business_unit: v as CompanyCode, responsible_sector: "" })}
-              >
-                <SelectTrigger><SelectValue placeholder="Selecionar empresa" /></SelectTrigger>
-                <SelectContent>
-                  {COMPANY_LIST.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      <span className="font-mono text-[10px] mr-2">{c.code}</span>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between h-10 mt-1 font-normal">
+                      {form.business_unit ? (
+                        <span className="flex items-center gap-2 truncate">
+                          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-muted">{form.business_unit}</span>
+                          <span className="truncate">{COMPANY_LIST.find((c) => c.code === form.business_unit)?.name ?? form.business_unit}</span>
+                          {(devis as any)?.business_unit && form.business_unit === (devis as any).business_unit && (
+                            <Badge variant="outline" className="h-5 text-[9px] uppercase font-bold border-primary/40 text-primary gap-1 px-1.5">
+                              <Sparkles className="h-2.5 w-2.5" /> IA
+                            </Badge>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">Selecionar empresa</span>
+                      )}
+                      <svg className="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                    <div className="p-1 max-h-[280px] overflow-y-auto">
+                      {COMPANY_LIST.map((c) => {
+                        const isSelected = form.business_unit === c.code;
+                        const isAiSuggested = (devis as any)?.business_unit === c.code;
+                        return (
+                          <button
+                            key={c.code}
+                            type="button"
+                            onClick={() => setForm({ ...form, business_unit: c.code, responsible_sector: form.business_unit === c.code ? form.responsible_sector : "" })}
+                            className={cn(
+                              "w-full flex items-center gap-2 px-2 py-2 text-sm rounded-md hover:bg-accent text-left",
+                              isSelected && "bg-accent"
+                            )}
+                          >
+                            <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{c.code}</span>
+                            <span className="flex-1 truncate">{c.name}</span>
+                            {isAiSuggested && (
+                              <Badge variant="outline" className="h-5 text-[9px] uppercase font-bold border-primary/40 text-primary gap-1 px-1.5">
+                                <Sparkles className="h-2.5 w-2.5" /> IA
+                              </Badge>
+                            )}
+                            {isSelected && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Sugestão da IA com base na ata — você pode trocar por qualquer empresa do grupo.
+                </p>
+              </>
             ) : <div className="mt-1"><CompanyBadge code={(devis as any)?.business_unit} /></div>}
           </div>
 
