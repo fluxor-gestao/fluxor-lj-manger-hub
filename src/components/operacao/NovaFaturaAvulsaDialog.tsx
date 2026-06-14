@@ -273,23 +273,86 @@ export function NovaFaturaAvulsaDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label>Unidade de negócio</Label>
-            <Select value={businessUnit} onValueChange={(v) => { setBusinessUnit(v); setResponsibleSector(""); }}>
-              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-              <SelectContent>
-                {units.map((u: any) => (
-                  <SelectItem key={u.code} value={u.code}>{u.code} — {u.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Unidades de negócio</Label>
+            <Popover open={unitsOpen} onOpenChange={setUnitsOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between font-normal h-auto min-h-10 py-2"
+                >
+                  <div className="flex flex-wrap gap-1 items-center">
+                    {businessUnits.length === 0 ? (
+                      <span className="text-muted-foreground">Selecione uma ou mais...</span>
+                    ) : (
+                      businessUnits.map((code) => {
+                        const u = unitsWithAreas.find((x: any) => x.code === code);
+                        return (
+                          <Badge key={code} variant="secondary" className="gap-1 pl-2 pr-1 py-0.5">
+                            <span className="font-mono text-[10px]">{code}</span>
+                            <span className="text-xs">{u?.name ?? ""}</span>
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBusinessUnits((prev) => prev.filter((c) => c !== code));
+                                setResponsibleSector("");
+                              }}
+                              className="ml-1 inline-flex items-center justify-center rounded hover:bg-muted-foreground/20 p-0.5"
+                            >
+                              <X className="h-3 w-3" />
+                            </span>
+                          </Badge>
+                        );
+                      })
+                    )}
+                  </div>
+                  <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-1" align="start">
+                <div className="max-h-64 overflow-auto">
+                  {unitsWithAreas.length === 0 ? (
+                    <div className="px-3 py-2 text-xs text-muted-foreground">Nenhuma unidade com áreas ativas.</div>
+                  ) : unitsWithAreas.map((u: any) => {
+                    const checked = businessUnits.includes(u.code);
+                    return (
+                      <button
+                        type="button"
+                        key={u.code}
+                        onClick={() => {
+                          setBusinessUnits((prev) =>
+                            checked ? prev.filter((c) => c !== u.code) : [...prev, u.code]
+                          );
+                          setResponsibleSector("");
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2 py-1.5 rounded-sm text-sm hover:bg-accent text-left",
+                          checked && "bg-accent/50"
+                        )}
+                      >
+                        <Check className={cn("h-4 w-4", checked ? "opacity-100" : "opacity-0")} />
+                        <span className="font-mono text-[11px] text-muted-foreground">{u.code}</span>
+                        <span>— {u.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1.5">
             <Label>Área / setor responsável</Label>
-            <Select value={responsibleSector} onValueChange={setResponsibleSector} disabled={!businessUnit}>
-              <SelectTrigger><SelectValue placeholder={businessUnit ? "Selecione..." : "Escolha a unidade"} /></SelectTrigger>
+            <Select value={responsibleSector} onValueChange={setResponsibleSector} disabled={businessUnits.length === 0}>
+              <SelectTrigger><SelectValue placeholder={businessUnits.length > 0 ? "Selecione..." : "Escolha a(s) unidade(s)"} /></SelectTrigger>
               <SelectContent>
                 {areas.map((a: any) => (
-                  <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                  <SelectItem key={`${a.business_unit}-${a.slug}`} value={a.slug}>
+                    <span className="font-mono text-[10px] mr-2 text-muted-foreground">{a.business_unit}</span>
+                    {a.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
