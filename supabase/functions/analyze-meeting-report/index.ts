@@ -115,7 +115,7 @@ Sua saída deve ser um objeto JSON estruturado contendo o idioma, dados do clien
             parameters: {
               type: "object",
               properties: {
-                detected_language: { type: "string", enum: ["pt", "fr", "en", "es"] },
+                detected_language: { type: "string", enum: ["pt", "fr", "en", "es", "de"] },
                 client_id: { type: "string", description: "ID do cliente existente se encontrado no catálogo." },
                 client: {
                   type: "object",
