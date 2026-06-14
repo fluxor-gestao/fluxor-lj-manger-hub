@@ -1038,6 +1038,7 @@ export type Database = {
           agency: string | null
           bank: string | null
           business_unit: string | null
+          business_units: string[] | null
           created_at: string | null
           holder_document: string | null
           holder_name: string | null
@@ -1054,6 +1055,7 @@ export type Database = {
           agency?: string | null
           bank?: string | null
           business_unit?: string | null
+          business_units?: string[] | null
           created_at?: string | null
           holder_document?: string | null
           holder_name?: string | null
@@ -1070,6 +1072,7 @@ export type Database = {
           agency?: string | null
           bank?: string | null
           business_unit?: string | null
+          business_units?: string[] | null
           created_at?: string | null
           holder_document?: string | null
           holder_name?: string | null
