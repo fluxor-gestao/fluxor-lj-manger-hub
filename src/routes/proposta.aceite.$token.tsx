@@ -379,9 +379,8 @@ function AceitarProposta() {
                 </Card>
               )}
 
-              {(state === "ready" || state === "accepting" || state === "rejecting") && (
-                <ActionButtons />
-              )}
+
+
 
               <Card>
                 <CardHeader>
