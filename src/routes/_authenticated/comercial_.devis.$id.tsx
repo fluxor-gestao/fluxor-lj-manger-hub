@@ -1013,6 +1013,7 @@ function DevisDetail() {
           devisId={devis.id}
           pricingStatus={devis.pricing_status || "sem_precificacao"}
           currentTotal={devis.total_amount}
+          selectedCompanies={[devis.business_unit, ...((devis as any).additional_business_units ?? [])].filter(Boolean) as string[]}
           onTotalUpdate={(newTotal) => {
             queryClient.invalidateQueries({ queryKey: ["devis", id] });
             const down = newTotal * 0.5;
