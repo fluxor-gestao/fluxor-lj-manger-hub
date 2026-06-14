@@ -86,7 +86,7 @@ export function MultiAreaSelector({
             "w-full justify-between h-auto min-h-[40px] py-2 px-3 font-normal",
             className
           )}
-          disabled={!companyCode}
+          disabled={effectiveCodes.length === 0}
         >
           <div className="flex flex-wrap gap-1 items-center overflow-hidden text-left">
             {selectedAreas.length > 0 ? (
