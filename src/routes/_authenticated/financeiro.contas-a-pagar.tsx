@@ -341,11 +341,17 @@ function ContasAPagarPage() {
       </div>
 
       <Tabs defaultValue="contas" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:inline-flex">
-          <TabsTrigger value="contas">
+        <TabsList className="h-12 p-1.5 bg-muted/60 backdrop-blur-sm border border-border/60 rounded-xl shadow-sm w-full sm:w-auto sm:inline-flex gap-1">
+          <TabsTrigger
+            value="contas"
+            className="h-9 px-4 rounded-lg font-medium text-sm transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:ring-1 data-[state=active]:ring-primary/20 hover:text-foreground"
+          >
             <ListChecks className="h-4 w-4 mr-2" /> Contas a Pagar
           </TabsTrigger>
-          <TabsTrigger value="cronograma">
+          <TabsTrigger
+            value="cronograma"
+            className="h-9 px-4 rounded-lg font-medium text-sm transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:ring-1 data-[state=active]:ring-primary/20 hover:text-foreground"
+          >
             <CalendarClock className="h-4 w-4 mr-2" /> Cronograma de Pagamentos
           </TabsTrigger>
         </TabsList>
