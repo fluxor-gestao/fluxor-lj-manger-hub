@@ -33,6 +33,7 @@ import { COMPANY_LIST, isCompanyCode, type CompanyCode } from "@/lib/companyCode
 import { AreaBadge } from "@/components/AreaBadge";
 import { getAreasFor, isValidAreaForCompany } from "@/lib/businessAreas";
 import { MultiAreaSelector } from "@/components/devis/MultiAreaSelector";
+import { resolveAreasForUnit } from "@/lib/areaResolver";
 import { formatDevisCode } from "@/lib/formatDevis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EntityAttachments } from "@/components/EntityAttachments";
