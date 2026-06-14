@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Copy, Send, Download, X, CreditCard, Building2, Loader2, Info } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Copy, Send, Download, X, CreditCard, Building2, Loader2, Info, User, Mail, Phone, CheckCircle2 } from "lucide-react";
 import { useFinanceiroCatalogs } from "@/hooks/useFinanceiroCatalogs";
 import logo from "@/assets/logo.svg";
 import type { CobrancaRow } from "./CobrancaDetailSheet";
