@@ -2034,6 +2034,7 @@ export type Database = {
       services: {
         Row: {
           actual_end_date: string | null
+          additional_business_units: string[]
           assigned_to: string | null
           business_unit: string | null
           client_company_snapshot: string | null
@@ -2060,6 +2061,7 @@ export type Database = {
         }
         Insert: {
           actual_end_date?: string | null
+          additional_business_units?: string[]
           assigned_to?: string | null
           business_unit?: string | null
           client_company_snapshot?: string | null
@@ -2086,6 +2088,7 @@ export type Database = {
         }
         Update: {
           actual_end_date?: string | null
+          additional_business_units?: string[]
           assigned_to?: string | null
           business_unit?: string | null
           client_company_snapshot?: string | null

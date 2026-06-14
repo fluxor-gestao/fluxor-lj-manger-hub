@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Loader2, Paperclip } from "lucide-react";
+import { Check, ChevronsUpDown, FileText, Loader2, Paperclip, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const BUCKET = "devis-pdfs";
 const FOLDER = "fatura-avulsa";
@@ -39,7 +41,8 @@ export function NovaFaturaAvulsaDialog({
 
   const [clientId, setClientId] = useState("");
   const [clientCompany, setClientCompany] = useState("");
-  const [businessUnit, setBusinessUnit] = useState("");
+  const [businessUnits, setBusinessUnits] = useState<string[]>([]);
+  const [unitsOpen, setUnitsOpen] = useState(false);
   const [responsibleSector, setResponsibleSector] = useState("");
   const [servicePriceId, setServicePriceId] = useState<string>("");
   const [title, setTitle] = useState("");
@@ -49,6 +52,8 @@ export function NovaFaturaAvulsaDialog({
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [previewNumber, setPreviewNumber] = useState<string>("");
+
+  const primaryUnit = businessUnits[0] ?? "";
 
   const { data: clients = [] } = useQuery({
     queryKey: ["fa-clients"],
@@ -64,28 +69,30 @@ export function NovaFaturaAvulsaDialog({
     enabled: open,
   });
 
-  const { data: units = [] } = useQuery({
-    queryKey: ["catalog", "business_units"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("business_units")
-        .select("code, name")
-        .eq("active", true)
-        .order("code");
-      if (error) throw error;
-      return data ?? [];
-    },
+  // Unidades que efetivamente possuem áreas cadastradas e ativas
+  const { data: unitsWithAreas = [] } = useQuery({
+    queryKey: ["fa-units-with-areas"],
     enabled: open,
+    queryFn: async () => {
+      const [{ data: units, error: uErr }, { data: areas, error: aErr }] = await Promise.all([
+        supabase.from("business_units").select("code, name").eq("active", true).order("code"),
+        supabase.from("business_areas").select("business_unit").eq("is_active", true),
+      ]);
+      if (uErr) throw uErr;
+      if (aErr) throw aErr;
+      const valid = new Set((areas ?? []).map((a: any) => a.business_unit).filter(Boolean));
+      return (units ?? []).filter((u: any) => valid.has(u.code));
+    },
   });
 
   const { data: areas = [] } = useQuery({
-    queryKey: ["business-areas", businessUnit],
-    enabled: !!businessUnit && open,
+    queryKey: ["business-areas-multi", businessUnits.join(",")],
+    enabled: businessUnits.length > 0 && open,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("business_areas")
-        .select("slug, label")
-        .eq("business_unit", businessUnit)
+        .select("slug, label, business_unit")
+        .in("business_unit", businessUnits)
         .eq("is_active", true)
         .order("label");
       if (error) throw error;
@@ -94,11 +101,11 @@ export function NovaFaturaAvulsaDialog({
   });
 
   const { data: prices = [] } = useQuery({
-    queryKey: ["fa-service-prices", businessUnit, responsibleSector],
+    queryKey: ["fa-service-prices", primaryUnit, responsibleSector],
     enabled: open,
     queryFn: async () => {
       let q = supabase.from("service_prices").select("id, name, price, description, business_unit, responsible_sector").order("name");
-      if (businessUnit) q = q.eq("business_unit", businessUnit);
+      if (primaryUnit) q = q.eq("business_unit", primaryUnit);
       if (responsibleSector) q = q.eq("responsible_sector", responsibleSector);
       const { data, error } = await q;
       if (error) throw error;
@@ -134,7 +141,7 @@ export function NovaFaturaAvulsaDialog({
         if (data) setPreviewNumber(data as string);
       })();
     } else {
-      setClientId(""); setClientCompany(""); setBusinessUnit(""); setResponsibleSector("");
+      setClientId(""); setClientCompany(""); setBusinessUnits([]); setResponsibleSector("");
       setServicePriceId(""); setTitle(""); setDescription(""); setAmount("");
       setDueDate(todayStr()); setFile(null); setPreviewNumber("");
     }
@@ -168,7 +175,8 @@ export function NovaFaturaAvulsaDialog({
         .insert({
           title: `[${fa_number}] ${title.trim()}`,
           description: description.trim() || null,
-          business_unit: businessUnit || null,
+          business_unit: primaryUnit || null,
+          additional_business_units: businessUnits.slice(1),
           responsible_sector: responsibleSector || null,
           client_id: clientId,
           expected_end_date: dueDate,
@@ -193,7 +201,7 @@ export function NovaFaturaAvulsaDialog({
       const { error: feErr } = await supabase.from("financial_entries").insert({
         entry_date: todayStr(),
         competence_month: todayStr().slice(0, 7),
-        business_unit: businessUnit || null,
+        business_unit: primaryUnit || null,
         movement_description: `Fatura Avulsa ${fa_number} — ${title.trim()}`,
         counterparty_name: clientCompany || clientName,
         amount_in: amt,
@@ -265,23 +273,86 @@ export function NovaFaturaAvulsaDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label>Unidade de negócio</Label>
-            <Select value={businessUnit} onValueChange={(v) => { setBusinessUnit(v); setResponsibleSector(""); }}>
-              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-              <SelectContent>
-                {units.map((u: any) => (
-                  <SelectItem key={u.code} value={u.code}>{u.code} — {u.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Unidades de negócio</Label>
+            <Popover open={unitsOpen} onOpenChange={setUnitsOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between font-normal h-auto min-h-10 py-2"
+                >
+                  <div className="flex flex-wrap gap-1 items-center">
+                    {businessUnits.length === 0 ? (
+                      <span className="text-muted-foreground">Selecione uma ou mais...</span>
+                    ) : (
+                      businessUnits.map((code) => {
+                        const u = unitsWithAreas.find((x: any) => x.code === code);
+                        return (
+                          <Badge key={code} variant="secondary" className="gap-1 pl-2 pr-1 py-0.5">
+                            <span className="font-mono text-[10px]">{code}</span>
+                            <span className="text-xs">{u?.name ?? ""}</span>
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBusinessUnits((prev) => prev.filter((c) => c !== code));
+                                setResponsibleSector("");
+                              }}
+                              className="ml-1 inline-flex items-center justify-center rounded hover:bg-muted-foreground/20 p-0.5"
+                            >
+                              <X className="h-3 w-3" />
+                            </span>
+                          </Badge>
+                        );
+                      })
+                    )}
+                  </div>
+                  <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-1" align="start">
+                <div className="max-h-64 overflow-auto">
+                  {unitsWithAreas.length === 0 ? (
+                    <div className="px-3 py-2 text-xs text-muted-foreground">Nenhuma unidade com áreas ativas.</div>
+                  ) : unitsWithAreas.map((u: any) => {
+                    const checked = businessUnits.includes(u.code);
+                    return (
+                      <button
+                        type="button"
+                        key={u.code}
+                        onClick={() => {
+                          setBusinessUnits((prev) =>
+                            checked ? prev.filter((c) => c !== u.code) : [...prev, u.code]
+                          );
+                          setResponsibleSector("");
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2 py-1.5 rounded-sm text-sm hover:bg-accent text-left",
+                          checked && "bg-accent/50"
+                        )}
+                      >
+                        <Check className={cn("h-4 w-4", checked ? "opacity-100" : "opacity-0")} />
+                        <span className="font-mono text-[11px] text-muted-foreground">{u.code}</span>
+                        <span>— {u.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1.5">
             <Label>Área / setor responsável</Label>
-            <Select value={responsibleSector} onValueChange={setResponsibleSector} disabled={!businessUnit}>
-              <SelectTrigger><SelectValue placeholder={businessUnit ? "Selecione..." : "Escolha a unidade"} /></SelectTrigger>
+            <Select value={responsibleSector} onValueChange={setResponsibleSector} disabled={businessUnits.length === 0}>
+              <SelectTrigger><SelectValue placeholder={businessUnits.length > 0 ? "Selecione..." : "Escolha a(s) unidade(s)"} /></SelectTrigger>
               <SelectContent>
                 {areas.map((a: any) => (
-                  <SelectItem key={a.slug} value={a.slug}>{a.label}</SelectItem>
+                  <SelectItem key={`${a.business_unit}-${a.slug}`} value={a.slug}>
+                    <span className="font-mono text-[10px] mr-2 text-muted-foreground">{a.business_unit}</span>
+                    {a.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
