@@ -292,26 +292,10 @@ function AceitarProposta() {
   return (
     <div className="min-h-screen bg-slate-50/50">
       <header className="border-b bg-background">
-        <div className={`${containerCls} mx-auto px-6 py-5 flex items-center justify-between gap-4`}>
-          <div className="flex items-center gap-4">
-            <img src={logo} alt="Lundgaard Jensen" className="h-10 w-auto" />
-            <div className="h-8 w-px bg-border hidden sm:block" />
-            <div className="hidden sm:block">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lundgaard Jensen</div>
-              <div className="text-sm font-bold text-foreground">
-                {preview?.business_unit ? COMPANY_NAME[preview.business_unit] : "Consultoria Internacional"}
-              </div>
-            </div>
-          </div>
-          {preview?.business_unit && (
-            <div className="sm:hidden text-right">
-              <div className="text-[10px] font-bold uppercase text-muted-foreground leading-tight">Lundgaard Jensen</div>
-              <div className="text-xs font-bold leading-tight truncate max-w-[150px]">
-                {COMPANY_NAME[preview.business_unit].split("—")[1]?.trim() || COMPANY_NAME[preview.business_unit]}
-              </div>
-            </div>
-          )}
+        <div className={`${containerCls} mx-auto px-6 py-5 flex items-center gap-4`}>
+          <img src={logo} alt="Lundgaard Jensen" className="h-10 w-auto" />
         </div>
+
       </header>
 
       <main className={`${containerCls} mx-auto px-6 py-10 md:py-14`}>
