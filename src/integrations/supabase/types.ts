@@ -1227,6 +1227,7 @@ export type Database = {
           entry_date: string
           entry_type: Database["public"]["Enums"]["entry_type"] | null
           exchange_rate: number
+          fa_area_allocations: Json | null
           fx_status: string | null
           fx_variation: number | null
           id: string
@@ -1281,6 +1282,7 @@ export type Database = {
           entry_date: string
           entry_type?: Database["public"]["Enums"]["entry_type"] | null
           exchange_rate?: number
+          fa_area_allocations?: Json | null
           fx_status?: string | null
           fx_variation?: number | null
           id?: string
@@ -1335,6 +1337,7 @@ export type Database = {
           entry_date?: string
           entry_type?: Database["public"]["Enums"]["entry_type"] | null
           exchange_rate?: number
+          fa_area_allocations?: Json | null
           fx_status?: string | null
           fx_variation?: number | null
           id?: string
@@ -2044,9 +2047,11 @@ export type Database = {
           devis_id: string | null
           expected_end_date: string | null
           fa_amount: number | null
+          fa_area_allocations: Json | null
           fa_attachment_name: string | null
           fa_attachment_url: string | null
           fa_due_date: string | null
+          fa_items: Json | null
           fa_number: string | null
           final_charge_generated: boolean | null
           id: string
@@ -2071,9 +2076,11 @@ export type Database = {
           devis_id?: string | null
           expected_end_date?: string | null
           fa_amount?: number | null
+          fa_area_allocations?: Json | null
           fa_attachment_name?: string | null
           fa_attachment_url?: string | null
           fa_due_date?: string | null
+          fa_items?: Json | null
           fa_number?: string | null
           final_charge_generated?: boolean | null
           id?: string
@@ -2098,9 +2105,11 @@ export type Database = {
           devis_id?: string | null
           expected_end_date?: string | null
           fa_amount?: number | null
+          fa_area_allocations?: Json | null
           fa_attachment_name?: string | null
           fa_attachment_url?: string | null
           fa_due_date?: string | null
+          fa_items?: Json | null
           fa_number?: string | null
           final_charge_generated?: boolean | null
           id?: string
