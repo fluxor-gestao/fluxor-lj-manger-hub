@@ -13,6 +13,8 @@ import { useMemo } from "react";
 
 interface MultiAreaSelectorProps {
   companyCode: CompanyCode | "";
+  /** Lista opcional de empresas (substitui `companyCode` quando informada). */
+  companyCodes?: string[];
   selectedAreas: string[];
   onChange: (areas: string[]) => void;
   placeholder?: string;
@@ -25,6 +27,7 @@ interface MultiAreaSelectorProps {
 
 export function MultiAreaSelector({
   companyCode,
+  companyCodes,
   selectedAreas,
   onChange,
   placeholder = "Selecionar áreas...",
@@ -33,28 +36,40 @@ export function MultiAreaSelector({
   onMainAreaChange,
   suggestedAreas = [],
 }: MultiAreaSelectorProps) {
-  // Fonte única: tabela `business_areas` (ativas) filtrada pela unidade.
+  // Resolve a lista efetiva de empresas: prioriza `companyCodes`, senão usa `companyCode`.
+  const effectiveCodes = useMemo(() => {
+    const fromArr = (companyCodes ?? []).filter(Boolean) as string[];
+    if (fromArr.length > 0) return Array.from(new Set(fromArr));
+    return companyCode ? [companyCode] : [];
+  }, [companyCodes, companyCode]);
+
+  // Fonte única: tabela `business_areas` (ativas) filtrada pelas unidades.
   const { data: dbAreas = [], isLoading } = useQuery({
-    queryKey: ["business-areas", "active", companyCode],
+    queryKey: ["business-areas", "active", effectiveCodes.join(",")],
     queryFn: async () => {
-      if (!companyCode) return [];
+      if (effectiveCodes.length === 0) return [];
       const { data, error } = await supabase
         .from("business_areas")
         .select("*")
         .eq("is_active", true)
-        .eq("business_unit", companyCode)
+        .in("business_unit", effectiveCodes)
         .order("display_order", { ascending: true })
         .order("label", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
-    enabled: !!companyCode,
+    enabled: effectiveCodes.length > 0,
   });
 
   const allAreas = useMemo(
-    () => dbAreas.map((a: any) => ({ slug: a.slug, label: a.label || a.name })),
+    () => dbAreas.map((a: any) => ({ slug: a.slug, label: a.label || a.name, unit: a.business_unit as string })),
     [dbAreas],
   );
+  const unitBySlug = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const a of allAreas) m.set(a.slug, a.unit);
+    return m;
+  }, [allAreas]);
 
   const suggestedSet = useMemo(() => new Set(suggestedAreas), [suggestedAreas]);
 
@@ -76,14 +91,14 @@ export function MultiAreaSelector({
             "w-full justify-between h-auto min-h-[40px] py-2 px-3 font-normal",
             className
           )}
-          disabled={!companyCode}
+          disabled={effectiveCodes.length === 0}
         >
           <div className="flex flex-wrap gap-1 items-center overflow-hidden text-left">
             {selectedAreas.length > 0 ? (
               selectedAreas.map((slug) => (
                 <div key={slug} className="relative group/badge">
                   <AreaBadge 
-                    companyCode={companyCode as CompanyCode} 
+                    companyCode={(unitBySlug.get(slug) || effectiveCodes[0]) as CompanyCode} 
                     areaSlug={slug}
                     className={cn(
                       "mr-1", 
@@ -106,7 +121,7 @@ export function MultiAreaSelector({
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
-          {!companyCode ? (
+          {effectiveCodes.length === 0 ? (
             <div className="text-sm text-muted-foreground p-2 text-center">
               Selecione a empresa para listar as áreas.
             </div>
