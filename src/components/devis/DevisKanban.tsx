@@ -131,7 +131,12 @@ function DevisCard({
         dragging && "opacity-50",
       )}
     >
-      <div className="flex flex-wrap gap-1 mb-1">
+      <div className="flex flex-wrap gap-1 mb-1 items-center">
+        {devis.is_fa && (
+          <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold">
+            FA
+          </Badge>
+        )}
         {areas.map((slug: string) => (
           <Badge key={slug} variant="secondary" className="text-[9px] px-1 py-0 h-3.5 bg-muted/50 font-normal">
             {slug}
