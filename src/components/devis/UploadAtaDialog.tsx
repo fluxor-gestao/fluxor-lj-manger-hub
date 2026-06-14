@@ -54,6 +54,7 @@ export type AnalyzedPayload = {
 export type ConfirmedAtaResult = {
   client_id: string;
   payload: AnalyzedPayload;
+  devis_code?: { prefix: string; devis_number: string; service_type: string };
 };
 
 interface Props {
