@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { LogoGlobeAnimation } from "../LogoGlobeAnimation";
+import FilePreview from "./FilePreview";
 
 export type AnalyzedClient = {
   name: string;
@@ -424,29 +425,8 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
               <p className="text-sm text-muted-foreground">Verifique se este é o arquivo correto antes de iniciar a análise pela IA.</p>
             </div>
 
-            <Card className="overflow-hidden border-2 border-primary/20 bg-muted/20">
-              <div className="bg-primary/5 p-3 flex items-center justify-between border-b">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <FileText className="h-4 w-4 text-primary" />
-                  <span className="truncate max-w-[400px]">{file.name}</span>
-                </div>
-                <Badge variant="outline" className="bg-background">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
-                </Badge>
-              </div>
-              
-              <div className="aspect-[4/3] w-full bg-slate-100 flex items-center justify-center overflow-auto relative">
-                {file.type === "application/pdf" && previewUrl ? (
-                  <object data={previewUrl} type="application/pdf" className="w-full h-full" />
-                ) : file.type.startsWith("image/") && previewUrl ? (
-                  <img src={previewUrl} alt="Preview" className="max-w-full h-auto" />
-                ) : (
-                  <div className="text-center p-8">
-                    <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm font-medium">Visualização não disponível</p>
-                  </div>
-                )}
-              </div>
+            <Card className="overflow-hidden border-2 border-primary/20 bg-background p-3">
+              <FilePreview file={file} previewUrl={previewUrl} />
             </Card>
 
             <DialogFooter className="flex justify-between items-center sm:justify-between">
