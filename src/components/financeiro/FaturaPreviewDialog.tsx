@@ -144,22 +144,64 @@ export function FaturaPreviewDialog({
   const sendInvoice = async () => {
     if (!row) return;
     
-    // Buscar o e-mail do cliente se não estiver disponível
-    let targetEmail = (row as any).client?.email;
-    
-    if (!targetEmail && row.client_id) {
-      const { data: clientData } = await supabase
-        .from("clients")
-        .select("email")
-        .eq("id", row.client_id)
-        .single();
-      targetEmail = clientData?.email;
-    }
+  const openConfirmDialog = async () => {
+    if (!row) return;
+    setLoadingRecipient(true);
+    setConfirmOpen(true);
+    try {
+      let clientId = row.client_id as string | null | undefined;
+      let name = (row as any).client?.name || row.counterparty_name || "";
+      let email = (row as any).client?.email || "";
+      let phone = (row as any).client?.phone || "";
+      let document = (row as any).client?.document || "";
 
-    if (!targetEmail) {
-      toast.error("E-mail do cliente não encontrado", {
-        description: "Configure o e-mail no cadastro do cliente antes de enviar."
-      });
+      // Fallback 1: via devis
+      if ((!clientId || !email) && row.devis_id) {
+        const { data: devis } = await supabase
+          .from("devis")
+          .select("client_id")
+          .eq("id", row.devis_id)
+          .maybeSingle();
+        if (devis?.client_id) clientId = devis.client_id;
+      }
+
+      // Fallback 2: por nome da contraparte
+      if (!clientId && row.counterparty_name) {
+        const { data: byName } = await supabase
+          .from("clients")
+          .select("id")
+          .ilike("name", row.counterparty_name)
+          .limit(1)
+          .maybeSingle();
+        if (byName?.id) clientId = byName.id;
+      }
+
+      if (clientId) {
+        const { data: cli } = await supabase
+          .from("clients")
+          .select("name, email, phone, document")
+          .eq("id", clientId)
+          .maybeSingle();
+        if (cli) {
+          name = cli.name || name;
+          email = cli.email || email;
+          phone = (cli as any).phone || phone;
+          document = (cli as any).document || document;
+        }
+      }
+
+      setRecipient({ name: name || "", email: email || "", phone: phone || "", document: document || "" });
+    } catch (err) {
+      console.error("Erro ao resolver dados do cliente:", err);
+    } finally {
+      setLoadingRecipient(false);
+    }
+  };
+
+  const confirmAndSend = async () => {
+    if (!row) return;
+    if (!recipient.email || !/^\S+@\S+\.\S+$/.test(recipient.email)) {
+      toast.error("E-mail inválido", { description: "Informe um e-mail válido para o envio." });
       return;
     }
 
@@ -168,7 +210,9 @@ export function FaturaPreviewDialog({
       const { data, error } = await supabase.functions.invoke("send-invoice-email", {
         body: {
           entry_id: row.id,
-          to: targetEmail,
+          to: recipient.email,
+          recipient_name: recipient.name,
+          recipient_phone: recipient.phone,
           subject: `Cobrança disponível - ${invoiceNumber}`,
           message_text: message,
           invoice_number: invoiceNumber,
@@ -181,8 +225,11 @@ export function FaturaPreviewDialog({
 
       if (error) throw error;
 
-      toast.success("Cobrança enviada com sucesso!");
+      toast.success("Cobrança enviada com sucesso!", {
+        description: `Enviada para ${recipient.email}`,
+      });
       queryClient.invalidateQueries({ queryKey: ["contas-a-receber"] });
+      setConfirmOpen(false);
       onOpenChange(false);
     } catch (err: any) {
       console.error("Error sending invoice:", err);
