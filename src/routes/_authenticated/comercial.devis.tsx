@@ -539,7 +539,7 @@ function Comercial() {
       down_payment_amount: total * 0.5,
       title: payload.devis.title || (client ? `Devis ${client.name}` : "Novo Devis"),
       devis_number: devisNumber,
-      service_type: payload.devis.service_type || prefix,
+      service_type: serviceType,
       source_language: payload.detected_language || "pt",
       business_unit: prefix as CompanyCode,
       responsible_sector: isValidAreaForCompany(prefix as CompanyCode, payload.devis.responsible_sector)
