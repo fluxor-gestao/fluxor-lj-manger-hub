@@ -8,9 +8,19 @@ const corsHeaders = {
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function buildHtml(messageText: string, invoiceNumber: string, openAmount: string, dueDate: string, trackingPixelUrl?: string) {
+function buildHtml(
+  messageText: string,
+  invoiceNumber: string,
+  openAmount: string,
+  dueDate: string,
+  trackingPixelUrl?: string,
+  trackingPixelUrlBottom?: string,
+  portalLink?: string,
+) {
+  const portalHref = portalLink || "https://ljmanager.fluxorbi.com";
   return `<!doctype html>
 <html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;color:#1f2937">
+  ${trackingPixelUrl ? `<img src="${trackingPixelUrl}" width="1" height="1" alt="" style="display:block;border:0;outline:none;width:1px;height:1px;opacity:0" />` : ""}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 0">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;max-width:600px;width:100%">
@@ -37,17 +47,20 @@ function buildHtml(messageText: string, invoiceNumber: string, openAmount: strin
             </tr>
           </table>
         </td></tr>
+        <tr><td align="center" style="padding:8px 36px 24px">
+          <a href="${portalHref}" style="display:inline-block;background:#1e40af;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:600">Ver detalhes da fatura</a>
+        </td></tr>
         <tr><td style="padding:0 36px 24px">
           <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 14px" />
           <div style="font-size:11px;color:#6b7280;line-height:1.6">
             Equipe LJ Manager<br/>
-            <a href="https://ljmanager.fluxorbi.com" style="color:#1e40af;text-decoration:none">ljmanager.fluxorbi.com</a>
+            <a href="${portalHref}" style="color:#1e40af;text-decoration:none">ljmanager.fluxorbi.com</a>
           </div>
         </td></tr>
       </table>
     </td></tr>
   </table>
-  ${trackingPixelUrl ? `<img src="${trackingPixelUrl}" width="1" height="1" alt="" style="display:block;border:0;outline:none;width:1px;height:1px" />` : ""}
+  ${trackingPixelUrlBottom ? `<img src="${trackingPixelUrlBottom}" width="1" height="1" alt="" style="display:block;border:0;outline:none;width:1px;height:1px;opacity:0" />` : ""}
 </body></html>`;
 }
 
@@ -66,8 +79,13 @@ Deno.serve(async (req) => {
     const { entry_id, to, subject, message_text, invoice_number, open_amount, due_date } = await req.json();
     if (!to || !subject || !message_text || !entry_id) throw new Error("Parâmetros inválidos");
 
-    const trackingPixelUrl = `${SUPABASE_URL}/functions/v1/track-email-open?id=${encodeURIComponent(entry_id)}`;
-    const htmlBody = buildHtml(message_text, invoice_number, open_amount, due_date, trackingPixelUrl);
+    // Cache-busting: timestamp + posição evitam que proxies (Gmail, etc.) sirvam a imagem em cache e nunca batam no servidor
+    const ts = Date.now();
+    const trackingPixelUrl = `${SUPABASE_URL}/functions/v1/track-email-open?id=${encodeURIComponent(entry_id)}&t=${ts}&p=top`;
+    const trackingPixelUrlBottom = `${SUPABASE_URL}/functions/v1/track-email-open?id=${encodeURIComponent(entry_id)}&t=${ts}&p=bot`;
+    const portalTarget = "https://ljmanager.fluxorbi.com";
+    const portalLink = `${SUPABASE_URL}/functions/v1/track-email-click?id=${encodeURIComponent(entry_id)}&to=${encodeURIComponent(portalTarget)}`;
+    const htmlBody = buildHtml(message_text, invoice_number, open_amount, due_date, trackingPixelUrl, trackingPixelUrlBottom, portalLink);
 
     const payload: any = {
       from: FROM_EMAIL,
