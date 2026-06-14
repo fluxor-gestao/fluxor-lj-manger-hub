@@ -69,28 +69,30 @@ export function NovaFaturaAvulsaDialog({
     enabled: open,
   });
 
-  const { data: units = [] } = useQuery({
-    queryKey: ["catalog", "business_units"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("business_units")
-        .select("code, name")
-        .eq("active", true)
-        .order("code");
-      if (error) throw error;
-      return data ?? [];
-    },
+  // Unidades que efetivamente possuem áreas cadastradas e ativas
+  const { data: unitsWithAreas = [] } = useQuery({
+    queryKey: ["fa-units-with-areas"],
     enabled: open,
+    queryFn: async () => {
+      const [{ data: units, error: uErr }, { data: areas, error: aErr }] = await Promise.all([
+        supabase.from("business_units").select("code, name").eq("active", true).order("code"),
+        supabase.from("business_areas").select("business_unit").eq("is_active", true),
+      ]);
+      if (uErr) throw uErr;
+      if (aErr) throw aErr;
+      const valid = new Set((areas ?? []).map((a: any) => a.business_unit).filter(Boolean));
+      return (units ?? []).filter((u: any) => valid.has(u.code));
+    },
   });
 
   const { data: areas = [] } = useQuery({
-    queryKey: ["business-areas", businessUnit],
-    enabled: !!businessUnit && open,
+    queryKey: ["business-areas-multi", businessUnits.join(",")],
+    enabled: businessUnits.length > 0 && open,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("business_areas")
-        .select("slug, label")
-        .eq("business_unit", businessUnit)
+        .select("slug, label, business_unit")
+        .in("business_unit", businessUnits)
         .eq("is_active", true)
         .order("label");
       if (error) throw error;
@@ -99,11 +101,11 @@ export function NovaFaturaAvulsaDialog({
   });
 
   const { data: prices = [] } = useQuery({
-    queryKey: ["fa-service-prices", businessUnit, responsibleSector],
+    queryKey: ["fa-service-prices", primaryUnit, responsibleSector],
     enabled: open,
     queryFn: async () => {
       let q = supabase.from("service_prices").select("id, name, price, description, business_unit, responsible_sector").order("name");
-      if (businessUnit) q = q.eq("business_unit", businessUnit);
+      if (primaryUnit) q = q.eq("business_unit", primaryUnit);
       if (responsibleSector) q = q.eq("responsible_sector", responsibleSector);
       const { data, error } = await q;
       if (error) throw error;
