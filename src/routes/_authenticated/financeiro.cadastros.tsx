@@ -171,7 +171,7 @@ function FinancialSetup() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
-                            <AccountDialog account={acc} onSave={(updated) => saveAccount.mutate(updated)} />
+                            <AccountDialog account={acc} onSave={(updated) => saveAccount.mutateAsync(updated)} />
                             <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteAccount.mutate(acc.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
