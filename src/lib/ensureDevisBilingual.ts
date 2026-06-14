@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-type Lang = "pt" | "fr" | "en" | "es";
+type Lang = "pt" | "fr" | "en" | "es" | "de";
 
 /**
  * Garante que o devis tenha campos traduzidos para o idioma do cliente
