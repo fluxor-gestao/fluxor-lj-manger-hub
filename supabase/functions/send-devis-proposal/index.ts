@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
     const { devis_id, to, subject, message_text, pdf_base64, pdf_filename, accept_url, language, business_unit } = await req.json();
     if (!to?.length || !subject || !message_text) throw new Error("Parâmetros inválidos");
 
-    const lang: Lang = (["pt", "fr", "en", "es"].includes(language) ? language : "pt") as Lang;
+    const lang: Lang = (["pt", "fr", "en", "es", "de"].includes(language) ? language : "pt") as Lang;
     const htmlBody = buildHtml(message_text, accept_url, lang, business_unit);
 
     const payload: any = {
@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
       to,
       subject,
       html: htmlBody,
-      text: message_text + (accept_url ? `\n\n${I18N[lang].accept}: ${accept_url}` : ""),
+      text: message_text + (accept_url ? `\n\n${I18N[lang].view}: ${accept_url}` : ""),
     };
     if (pdf_base64 && pdf_filename) {
       payload.attachments = [{ filename: pdf_filename, content: pdf_base64 }];
