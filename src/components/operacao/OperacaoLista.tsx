@@ -52,10 +52,12 @@ export function OperacaoLista({
   services,
   onChangeStatus,
   onOpenDetail,
+  onDelete,
 }: {
   services: ServiceLike[];
   onChangeStatus: (id: string, status: OpStatus) => void;
   onOpenDetail: (s: ServiceLike) => void;
+  onDelete?: (s: ServiceLike) => void;
 }) {
   return (
     <Card>
