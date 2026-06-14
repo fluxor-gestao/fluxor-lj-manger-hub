@@ -794,6 +794,38 @@ function DevisDetail() {
             )}
           </div>
 
+          {/* Idioma nativo da proposta (cliente) */}
+          <div>
+            <Label>Idioma do cliente</Label>
+            {editing ? (
+              <Select
+                value={form.source_language || "pt"}
+                onValueChange={(v) => setForm({ ...form, source_language: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(LANG_LABELS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="font-medium mt-1 flex items-center gap-2">
+                <Languages className="h-4 w-4 text-muted-foreground" />
+                {LANG_LABELS[sourceLang] || sourceLang}
+              </p>
+            )}
+            {editing && (
+              <p className="text-xs text-muted-foreground mt-1">
+                A proposta é escrita no idioma do cliente; use "Traduzir para Português" para revisão interna.
+              </p>
+            )}
+          </div>
+
+
+
           {/* Data Reunião */}
           <div>
             <Label>Data da reunião</Label>
