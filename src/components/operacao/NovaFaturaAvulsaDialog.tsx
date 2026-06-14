@@ -141,7 +141,7 @@ export function NovaFaturaAvulsaDialog({
         if (data) setPreviewNumber(data as string);
       })();
     } else {
-      setClientId(""); setClientCompany(""); setBusinessUnit(""); setResponsibleSector("");
+      setClientId(""); setClientCompany(""); setBusinessUnits([]); setResponsibleSector("");
       setServicePriceId(""); setTitle(""); setDescription(""); setAmount("");
       setDueDate(todayStr()); setFile(null); setPreviewNumber("");
     }
