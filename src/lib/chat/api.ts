@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { ChatContextRef } from "./types";
+import type { ChatContextRef, MessageAttachment } from "./types";
 import type { AppRole } from "@/contexts/AuthContext";
+
+export const CHAT_ATTACHMENTS_BUCKET = "chat-attachments";
 
 export async function findOrCreateContextConversation(
   ctx: ChatContextRef,
@@ -111,13 +113,52 @@ export async function markConversationRead(conversationId: string, userId: strin
     .eq("user_id", userId);
 }
 
-export async function sendMessage(conversationId: string, userId: string, body: string) {
+export async function sendMessage(
+  conversationId: string,
+  userId: string,
+  body: string,
+  attachments: MessageAttachment[] = [],
+) {
   const trimmed = body.trim();
-  if (!trimmed) return;
+  if (!trimmed && attachments.length === 0) return;
   const { error } = await supabase.from("messages").insert({
     conversation_id: conversationId,
     sender_id: userId,
     body: trimmed,
+    attachments: attachments as any,
   });
   if (error) throw error;
+}
+
+export async function uploadChatAttachment(
+  conversationId: string,
+  file: File,
+): Promise<MessageAttachment> {
+  const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+  const path = `${conversationId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
+  const { error } = await supabase.storage
+    .from(CHAT_ATTACHMENTS_BUCKET)
+    .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type || undefined });
+  if (error) {
+    if (/bucket.*not.*found|does not exist/i.test(error.message)) {
+      throw new Error(
+        "Bucket de anexos do chat não existe. Crie no Storage: chat-attachments (privado).",
+      );
+    }
+    throw error;
+  }
+  return {
+    path,
+    name: file.name,
+    size: file.size,
+    mime: file.type || "application/octet-stream",
+  };
+}
+
+export async function getAttachmentSignedUrl(path: string, expiresIn = 3600) {
+  const { data, error } = await supabase.storage
+    .from(CHAT_ATTACHMENTS_BUCKET)
+    .createSignedUrl(path, expiresIn);
+  if (error) throw error;
+  return data.signedUrl;
 }
