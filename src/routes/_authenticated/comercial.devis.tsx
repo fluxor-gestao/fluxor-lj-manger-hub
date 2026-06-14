@@ -170,7 +170,7 @@ function Comercial() {
     queryFn: async () => {
       const qb = supabase
         .from("devis")
-        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, pricing_status, pricing_total, devis_service_areas(area_slug)") as any;
+        .select("id, devis_number, title, status, total_amount, down_payment_amount, business_unit, client_id, created_at, sent_at, accepted_at, rejected_at, deadline_date, meeting_date, commercial_responsible, pricing_status, pricing_total, is_fa, devis_service_areas(area_slug)") as any;
       
       let q = qb.order("created_at", { ascending: false }).range(0, SUMMARY_HARD_CAP - 1);
 
