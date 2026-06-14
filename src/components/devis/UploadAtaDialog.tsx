@@ -17,6 +17,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { LogoGlobeAnimation } from "../LogoGlobeAnimation";
 import FilePreview from "./FilePreview";
+import DevisCodePreviewDialog, { inferServicePrefix } from "./DevisCodePreviewDialog";
 
 export type AnalyzedClient = {
   name: string;
