@@ -373,14 +373,16 @@ export default function UploadAtaDialog({ open, onOpenChange, clients, onConfirm
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4 flex-wrap">
           <span className={cn(step >= 1 && "text-primary font-medium")}>1. Upload</span>
           <span>→</span>
           <span className={cn(step >= 2 && "text-primary font-medium")}>2. Confirmação</span>
           <span>→</span>
           <span className={cn(step >= 3 && "text-primary font-medium")}>3. Análise IA</span>
           <span>→</span>
-          <span className={cn(step >= 4 && "text-primary font-medium")}>4. Revisão</span>
+          <span className={cn((showCodeDialog || step >= 4) && "text-primary font-medium")}>4. Código</span>
+          <span>→</span>
+          <span className={cn(step >= 4 && "text-primary font-medium")}>5. Revisão</span>
         </div>
 
         {step === 1 && (
