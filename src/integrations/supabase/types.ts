@@ -767,6 +767,7 @@ export type Database = {
       }
       devis_pricing_items: {
         Row: {
+          business_unit: string | null
           created_at: string | null
           description: string | null
           devis_id: string
@@ -779,6 +780,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          business_unit?: string | null
           created_at?: string | null
           description?: string | null
           devis_id: string
@@ -791,6 +793,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          business_unit?: string | null
           created_at?: string | null
           description?: string | null
           devis_id?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.devis_pricing_items ADD COLUMN IF NOT EXISTS business_unit text;
