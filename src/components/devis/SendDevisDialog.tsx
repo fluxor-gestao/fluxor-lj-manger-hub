@@ -54,7 +54,7 @@ export default function SendDevisDialog({ open, onOpenChange, devis, client }: P
   const queryClient = useQueryClient();
   const language = useMemo<Lang>(() => {
     const src = (devis?.source_language || "").toLowerCase();
-    if (src === "pt" || src === "fr" || src === "en" || src === "es") return src as Lang;
+    if (src === "pt" || src === "fr" || src === "en" || src === "es" || src === "de") return src as Lang;
     return detectLanguage(devis?.proposal_structure);
   }, [devis?.source_language, devis?.proposal_structure]);
   const publicBase =
