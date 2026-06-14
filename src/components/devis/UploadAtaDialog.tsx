@@ -69,6 +69,7 @@ const LANG_LABEL: Record<string, string> = {
   fr: "Français",
   en: "English",
   es: "Español",
+  de: "Deutsch",
   auto: "Detectar automaticamente",
 };
 
