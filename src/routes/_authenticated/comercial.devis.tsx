@@ -34,6 +34,7 @@ import UploadAtaDialog, { type ConfirmedAtaResult } from "@/components/devis/Upl
 import RoteiroComercialDialog from "@/components/devis/RoteiroComercialDialog";
 import DevisCodePreviewDialog, { inferServicePrefix, type ServicePrefix } from "@/components/devis/DevisCodePreviewDialog";
 import ClientLocationEnrichment from "@/components/clients/ClientLocationEnrichment";
+import { resolveAreasForUnit } from "@/lib/areaResolver";
 import BulkClientLocationEnrichment from "@/components/clients/BulkClientLocationEnrichment";
 import { CurrencyInputBRL } from "@/components/ui/currency-input-brl";
 import { LoadingState, EmptyState, ErrorState } from "@/components/DataStates";
