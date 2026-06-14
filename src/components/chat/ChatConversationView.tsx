@@ -19,7 +19,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const MAX_FILE_MB = 15;
+const MAX_FILE_MB = 10;
 
 function formatBytes(n: number) {
   if (n < 1024) return `${n} B`;
